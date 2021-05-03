@@ -1,6 +1,5 @@
 ---
 Project1:
-    Name: mouse.skin.trial60.atac
     Primer:
         - P1.04
         - P1.05
@@ -9,7 +8,6 @@ Project1:
         - P1.08
     Type: ATAC
 Project2:
-    Name: mouse.skin.trial60.rna
     Primer:
         - P1.52
         - P1.53
