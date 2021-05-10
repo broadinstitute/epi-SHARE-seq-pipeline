@@ -1,8 +1,8 @@
-task align_atac {
+task update_rgid_rna {
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: align ATAC task'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: update RGID task'
     }
     
     input {
@@ -10,41 +10,42 @@ task align_atac {
         # Nextseq and perform trimming, adapter removal, appending
         # cell barcode to the read name, and splitting ATAC and RNA.
         
-        File fastq_R1
-        File fastq_R2
-        File genome_index
+        Bool multimapper= false
+        File bam
         String genome_name
-        String? prefix
+        String? prefix= "rna"
         String docker_image
         Int cpus= 4
         
     }
     
     Float input_file_size_gb = size(input[0], "G")
-    Float mem_gb = 8.0
+    Float mem_gb = 40.0
     Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    
+    String updated_bam= "${prefix}.${genome_name}.rigid.reheader.unique.st.bam"
+    String updated_bam_index= "${prefix}.${genome_name}.rigid.reheader.unique.st.bam.bai"
 
     command {
         set -e
         
-        bowtie2 -X2000 \
-            -p $cores \
-            --rg-id $Name \
-            -x ${genome_index} \
-            -1 fastq_R1 \
-			-2 fastq_R2 |\
-        samtools view \
-            -bS
-            -@ ${cpus} \
-            - \
-            -o atac.align.${genome_name}.bam) \
-            2> atac.bowtie2.align.${genome_name}.log
+       
+        # Update RGID, remove low quality reads and unwanted chrs
+        # If keepig multimappers, keep primary aligned reads only,
+        # otherwise filter by quality score (-q 30)
         
+        samtools view -h -@ ${cpus} ${bam} | \
+            sed 's/chrMT/chrM/g' | \
+            awk -v OFS='\t' '{$1=substr($1,1,length($1)-34)""substr($1,length($1)-22,23)""substr($1,length($1)-34,11); print $0}') | \
+            samtools view -@ $cores -bS ${if multimapper then "-F 256" else "-q 30"} > ${updated_bam}
+            
+        samtools index -@ ${cpus} ${updated_bam}
+		
     }
     
     output {
-        File atac_bowtie2_align= atac.align.${genome_name}.bam
-        File log= atac.bowtie2.align.${genome_name}.log
+        File rna_rgid_updated_bam= ${updated_bam}
+        File rna_rgid_updated_bai= ${updated_bam_index}
     }
 
     runtime {
@@ -56,20 +57,16 @@ task align_atac {
     }
     
     parameter_meta {
-        fastq_R1: {
-                description: 'Read1 fastq',
-                help: 'Processed fastq for read1.',
-                example: 'processed.atac.R1.fq.gz'
+        bam: {
+                description: 'Alignment bam file',
+                help: 'Aligned reads in bam format.',
+                example: 'hg38.aligned.bam'
             },
-        fastq_R2: {
-                description: 'Read2 fastq',
-                help: 'Processed fastq for read2.',
-                example: 'processed.atac.R2.fq.gz'
-            },
-        genome_index: {
-                description: 'Bowtie2 indexes',
-                help: 'Index files for bowtie2 to use during alignemnt.'
-                examples: ['']
+        multimapper: {
+                description: 'Multimappers flag',
+                help: 'Flag to set if you want to keep the multimapping reads.'
+                default: false
+                examples: [true, false]
             },
         genome_name: {
                 description: 'Reference name',
@@ -88,7 +85,7 @@ task align_atac {
             },
         docker_image: {
                 description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz'
+                help: 'Docker image for preprocessing step. Dependencies: samtools'
                 example: ['put link to gcr or dockerhub']
             }
     }

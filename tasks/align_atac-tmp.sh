@@ -30,70 +30,7 @@ for Name in ${Project[@]}; do
 			     -1 $dir/fastqs/$Name.R1.fastq.gz \
 			     -2 $dir/fastqs/$Name.R2.fastq.gz | \
 			 samtools view -bS -@ $cores - -o $Name.$Species.bam) 2>$Name.$Species.align.log
-		elif [ ${Type[$index]} == "crop" ]; then
-                    (bowtie2 -X2000 -p $cores --rg-id $Name \
-			     -N 0 -L 30 \
-                             -x $bowtieGenome/viralRNA/viralRNA \
-			     -U $dir/fastqs/$Name.R1.fastq.gz | \
-                         samtools view -bS -@ $cores - -o $Name.$Species.bam) 2>$Name.$Species.align.log
-		elif [ ${Type[$index]} == "cite" ]; then
-                    (bowtie2 -X2000 -p $cores --rg-id $Name \
-                             -N 0 -L 30 \
-                             -x $bowtieGenome/cite/cite \
-                             -U $dir/fastqs/$Name.R1.fastq.gz | \
-                         samtools view -bS -@ $cores - -o $Name.$Species.bam) 2>$Name.$Species.align.log
-		elif [ ${Type[$index]} == "cellhash" ]; then
-                    echo "Match CITE-seq barcodes, convert fastq to bam"
-                    (bowtie2 -p $cores --rg-id $Name \
-                             -x $bowtieGenome/cellhash/$Species.cellhash/$Species.cellhash \
-                             -U $dir/fastqs/$Name.R1.fastq.gz | \
-                         samtools view -bS - -o $Name.$Species.bam) 2>$Name.$Species.align.log
-                elif [ ${Type[$index]} == "TAPS" ]; then
-		    (bismark --parallel 4  \
-			     --multicore 4 \
-			     --rg_id $Name \
-			     --non_directional \
-                             --genome $bismarkGenome/$Species \
-			     -X 2000 \
-                             -1 $dir/fastqs/$Name.R1.fastq.gz \
-                             -2 $dir/fastqs/$Name.R2.fastq.gz) 1> $Name.$Species.bismark.log 2>>$Name.$Species.bismark.log
-		    mv $Name.R1_bismark_bt2_pe.bam $Name.$Species.bam
-		    mv $Name.R1_bismark_bt2_PE_report.txt $Name.$Species.align.log			
-		elif [ ${Type[$index]} == "DipC" ]; then
-		    ## align and process with HiC-pro
-		    ## without removing duplicates
-		    if [ -d $dir/fastqs/$Name.$Species.processed/ ]; then
-			echo "found $Name.$Species.processed, skip HiC-pro"
-		    else
-			echo "running HiC-pro pipeline"
-			~/Package/HiCpro/HiC-Pro_2.11.4/bin/HiC-Pro -c $myPATH/Config_MboI_$Species.txt -i ./$Name.rawdata/ -o $Name.$Species.processed/
-		    fi
-		elif [ ${Type[$index]} == "RNA" ]; then
-		    if [ -f $dir/fastqs/$Name.$Species.align.log ]; then
-			echo "found $dir/fastqs/$Name.$Species.align.log, skip alignment for UMI reads"
-		    else
-			echo "Align UMI reads"
-			STAR --chimOutType WithinBAM \
-			     --runThreadN $cores \
-			     --genomeDir $starGenome/$Species/ \
-			     --readFilesIn $dir/fastqs/$Name.R1.fastq.gz  \
-			     --outFileNamePrefix $dir/fastqs/$Name.$Species. \
-			     --outFilterMultimapNmax 20 \
-			     --outFilterMismatchNoverLmax 0.06 \
-			     --limitOutSJcollapsed 2000000 \
-			     --outSAMtype BAM Unsorted \
-			     --limitIObufferSize 400000000 \
-			     --outReadsUnmapped Fastx \
-			     --readFilesCommand zcat
-		    
-			mv $dir/fastqs/$Name.$Species.Aligned.out.bam $dir/fastqs/$Name.$Species.bam
-			rm -r *_STARtmp *Log.progress.out *SJ.out.tab *Unmapped.out.mate* *_STARpass1 *_STARgenome  
-			mv $dir/fastqs/$Name.$Species.Log.final.out $dir/fastqs/$Name.$Species.align.log
-		    fi
-		else
-		    echo "Unknown parameter"
-		    exit
-		fi
+# Sort
 		if [ -f $dir/fastqs/$Name.$Species.st.bam ]; then
 		    echo "Found $Name.$Species.st.bam, skip sorting bam"
 		else
@@ -109,6 +46,10 @@ for Name in ${Project[@]}; do
 			rm $Name.$Species.bam
 		    fi
 		fi
+        
+        
+        
+        
 				
 		# Update RGID's and Headers
 		if [ -f $dir/fastqs/$Name.$Species.rigid.reheader.st.bam.bai ]; then
@@ -185,47 +126,8 @@ for Name in ${Project[@]}; do
                         samtools index -@ $cores $Name.$Species.rmdup.bam
                     fi
 		fi
-			
-		# Update RGID's and Headers for dipc bedpe
-		## this part needs to be updated
-		if [ ${Type[$index]} == "DipC" ] ; then
-                    if [ -f $dir/fastqs/$Name.$Species/$Name.$Species.rg.allPairs ]; then
-			echo "Found $Name.$Species.rg.allPairs, skip update RGID"
-			echo "Update RGID for $Name.$Species.allValidPairs"
-			cd $dir/fastqs/
-			if [ "$Sequencer" = Novaseq ]; then
-                            /usr/bin/python $myPATH/updateRGID_dipC_novaseq_V1.py --input $dir/fastqs/$Name.$Species.processed/hic_results/data/$Name/$Name.allValidPairs --out $Name.$Species.rg.allValidPairs
-			else
-                            /usr/bin/python $myPATH/updateRGID_dipC_nextseq_V1.py --input $dir/fastqs/$Name.$Species.processed/hic_results/data/$Name/$Name.allValidPairs --out $Name.$Species.rg.allValidPairs
-			    tempdir=$dir/fastqs/$Name.$Species.processed/hic_results/data/$Name/
-			    cat $tempdir/$Name\_*DEPairs $tempdir/$Name\_*.DumpPairs $tempdir/$Name\_*.FiltPairs $tempdir/$Name\_*.REPairs \
-				$tempdir/$Name\_*.SCPairs $tempdir/$Name\_*.SinglePairs $tempdir/$Name\_*.validPairs > $dir/fastqs/$Name.$Species.allPairs
-			    /usr/bin/python $myPATH/updateRGID_dipC_nextseq_V1.py --input $dir/fastqs/$Name.$Species.allPairs --out $Name.$Species.rg.allPairs
-			fi
-		    fi
-                
-		    if [ -f $dir/fastqs/$Name.$Species.rg.allValidPairs.hic ]; then
-			echo "found $Name.$Species.rg.allValidPairs, skip convert to .hic"
-		    else
-			echo "convert Valid pairs to hic"
-			~/Package/HiCpro/HiC-Pro_2.11.4/bin/utils/hicpro2juicebox.sh \
-			    -i $Name.$Species.rg.allValidPairs -g $Species \
-			    -j /mnt/users/sai/Package/juicer/CPU/common/juicer_tools.1.9.9_jcuda.0.8.jar
-		    fi
-		fi
 	        
-		# remove dups, mito and secondary alignment
-		if [ -f $dir/fastqs/$Name.$Species.rigid.reheader.unique.st.bam ] || [ -f $dir/fastqs/$Name.$Species.wdup.all.bam ]; then
-		    echo "Found $Name.$Species.rigid.reheader.nomito.st.bam, skip mito removal"
-		else
-		    if [ ${Type[$index]} == "TAPS" ]; then
-			echo "Remove unwanted chrs:" $Name.$Species.rigid.reheader.st.bam
-			chrs=`samtools view -H $Name.$Species.st.bam | grep chr | cut -f2 | sed 's/SN://g' | grep -v chrM | grep -v Y | awk '{if(length($0)<6)print}'`
-			samtools view -@ $cores -b $Name.$Species.rigid.reheader.st.bam -o $Name.$Species.wdup.all.bam `echo $chrs`
-			samtools index -@ $cores $Name.$Species.wdup.all.bam
-		    fi
-		fi
-
+		
 		if [ ${Type[$index]} == "DipC" ]; then
 		    cd $dir/fastqs/
                     # count unfiltered reads
@@ -360,22 +262,7 @@ for Name in ${Project[@]}; do
 		    fi		
 		fi
 
-		# cellhashing processing
-		if [ ${Type[$index]} == "cellhash" ] && [ ! -f $Name.$Species.rigid.reheader.unique.st.bam ]; then
-		    cd $dir/fastqs/
-                    echo "Split into hg and mm"
-                    chrs1=`samtools view -H $Name.$Species.rigid.reheader.unique.st.bam | grep hg19 | cut -f2 | sed 's/SN://g'`
-                    chrs2=`samtools view -H $Name.$Species.rigid.reheader.unique.st.bam | grep mm10 | cut -f2 | sed 's/SN://g'`
-                    samtools view -@ $cores -b $Name.$Species.rigid.reheader.unique.st.bam -o temp1.bam `echo ${chrs1[@]}`
-                    samtools view -@ $cores -b $Name.$Species.rigid.reheader.unique.st.bam -o temp2.bam `echo ${chrs2[@]}`
-                    mv temp1.bam $Name.hg19.rigid.reheader.unique.st.bam
-                    mv temp2.bam $Name.mm10.rigid.reheader.unique.st.bam
-                    samtools index -@ $cores $Name.hg19.rigid.reheader.unique.st.bam &
-                    samtools index -@ $cores $Name.mm10.rigid.reheader.unique.st.bam &
-		    wait
-                    rm temp1.bam temp2.bam
-		fi
-
+		
 		# assign feature to reads
 		cd  $dir/fastqs/
 		if [ ${Type[$index]} == "RNA" ]; then
@@ -714,25 +601,25 @@ for Name in ${Project[@]}; do
 	else
 	    echo "Estimate lib size"
             if [ ${Genomes[$index]} == "both" ]; then
-		if [ -f $Name.hg19.unfiltered.counts.csv ] && [ ! -f $Name.hg19.filtered.counts.csv ]; then
-		    cp $Name.hg19.unfiltered.counts.csv $Name.hg19.filtered.counts.csv
-		    echo "Error: Could locate $Name.hg19.unfiltered.counts.csv"
-		fi
-		if [ -f $Name.mm10.unfiltered.counts.csv ] && [ ! -f $Name.mm10.filtered.counts.csv ]; then
-		    cp $Name.mm10.unfiltered.counts.csv $Name.mm10.filtered.counts.csv
-		    echo "Error: Could locate $Name.mm10.unfiltered.counts.csv"
-		fi
-		if [ -f $Name.hg19.unfiltered.counts.csv ] && [ -f $Name.mm10.unfiltered.counts.csv ]; then
-                    echo "Calcuating library size for $Name"
-		    Rscript $myPATH/lib_size_sc_V5_species_mixing.R ./ $Name ${ReadsPerBarcode[$index]} ${Type[$index]} --save
-		fi
-	    else
-		if [ -f $Name.${Genomes[$index]}.unfiltered.counts.csv ] && [ ! -f $Name.${Genomes[$index]}.filtered.counts.csv ]; then
-		    cp $Name.${Genomes[$index]}.unfiltered.counts.csv $Name.${Genomes[$index]}.filtered.counts.csv
-		else
-		    Rscript $myPATH/lib_size_sc_V5_single_species.R ./ $Name ${ReadsPerBarcode[$index]} ${Genomes[$index]} ${Type[$index]} --save
-		fi
-	    fi
+                if [ -f $Name.hg19.unfiltered.counts.csv ] && [ ! -f $Name.hg19.filtered.counts.csv ]; then
+                    cp $Name.hg19.unfiltered.counts.csv $Name.hg19.filtered.counts.csv
+                    echo "Error: Could locate $Name.hg19.unfiltered.counts.csv"
+                fi
+                if [ -f $Name.mm10.unfiltered.counts.csv ] && [ ! -f $Name.mm10.filtered.counts.csv ]; then
+                    cp $Name.mm10.unfiltered.counts.csv $Name.mm10.filtered.counts.csv
+                    echo "Error: Could locate $Name.mm10.unfiltered.counts.csv"
+                fi
+                if [ -f $Name.hg19.unfiltered.counts.csv ] && [ -f $Name.mm10.unfiltered.counts.csv ]; then
+                            echo "Calcuating library size for $Name"
+                    Rscript $myPATH/lib_size_sc_V5_species_mixing.R ./ $Name ${ReadsPerBarcode[$index]} ${Type[$index]} --save
+                fi
+            else
+                if [ -f $Name.${Genomes[$index]}.unfiltered.counts.csv ] && [ ! -f $Name.${Genomes[$index]}.filtered.counts.csv ]; then
+                    cp $Name.${Genomes[$index]}.unfiltered.counts.csv $Name.${Genomes[$index]}.filtered.counts.csv
+                else
+                    Rscript $myPATH/lib_size_sc_V5_single_species.R ./ $Name ${ReadsPerBarcode[$index]} ${Genomes[$index]} ${Type[$index]} --save
+                fi
+            fi
 	fi
 	if [ ! -d $dir/$Name/ ]; then 
 	    mkdir $dir/$Name/ && mv $dir/fastqs/$Name.* $dir/$Name

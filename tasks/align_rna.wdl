@@ -1,8 +1,8 @@
-task align_atac {
+task align_rna {
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: align ATAC task'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: align RNA task'
     }
     
     input {
@@ -11,8 +11,7 @@ task align_atac {
         # cell barcode to the read name, and splitting ATAC and RNA.
         
         File fastq_R1
-        File fastq_R2
-        File genome_index
+        File genome_index_tar
         String genome_name
         String? prefix
         String docker_image
@@ -21,30 +20,38 @@ task align_atac {
     }
     
     Float input_file_size_gb = size(input[0], "G")
-    Float mem_gb = 8.0
+    Float mem_gb = 40.0
     Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     command {
         set -e
         
-        bowtie2 -X2000 \
-            -p $cores \
-            --rg-id $Name \
-            -x ${genome_index} \
-            -1 fastq_R1 \
-			-2 fastq_R2 |\
-        samtools view \
-            -bS
-            -@ ${cpus} \
-            - \
-            -o atac.align.${genome_name}.bam) \
-            2> atac.bowtie2.align.${genome_name}.log
+        # Untar the genome
+        tar xvzf ${genome_index_tar} --no-same-owner -C ./index
         
+        # Find the prefix
+        PREFIX_GENOME=`ls ./index/*.sa | sed 's/.sa//'`
+        
+
+        STAR --chimOutType WithinBAM \
+             --runThreadN ${cpus} \
+             --genomeDir $PREFIX_GENOME \
+             --readFilesIn ${fastq_R1}  \
+             --outFileNamePrefix out/${prefix}.${genome_name}. \
+             --outFilterMultimapNmax 20 \
+             --outFilterMismatchNoverLmax 0.06 \
+             --limitOutSJcollapsed 2000000 \
+             --outSAMtype BAM Unsorted \
+             --limitIObufferSize 400000000 \
+             --outReadsUnmapped Fastx \
+             --readFilesCommand zcat
+             
     }
     
     output {
-        File atac_bowtie2_align= atac.align.${genome_name}.bam
-        File log= atac.bowtie2.align.${genome_name}.log
+        File rna_align_bam= glob('out/*.bam')[0]
+        File rna_align_bai= glob('out/*.bai')[0]
+        File rna_align_log= glob('out/*.Log.final.out')[0]
     }
 
     runtime {
@@ -61,14 +68,9 @@ task align_atac {
                 help: 'Processed fastq for read1.',
                 example: 'processed.atac.R1.fq.gz'
             },
-        fastq_R2: {
-                description: 'Read2 fastq',
-                help: 'Processed fastq for read2.',
-                example: 'processed.atac.R2.fq.gz'
-            },
-        genome_index: {
-                description: 'Bowtie2 indexes',
-                help: 'Index files for bowtie2 to use during alignemnt.'
+        genome_index_tar: {
+                description: 'STAR indexes',
+                help: 'Index files for STAR to use during alignment in tar.gz.'
                 examples: ['']
             },
         genome_name: {
@@ -88,7 +90,7 @@ task align_atac {
             },
         docker_image: {
                 description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz'
+                help: 'Docker image for preprocessing step. Dependencies: STAR'
                 example: ['put link to gcr or dockerhub']
             }
     }

@@ -1,288 +1,3 @@
-#!/bin/bash
-# Author: Sai Ma <sai@broadinstitute.org>
-# Last modified date: 2021/04/01
-# Designed for processing share-atac/rna/taps/dipC/cite/cellhashing/crop
-
-# input files
-# 1) yaml
-# 2) BCL or fastq, fastqs need to be named as "*S1_L001/2/3/4_R1/2/3/4_001.fastq.gz" or "_S1_R1/2/3/4_001.fastq.gz"
-
-rawdir=/mnt/RawData/NovaSeq/20210404_skin_realign/
-dir=/mnt/AlignedData/210404_skin_realign/
-yaml=/mnt/users/sai/Script/Split-seq_Sai/config_skin_realign.yaml
-Project=(mouse.skin.trial60.rna mouse.skin.trial60.atac)
-Type=(RNA ATAC)
-
-# ATAC RNA TAPS DipC crop cite cellhash
-# use ATAc for ChIP and Cut&Tag data
-# use crop from tristan guide library
-# if ATAC+TAPS, use TAPS; if dipC+TAPS, run each pipeline once
-# fill the same information to yaml file
-
-Genomes=(mm10 mm10) # both mm10 hg19 guide hg38 (hg38 only supports ATAC, TAPS and RNA, and gencode annotation) h19m10 is combined hg19 and mm10 genome; h38m10 is combined hg19 and mm10 genome;
-ReadsPerBarcode=(300 300) # reads cutoff for the filtered bam/bed: 300 for full run; 10 for QC run; 1 for crop
-
-Start=Fastq # Bcl or Fastq
-Runtype=QC # QC or full,  QC only analyze 12M reads
-
-###########################
-## RNA-seq options, usually don't change these options
-removeSingelReadUMI=F # default F; T if seq deep enough or slant is a big concern; def use F for crop-seq
-keepIntron=T #default T
-cores=18
-genename=gene_name # gene_name (official gene symbol) or gene_id (ensemble gene name), I prefer gene_name
-refgene=gencode # default gencode; gencode or genes; genes is UCSC genes; gencode also annotate ncRNA
-mode=fast # fast or regular; fast: dedup with my own script; regular: dedup with umitools
-# fast: samtools for sorting; regular: java for sorting
-# fast gives more UMIs because taking genome position into account when dedup
-# note: my own dedup script for UMI doesn't collapse UMIs map to different position
-
-keepMultiMapping=(F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F)
-# default F; F for species mixing or cell lines, T for low yield tissues (only keep the primarily aligned reads), doesn't matter for ATAC
-GpC=(F F F F F F F F F F F F F F F F F F F F F F F F F F F F F)
-# default F; T if sample is GpC treated
-
-# 1) filters the genome-wide CpG-report to only output cytosines in ACG and TCG context
-# 2) filters the GC context output to only report cytosines in GCA, GCC and GCT context
-# 3) use non-directional is very important for taps
-
-################### DO NOT CHANGE BELOW ####################
-## version log
-# v36 add option for N6 RT primer; remove "matchPolyT" option
-# v35 add supoort for saving RNA matrix as h5, the same as 10x v3, this can be used for Running Cellbender
-# v4.0 try to speed up pipeline
-## remove R1 level barcode
-## rewrite ATAC pipeline and demultiplexing, 3x faster
-## automatically detect seq chemistry
-## removed Fastq_SplitLane
-## autimatically detect reads are indexed or not
-## try to process RNA in bed format as well
-## always remove GGGGGG reads
-## removed SkipPlotUMIgene
-# v4.1
-## remove RawReadsPerBarcode
-# v4.3
-## add support for multiple lanes
-## avoid sorting bam with picard
-## removed N6 option since it does not really improve no. of genes
-# v4.7
-## add fast mode for faster RNA dedup
-## sorting with samtools instead of picard
-## use pigz to spped up gzip
-# v4.8
-## add back cutoff for fragment file
-
-## to do
-# add support for dipC
-
-# define path
-toolPATH='/mnt/Apps/JDB_tools/'
-myPATH='/mnt/users/sai/Script/Split-seq_Sai/'
-tssFilesPATH='/mnt/users/sai/Script/Split-seq_Sai/TSSfiles/' # cleaned TSSs on unknown chr for mm10
-picardPATH='/mnt/bin/picard/picard.jar'
-bowtieGenome='/mnt/users/sai/Script/Split-seq_Sai/refGenome/bowtie2/'
-starGenome='/mnt/users/sai/Data/star/genome/'
-genomeBed='/mnt/users/sai/Script/Split-seq_Sai/genomeBed/'
-bwamem2Genome='/mnt/users/sai/Script/Split-seq_Sai/refGenome/bwamem2/'
-bismarkGenome='/mnt/users/sai/Script/Split-seq_Sai/refGenome/bismark/'
-fastpPath='/mnt/users/sai/Package/fastp/'
-
-# real code
-export SHELL=$(type -p bash)
-source ~/.bashrc
-# export LC_COLLATE=C
-# export LANG=C
-## this may speed up sorting by limit output to bytes 
-
-echo "the number of projects is" ${#Project[@]}
-echo "Running $Runtype pipeline"
-
-if [ ! -d $dir ]; then mkdir $dir; fi
-if [ ! -d $dir/fastqs ]; then mkdir $dir/fastqs ; fi
-if [ ! -d $dir/temp ]; then mkdir $dir/temp ; fi
-
-cp $myPATH/Split*.sh $dir/
-cp $yaml $dir/
-cd $dir 
-if [ -f $dir/Run.log ]; then rm $dir/Run.log; fi
-
-export PATH="/mnt/users/sai/miniconda2/bin:$PATH"
-
-# if start with bcl file
-if [ "$Start" = Bcl ]; then
-    echo "Bcl2fastq"
-    if [ -f $rawdir/fastqs/Undetermined_S0_R1_001.fastq.gz ] || [ -f $rawdir/fastqs/Undetermined_S1_R1_001.fastq.gz ]; then
-	echo "Found Undetermined_S0_L001_I1_001.fastq.gz, skip Bcl2Fastq"
-    else
-	echo "Converting bcl to fastq"
-	mkdir $rawdir/fastqs/
-	bcl2fastq -p $cores -R $rawdir --no-lane-splitting --mask-short-adapter-reads 0 -o $rawdir/fastqs/ --create-fastq-for-index-reads  2>>$dir/Run.log
-    
-	cd $rawdir/fastqs/    
-	mv Undetermined_S0_R1_001.fastq.gz Undetermined_S1_R1_001.fastq.gz
-	mv Undetermined_S0_I1_001.fastq.gz Undetermined_S1_R2_001.fastq.gz
-	mv Undetermined_S0_I2_001.fastq.gz Undetermined_S1_R3_001.fastq.gz
-	mv Undetermined_S0_R2_001.fastq.gz Undetermined_S1_R4_001.fastq.gz
-    fi
-    if [ -f $dir/fastqs/filesi1.xls ]; then rm $dir/fastqs/filler*; fi
-    
-    rawdir=$rawdir/fastqs/
-    Start=Fastq
-fi
-
-if [ "$Start" = Fastq ]; then
-    echo "Skip bcltofastq"
-    if [ -f $dir/fastqs/filesi1.xls ]; then rm $dir/fastqs/filler*; fi
-    cd $rawdir
-    if ls *L001_R1_001.fastq.gz 1> /dev/null 2>&1; then
-	temp=$(ls *_S1_L001_R1_001.fastq.gz)
-	Run=$(echo $temp | sed -e 's/\_S1\_L001\_R1\_001.fastq.gz//')
-	singlelane=F
-	temp=$(ls *_S1_L00*_R1_001.fastq.gz)
-	VAR=( $temp )
-	nolane=${#VAR[@]}
-	echo "Detected $nolane lanes"
-    elif ls *S1_R1_001.fastq.gz 1> /dev/null 2>&1; then
-	echo "Detected single lane"
-	temp=$(ls *S1_R1_001.fastq.gz)
-	Run=$(echo $temp | sed -e 's/\_\S1\_\R1\_\001.fastq.gz//')
-	singlelane=T
-	nolane=1
-    else
-	echo "No fastq with matched naming format detected; exit..."
-	exit
-    fi
-    
-    echo "Run number is:" $Run
-
-    # split fastqs
-    mkdir $dir/smallfastqs/
-    if [ -f $dir/smallfastqs/0001.1.$Run.R2.fastq.gz ]; then
-        echo "Found 0001.$Run.R2.fastq, skip split fastqs"
-    else
-	if [ ! -f $dir/R1.1.fastq.gz ]; then
-            echo "Link fastqs"
-	    if [ $singlelane == T ]; then
-		ln -s $rawdir/"$Run"_S1_R1_001.fastq.gz $dir/R1.1.fastq.gz
-		ln -s $rawdir/"$Run"_S1_R4_001.fastq.gz $dir/R2.1.fastq.gz
-		ln -s $rawdir/"$Run"_S1_R2_001.fastq.gz $dir/I1.1.fastq.gz
-		ln -s $rawdir/"$Run"_S1_R3_001.fastq.gz $dir/I2.1.fastq.gz
-	    else
-		parallel 'ln -s '$rawdir'/'$Run'_S1_L00{}_R1_001.fastq.gz '$dir'/R1.{}.fastq.gz' ::: $(seq $nolane)
-		parallel 'ln -s '$rawdir'/'$Run'_S1_L00{}_R4_001.fastq.gz '$dir'/R2.{}.fastq.gz' ::: $(seq $nolane)
-		parallel 'ln -s '$rawdir'/'$Run'_S1_L00{}_R2_001.fastq.gz '$dir'/I1.{}.fastq.gz' ::: $(seq $nolane)
-		parallel 'ln -s '$rawdir'/'$Run'_S1_L00{}_R3_001.fastq.gz '$dir'/I2.{}.fastq.gz' ::: $(seq $nolane)
-	    fi
-	fi
-	
-	if [ "$Runtype" = full ]; then
-	    # Runing full pipeline
-	    echo "Split fastqs to small files"
-#	    $fastpPath/fastp -i $dir/R1.fastq.gz -o $dir/smallfastqs/$Run.1.R1.fastq.gz -S 12000000 --thread 1 -d 4 -A -G -L -Q 2>>$dir/split.log &
-#	    $fastpPath/fastp -i $dir/R2.fastq.gz -o $dir/smallfastqs/$Run.1.R2.fastq.gz -S 12000000 --thread 1 -d 4 -A -G -L -Q 2>>$dir/split.log &
-#	    $fastpPath/fastp -i $dir/I1.fastq.gz -o $dir/smallfastqs/$Run.1.I1.fastq.gz -S 12000000 --thread 1 -d 4 -A -G -L -Q 2>>$dir/split.log &
-#	    $fastpPath/fastp -i $dir/I2.fastq.gz -o $dir/smallfastqs/$Run.1.I2.fastq.gz -S 12000000 --thread 1 -d 4 -A -G -L -Q 2>>$dir/split.log &
-	    wait
-	    dosplitfull(){
-                /mnt/users/sai/Package/fastp/fastp -i $2/R1.$1.fastq.gz -o $2/smallfastqs/$1.$3.R1.fastq.gz -S 12000000 --thread 1 -d 4 -A -G -L -Q 2>>$2/split.log &
-                /mnt/users/sai/Package/fastp/fastp -i $2/R2.$1.fastq.gz -o $2/smallfastqs/$1.$3.R2.fastq.gz -S 12000000 --thread 1 -d 4 -A -G -L -Q 2>>$2/split.log &
-                /mnt/users/sai/Package/fastp/fastp -i $2/I1.$1.fastq.gz -o $2/smallfastqs/$1.$3.I1.fastq.gz -S 12000000 --thread 1 -d 4 -A -G -L -Q 2>>$2/split.log &
-                /mnt/users/sai/Package/fastp/fastp -i $2/I2.$1.fastq.gz -o $2/smallfastqs/$1.$3.I2.fastq.gz -S 12000000 --thread 1 -d 4 -A -G -L -Q 2>>$2/split.log &
-		wait
-            }
-            export -f dosplitfull
-            parallel --delay 1 dosplitfull {} $dir $Run ::: $(seq $nolane)
-	elif [ "$Runtype" = QC ]; then
-	    # Runing QC pipeline
-	    echo "Split fastqs to small files"
-	    # dosplitQC() works for fastqs that were not trimmed; it is fast
-	    dosplitQC(){
-		/mnt/users/sai/Package/fastp/fastp -i $2/R1.$1.fastq.gz -o $2/smallfastqs/$1.$3.R1.fastq.gz --reads_to_process $4 -S 2000000 --thread 1 -d 4 -A -G -L -Q 2>>$2/split.log &
-		/mnt/users/sai/Package/fastp/fastp -i $2/R2.$1.fastq.gz -o $2/smallfastqs/$1.$3.R2.fastq.gz --reads_to_process $4 -S 2000000 --thread 1 -d 4 -A -G -L -Q 2>>$2/split.log &
-		/mnt/users/sai/Package/fastp/fastp -i $2/I1.$1.fastq.gz -o $2/smallfastqs/$1.$3.I1.fastq.gz --reads_to_process $4 -S 2000000 --thread 1 -d 4 -A -G -L -Q 2>>$2/split.log &
-		/mnt/users/sai/Package/fastp/fastp -i $2/I2.$1.fastq.gz -o $2/smallfastqs/$1.$3.I2.fastq.gz --reads_to_process $4 -S 2000000 --thread 1 -d 4 -A -G -L -Q 2>>$2/split.log &
-		wait
-            }
-            export -f dosplitQC
-	    # dosplitQC2() works for accidentially trimmed fastq, may have empty lines
-	    dosplitQC2(){
-		zcat $2/R1.$1.fastq.gz | head -n $4 | awk 'BEGIN { file = "1" } { print | "pigz --fast -p 18 >" file ".'$1'.'$3'.R1.fastq.gz" } NR % 2000000 == 0 {close("pigz --fast -p 18  > " file".'$1'.'$3'.R1.fastq.gz"); file = file + 1}' &
-		zcat $2/R2.$1.fastq.gz | head -n $4 | awk 'BEGIN { file = "1" } { print | "pigz --fast -p 18 >" file ".'$1'.'$3'.R2.fastq.gz" } NR % 2000000 == 0 {close("pigz --fast -p 18  > " file".'$1'.'$3'.R2.fastq.gz"); file = file + 1}' &
-		zcat $2/I1.$1.fastq.gz | head -n $4 | awk 'BEGIN { file = "1" } { print | "pigz --fast -p 18 >" file ".'$1'.'$3'.I1.fastq.gz" } NR % 2000000 == 0 {close("pigz --fast -p 18  > " file".'$1'.'$3'.I1.fastq.gz"); file = file + 1}' &
-		zcat $2/I2.$1.fastq.gz | head -n $4 | awk 'BEGIN { file = "1" } { print | "pigz --fast -p 18 >" file ".'$1'.'$3'.I2.fastq.gz" } NR % 2000000 == 0 {close("pigz --fast -p 18  > " file".'$1'.'$3'.I2.fastq.gz"); file = file + 1}' &
-		wait
-	    }
-            export -f dosplitQC2
-	    let reads=12100000/$nolane
-	    parallel --delay 1 dosplitQC {} $dir $Run $reads ::: $(seq $nolane)
-#	    cd $dir/smallfastqs/
-#	    parallel --delay 1 dosplitQC2 {} $dir $Run $reads ::: $(seq $nolane)
-	else
-            echo "Unknown sequencer type, exiting" && exit
-        fi
-    fi
-    
-    # trim and index fastq
-    if [ -f $dir/fastp.json ]; then rm $dir/fastp.json $dir/fastp.html; fi
-    ls $dir/smallfastqs | grep R1 > $dir/filesr1.xls
-    ls $dir/smallfastqs | grep R2 > $dir/filesr2.xls
-    ls $dir/smallfastqs | grep I1 > $dir/filesi1.xls
-    ls $dir/smallfastqs | grep I2 > $dir/filesi2.xls
-    cd $dir/
-    if [ -f $dir/fastqs/Sub.0001.1.discard.R1.fq.gz ]; then
-        echo "Found Sub.0001.1.discard.R1.fq.gz, skip updating index"
-    else
-        echo "Update index and trim fastqs"
-	noreadfile=`ls $dir/smallfastqs | grep R1 2>/dev/null | wc -l`
-	noindexfile=`ls $dir/smallfastqs | grep I1 2>/dev/null | wc -l`
-	if [ $noreadfile == $noindexfile ]; then
-	    paste filesr1.xls filesr2.xls filesi1.xls filesi2.xls | awk -v OFS='\t' '{print $1, $2, $3, $4, substr($1,1,7)}'> Filelist2.xls
-	    parallel --jobs $cores --colsep '\t' 'if [ -f '$dir'/fastqs/Sub.{5}.discard.R1.fq.gz ]; then echo "found Sub.{5}.discard.R1.fq.gz"; \
-	    	     	    	   	  else python3 '$myPATH'/fastq.process.py3.v0.6.py \
-                                          -a '$dir'/smallfastqs/{1} -b '$dir'/smallfastqs/{2} \
-                                          --c '$dir'/smallfastqs/{3} --d '$dir'/smallfastqs/{4} \
-					  --out '$dir'/fastqs/Sub.{5} \
-                                          -y '$yaml' && pigz --fast -p 4 '$dir'/fastqs/Sub.{5}*fq; fi' :::: Filelist2.xls
-	else
-	    paste filesr1.xls filesr2.xls | awk -v OFS='\t' '{print $1, $2, substr($1,1,7)}'> Filelist2.xls
-	    parallel --jobs $cores --colsep '\t' 'if [ -f '$dir'/fastqs/Sub.{3}.discard.R1.fq.gz ]; then echo "found Sub.{3}.discard.R1.fq.gz"; \ 
-	    	     	    	   	  else python3 '$myPATH'/fastq.process.py3.v0.6.py -a '$dir'/smallfastqs/{1} -b '$dir'/smallfastqs/{2} \
-                                          --out '$dir'/fastqs/Sub.{3} \
-					  -y '$yaml' && pigz --fast -p 4 '$dir'/fastqs/Sub.{3}*fq; fi' :::: Filelist2.xls
-	    # --qc # option is available to process even smaller number of reads
-	fi
-    fi
-    rm filesr1.xls filesr2.xls filesi1.xls filesi2.xls
-    if [ -f Filelist2.xls ]; then
-	rm Filelist2.xls
-    fi
-fi 
-
-# merge fastq
-echo "Merge fastqs"
-parallel --jobs 4 'if [ -f '$dir'/fastqs/{}.R1.fastq.gz ]; then echo "found {}.R1.fastq.gz"; \
-	 	      	   else ls '$dir'/fastqs/Sub*{}*R1.fq.gz | xargs cat > '$dir'/fastqs/{}.R1.fastq.gz; fi' ::: ${Project[@]} discard
-parallel --jobs 4 'if [ -f '$dir'/fastqs/{}.R2.fastq.gz ]; then echo "found {}.R2.fastq.gz"; \
-                           else ls '$dir'/fastqs/Sub*{}*R2.fq.gz | xargs cat > '$dir'/fastqs/{}.R2.fastq.gz; fi' ::: ${Project[@]} discard
-
-# align
-index=0
-for Name in ${Project[@]}; do
-    echo "project $index : $Name" 
-    if [ -d $dir/$Name ]; then
-	echo "Found $Name dir, skip this project"
-    else    
-	if [ ${Genomes[$index]} == "both" ]; then
-	    if [ ${Type[$index]} == "ATAC" ] || [ ${Type[$index]} == "DipC" ] || [ ${Type[$index]} == "TAPS" ]; then
-		Genome1=(hg19 mm10) # Genome1 for alignment, Genome2 for other steps
-	    else
-		Genome1=(both) # for RNA and cellhash
-	    fi
-            Genome2=(hg19 mm10)
-	else
-	    Genome1=${Genomes[$index]}
-	    Genome2=${Genomes[$index]}
-	fi
 	
 	for Species in ${Genome1[@]}; do
 	    if [ -d $dir/$Name ]; then
@@ -336,7 +51,7 @@ for Name in ${Project[@]}; do
 			echo "running HiC-pro pipeline"
 			~/Package/HiCpro/HiC-Pro_2.11.4/bin/HiC-Pro -c $myPATH/Config_MboI_$Species.txt -i ./$Name.rawdata/ -o $Name.$Species.processed/
 		    fi
-		elif [ ${Type[$index]} == "RNA" ]; then
+->		elif [ ${Type[$index]} == "RNA" ]; then
 		    if [ -f $dir/fastqs/$Name.$Species.align.log ]; then
 			echo "found $dir/fastqs/$Name.$Species.align.log, skip alignment for UMI reads"
 		    else
@@ -383,20 +98,20 @@ for Name in ${Project[@]}; do
 		    echo "Found $Name.$Species.rigid.reheader.st.bam, skip update RGID"
 		elif [ ${Type[$index]} == "TAPS" ]; then
 		    if [ -f $Name.$Species.rigid.reheader.st.bam ]; then
-                        echo "Found $Name.$Species.rigid.reheader.st.bam, skip update RG tag"
-                    else
-                        echo "Update RGID for $Name.$Species.st.bam"
-                        samtools view -H $Name.$Species.st.bam > $Name.$Species.st.header.sam
-                        samtools view -@ $cores $Name.$Species.st.bam | cut -f1 | \
-                            sed 's/_/\t/g' | cut -f2 | sort --parallel=$cores -S 10G | \
-                            uniq | awk -v OFS='\t' '{print "@RG", "ID:"$1, "SM:Barcode"NR}' > header.temp.sam
-                        sed -e '/\@RG/r./header.temp.sam' $Name.$Species.st.header.sam > $Name.$Species.rigid.st.header.sam
-                        cat $Name.$Species.rigid.st.header.sam <(samtools view $Name.$Species.st.bam | \
-                                                                     awk -v OFS='\t' '{$1=substr($1,1,length($1)-23)""substr($1,length($1)-22,23); print $0}') |
-                            samtools view -@ $cores -bS > $Name.$Species.rigid.reheader.st.bam
-                        samtools index -@ $cores $Name.$Species.rigid.reheader.st.bam
-                        rm header.temp.sam $Name.$Species.rigid.st.header.sam
-                    fi
+                echo "Found $Name.$Species.rigid.reheader.st.bam, skip update RG tag"
+            else
+                echo "Update RGID for $Name.$Species.st.bam"
+                samtools view -H $Name.$Species.st.bam > $Name.$Species.st.header.sam
+                samtools view -@ $cores $Name.$Species.st.bam | cut -f1 | \
+                    sed 's/_/\t/g' | cut -f2 | sort --parallel=$cores -S 10G | \
+                    uniq | awk -v OFS='\t' '{print "@RG", "ID:"$1, "SM:Barcode"NR}' > header.temp.sam
+                sed -e '/\@RG/r./header.temp.sam' $Name.$Species.st.header.sam > $Name.$Species.rigid.st.header.sam
+                cat $Name.$Species.rigid.st.header.sam <(samtools view $Name.$Species.st.bam | \
+                                                             awk -v OFS='\t' '{$1=substr($1,1,length($1)-23)""substr($1,length($1)-22,23); print $0}') |
+                    samtools view -@ $cores -bS > $Name.$Species.rigid.reheader.st.bam
+                samtools index -@ $cores $Name.$Species.rigid.reheader.st.bam
+                rm header.temp.sam $Name.$Species.rigid.st.header.sam
+            fi
 		elif [ ${Type[$index]} == "RNA" ] || [ ${Type[$index]} == "crop" ] || [ ${Type[$index]} == "cite" ] || [ ${Type[$index]} == "cellhash" ]; then
 		    if [ -f $Name.$Species.rigid.reheader.unique.st.bam.bai ]; then
                         echo "Found $Name.$Species.rigid.reheader.st.bam, skip update RG tag"
@@ -648,43 +363,43 @@ for Name in ${Project[@]}; do
 		cd  $dir/fastqs/
 		if [ ${Type[$index]} == "RNA" ]; then
 		    for Species2 in ${Genome2[@]}; do
-                if [ -f $dir/fastqs/$Name.$Species2.exon.featureCounts.bam ]; then
-                    echo "Skip exon feasure count"
-                else
-                        # excliude multimapping, uniquely mapped reads only, -Q 30, for real sample, might consider include multi-mapping
-                    echo "Feature counting on exons"
-                    # count exon
-                    if [ ${keepMultiMapping[$index]} == "T" ]; then
-                        featureCounts -T $cores -Q 0 -M -a $myPATH/gtf/$Species2.$refgene.gtf -t exon -g $genename \
-                                        -o $Name.$Species2.feature.count.txt -R BAM $Name.$Species2.rigid.reheader.unique.st.bam >>$dir/Run.log
-                    else
-                        featureCounts -T $cores -Q 30 -a $myPATH/gtf/$Species2.$refgene.gtf -t exon -g $genename \
-                                        -o $Name.$Species2.feature.count.txt -R BAM $Name.$Species2.rigid.reheader.unique.st.bam >>$dir/Run.log
-                    fi
-                    # Extract reads that assigned to genes
-                    mv $Name.$Species2.rigid.reheader.unique.st.bam.featureCounts.bam $Name.$Species2.exon.featureCounts.bam
-                fi
-                if [ -f $dir/fastqs/$Name.$Species2.wdup.bam.bai ]; then
-                    echo "Skip intron and exon feasure count"
-                else
-                    # count both intron and exon
-                    echo "Count feature on both intron and exon"
-                    if [ $keepIntron == "T" ]; then
-                        if [ ${keepMultiMapping[$index]} == "T" ]; then
-                            featureCounts -T $cores -Q 0 -M -a $myPATH/gtf/$Species2.$refgene.gtf -t gene -g $genename \
-                                  -o $Name.$Species2.feature.count.txt -R BAM $Name.$Species2.exon.featureCounts.bam >>$dir/Run.log
-                        # then for reads mapped to multiple genes,  only keep if all its alignments are within a single gene
-                        else
-                            featureCounts -T $cores -Q 30 -a $myPATH/gtf/$Species2.$refgene.gtf -t gene -g $genename \
-                            -o $Name.$Species2.feature.count.txt -R BAM $Name.$Species2.exon.featureCounts.bam >>$dir/Run.log
-                        fi
-                        samtools sort -@ $cores -m 2G -o $Name.$Species2.wdup.bam  $Name.$Species2.exon.featureCounts.bam.featureCounts.bam
-                        rm $Name.$Species2.exon.featureCounts.bam.featureCounts.bam
-                    else
-                        samtools sort -@ $cores -m 2G -o $Name.$Species2.wdup.bam $Name.$Species2.exon.featureCounts.bam
-                    fi
-                        samtools index -@ $cores $Name.$Species2.wdup.bam
-                fi
+			if [ -f $dir/fastqs/$Name.$Species2.exon.featureCounts.bam ]; then
+			    echo "Skip exon feasure count"
+			else
+		    	    # excliude multimapping, uniquely mapped reads only, -Q 30, for real sample, might consider include multi-mapping
+			    echo "Feature counting on exons"
+			    # count exon
+                            if [ ${keepMultiMapping[$index]} == "T" ]; then
+				featureCounts -T $cores -Q 0 -M -a $myPATH/gtf/$Species2.$refgene.gtf -t exon -g $genename \
+                                    -o $Name.$Species2.feature.count.txt -R BAM $Name.$Species2.rigid.reheader.unique.st.bam >>$dir/Run.log
+                            else
+				featureCounts -T $cores -Q 30 -a $myPATH/gtf/$Species2.$refgene.gtf -t exon -g $genename \
+                                    -o $Name.$Species2.feature.count.txt -R BAM $Name.$Species2.rigid.reheader.unique.st.bam >>$dir/Run.log
+                            fi
+			    # Extract reads that assigned to genes
+			    mv $Name.$Species2.rigid.reheader.unique.st.bam.featureCounts.bam $Name.$Species2.exon.featureCounts.bam
+			fi
+			if [ -f $dir/fastqs/$Name.$Species2.wdup.bam.bai ]; then
+			    echo "Skip intron and exon feasure count"
+			else
+			    # count both intron and exon
+			    echo "Count feature on both intron and exon"
+			    if [ $keepIntron == "T" ]; then
+				if [ ${keepMultiMapping[$index]} == "T" ]; then
+				    featureCounts -T $cores -Q 0 -M -a $myPATH/gtf/$Species2.$refgene.gtf -t gene -g $genename \
+						  -o $Name.$Species2.feature.count.txt -R BAM $Name.$Species2.exon.featureCounts.bam >>$dir/Run.log
+				# then for reads mapped to multiple genes,  only keep if all its alignments are within a single gene
+				else
+				    featureCounts -T $cores -Q 30 -a $myPATH/gtf/$Species2.$refgene.gtf -t gene -g $genename \
+					-o $Name.$Species2.feature.count.txt -R BAM $Name.$Species2.exon.featureCounts.bam >>$dir/Run.log
+				fi
+				samtools sort -@ $cores -m 2G -o $Name.$Species2.wdup.bam  $Name.$Species2.exon.featureCounts.bam.featureCounts.bam
+				rm $Name.$Species2.exon.featureCounts.bam.featureCounts.bam
+			    else
+				samtools sort -@ $cores -m 2G -o $Name.$Species2.wdup.bam $Name.$Species2.exon.featureCounts.bam
+			    fi
+			    samtools index -@ $cores $Name.$Species2.wdup.bam
+			fi
 		    done
 		fi
 		# add crop barcode to reads
@@ -925,179 +640,3 @@ for Name in ${Project[@]}; do
 		fi
 	    fi
 	done
-
-	# methylation call for TAPS
-	for Species2 in ${Genome2[@]}; do
-            if [ ${Type[$index]} == "TAPS" ]; then
-		if [ -f $Name.$Species2.CpG.bed.gz ]; then
-                    echo "Skip removing low counts barcode combination"
-		else
-		    samtools view -h $Name.$Species2.rmdup.cutoff.namesort.bam | sed 's/\.//g' | samtools view -bS > $Name.$Species2.temp.bam
-
-		    ## mask methylation call in 9bp reads on the left and 1bp on the right
-		    cat <(samtools view -H $Name.$Species2.temp.bam) <(samtools view $Name.$Species2.temp.bam |  \
-                        awk -v OFS='\t' '{if ($9>0) {gsub("Z:[ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.]","Z:.........", $14); print} \
-                  		    else {gsub("[ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.][ZzHhXx.]$",".........", $14);print}}') | \
-			samtools view -bS > $Name.$Species2.bismark.bam
-		    rm $Name.$Species2.temp.bam
-		    if [ ${GpC[$index]} == "T" ]; then
-			(bismark_methylation_extractor --multicore 10 -p $Name.$Species2.bismark.bam --mbias_off --no_header --no_overlap \
-						       --gzip --bedGraph --CX) 1>> $Name.$Species2.bismark.log 2>> $Name.$Species2.bismark.log
-			## GC and CG report
-			(coverage2cytosine --nome-seq --genome_folder ~/Script/Split-seq_Sai/refGenome/fasta/$Species2/ -o $Name.$Species2 \
-					   --gzip --split_by_chromosome --gc $Name.$Species2.bismark.bismark.cov.gz) 1>> $Name.$Species2.bismark.log 2>> $Name.$Species2.bismark.log
-
-			## calculate mean methylation% and GpC MTase effciency
-			zcat $Name.$Species2.NOMe.CpG_report.txt.gz | \
-			    awk -v OFS='\t' '{unme+=$4}{me+=$5}END{print "CpG", me/(unme+me)}' > $Name.$Species2.methy.pct.xls
-			zcat $Name.$Species2.NOMe.GpC_report.txt.gz | \
-                            awk -v OFS='\t' '{unme+=$4}{me+=$5}END{print "GpC", me/(unme+me)}' >> $Name.$Species2.methy.pct.xls
-
-		    else
-			(bismark_methylation_extractor --multicore 10 -p $Name.$Species2.bismark.bam --mbias_off --no_header --gzip --bedGraph --no_overlap) 1>> $Name.$Species2.bismark.log 2>> $Name.$Species2.bismark.log
-			zcat $Name.$Species2.bismark.bismark.cov.gz | \
-                            awk -v OFS='\t' '{unme+=$5}{me+=$6}END{print "CpG", me/(unme+me)}' > $Name.$Species2.methy.pct.xls
-		    fi
-		    zcat $Name.$Species2.bismark.bedGraph.gz | awk -v OFS='\t' 'NR > 1 {print $1, $2, $3, 100-$4}' | pigz --fast -p $cores > $Name.$Species2.corrected.bedGraph.gz
-		    
-		    ## convert to fragments file and merge top and bottom
-		    ## convert Z to "unmethylation", 0
-		    zcat CpG_OT_$Name.$Species2.bismark.txt.gz CpG_CTOT_$Name.$Species2.bismark.txt.gz| \
-			sed 's/_/\t/g' | awk -v OFS='\t' '{if($6 == "z") print $4, $5, $5+1, $2, 1, "+"; else print $4, $5, $5+1, $2, 0, "+"}' | \
-			sed 's/R1/R1./g' | sed 's/R2/R2./g' | sed 's/R3/R3./g' | sed 's/P1/P1./g' | \
-			pigz --fast -p $cores > $Name.$Species2.CpG_OT.bed.gz
-		    zcat CpG_OB_$Name.$Species2.bismark.txt.gz CpG_CTOB_$Name.$Species2.bismark.txt.gz| \
-		        sed 's/_/\t/g' | awk -v OFS='\t' '{if($6 == "z") print $4, $5, $5+1, $2, 1, "-"; else print $4, $5, $5+1, $2, 0, "-"}' | \
-			sed 's/R1/R1./g' | sed 's/R2/R2./g' | sed 's/R3/R3./g' | sed 's/P1/P1./g' | \
-			pigz --fast -p $cores > $Name.$Species2.CpG_OB.bed.gz
-		    cat $Name.$Species2.CpG_OT.bed.gz $Name.$Species2.CpG_OB.bed.gz > $Name.$Species2.CpG.bed.gz
-		    rm $Name.$Species2.CpG_OT.bed.gz $Name.$Species2.CpG_OB.bed.gz
-		fi
-	    fi
-	done
-
-	# estimate lib size
-	if [ -f $Name.counts.csv ]; then
-	    echo "Found $Name.counts.csv, skip calculate lib size"
-	else
-	    echo "Estimate lib size"
-            if [ ${Genomes[$index]} == "both" ]; then
-		if [ -f $Name.hg19.unfiltered.counts.csv ] && [ ! -f $Name.hg19.filtered.counts.csv ]; then
-		    cp $Name.hg19.unfiltered.counts.csv $Name.hg19.filtered.counts.csv
-		    echo "Error: Could locate $Name.hg19.unfiltered.counts.csv"
-		fi
-		if [ -f $Name.mm10.unfiltered.counts.csv ] && [ ! -f $Name.mm10.filtered.counts.csv ]; then
-		    cp $Name.mm10.unfiltered.counts.csv $Name.mm10.filtered.counts.csv
-		    echo "Error: Could locate $Name.mm10.unfiltered.counts.csv"
-		fi
-		if [ -f $Name.hg19.unfiltered.counts.csv ] && [ -f $Name.mm10.unfiltered.counts.csv ]; then
-                    echo "Calcuating library size for $Name"
-		    Rscript $myPATH/lib_size_sc_V5_species_mixing.R ./ $Name ${ReadsPerBarcode[$index]} ${Type[$index]} --save
-		fi
-	    else
-		if [ -f $Name.${Genomes[$index]}.unfiltered.counts.csv ] && [ ! -f $Name.${Genomes[$index]}.filtered.counts.csv ]; then
-		    cp $Name.${Genomes[$index]}.unfiltered.counts.csv $Name.${Genomes[$index]}.filtered.counts.csv
-		else
-		    Rscript $myPATH/lib_size_sc_V5_single_species.R ./ $Name ${ReadsPerBarcode[$index]} ${Genomes[$index]} ${Type[$index]} --save
-		fi
-	    fi
-	fi
-	if [ ! -d $dir/$Name/ ]; then 
-	    mkdir $dir/$Name/ && mv $dir/fastqs/$Name.* $dir/$Name
-	    if [ ${Type[$index]} == "TAPS" ]; then
-		mv $dir/fastqs/*$Name.*txt.gz $dir/$Name
-	    fi
-	fi
-    fi
-    index=$((index + 1))
-done
-
-cd $dir
-# get stats for ATAC
-echo "Name" > Names.atac.xls
-index=0 && count=0 && Genome=(hg19 mm10) # re-define genome
-mkdir $dir/temp/
-for Name in ${Project[@]}; do
-    if [ ${Type[$index]} == "ATAC" ]; then
-        if [ ${Genomes[$index]} == "both" ]; then
-            Genome2=(hg19 mm10)
-        else
-            Genome2=${Genomes[$index]}
-        fi
-        for Species in ${Genome2[@]}; do
-            echo $Name.$Species >> Names.atac.xls
-            mkdir $dir/temp/$Name.$Species/
-            cp $dir/$Name/$Name.$Species.dups.log $dir/temp/$Name.$Species/
-            cp $dir/$Name/$Name.$Species.align.log $dir/temp/$Name.$Species/
-            cp $dir/$Name/$Name.$Species.stats.log $dir/temp/$Name.$Species/
-            cp $dir/$Name/$Name.$Species.rmdup.hist_data.log $dir/temp/$Name.$Species/
-            cp $dir/$Name/$Name.$Species.RefSeqTSS $dir/temp/$Name.$Species/
-            let "count=count+1"
-        done
-        cp -r $dir/temp/$Name.$Species/ $dir/temp/$Name.$Species.temp/
-    fi
-    index=$((index + 1))
-done
-
-cp -r $dir/temp/$Name.$Species/ $dir/temp/$Name.$Species.temp/
-
-if [ $count -eq 0 ]; then
-    rm Names.atac.xls
-else
-    cd $dir/temp/
-    cp $dir/Names.atac.xls $dir/temp/
-    /usr/bin/python $myPATH/pySinglesGetAlnStats_sai.py -i ./Names.atac.xls -d ./
-    mv $dir/temp/Names.merged.xls $dir/Names.atac.merged.xls
-    mv Names.merged.xls.iSize.txt.mat Names.atac.iSize.txt.mat
-fi
-
-# gather useful files
-cd $dir
-mkdir $dir/Useful
-cp $dir/*/*.png $dir/Useful
-cp $dir/*/*.pdf $dir/Useful
-
-# generate bigwig, for TAPS-seq and RNA-seq
-let i=0 
-unset Subproject
-for (( Index=0; Index<${#Type[@]}; Index++ ))
-do
-    if [ ${Type[$Index]} == "RNA" ] || [ ${Type[$Index]} == "TAPS" ] || [ ${Type[$Index]} == "ATAC" ]; then
-	Subproject[$i]=${Project[$Index]}
-	let "i+=1"
-    fi
-done
-
-count=`ls -1 $dir/Useful/*bw 2>/dev/null | wc -l`
-if [ ! -z $Subproject ]; then
-    if [ $count != 0 ]; then
-	echo "Found bigwig files, skip converting bam to bigwig"
-    else
-	echo "Genarate bigwig for ${Subproject[@]}"
-	for Species in ${Genome[@]}; do
-	    parallel --will-cite --jobs 6 --delay 1 'igvtools count -w 25 -f mean -e 250 '$dir'/{}/{}.'$Species'.rmdup.bam '$dir'/Useful/{}.'$Species'.rmdup.wig '$Species' >>'$dir'/Run.log' ::: `echo ${Subproject[@]}`
-	    cd $dir/Useful
-	    parallel --will-cite --jobs 6 --delay 1 'wigToBigWig {} '$genomeBed'/'$Species'genome.bed {.}.bw 2>>'$dir'/Run.log' ::: *wig
-	    rm *wig
-	done
-    fi
-fi
-
-
-# clean up
-echo "Cleaning up folder"
-cp $dir/*/*.csv $dir/Useful/
-rm $dir/Useful/*filtered.counts.csv 
-rm -r $dir/temp/
-
-pigz --fast -p $cores $dir/*/*.csv
-pigz --fast -p $cores $dir/*/*.groups.tsv
-
-# rm  $dir/*/*rmdup.bam* $dir/*/*wdup.bam*
-rm $dir/*/*wdup.all.bam* $dir/*/*namesort.bam $dir/igv.log $dir/*/*exon.featureCounts.bam
-rm -r $dir/smallfastqs/* $dir/*/Sub.*.fq.gz 
-touch $dir/smallfastqs/0001.1.$Run.R2.fastq.gz
-touch $dir/fastqs/Sub.0001.1.discard.R1.fq.gz
-
-echo "The pipeline is completed!! Author: Sai Ma <sai@broadinstitute.org>"
-exit
