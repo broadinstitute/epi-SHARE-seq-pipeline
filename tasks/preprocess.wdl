@@ -10,10 +10,18 @@ task pre_process {
         # Nextseq and perform trimming, adapter removal, appending
         # cell barcode to the read name, and splitting ATAC and RNA.
         
-        Array[File] input
-        File config
-        String? prefix
+        # TODO: Create a log file inside the python script that can be
+        # reported to the user
+        
+        File R1
+        File R2
+        File? I1
+        File? I2
         Boolean? qc= false
+        Int cpus= 4
+        String? prefix
+        String rna_primers
+        String atac_primers
         String docker_image
         
     }
@@ -26,23 +34,29 @@ task pre_process {
         set -e
         
         python3 /opt/fastq.process.py3.v0.6.py \
-            -a ${input[0]} \
-            -b ${input[1]} \
-            ${"--c=" + input[2]} \
-            ${"--d=" + input[3]} \
-            --out ./processed-fastqs/${default="processed" prefix} \
-            -y '${config}'
+            #-a ${input[0]} \
+            #-b ${input[1]} \
+            #${if length(input) == 4 then "--c=" + input[2] else ""} \
+            #${if length(input) == 4 then "--d=" + input[3] else ""} \
+            -a ${R1} \
+            -b ${R2} \
+            ${"--c" + I1} \
+            ${"--d" + I2} \
+            ${if qc then "--qc"} \
+            --rna_primers ${rna_primers} \
+            --atac_primers ${atac_primers} \
+            --out ./processed-fastqs/"${default="shareseq-project." prefix+"."}preprocessed
         
         # Compressing the fastqs
-        pigz --fast -p 4 ./processed-fastqs/*.fq
+        pigz --fast -p ${cpus} ./processed-fastqs/*.fq
         
     }
     
     output {
         # Useful for ATAC and RNA so I don't have to copy twice
-        File atac_processed_fastq_R1= glob('./processed-fastqs/*ATAC.R1.fq.gz')
-        File atac_processed_fastq_R2= glob('./processed-fastqs/*ATAC.R2.fq.gz')
-        File rna_processed_fastq_R1= glob('./processed-fastqs/*RNA.R1.fq.gz')
+        File atac_processed_fastq_R1= glob('./processed-fastqs/*atac.R1.fq.gz')[0]
+        File atac_processed_fastq_R2= glob('./processed-fastqs/*atac.R2.fq.gz')[0]
+        File rna_processed_fastq_R1= glob('./processed-fastqs/*rna.R1.fq.gz')[0]
     }
 
     runtime {
@@ -63,14 +77,21 @@ task pre_process {
                     'I1',
                     'I2'
                 ]
-            }
-        config: {
-                description: 'Config YAML file.',
-                help: 'Configuration file that contains the adapter information'
-                examples: ['https://raw.githubusercontent.com/masai1116/SHARE-seq-alignment/main/config_example.ymal']
             },
+        rna_primers: {
+                description: 'Primers used for RNA.',
+                help: 'Comma separated list of primers used for the RNA part of SHARE-seq'
+                examples: ["P1.52,P1.53,P1.54,P1.55,P1.56"]
+            },
+        atac_primers: {
+            description: 'Primers used for ATAC.',
+            help: 'Comma separated list of primers used for the ATAC part of SHARE-seq'
+            examples: ["P1.04,P1.05,P1.06,P1.07,P1.08"]
+        },
         qc: {
                 description: 'Boolean used to switch to QC run.'
+                default: false
+                example: [true, false]
             },
         docker_image: {
                 description: 'Docker image.',

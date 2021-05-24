@@ -5,8 +5,8 @@
 # handle QC vs full & modify fastq header & split fastqs & add index & trim & split project
 # example python3 /mnt/users/sai/Script/Split-seq_Sai/fastq.process.py3.py -a Undetermined_S0_R1_001.fastq.gz -b Undetermined_S0_R2_001.fastq.gz --qc -y /mnt/users/sai/Script/Split-seq_Sai/config_test.yaml
 
-# to do list
-## need to add N6 compatability
+# Modified by Eugenio Mattei
+# Broad Institute of MIT and Harvard
 
 ##### IMPORT MODULES #####
 # import necessary for python
@@ -18,7 +18,7 @@ import gzip
 import string
 import Levenshtein
 import json
-import yaml
+#import yaml
 from Bio import SeqIO
 from Bio import AlignIO
 from optparse import OptionParser
@@ -543,6 +543,8 @@ opts.add_option("--d", help="<Index2> optional xxx_S1_R3_001.fastq.gz", default=
 #opts.add_option("--outdir", help="output dir")
 opts.add_option("--qc", action="store_true", help="QC run with first 3M reads")
 opts.add_option("--out", help="Path to the output fastq files")
+opts.add_option("--atac_primers", help="List of comma separated values of primers used for ATAC")
+opts.add_option("--rna_primers", help="List of comma separated values of primers used for RNA")
 options, arguments = opts.parse_args()
 
 # return usage information if no argvs given
@@ -558,6 +560,8 @@ i1_in = options.c
 i2_in = options.d
 yaml_in = options.y
 prefix = options.out
+atac_primers= options.atac_primers
+rna_primers= options.rna_primers
 qcreads=99999 # number of reads for QC analysis
 
 
@@ -615,32 +619,44 @@ p1_rds.close()
 p1_rds = io.BufferedReader(gzip.open(p1_in,'rb'))
 
 # load yaml 
-inFile = open(yaml_in, 'r')
-config = yaml.load(inFile, Loader=yaml.UnsafeLoader)
-projectNames = set()
+#inFile = open(yaml_in, 'r')
+#config = yaml.load(inFile, Loader=yaml.UnsafeLoader)
+#projectNames = set()
 
-for key in config.keys():
-    if ('Project' in key):
-        projectNames.add(key)
+#for key in config.keys():
+#    if ('Project' in key):
+#        projectNames.add(key)
 # print(projectNames)
 
 # open files to write in
 project = dict()
 sampletype = dict()
 # N6type = dict()
-for proj in projectNames:
-    metaData = config[proj]
-    #outName = metaData['Name']
-    outType = metaData['Type'] 
-    # remove existing files
-    if os.path.exists(prefix + "." + outType + ".R1.fq.gz"):
-        os.remove(prefix + "." + outType + ".R1.fq.gz")
-    if os.path.exists(prefix + "." + outType + ".R2.fq.gz"):
-        os.remove(prefix + "." + outType + ".R2.fq.gz")
+# for proj in projectNames:
+    # metaData = config[proj]
+    # #outName = metaData['Name']
+    # outType = metaData['Type'] 
+    # # remove existing files
+    # if os.path.exists(prefix + "." + outType + ".R1.fq.gz"):
+        # os.remove(prefix + "." + outType + ".R1.fq.gz")
+    # if os.path.exists(prefix + "." + outType + ".R2.fq.gz"):
+        # os.remove(prefix + "." + outType + ".R2.fq.gz")
 
-    for primer in metaData['Primer']:
-        project[primer] = prefix + "." + outType
-        sampletype[primer] = outType
+    # for primer in metaData['Primer']:
+        # project[primer] = prefix + "." + outType
+        # sampletype[primer] = outType
+
+# The following lines are useful to bypass the need for a YAML file that
+# is not very convenient in Terra
+
+# Reading in the primers used for ATAC
+for atac_primer in atac_primers.split(","):
+    project[atac_primer] = prefix + ".atac"
+    sampletype[atac_primer] = "atac"
+# Reading in the primers used for RNA
+for rna_primer in rna_primers.split(","):
+    project[rna_primer] = prefix + ".rna"
+    sampletype[rna_primer] = "rna"
 
 
 # generate barcode set
