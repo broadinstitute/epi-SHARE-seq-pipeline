@@ -3,11 +3,11 @@ version 1.0
 workflow wf_preprocess {
   input {
     # Preprocess inputs
-    File R1
-    File R2
-    File? I1
-    File? I2        
-    String? qc
+    File read1
+    File read2
+    File? index1
+    File? index2
+    Boolean? qc
     String atac_primers
     String rna_primers
     String prefix = "shareseq-project"
@@ -16,10 +16,10 @@ workflow wf_preprocess {
 
   call preprocess {
     input:
-      R1 = R1,
-      R2 = R2,
-      I1 = I1,
-      I2 = I2,
+      R1 = read1,
+      R2 = read2,
+      I1 = index1,
+      I2 = index2,
       qc = qc,
       atac_primers = atac_primers,
       rna_primers = rna_primers,
