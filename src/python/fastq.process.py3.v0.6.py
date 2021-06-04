@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Author: Sai Ma
 # The following program will process the fastq
@@ -657,7 +657,7 @@ for atac_primer in atac_primers.split(","):
 for rna_primer in rna_primers.split(","):
     project[rna_primer] = prefix + ".rna"
     sampletype[rna_primer] = "rna"
-
+    print(rna_primer) # remove
 
 # generate barcode set
 r1set = dict()

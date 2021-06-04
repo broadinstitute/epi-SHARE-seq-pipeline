@@ -1,4 +1,4 @@
-version 0.0.1
+version 1.0
 
 import tasks/preprocess.wdl
 import tasks/raise_exception.wdl
@@ -57,7 +57,7 @@ workflow ShareSeq {
     output {
         File output1= preprocess.atac_processed_fastq_R1,
         File output2= preprocess.atac_processed_fastq_R2,
-        File output1= rna_processed_fastq_R1
+        File output3= rna_processed_fastq_R1
     }
     
 }
