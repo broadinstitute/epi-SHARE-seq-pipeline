@@ -60,9 +60,9 @@ task preprocess {
     String docker_image = "polumechanos/share-seq"
   }
   
-#  Float input_file_size_gb = size(R1, "G")
-#  Float mem_gb = 8.0
-#  Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+  Float input_file_size_gb = size(R1, "G")
+  Float mem_gb = 8.0
+  Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
   command {
     set -e
@@ -90,10 +90,10 @@ task preprocess {
   }
 
   runtime {
-#    cpu : 4
-#    memory : '${mem_gb} GB'
-#    disks : 'local-disk ${disk_gb} SSD'
-#    preemptible: 0 
+    cpu : 4
+    memory : '${mem_gb} GB'
+    disks : 'local-disk ${disk_gb} SSD'
+    preemptible: 0 
     docker: docker_image
   }
   
