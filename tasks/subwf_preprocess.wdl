@@ -67,7 +67,7 @@ task preprocess {
   command {
     set -e
     
-    python3 fastq.process.py3.v0.6.py \
+    python3 $(which fastq.process.py3.v0.6.py) \
       -a ${R1} \
       -b ${R2} \
       ${if defined(I1) then "--c " + I1 else ""} \
@@ -78,7 +78,7 @@ task preprocess {
       --out ${default="shareseq-project." prefix+"."}preprocessed
         
     # Compressing the fastqs
-    pigz --fast -p ${cpus} ./processed-fastqs/*.fq
+    pigz --fast -p ${cpus} *.fq
     
   }
     
