@@ -79,9 +79,34 @@ workflow ShareSeq {
     
 
     output {
-        Array[File] output1 = wf_preprocess.atac_processed_fastq_R1,
-        Array[File] output2 = wf_preprocess.atac_processed_fastq_R2,
+        Array[File] output1 = wf_preprocess.atac_processed_fastq_R1
+        Array[File] output2 = wf_preprocess.atac_processed_fastq_R2
         Array[File] output3 = wf_preprocess.rna_processed_fastq_R1
     }
     
+}
+
+
+# Task to report errors to user.
+# From https://github.com/ENCODE-DCC/chip-seq-pipeline2/blob/master/chip.wdl
+task raise_exception {
+  input {
+      String msg
+      Array[String]? vals
+  }
+  command {
+      echo -e "\n* Error: ${msg}\n" >&2
+      echo -e "* Vals: ${sep=',' vals}\n" >&2
+      exit 2
+  }
+  output {
+      String error_msg = '${msg}'
+  }
+  runtime {
+      maxRetries : 0
+      cpu : 1
+      memory : '2 GB'
+      time : 1
+      disks : 'local-disk 10 SSD'
+  }
 }
