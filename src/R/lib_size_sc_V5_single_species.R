@@ -94,7 +94,7 @@ plot(Df[ , 5],Df[, 6], xlab=paste(Genome1, " unique molecules", sep=""), ylab = 
 abline(1,1, col="blue")
 garbage <- dev.off()
 
-temp <- paste(Name,".counts.csv", sep="")
+temp <- paste(Name,".libsize.counts.csv", sep="")
 File <- paste(dir, temp, sep="/")
 write.csv(Df, File)
 

@@ -1,6 +1,7 @@
 version 1.0
 
 workflow wf_preprocess {
+    
   input {
     # Preprocess inputs
     File read1
