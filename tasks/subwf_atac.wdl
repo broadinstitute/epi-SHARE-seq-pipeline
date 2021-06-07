@@ -24,7 +24,7 @@ workflow wf_atac {
         input:
             R1 = read1,
             R2 = read2,
-            String genome_name = genome_name,
+            genome_name = genome_name,
             genome_index = idx_tar,
             prefix = prefix
     }
@@ -110,7 +110,7 @@ task align_atac {
         
     }
     
-    Float input_file_size_gb = size(input[0], "G")
+    Float input_file_size_gb = size(fastq_R1, "G")
     # This is almost fixed for either mouse or human genome
     Float mem_gb = 34.0
     Int disk_gb = round(20.0 + 4 * input_file_size_gb)
@@ -127,7 +127,7 @@ task align_atac {
             --rg-id $Name \
             -x $genome_prefix \
             -1 fastq_R1 \
-			-2 fastq_R2 |\
+            -2 fastq_R2 |\
             samtools view \
                 -bS \
                 -@ ${cpus} \
@@ -146,11 +146,11 @@ task align_atac {
     output {
         File atac_bowtie2_align = glob('*.sorted.bam')[0]
         File atac_bowtie2_align_index = glob('*.sorted.bam.bai')[0]
-        File log = atac.bowtie2.align.${genome_name}.log
+        File log = 'atac.bowtie2.align.${genome_name}.log'
     }
 
     runtime {
-        cpu : ${cpus}
+        cpu : '${cpus}'
         memory : '${mem_gb} GB'
         disks : 'local-disk ${disk_gb} SSD'
         preemptible : 0 
@@ -161,36 +161,36 @@ task align_atac {
         fastq_R1: {
                 description: 'Read1 fastq',
                 help: 'Processed fastq for read1.',
-                example: 'processed.atac.R1.fq.gz'
-            },
+                example: 'processed.atac.R1.fq.gz',
+            }
         fastq_R2: {
                 description: 'Read2 fastq',
                 help: 'Processed fastq for read2.',
                 example: 'processed.atac.R2.fq.gz'
-            },
+            }
         genome_index: {
                 description: 'Bowtie2 indexes',
-                help: 'Index files for bowtie2 to use during alignemnt.'
+                help: 'Index files for bowtie2 to use during alignment.',
                 examples: ['hg19.tar.gz']
-            },
+            }
         genome_name: {
                 description: 'Reference name',
-                help: 'The name of the reference genome used by the aligner.'
+                help: 'The name of the reference genome used by the aligner.',
                 examples: ['hg38', 'mm10', 'both']
-            },
+            }
         prefix: {
                 description: 'Prefix for output files',
-                help: 'Prefix that will be used to name the output files'
+                help: 'Prefix that will be used to name the output files',
                 examples: 'MyExperiment'
-            },
+            }
         cpus: {
                 description: 'Number of cpus',
-                help: 'Set the number of cpus useb by bowtie2'
+                help: 'Set the number of cpus useb by bowtie2',
                 default: 16
-            },
+            }
         docker_image: {
                 description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz'
+                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
             }
     }
@@ -228,18 +228,18 @@ task bam_to_bed_atac {
     String final_bam_index = '${prefix + '.'}atac.cleaned.${genome_name}.bam.bai'
     String final_bedpe = '${prefix + '.'}atac.cleaned.${genome_name}.bedpe.gz'
 
-    command {
+    command <<<
         set -e
         
         # Remove unwanted chromosomes
-        chrs=`samtools view -H ${bam} | \
+        chrs=$(samtools view -H ${bam} | \
             grep chr | \
             cut -f2 | \
             sed 's/SN://g' | \
             grep -v chrM | \
             grep -v Y | \
-            awk '{if(length($0)<6)print}'`
-            
+            awk '{if(length($0)<6)print}')
+                        
         # Sort file by name, remove low quality reads, namesort the input bam
         samtools view \
             -b \
@@ -266,7 +266,7 @@ task bam_to_bed_atac {
         # Compress the bedpe file
         pigz --fast -c -p ${cpus} ${bedpe} > ${final_bedpe}
         
-    }
+    >>>
     
     output {
         File bam_filtered = final_bam
@@ -275,7 +275,7 @@ task bam_to_bed_atac {
     }
 
     runtime {
-        cpu : ${cpus}
+        cpu : '${cpus}'
         memory : '${mem_gb} GB'
         disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0 
@@ -290,22 +290,22 @@ task bam_to_bed_atac {
             }
         genome_name: {
                 description: 'Reference name',
-                help: 'The name of the reference genome used by the aligner.'
+                help: 'The name of the reference genome used by the aligner.',
                 examples: ['hg38', 'mm10', 'both']
-            },
+            }
         chrom_sizes: {
                 description: 'Chromosomes size file',
-                help: 'File with the length of each chromosome'
+                help: 'File with the length of each chromosome',
                 examples: 'hg38.chrom.sizes'
-            },
+            }
         cpus: {
                 description: 'Number of cpus',
-                help: 'Set the number of cpus useb by bowtie2'
+                help: 'Set the number of cpus useb by bowtie2',
                 examples: '4'
-            },
+            }
         docker_image: {
                 description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz'
+                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
             }
     }
@@ -343,12 +343,12 @@ task count_reads_atac {
     String filtered_counts = '${prefix + '.'}atac.${genome_name}.filtered.counts.csv'
     String filtered_bedpe = '${prefix + '.'}atac.${genome_name}.cleaned.filtered.bedpe.gz'
 
-    command {
+    command <<<
         set -e
         
         # Count unfiltered reads
         zcat ${bedpe} | \
-        awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}'| \
+        awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}' | \
         awk -v OFS='\t' '{if($1 >= '${cutoff}') print }'> ${read_groups_freq}
         
         # TODO: parametrize this script to explicitly call inputs and outputs
@@ -367,13 +367,13 @@ task count_reads_atac {
         
         mv '${read_groups_freq_rmdup}.csv' ${filtered_counts}
         
-		# Remove barcode with low counts from the fragment file for ATAC
+        # Remove barcode with low counts from the fragment file for ATAC
         sed -e 's/,/\t/g' ${filtered_counts} | \
         awk -v OFS=',' 'NR>=2 {if($5 >= '${cutoff}') print $1,$2,$3,$4} ' > barcodes.txt
         
         grep -wFf ${barcodes.txt} <(zcat ${bedpe}) | \
         pigz --fast -p ${cpus}  > ${filtered_bedpe}        
-    }
+    >>>
     
     output {
         File bedpe_cleaned_filtered = filtered_bedpe
@@ -382,7 +382,7 @@ task count_reads_atac {
     }
 
     runtime {
-        cpu : ${cpus}
+        cpu : '${cpus}'
         memory : '${mem_gb} GB'
         disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0 
@@ -397,17 +397,17 @@ task count_reads_atac {
             }
         genome_name: {
                 description: 'Reference name',
-                help: 'The name of the reference genome used by the aligner.'
+                help: 'The name of the reference genome used by the aligner.',
                 examples: ['hg38', 'mm10', 'both']
-            },
+            }
         cpus: {
                 description: 'Number of cpus',
-                help: 'Set the number of cpus useb by bowtie2'
+                help: 'Set the number of cpus useb by bowtie2',
                 examples: '4'
-            },
+            }
         docker_image: {
                 description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz'
+                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
             }
     }
@@ -460,7 +460,7 @@ task qc_lib_size {
     }
 
     runtime {
-        cpu : ${cpus}
+        cpu : '${cpus}'
         memory : '${mem_gb} GB'
         disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0 
@@ -475,27 +475,27 @@ task qc_lib_size {
             }
         raw_bam: {
                 description: 'Filtered bam',
-                help: 'Filtered alignment bam file. Typically, no duplicates and quality filtered.'
+                help: 'Filtered alignment bam file. Typically, no duplicates and quality filtered.',
                 example: 'aligned.hg38.rmdup.filtered.bam'
             }
         tss: {
                 description: 'TSS bed file',
-                help: 'List of TSS in bed format used for the enrichment plot.'
+                help: 'List of TSS in bed format used for the enrichment plot.',
                 example: 'refseq.tss.bed'
             }
         genome_name: {
                 description: 'Reference name',
-                help: 'The name of the reference genome used by the aligner.'
+                help: 'The name of the reference genome used by the aligner.',
                 examples: ['hg38', 'mm10', 'both']
-            },
+            }
         cpus: {
                 description: 'Number of cpus',
-                help: 'Set the number of cpus useb by bowtie2'
+                help: 'Set the number of cpus useb by bowtie2',
                 examples: '4'
-            },
+            }
         docker_image: {
                 description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz'
+                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
             }
     }
@@ -576,7 +576,7 @@ task qc_stats_atac {
     }
 
     runtime {
-        cpu : ${cpus}
+        cpu : '${cpus}'
         memory : '${mem_gb} GB'
         disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0 
@@ -591,27 +591,27 @@ task qc_stats_atac {
             }
         raw_bam: {
                 description: 'Filtered bam',
-                help: 'Filtered alignment bam file. Typically, no duplicates and quality filtered.'
+                help: 'Filtered alignment bam file. Typically, no duplicates and quality filtered.',
                 example: 'aligned.hg38.rmdup.filtered.bam'
             }
         tss: {
                 description: 'TSS bed file',
-                help: 'List of TSS in bed format used for the enrichment plot.'
+                help: 'List of TSS in bed format used for the enrichment plot.',
                 example: 'refseq.tss.bed'
             }
         genome_name: {
                 description: 'Reference name',
-                help: 'The name of the reference genome used by the aligner.'
+                help: 'The name of the reference genome used by the aligner.',
                 examples: ['hg38', 'mm10', 'both']
-            },
+            }
         cpus: {
                 description: 'Number of cpus',
-                help: 'Set the number of cpus useb by bowtie2'
+                help: 'Set the number of cpus useb by bowtie2',
                 examples: '4'
-            },
+            }
         docker_image: {
                 description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz'
+                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
             }
     }
