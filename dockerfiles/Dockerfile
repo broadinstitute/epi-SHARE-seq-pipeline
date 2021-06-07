@@ -30,4 +30,26 @@ ENV PATH="/software:${PATH}"
 RUN pip3 install --no-cache-dir common python-Levenshtein==0.12.2 biopython==1.79
 
 # Copy the preprocess python file inside
-COPY ../src/python/fastq.process.py3.v0.6.py /software
+COPY src/python /software
+COPY src/R /software
+
+# Install R packages including spp
+RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.r-project.org'; options(repos = r);" > ~/.Rprofile && \
+    Rscript -e "install.packages('Matrix')" && \
+    Rscript -e "install.packages('matrixStats')" && \
+    Rscript -e "install.packages('reshape2')" && \
+    Rscript -e "install.packages('data.table')" && \
+    Rscript -e "install.packages('tidyr')"
+
+# Install Picard 2.20.7
+RUN wget https://github.com/broadinstitute/picard/releases/download/2.20.7/picard.jar && chmod +x picard.jar
+
+# Install samtools 1.9
+RUN git clone --branch 1.9 --single-branch https://github.com/samtools/samtools.git && \
+    git clone --branch 1.9 --single-branch https://github.com/samtools/htslib.git && \
+    cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
+
+# Install Bowtie2 2.3.4.3
+RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.4.4/bowtie2-2.4.4-source.zip && \
+    unzip bowtie2-2.4.4-source.zip && cd bowtie2-2.4.4 && make static-libs && make STATIC_BUILD=1 && mv bowtie2* .. && \
+    cd .. && rm -rf bowtie2-2.4.4*
