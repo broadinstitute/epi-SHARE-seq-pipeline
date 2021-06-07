@@ -22,8 +22,8 @@ workflow wf_atac {
     
     call align_atac {
         input:
-            R1 = read1,
-            R2 = read2,
+            fastq_R1 = read1,
+            fastq_R2 = read2,
             genome_name = genome_name,
             genome_index = idx_tar,
             prefix = prefix
@@ -53,8 +53,7 @@ workflow wf_atac {
             filtered_counts = count_reads_atac.atac_filtered_counts,
             cutoff = cutoff,
             genome_name = genome_name,
-            prefix = prefix,
-            cpus = cpus
+            prefix = prefix
     }
     
     call qc_stats_atac {
