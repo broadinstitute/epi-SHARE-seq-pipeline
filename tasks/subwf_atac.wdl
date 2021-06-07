@@ -123,7 +123,7 @@ task align_atac {
         
         bowtie2 -X2000 \
             -p $cores \
-            --rg-id $Name \
+            --rg-id ${prefix + "."}atac \
             -x $genome_prefix \
             -1 fastq_R1 \
             -2 fastq_R2 |\
