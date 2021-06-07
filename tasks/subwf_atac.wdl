@@ -38,10 +38,10 @@ workflow wf_atac {
             cpus = cpus,
     }
     
-    call counts_reads_atac {
+    call count_reads_atac {
         input:
             cutoff = cutoff,
-            bedpe = bam_to_bed.bedpe_cleaned,
+            bedpe = bam_to_bed_atac.bedpe_cleaned,
             genome_name = genome_name,
             prefix = prefix,
             cpus = cpus,
@@ -49,8 +49,8 @@ workflow wf_atac {
     
     call qc_lib_size {
         input:
-            raw_counts = counts_reads_atac.atac_unfiltered_counts,
-            filtered_counts = counts_reads_atac.atac_filtered_counts,
+            raw_counts = count_reads_atac.atac_unfiltered_counts,
+            filtered_counts = count_reads_atac.atac_filtered_counts,
             cutoff = cutoff,
             genome_name = genome_name,
             prefix = prefix,
@@ -61,7 +61,7 @@ workflow wf_atac {
         input:
             raw_bam = align_atac.atac_bowtie2_align,
             filtered_bam = bam_to_bed_atac.bam_filtered,
-            tss = bed_tss,
+            tss = tss_bed,
             genome_name = genome_name,
             prefix = prefix,
             cpus = cpus
@@ -74,9 +74,9 @@ workflow wf_atac {
         File atac_aligned_filtered_bam = bam_to_bed_atac.bam_filtered
         File atac_aligned_filtered_bai = bam_to_bed_atac.bam_filtered_index
         File atac_fragment_file_raw = bam_to_bed_atac.bedpe_cleaned
-        File atac_fragment_file_filtered = counts_reads_atac.bedpe_cleaned_filtered
-        File atac_counts_filtered = counts_reads_atac.atac_filtered_counts
-        File atac_counts_unfiltered = counts_reads_atac.atac_unfiltered_counts
+        File atac_fragment_file_filtered = count_reads_atac.bedpe_cleaned_filtered
+        File atac_counts_filtered = count_reads_atac.atac_filtered_counts
+        File atac_counts_unfiltered = count_reads_atac.atac_unfiltered_counts
         File atac_lib_size_count = qc_lib_size.lib_size_counts
         File atac_duplicates_log = qc_lib_size.lib_size_log
         Array[File] atac_lib_size_plots = qc_lib_size.plots
@@ -334,7 +334,7 @@ task count_reads_atac {
     }
     
     Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Float input_file_size_gb = size(bam, "G")
+    Float input_file_size_gb = size(bedpe, "G")
     Float mem_gb = 8.0
     
     String read_groups_freq = 'read_groups_freq.bed'
@@ -436,7 +436,7 @@ task qc_lib_size {
     }
     
     Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Float input_file_size_gb = size(bam, "G")
+    Float input_file_size_gb = size(filtered_counts, "G")
     Float mem_gb = 8.0
     
 
@@ -447,7 +447,7 @@ task qc_lib_size {
         # TODO create only one R script that uses the parameters to discriminate
         # Estimate lib size
         # both
-        #Rscript $(which lib_size_sc_V5_species_mixing.R)./ '${prefix + '.'}atac.${genome_name}' ${cutoff} ${type} --save
+        #Rscript $(which lib_size_sc_V5_species_mixing.R)./ '${prefix + '.'}atac.${genome_name}' ${cutoff} atac --save
         # hg38/mm10
         Rscript $(which lib_size_sc_V5_single_species.R) ./ '${prefix + '.'}atac.${genome_name}' ${cutoff} ${genome_name} atac --save
 
@@ -460,7 +460,6 @@ task qc_lib_size {
     }
 
     runtime {
-        cpu : '${cpus}'
         memory : '${mem_gb} GB'
         disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0 
@@ -468,30 +467,20 @@ task qc_lib_size {
     }
     
     parameter_meta {
-        raw_bam: {
-                description: 'Unfiltered bam',
-                help: 'Not filtered alignment bam file.',
-                example: 'aligned.hg38.bam'
+        raw_counts: {
+                description: 'Barcode count csv',
+                help: 'Barcode counts from raw bam in csv format.',
+                example: 'raw.counts.csv'
             }
-        raw_bam: {
-                description: 'Filtered bam',
-                help: 'Filtered alignment bam file. Typically, no duplicates and quality filtered.',
-                example: 'aligned.hg38.rmdup.filtered.bam'
-            }
-        tss: {
-                description: 'TSS bed file',
-                help: 'List of TSS in bed format used for the enrichment plot.',
-                example: 'refseq.tss.bed'
-            }
+        filtered_counts: {
+            description: 'Barcode count csv',
+            help: 'Barcode counts from filtered bam in csv format.',
+            example: 'filtered.counts.csv'
+        }
         genome_name: {
                 description: 'Reference name',
                 help: 'The name of the reference genome used by the aligner.',
                 examples: ['hg38', 'mm10', 'both']
-            }
-        cpus: {
-                description: 'Number of cpus',
-                help: 'Set the number of cpus useb by bowtie2',
-                examples: '4'
             }
         docker_image: {
                 description: 'Docker image.',
@@ -528,7 +517,7 @@ task qc_stats_atac {
     }
     
     Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Float input_file_size_gb = size(bam, "G")
+    Float input_file_size_gb = size(raw_bam, "G")
     Float mem_gb = 8.0
     
     String stats_log= '${prefix + '.'}atac.stats.${genome_name}.log.txt'
@@ -570,7 +559,7 @@ task qc_stats_atac {
     
     output {
         File final_stats = stats_log
-        File final_hist_stats_pdf = stats_log_pdf
+        File final_hist_stats_pdf = hist_log_pdf
         File final_hist_stats = stats_log
         File tss_pileup = tss_pileup
     }
