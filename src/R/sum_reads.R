@@ -3,11 +3,11 @@
 args <- commandArgs()
 #print(args)
 
-dir <- args[6]
-Name <- args[7]
+inp <- args[6]
+out <- args[7]
 
 # read csv
-Counts <- read.csv(paste(dir, Name, sep="/"), header=F, sep = "")
+Counts <- read.csv(inp, header=F, sep = "")
 colnames(Counts) <- c("Freq","Barcode")
 #head(Table)
 
@@ -39,9 +39,6 @@ library(tibble)
 Df2 <- tibble(R1=Df$R1, R2=Df$R2, R3=Df$R3, P5=Df$P5, fragments=Df$Count)
 #head(Df2)
 
-temp <- paste(Name, ".csv", sep="")
-File <- paste(dir, temp, sep="/")
-write.csv(Df2, File, quote = F, row.names = F)
-print(paste("Finished counting for ", Name, sep=""))
+write.csv(Df2, out, quote = F, row.names = F)
 
 #stop()

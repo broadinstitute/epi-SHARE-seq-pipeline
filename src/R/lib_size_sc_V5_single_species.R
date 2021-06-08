@@ -3,20 +3,15 @@
 args <- commandArgs()
 # print(args)
 
-dir <- args[6]
-Name <- args[7]
+unfilt <- args[6]
+filt <- args[7]
 Cutoff <- as.integer(args[8])
 Genome1 <- args[9]
 libtype <- args[10]
 
-Name1 <- paste(Name, Genome1, sep=".")
-
-File1 <- paste(Name1, ".unfiltered.counts.csv", sep="")
-File2 <- paste(Name1, ".filtered.counts.csv", sep="")
-
 # print(paste(dir, Namehg, File1, sep="/"))
-hg_unfil <- read.csv(paste(dir, File1, sep="/"), header=T)
-hg_fil <- read.csv(paste(dir, File2, sep="/"), header=T)
+hg_unfil <- read.csv(unfilt, header=T)
+hg_fil <- read.csv(filt, header=T)
 
 Df <- cbind(hg_fil, hg_unfil$fragments)
 
@@ -56,7 +51,7 @@ if (libtype != "RNA"){
    }
 }
 #head(Df)
-print(paste("Average ", Genome1, " lib size of ", Name, " is:", sep=""))
+print(paste("Average ", Genome1, " lib size of sample is:", sep=""))
 mean(Df[Df[, 8] > Cutoff,8])
 
 alllibeize <- sum(Df[ ,8])
@@ -73,7 +68,7 @@ out = data.frame(LIBRARY="Unkown",
 		 READ_PAIR_OPTICAL_DUPLICATES=0,
 		 PERCENT_DUPLICATION=duprate,
 		 ESTIMATED_LIBRARY_SIZE=alllibeize)
-fileout <- paste(Name, Genome1, 'dups.log', sep=".")
+fileout <- paste(basename(filt), 'dups.log', sep=".")
 write.table(out, fileout, quote=F, row.names=F, col.names=T, sep="\t")
 
 # PERCENT_DUPLICATION     ESTIMATED_LIBRARY_SIZE
@@ -83,20 +78,19 @@ write.table(out, fileout, quote=F, row.names=F, col.names=T, sep="\t")
 print("Plot Libsize, Species mixing etc...")
 
 Size2 <-Df[, 8];  Size2 <- Size2[Size2 >0]; # plot(Size)
-file6 <- paste(Name, Genome1, 'libSize.pdf', sep=".")
-pdf(paste(dir,file6, sep="/"))
+file6 <- paste(basename(filt), 'libSize.pdf', sep=".")
+pdf(file6)
 plot(log10(sort(Size2, decreasing = T)), xlab="Barcode rank", ylab = "log10 (lib size)", main = "Estimated Lib Sizes per Cell", col="darkblue", pch=16)
 garbage <- dev.off()
 
-file12 <- paste(Name, Genome1, 'FilvsUnfil.pdf', sep=".")
-pdf(paste(dir,file12, sep="/"))
+file12 <- paste(basename(filt), 'FilvsUnfil.pdf', sep=".")
+pdf(file12)
 plot(Df[ , 5],Df[, 6], xlab=paste(Genome1, " unique molecules", sep=""), ylab = "total reads", main = "Saturation", col="darkblue", pch=16)
 abline(1,1, col="blue")
 garbage <- dev.off()
 
-temp <- paste(Name,".libsize.counts.csv", sep="")
-File <- paste(dir, temp, sep="/")
-write.csv(Df, File)
+temp <- paste(basename(filt),"libsize.counts.csv", sep=".")
+write.csv(Df, temp)
 
 # C/X = 1 - exp( -N/X ) 
 # 

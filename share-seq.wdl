@@ -2,6 +2,7 @@ version 1.0
 
 # Import the sub-workflow for preprocessing the fastqs.
 import "tasks/subwf_preprocess.wdl" as step1
+import "tasks/subwf_atac.wdl" as atac
 
 # WDLworkflow for SHARE-seq
 
@@ -21,6 +22,13 @@ workflow ShareSeq {
         # WDL does not allow to assign None|null|nill if I want to explicitly pass an empty value so I am creating it
         # myself and use this as a substitute. Look inside the wf_preprocess call to see how I am using it.
         File? empty
+        
+        # ATAC inputs
+        Array[String] genomes_alignment_atac
+        Array[String] genomes_annotations
+        
+        # RNA inputs
+        #Array[String] genomes_alignment_rna
     }
     
     # Check if the number of reads in input is correct
@@ -59,6 +67,15 @@ workflow ShareSeq {
             atac_read2 = wf_preprocess.atac_processed_fastq_R2,
             rna_read1 = wf_preprocess.rna_processed_fastq_R1,
             prefix = prefix
+    }
+    
+    # Need to make the logic for the indexes
+    scatter( genome in genomes ){
+        call atac.wf_atac{
+            input:
+                fdsafsda
+                genome_name = genome
+        }
     }
     
 
