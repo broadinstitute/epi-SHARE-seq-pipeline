@@ -58,6 +58,10 @@ RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.4.3/bowtie2
 RUN git clone --branch v2.29.0 --single-branch https://github.com/arq5x/bedtools2.git && \
     cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
 
+# Install STAR 2.5.1b
+RUN wget https://github.com/alexdobin/STAR/archive/2.5.1b.tar.gz && tar -xzf 2.5.1b.tar.gz
+RUN cd STAR-2.5.1b && make STAR && rm ../2.5.1b.tar.gz
+ENV PATH="/software/STAR-2.5.1b/bin/Linux_x86_64:${PATH}"
 
 # Copy the external scripts inside
 COPY src/python /software
