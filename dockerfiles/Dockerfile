@@ -63,6 +63,10 @@ RUN wget https://github.com/alexdobin/STAR/archive/2.5.1b.tar.gz && tar -xzf 2.5
 RUN cd STAR-2.5.1b && make STAR && rm ../2.5.1b.tar.gz
 ENV PATH="/software/STAR-2.5.1b/bin/Linux_x86_64:${PATH}"
 
+# Install featureCounts
+RUN wget https://sourceforge.net/projects/subread/files/subread-2.0.2/subread-2.0.2-source.tar.gz && tar -zxf subread-2.0.2-source.tar.gz
+RUN cd subread-2.0.2-source/src && make -f Makefile.Linux && mv ../bin/* /software/ && cd ../.. && rm -r subread-2.0.2-source
+
 # Copy the external scripts inside
 COPY src/python /software
 COPY src/R /software
