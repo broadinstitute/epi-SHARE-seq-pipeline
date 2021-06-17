@@ -6,5 +6,6 @@
 	"wf_rna.multimappers" : false,
 	"wf_rna.include_multimappers" : false,
 	"wf_rna.include_introns" : false,
-	"wf_rna.gtf" : "other-files-for-testing/mm10.genes.gtf"
+	"wf_rna.gtf" : "other-files-for-testing/mm10.genes.gtf",
+	"wf_rna.cutoff" : 1
 }

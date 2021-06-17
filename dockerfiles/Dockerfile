@@ -67,6 +67,9 @@ ENV PATH="/software/STAR-2.5.1b/bin/Linux_x86_64:${PATH}"
 RUN wget https://sourceforge.net/projects/subread/files/subread-2.0.2/subread-2.0.2-source.tar.gz && tar -zxf subread-2.0.2-source.tar.gz
 RUN cd subread-2.0.2-source/src && make -f Makefile.Linux && mv ../bin/* /software/ && cd ../.. && rm -r subread-2.0.2-source
 
+# Install system/math python packages (python3)
+RUN pip3 install --no-cache-dir matplotlib==3.3.4 pandas==1.1.5
+
 # Copy the external scripts inside
 COPY src/python /software
 COPY src/R /software

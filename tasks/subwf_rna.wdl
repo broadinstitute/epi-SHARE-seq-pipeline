@@ -27,6 +27,10 @@ workflow wf_rna {
         File gtf
         File? gtf2
         String gene_naming = "gene_name"
+        # Group UMI
+        Boolean remove_single_umi = true
+        String mode = "fast"
+        Int cutoff = 300
     }
 
     Map[String, File] gtf_mapping = { "${genome_name}": gtf}
@@ -80,6 +84,17 @@ workflow wf_rna {
                 prefix = prefix,
                 docker_image = docker
         }
+
+        call group_umi_rna{
+            input:
+                bam = assign_features_rna.assigned_features_rna_bam,
+                mode = mode,
+                cutoff = cutoff,
+                remove_single_umi = remove_single_umi,
+                genome_name = assign_feature_input[2],
+                prefix = prefix,
+                docker_image = docker
+        }
     }
 
     output {
@@ -89,6 +104,10 @@ workflow wf_rna {
         Array[Array[File]] rna_rgid_updated_bam = assign_feature_inputs
         Array[File] rna_assigned_features_bam = assign_features_rna.assigned_features_rna_bam
         Array[File] rna_assigned_features_bai = assign_features_rna.assigned_features_rna_bai
+        Array[File] rna_filtered_counts = group_umi_rna.filtered_counts_rna
+        Array[File] rna_unfiltered_counts = group_umi_rna.unfiltered_counts_rna
+        Array[File] rna_groupped_umi_unfiltered = group_umi_rna.groupped_umi_rna
+        Array[File] rna_groupped_umi_filtered = group_umi_rna.groupped_umi_filtered_rna
     }
 }
 
@@ -507,6 +526,168 @@ task assign_features_rna {
                 description: 'Number of cpus',
                 help: 'Set the number of cpus useb by bowtie2',
                 example: '4'
+            }
+        docker_image: {
+                description: 'Docker image.',
+                help: 'Docker image for preprocessing step. Dependencies: samtools',
+                example: ['put link to gcr or dockerhub']
+            }
+    }
+}
+
+task group_umi_rna {
+    meta {
+        version: 'v0.1'
+        author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: group umi rna task'
+    }
+    
+    input {
+        # This function takes in input the bam file produced by the STAR
+        # aligner and group UMI reads whilst filtering duplicates.
+        
+        Boolean remove_single_umi = true
+        File bam
+        String genome_name
+        String mode = "fast"
+        String? prefix
+        String docker_image
+        Int cpus = 4
+        Int cutoff = 300
+        
+    }
+    
+    #Float input_file_size_gb = size(input[0], "G")
+    #Float mem_gb = 40.0
+    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    
+    command <<<
+        set -e
+        
+        if [[ '~{mode}' == 'regular' ]]; then
+            # Seems to get more slant and fewer UMIs, but get accurate lib size estimation. Slow.
+            umi_tools group \
+                --extract-umi-method=read_id \
+                --per-gene \
+                --gene-tag=XT \
+                --per-cell \
+                -I ~{bam} \
+                --output-bam -S ~{prefix + "."}rna.~{genome_name}.grouped.bam \
+                --group-out= ~{prefix + "."}rna.~{genome_name}.groups.tsv \
+                --skip-tags-regex=Unassigned >>./Run.log
+        else
+            # Custom UMI dedup by matching bc-umi-align position
+            samtools view -@ ~{cpus} ~{bam} | \
+                grep XT:Z: | \
+                sed 's/Unassigned_Ambiguity/discard/g' | \
+                sed 's/Unassigned_MappingQuality/discard/g' | \
+                sed 's/\_/\t/g' | \
+                awk -v OFS='\t' '{if($NF ~/discard/){$NF=$(NF-1)} print $5, $6, $2, $3, $NF}' | \
+                sed 's/XT:Z://g' > ~{prefix + "."}rna.~{genome_name}.wdup.bed
+            # remove dup reads
+            python3 $(which rm_dup_barcode_UMI_v3.py) \
+                    -i ~{prefix + "."}rna.~{genome_name}.wdup.bed \
+                    -o ~{prefix + "."}rna.~{genome_name}.groups.tsv \
+                    --m 1
+        fi
+            
+        # convert groupped UMI to bed file
+        if [[ '~{mode}' == 'regular' ]]; then
+            
+            ## 3rd column is umi, 4th column is read
+            ## note: difference between these two versions of groups.tsv
+            ## 1) umitools output keep all the barcode-UMI and don't collapse them
+            ## 2) my script already collpsed them at alignment position level
+            less ~{prefix + "."}rna.~{genome_name}.groups.tsv | \
+                sed 's/_/\t/g' | \
+                awk -v thr=~{if remove_single_umi then 1 else 0} 'FNR > 1 {if($10 > thr){if($9 != "GGGGGGGGGG"){print}}}' | \
+                awk 'NR==1{ id="N"} {if(id != $11 ) {id = $11; print $2, $6, $10}}' | \
+                awk -v OFS="\t" 'NR==1{ t1=$1;t2=$2;readsum=0; umisum=0} {if(t1==$1 && t2==$2) {readsum+=$3; umisum+=1} \
+                    else {print t1, t2, umisum, readsum; t1=$1;t2=$2;umisum=1;readsum=$3}}' | \
+                pigz --fast -p ~{cpus} > ~{prefix + "."}rna.~{genome_name}.bed.gz
+        else
+        
+            less ~{prefix + "."}rna.~{genome_name}.groups.tsv | \
+                awk -v thr=~{if remove_single_umi then 1 else 0} -v OFS='\t' '{if($3 > thr){print}}' | \
+                awk -v OFS="\t" 'NR==1{ t1=$1;t2=$2; t3=$3} {if(t1==$1 && t2==$2) {readsum+=$3} else {print t1, t2, t3, readsum; t1=$1;t2=$2;t3=$3;readsum=$3}}' | \
+                pigz --fast -p ~{cpus} > ~{prefix + "."}rna.~{genome_name}.bed.gz
+        fi
+
+        # Count unfiltered reads
+        zcat ~{prefix + "."}rna.~{genome_name}.bed.gz | \
+            awk -v OFS='\t' '{a[$1] += $4} END{for (i in a) print a[i], i}' | \
+            awk -v thr=~{cutoff} -v OFS='\t' '{if($1 >= thr) print }'> ~{prefix + "."}rna.~{genome_name}.wdup.RG.freq.bed
+
+        Rscript $(which sum_reads.R) ~{prefix + "."}rna.~{genome_name}.wdup.RG.freq.bed ~{prefix + "."}rna.~{genome_name}.unfiltered.counts.csv --save
+
+        # Count filtered reads
+        zcat ~{prefix + "."}rna.~{genome_name}.bed.gz | \
+            awk -v OFS='\t' '{a[$1] += $3} END{for (i in a) print a[i], i}' | \
+            awk -v thr=~{cutoff} -v OFS='\t' '{if($1 >= thr) print }' > ~{prefix + "."}rna.~{genome_name}.rmdup.RG.freq.bed
+
+        Rscript $(which sum_reads.R) ~{prefix + "."}rna.~{genome_name}.rmdup.RG.freq.bed ~{prefix + "."}rna.~{genome_name}.filtered.counts.csv --save
+
+        # Remove barcode combinations with less then N reads
+        sed -e 's/,/\t/g' ~{prefix + "."}rna.~{genome_name}.filtered.counts.csv | \
+            awk -v thr=~{cutoff} -v OFS=',' 'NR>=2 {if($5 >= thr) print $1,$2,$3,$4} ' > ~{prefix + "."}rna.~{genome_name}.barcodes.txt
+        grep -wFf ~{prefix + "."}rna.~{genome_name}.barcodes.txt <(zcat ~{prefix + "."}rna.~{genome_name}.bed.gz) | \
+        pigz --fast -p ~{cpus} > ~{prefix + "."}rna.~{genome_name}.cutoff.bed.gz
+        
+    >>>
+    
+    output {
+        File filtered_counts_rna = "${prefix + "."}rna.${genome_name}.filtered.counts.csv"
+        File unfiltered_counts_rna = "${prefix + "."}rna.${genome_name}.unfiltered.counts.csv"
+        File groupped_umi_rna = "${prefix + "."}rna.${genome_name}.bed.gz"
+        File groupped_umi_filtered_rna = "${prefix + "."}rna.${genome_name}.cutoff.bed.gz"
+    }
+
+    runtime {
+     #   cpu : ${cpus}
+     #   memory : '${mem_gb} GB'
+     #   disks : 'local-disk ${disk_gb} SSD'
+     #   preemptible: 0
+        maxRetries : 0
+        docker: docker_image
+    }
+    
+    parameter_meta {
+        bam: {
+                description: 'Alignment bam file',
+                help: 'Aligned reads in bam format.',
+                example: 'hg38.aligned.bam'
+            }
+        remove_single_umi: {
+                description: 'Single UMI removal flag',
+                help: 'Flag to set if you want to remove the UMI with only one read.',
+                default: false,
+                example: [true, false]
+            }
+        mode: {
+                description: 'Running mode',
+                help: 'Decide if you want ot use umi_toolsFlag to set if you want to include reads overlapping introns.',
+                default: false,
+                example: [true, false]
+            }
+        genome_name: {
+                description: 'Reference name',
+                help: 'The name genome reference used to align.',
+                example: ['hg38', 'mm10', 'hg19', 'mm9']
+            }
+        cutoff: {
+                description: 'Read number cutoff',
+                help: 'Remove barcodes combination that have less read than the set value (integer).',
+                default: 300
+            }
+        prefix: {
+                description: 'Prefix for output files',
+                help: 'Prefix that will be used to name the output files',
+                examples: 'MyExperiment'
+            }
+        cpus: {
+                description: 'Number of cpus',
+                help: 'Set the number of cpus useb by the task',
+                examples: '4'
             }
         docker_image: {
                 description: 'Docker image.',
