@@ -3,5 +3,8 @@
 	"wf_rna.prefix" : "subwf",
 	"wf_rna.idx_tar" : "STAR/mm10/mm10_chr19_star.tar.gz",
 	"wf_rna.genome_name" : "mm10",
-	"wf_rna.multimappers" : false
+	"wf_rna.multimappers" : false,
+	"wf_rna.include_multimappers" : false,
+	"wf_rna.include_introns" : false,
+	"wf_rna.gtf" : "other-files-for-testing/mm10.genes.gtf"
 }
