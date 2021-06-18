@@ -7,5 +7,6 @@
 	"wf_rna.include_multimappers" : false,
 	"wf_rna.include_introns" : false,
 	"wf_rna.gtf" : "other-files-for-testing/mm10.genes.gtf",
-	"wf_rna.cutoff" : 1
+	"wf_rna.cutoff" : 1,
+	"wf_rna.genes_annotations_bed" : "other-files-for-testing/mm10.UCSC_RefSeq.bed"
 }
