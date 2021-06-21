@@ -53,7 +53,7 @@ task preprocess {
     File R2
     File? I1
     File? I2
-    Boolean? qc = false
+    Boolean? qc
     Int cpus= 4
     String? prefix
     String rna_primers
