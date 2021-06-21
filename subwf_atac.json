@@ -1,6 +1,6 @@
 {
-	"wf_atac.read1" : "other-files-for-testing/mouse.skin.trial60.atac.R1.fastq.gz",
-	"wf_atac.read2" : "other-files-for-testing/mouse.skin.trial60.atac.R2.fastq.gz",
+	"wf_atac.read1" : "~/wdl-dev/wf_preprocess/d3dadab2-c650-4937-ae15-e87a4586bccd/call-preprocess/execution/glob-6e8cbfa7dca22a31b99510c7003b241a/shareseq-project.preprocessed.atac.R2.fq.gz",
+	"wf_atac.read2" : "~/wdl-dev/wf_preprocess/d3dadab2-c650-4937-ae15-e87a4586bccd/call-preprocess/execution/glob-f3e5eface89676a5cea5c236220c38d9/shareseq-project.preprocessed.atac.R1.fq.gz",
 	"wf_atac.prefix" : "subwf",
 	"wf_atac.chrom_sizes" : "other-files-for-testing/mm10.chrom.sizes",
 	"wf_atac.idx_tar" : "bowtie2/mm10/mm10_chr19.tar.gz",
