@@ -39,21 +39,23 @@ workflow wf_rna {
         Int cutoff = 300
         # Lib_size QC
         Boolean qc = false
-        File genes_annotations_bed
-        File? genes_annotations_bed2
+        File genes_annotation_bed
+        File? genes_annotation_bed2
     }
 
     Annotation genome1 = object{
                                 genome_name : genome_name,
                                 gene_gtf : gtf,
-                                gene_bed : gene_annotation_bed
+                                gene_bed : genes_annotation_bed
                                 }
 
     Annotation? genome2 = object{
                                 genome_name : genome_name2,
                                 gene_gtf : gtf2,
-                                gene_bed : gene_annotation_bed2
-                                }
+                                gene_bed : genes_annotation_bed2
+                                 }
+
+    Array[Annotation] annotations = select_all([genome1, genome2])
 
     call align_rna {
         input:
@@ -79,27 +81,28 @@ workflow wf_rna {
             input:
                 bam = update_rgid_rna.rna_rgid_updated_bam,
                 bai = update_rgid_rna.rna_rgid_updated_bai,
-                annotation1 = genome1,
-                annotation2 = genome2,
                 genome1_name = genome_name,
                 genome2_name = genome_name2,
                 prefix = prefix,
                 docker_image = docker
         }
+        Array[Int]? range = [1,2]
     }
 
-    Array[Pair[Array[File],Annotation]] assign_feature_inputs = select_first([split_mixed_alignments_rna.rna_splitted_output,
-                                                           [zip([update_rgid_rna.rna_rgid_updated_bam, update_rgid_rna.rna_rgid_updated_bai],genome1)]])
+    Array[Int] indexes = select_first([range,[1]])
+
+    Array[File] assign_feature_inputs = select_first([split_mixed_alignments_rna.rna_splitted_bam,
+                                                     [update_rgid_rna.rna_rgid_updated_bam]])
     
-    scatter( assign_feature_input in assign_feature_inputs ){
+    scatter( index in indexes ){
         call assign_features_rna{
             input:
                 multimapper = include_multimappers,
                 intron = include_introns,
-                bam = assign_feature_input.left[0],
-                gtf = assign_feature_input.right["gene_gtf"],
+                bam = assign_feature_inputs[index],
+                gtf = annotations[index]["gene_gtf"],
                 gene_naming = gene_naming,
-                genome_name = assign_feature_input.right["genome_name"],
+                genome_name = annotations[index]["genome_name"],
                 prefix = prefix,
                 docker_image = docker
         }
@@ -110,7 +113,7 @@ workflow wf_rna {
                 mode = mode,
                 cutoff = cutoff,
                 remove_single_umi = remove_single_umi,
-                genome_name = assign_feature_input.right["genome_name"],
+                genome_name = annotations[index]["genome_name"],
                 prefix = prefix,
                 docker_image = docker
         }
@@ -121,8 +124,8 @@ workflow wf_rna {
             input:
                 qc = qc,
                 bam = assign_features_rna.assigned_features_rna_bam,
-                genes_annotations_bed = assign_feature_input.right["gene_bed"],
-                genome_name = assign_feature_input.right["genome_name"],
+                genes_annotations_bed = annotations[index]["gene_bed"],
+                genome_name = annotations[index]["genome_name"],
                 docker_image = docker,
                 prefix = prefix,
         }
@@ -132,7 +135,7 @@ workflow wf_rna {
         File rna_aligned_raw_bam = align_rna.rna_align_bam
         File rna_aligned_raw_bai = align_rna.rna_align_bai
         File rna_align_log = align_rna.rna_align_log
-        Array[Pairs[Array[File], Annotation]] rna_rgid_updated_bam = assign_feature_inputs
+        Array[File] rna_rgid_updated_bam = assign_feature_inputs
         Array[File] rna_assigned_features_bam = assign_features_rna.assigned_features_rna_bam
         Array[File] rna_assigned_features_bai = assign_features_rna.assigned_features_rna_bai
         Array[File] rna_filtered_counts = group_umi_rna.filtered_counts_rna
@@ -348,8 +351,6 @@ task split_mixed_alignments_rna {
         # aligner run on a mixed index (e.g. mouse + human) and split
         # the reads into the two genomes
         
-        Annotation genome1_annotation
-        Annotation genome2_annotation
         File bam
         File bai
         String genome1_name
@@ -383,15 +384,12 @@ task split_mixed_alignments_rna {
         samtools view -@ ~{cpus} -h temp1.bam | sed 's/~{genome1_name}_/chr/g' | sed 's/chrMT/chrM/g'| samtools view -@ ~{cpus} -b -o ~{genome1_bam}
         samtools view -@ ~{cpus} -h temp2.bam | sed 's/~{genome2_name}_/chr/g' | sed 's/chrMT/chrM/g'| samtools view -@ ~{cpus} -b -o ~{genome2_bam}
 
-        samtools index -@ ${cpus} ~{genome1_bam}
-        samtools index -@ ${cpus} ~{genome2_bam}
+        #samtools index -@ ${cpus} ~{genome1_bam}
+        #samtools index -@ ${cpus} ~{genome2_bam}
     >>>
     
     output {
-        Array[Pair[Array[File], Annotation]] rna_splitted_output = [zip([genome1_bam, genome1_index],genome1_annotation),
-                                                                    zip([genome2_bam, genome2_index],genome2_annotation)]
-        Array[File] splitted_bam_genome1 = [genome1_bam, genome1_index]
-        Array[File] splitted_bam_genome2 = [genome2_bam, genome2_index]
+        Array[File] rna_splitted_bam = [genome1_bam, genome2_bam]
     }
 
     runtime {
