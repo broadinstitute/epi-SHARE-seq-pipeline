@@ -68,7 +68,7 @@ RUN wget https://sourceforge.net/projects/subread/files/subread-2.0.2/subread-2.
 RUN cd subread-2.0.2-source/src && make -f Makefile.Linux && mv ../bin/* /software/ && cd ../.. && rm -r subread-2.0.2-source
 
 # Install system/math python packages (python3)
-RUN pip3 install --no-cache-dir matplotlib==3.3.4 pandas==1.1.5
+RUN pip3 install --no-cache-dir matplotlib==3.3.4 pandas==1.1.5 RSeQC
 
 # Copy the external scripts inside
 COPY src/python /software
