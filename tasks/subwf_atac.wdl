@@ -53,15 +53,15 @@ workflow wf_atac {
             docker_image = docker
     }
     
-    call qc_lib_size {
-        input:
-            raw_counts = count_reads_atac.atac_unfiltered_counts,
-            filtered_counts = count_reads_atac.atac_filtered_counts,
-            cutoff = cutoff,
-            genome_name = genome_name,
-            prefix = prefix,
-            docker_image = docker
-    }
+    #call qc_lib_size {
+    #    input:
+    #        raw_counts = count_reads_atac.atac_unfiltered_counts,
+    #        filtered_counts = count_reads_atac.atac_filtered_counts,
+    #        cutoff = cutoff,
+    #        genome_name = genome_name,
+    #        prefix = prefix,
+    #        docker_image = docker
+    #}
     
     call qc_stats_atac {
         input:
@@ -86,9 +86,9 @@ workflow wf_atac {
         File atac_fragment_file_filtered = count_reads_atac.bedpe_cleaned_filtered
         File atac_counts_filtered = count_reads_atac.atac_filtered_counts
         File atac_counts_unfiltered = count_reads_atac.atac_unfiltered_counts
-        File atac_lib_size_count = qc_lib_size.lib_size_counts
-        File atac_duplicates_log = qc_lib_size.lib_size_log
-        Array[File] atac_lib_size_plots = qc_lib_size.plots
+        #File atac_lib_size_count = qc_lib_size.lib_size_counts
+        #File atac_duplicates_log = qc_lib_size.lib_size_log
+        #Array[File] atac_lib_size_plots = qc_lib_size.plots
         File atac_qc_final_stats = qc_stats_atac.final_stats
         File atac_qc_hist_plot = qc_stats_atac.final_hist_stats_pdf
         File atac_qc_hist_stats = qc_stats_atac.final_hist_stats
@@ -121,7 +121,7 @@ task align_atac {
     
     Float input_file_size_gb = size(fastq_R1, "G")
     # This is almost fixed for either mouse or human genome
-    Int mem_gb = 2
+    Int mem_gb = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
 
@@ -160,10 +160,9 @@ task align_atac {
     }
 
     runtime {
-        #cpu : '${cpus}'
-        #memory : '${mem_gb} GB'
-        #disks : 'local-disk ${disk_gb} SSD'
-        #preemptible : 0 
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         docker : docker_image
     }
     
@@ -230,7 +229,7 @@ task bam_to_bed_atac {
     }
     
     Float input_file_size_gb = size(bam, "G")
-    Int mem_gb = 2
+    Int mem_gb = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     
@@ -289,10 +288,9 @@ task bam_to_bed_atac {
     }
 
     runtime {
-      #  cpu : '${cpus}'
-      #  memory : '${mem_gb} GB'
-      #  disks : 'local-disk ${disk_gb} SSD'
-      #  preemptible: 0 
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries : 0  
         docker: docker_image
     }
@@ -349,8 +347,9 @@ task count_reads_atac {
     
     
     Float input_file_size_gb = size(bedpe, "G")
-    Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Float mem_gb = 8.0
+    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    Int disk_gb = 50
+    Int mem_gb = 16
     
     String read_groups_freq = 'read_groups_freq.bed'
     String unfiltered_counts = '${prefix + '.'}atac.${genome_name}.unfiltered.counts.csv'
@@ -384,10 +383,9 @@ task count_reads_atac {
     }
 
     runtime {
-      #  cpu : '${cpus}'
-      #  memory : '${mem_gb} GB'
-      #  disks : 'local-disk ${disk_gb} SSD'
-      #  preemptible: 0 
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries : 0  
         docker: docker_image
     }
@@ -438,9 +436,10 @@ task qc_lib_size {
         
     }
     
-    Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    Int disk_gb = 50
     Float input_file_size_gb = size(filtered_counts, "G")
-    Float mem_gb = 8.0
+    Int mem_gb = 16
     
 
     command {
@@ -452,7 +451,7 @@ task qc_lib_size {
         # both
         #Rscript $(which lib_size_sc_V5_species_mixing.R)./ '${prefix + '.'}atac.${genome_name}' ${cutoff} atac --save
         # hg38/mm10
-        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} ATAC --save
+        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} atac --save
 
     }
     
@@ -463,10 +462,9 @@ task qc_lib_size {
     }
 
     runtime {
-      #  cpu : '${cpus}'
-      #  memory : '${mem_gb} GB'
-      #  disks : 'local-disk ${disk_gb} SSD'
-      #  preemptible: 0 
+        #cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries : 0  
         docker: docker_image
     }
@@ -523,14 +521,16 @@ task qc_stats_atac {
         
     }
     
-    Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    Int disk_gb = 50
     Float input_file_size_gb = size(raw_bam, "G")
-    Float mem_gb = 8.0
+    Int mem_gb = 16
     
-    String stats_log= '${prefix + '.'}atac.stats.${genome_name}.log.txt'
-    String hist_log= '${prefix + '.'}atac.hist.${genome_name}.log.txt'
-    String hist_log_pdf= '${prefix + '.'}atac.hist.${genome_name}.log.pdf'
-    String tss_pileup= '${prefix + '.'}atac.tss.pileup.${genome_name}.log.pdf'
+    String stats_log = '${prefix + '.'}atac.stats.${genome_name}.log.txt'
+    String hist_log = '${prefix + '.'}atac.hist.${genome_name}.log.txt'
+    String hist_log_pdf = '${prefix + '.'}atac.hist.${genome_name}.log.pdf'
+    String tss_pileup_prefix = '${prefix + '.'}atac.tss.pileup.${genome_name}.log'
+    String tss_pileup_out = '${prefix + '.'}atac.tss.pileup.${genome_name}.log.png'
     
 
     command {
@@ -565,7 +565,7 @@ task qc_stats_atac {
             -p ends \
             -v \
             -u \
-            -o ${tss_pileup}
+            -o ${tss_pileup_prefix}
 
     }
     
@@ -573,14 +573,13 @@ task qc_stats_atac {
         File final_stats = stats_log
         File final_hist_stats_pdf = hist_log_pdf
         File final_hist_stats = stats_log
-        File tss_pileup = tss_pileup
+        File tss_pileup = tss_pileup_out
     }
 
     runtime {
-      #  cpu : '${cpus}'
-      #  memory : '${mem_gb} GB'
-      #  disks : 'local-disk ${disk_gb} SSD'
-      #  preemptible: 0 
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries : 0  
         docker: docker_image
     }
@@ -617,6 +616,4 @@ task qc_stats_atac {
                 example: ['put link to gcr or dockerhub']
             }
     }
-
-
 }

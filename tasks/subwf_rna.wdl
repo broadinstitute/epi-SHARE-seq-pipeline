@@ -86,10 +86,10 @@ workflow wf_rna {
                 prefix = prefix,
                 docker_image = docker
         }
-        Array[Int]? range = [1,2]
+        Array[Int]? range = [0,1]
     }
 
-    Array[Int] indexes = select_first([range,[1]])
+    Array[Int] indexes = select_first([range,[0]])
 
     Array[File] assign_feature_inputs = select_first([split_mixed_alignments_rna.rna_splitted_bam,
                                                      [update_rgid_rna.rna_rgid_updated_bam]])
@@ -165,11 +165,12 @@ task align_rna {
         String genome_name
         String? prefix
         String docker_image = "polumechanos/share-seq"
-        Int cpus = 4
+        Int cpus = 16
     }
     #Float input_file_size_gb = size(input[0], "G")
-    Int samtools_mem_gb = 1
-    #Float mem_gb = 40.0
+    Int samtools_mem_gb = 2
+    Int mem_gb = 40
+    Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     command {
@@ -211,10 +212,9 @@ task align_rna {
     }
 
     runtime {
-#        cpu : ${cpus}
-#        memory : '${mem_gb} GB'
-#        disks : 'local-disk ${disk_gb} SSD'
-#        preemptible: 0
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries: 0
         docker: docker_image
     }
@@ -271,7 +271,8 @@ task update_rgid_rna {
     }
     
     #Float input_file_size_gb = size(input[0], "G")
-    #Float mem_gb = 40.0
+    Int mem_gb = 8
+    Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     String updated_bam = "${prefix + "."}${genome_name}.rigid.reheader.${if multimapper then "multi" else "unique"}.st.bam"
@@ -283,9 +284,11 @@ task update_rgid_rna {
         # If keepig multimappers, keep primary aligned reads only,
         # otherwise filter by quality score (-q 30)
         
-        $(which samtools) view -h -@ ~{cpus} ~{bam} | \
+        $(which samtools) view -H ~{bam} | sed 's/chrMT/chrM/g' > header.sam
+        
+        cat header.sam <($(which samtools) view -@ ~{cpus} ~{bam} | \
             sed 's/chrMT/chrM/g' | \
-            awk -v OFS='\t' '{$1=substr($1,1,length($1)-34)""substr($1,length($1)-22,23)""substr($1,length($1)-34,11); print $0}' | \
+            awk -v OFS='\t' '{$1=substr($1,1,length($1)-34)""substr($1,length($1)-22,23)""substr($1,length($1)-34,11); print $0}') | \
             $(which samtools) view -@ ~{cpus} -bS ~{if multimapper then "-F 256" else "-q 30"} > ~{updated_bam}
         $(which samtools) index -@ ~{cpus} ~{updated_bam}
     >>>
@@ -296,10 +299,9 @@ task update_rgid_rna {
     }
 
     runtime {
-        #cpu : ${cpus}
-        #memory : '${mem_gb} GB'
-        #disks : 'local-disk ${disk_gb} SSD'
-        #preemptible: 0
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries: 0
         docker: docker_image
     }
@@ -362,7 +364,8 @@ task split_mixed_alignments_rna {
     }
     
     #Float input_file_size_gb = size(bam, "G")
-    #Float mem_gb = 40.0
+    Int mem_gb = 8
+    Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     
     String genome1_bam= "${prefix + "."}rna.mixed.${genome1_name}.rigid.reheader.unique.st.bam"
@@ -376,13 +379,13 @@ task split_mixed_alignments_rna {
         # Split reads aligned onto a mixed species index into two files
         # one for ech of the indexes
         
-        chrs1=`samtools view -H ~{bam}| grep ~{genome1_name} | cut -f2 | sed 's/SN://g' | awk '{if(length($0)<8)print}'`
-        chrs2=`samtools view -H ~{bam}| grep ~{genome2_name} | cut -f2 | sed 's/SN://g' | awk '{if(length($0)<8)print}'`
+        chrs1=`samtools view -H ~{bam}| grep ~{genome1_name} | cut -f2 | grep chr | sed 's/SN://g' | awk '{if(length($0)<12)print}'`
+        chrs2=`samtools view -H ~{bam}| grep ~{genome2_name} | cut -f2 | grep chr | sed 's/SN://g' | awk '{if(length($0)<12)print}'`
         
         samtools view -@ ~{cpus} -b ~{bam} -o temp1.bam `echo ${chrs1[@]}`
         samtools view -@ ~{cpus} -b ~{bam} -o temp2.bam `echo ${chrs2[@]}`
-        samtools view -@ ~{cpus} -h temp1.bam | sed 's/~{genome1_name}_/chr/g' | sed 's/chrMT/chrM/g'| samtools view -@ ~{cpus} -b -o ~{genome1_bam}
-        samtools view -@ ~{cpus} -h temp2.bam | sed 's/~{genome2_name}_/chr/g' | sed 's/chrMT/chrM/g'| samtools view -@ ~{cpus} -b -o ~{genome2_bam}
+        samtools view -@ ~{cpus} -h temp1.bam | sed 's/~{genome1_name}_//g' | sed 's/chrMT/chrM/g'| samtools view -@ ~{cpus} -b -o ~{genome1_bam}
+        samtools view -@ ~{cpus} -h temp2.bam | sed 's/~{genome2_name}_//g' | sed 's/chrMT/chrM/g'| samtools view -@ ~{cpus} -b -o ~{genome2_bam}
 
         #samtools index -@ ${cpus} ~{genome1_bam}
         #samtools index -@ ${cpus} ~{genome2_bam}
@@ -393,10 +396,9 @@ task split_mixed_alignments_rna {
     }
 
     runtime {
-        #cpu : ${cpus}
-        #memory : '${mem_gb} GB'
-        #disks : 'local-disk ${disk_gb} SSD'
-        #preemptible : 0
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries : 0
         docker: docker_image
     }
@@ -459,7 +461,8 @@ task assign_features_rna {
     }
     
     #Float input_file_size_gb = size(input[0], "G")
-    #Float mem_gb = 40.0
+    Int mem_gb = 16
+    Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     String out_bam = "${prefix + "."}rna.featureCounts.${if multimapper then "multi." else "unique."}${if intron then "intron." else "exon."}${genome_name}.wdup.bam"
     String out_bai = "${prefix + "."}rna.featureCounts.${if multimapper then "multi." else "unique."}${if intron then "intron." else "exon."}${genome_name}.wdup.bam.bai"
@@ -510,10 +513,9 @@ task assign_features_rna {
     }
 
     runtime {
-        #cpu : ${cpus}
-        #memory : '${mem_gb} GB'
-        #disks : 'local-disk ${disk_gb} SSD'
-        #preemptible: 0
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries : 0
         docker: docker_image
     }
@@ -593,7 +595,8 @@ task group_umi_rna {
     }
     
     #Float input_file_size_gb = size(input[0], "G")
-    #Float mem_gb = 40.0
+    Int mem_gb = 16
+    Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     
     command <<<
@@ -678,10 +681,9 @@ task group_umi_rna {
     }
 
     runtime {
-     #   cpu : ${cpus}
-     #   memory : '${mem_gb} GB'
-     #   disks : 'local-disk ${disk_gb} SSD'
-     #   preemptible: 0
+        cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries : 0
         docker: docker_image
     }
@@ -751,13 +753,21 @@ task qc_libsize_rna {
     }
 
     #Float input_file_size_gb = size(input[0], "G")
-    #Float mem_gb = 40.0
+    Int mem_gb = 8
+    Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     
     command {
         set -e
         # Calculate gene body coverage and reads distribution
-        INPUT=${bam}
+        mv ${bam} in.bam
+        INPUT=in.bam
+        
+        mv ${genes_annotations_bed} gene.bed.gz
+        
+        gunzip gene.bed.gz
+        
+        samtools index in.bam
 
         if [[ '${qc}' == 'true' ]]; then
             $(which samtools) view -s 0.01 -o temp.1pct.bam ${bam}
@@ -766,7 +776,7 @@ task qc_libsize_rna {
         
         ## TODO: Where is this python script?
         # Calculate read distribution
-        # python3 $(which read_distribution.py) -i $INPUT -r ${genes_annotations_bed} > ${prefix + "."}rna.${genome_name}.reads_distribution.txt 2>>./Run.log
+        python3 $(which read_distribution.py) -i $INPUT -r gene.bed > ${prefix + "."}rna.${genome_name}.reads_distribution.txt 2>>./Run.log
         
         # The two files created here are necessary for the
         # Read_distribution.R script.
@@ -785,10 +795,9 @@ task qc_libsize_rna {
     }
 
     runtime {
-     #   cpu : ${cpus}
-     #   memory : '${mem_gb} GB'
-     #   disks : 'local-disk ${disk_gb} SSD'
-     #   preemptible: 0
+     	#cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
         maxRetries : 0
         docker: docker_image
     }
