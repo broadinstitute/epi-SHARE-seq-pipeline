@@ -27,7 +27,7 @@ WORKDIR /software
 ENV PATH="/software:${PATH}"
 
 # Install system/math python packages (python3)
-RUN pip3 install --no-cache-dir common python-Levenshtein==0.12.2 biopython==1.79
+RUN pip3 install --no-cache-dir common python-Levenshtein==0.12.2 biopython==1.79 pyyaml
 
 # Install packages for python2 scripts
 RUN pip2 install --no-cache-dir numpy matplotlib pysam

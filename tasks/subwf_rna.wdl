@@ -187,7 +187,9 @@ task align_rna {
             --readFilesIn ${fastq_R1}  \
             --outFileNamePrefix out/${prefix + "."}rna.${genome_name}. \
             --outFilterMultimapNmax 20 \
-            --outFilterMismatchNoverLmax 0.06 \
+            --outFilterScoreMinOverLread 0.3 \
+            --outFilterMatchNminOverLread 0.3 \
+            --outSAMattributes NH HI AS nM MD \
             --limitOutSJcollapsed 2000000 \
             --outSAMtype BAM Unsorted \
             --limitIObufferSize 400000000 \
@@ -586,7 +588,7 @@ task group_umi_rna {
         Boolean remove_single_umi = true
         File bam
         String genome_name
-        String mode = "fast"
+        String mode = "regular"
         String? prefix
         String docker_image
         Int cpus = 4
@@ -597,6 +599,7 @@ task group_umi_rna {
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = 16
     Int disk_gb = 50
+    Int mem_sort = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     
     command <<<
@@ -646,9 +649,11 @@ task group_umi_rna {
         else
         
             less ~{prefix + "."}rna.~{genome_name}.groups.tsv | \
+                sort --parallel=~{cpus} -S ~{mem_sort}G -k1,1 -k2,2 | \
                 awk -v thr=~{if remove_single_umi then 1 else 0} -v OFS='\t' '{if($3 > thr){print}}' | \
-                awk -v OFS="\t" 'NR==1{ t1=$1;t2=$2; t3=$3} {if(t1==$1 && t2==$2) {readsum+=$3} else {print t1, t2, t3, readsum; t1=$1;t2=$2;t3=$3;readsum=$3}}' | \
+                awk -v OFS="\t" 'NR==1 { t1=$1;t2=$2;readsum=0; umisum=0} {if(t1==$1 && t2==$2) {readsum+=$3; umisum+=1} else {print t1, t2, umisum, readsum; t1=$1;t2=$2;umisum=1;readsum=$3}}' | \
                 pigz --fast -p ~{cpus} > ~{prefix + "."}rna.~{genome_name}.bed.gz
+                
         fi
 
         # Count unfiltered reads
