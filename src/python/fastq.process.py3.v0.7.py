@@ -687,6 +687,8 @@ for barcode, name in P5fwdstr.items():
     for bc in barcodes:
         p5set[bc] = name
 
+file_names = open("paht_to_files.txt","w")
+
 files_r1 = dict()
 files_r2 = dict()
 for proj in project.values():
@@ -694,7 +696,11 @@ for proj in project.values():
     f2 = io.BufferedWriter(open(("out/" + proj + ".R2.fq"), 'ab'))
     files_r1[proj] = f1
     files_r2[proj] = f2
+    file_names.write(f"out/" + proj + ".R1.fq\n")
+    file_names.write(f"out/" + proj + ".R2.fq\n")
 #print(files_r1)
+file_names.close()
+
 
 start = time.process_time()        
 while 1:
