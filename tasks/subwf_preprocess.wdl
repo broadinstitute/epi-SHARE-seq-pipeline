@@ -103,7 +103,8 @@ task preprocess {
   }
     
   output {
-    Array[File] read_paths = glob('out/*.fq.gz')
+    #Array[File] read_paths = glob('out/*.fq.gz')
+    Array[File] read_paths = read_lines('path_to_files.txt')
     File discarded_fastq_R1 = glob('discard/*R1.fq.gz')[0]
     File discarded_fastq_R2 = glob('discard/*R2.fq.gz')[0]
   }
