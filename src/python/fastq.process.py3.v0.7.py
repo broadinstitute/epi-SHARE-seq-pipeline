@@ -18,6 +18,7 @@ import gzip
 import string
 import Levenshtein
 import json
+import xopen
 import yaml
 from Bio import SeqIO
 from Bio import AlignIO
@@ -576,15 +577,15 @@ p2_file = p2_in.split('/')[-1]
 #check for file type and open input file
 append = p1_in.split('.')[-1]
 if append == "gz":
-    p1_rds = io.BufferedReader(gzip.open(p1_in,'rb'))
-    p2_rds = io.BufferedReader(gzip.open(p2_in,'rb'))
+    p1_rds = xopen.xopen(p1_in, mode='rb')
+    p2_rds = xopen.xopen(p2_in, mode='rb')
     # set up files for undetermined reads
-    dis1 = io.BufferedWriter(open("discard/discard.R1.fq", 'wb'))
-    dis2 = io.BufferedWriter(open("discard/discard.R2.fq", 'wb'))
+    dis1 = xopen.xopen('discard/discard.R1.fq.gz', mode='wb')
+    dis2 = xopen.xopen('discard/discard.R2.fq.gz', mode='wb')
     # read in optional index files
     if i1_in != "NA":
-        i1_rds = io.BufferedReader(gzip.open(i1_in,'rb'))
-        i2_rds = io.BufferedReader(gzip.open(i2_in,'rb'))
+        i1_rds = xopen.xopen(i1_in, mode='rb')
+        i2_rds = xopen.xopen(i2_in, mode='rb')
 else:
     sys.exit("ERROR! The input file2 must be a .fastq.gz")
 
@@ -612,7 +613,7 @@ else:
         
 
 p1_rds.close()
-p1_rds = io.BufferedReader(gzip.open(p1_in,'rb'))
+p1_rds = xopen.xopen(p1_in, mode='rb')
 
 # load yaml 
 inFile = open(yaml_in, 'r')
@@ -694,12 +695,12 @@ file_name_arr2 = []
 files_r1 = dict()
 files_r2 = dict()
 for proj in project.values():
-    f1 = io.BufferedWriter(open(("out/" + proj + ".R1.fq"), 'ab'))
-    f2 = io.BufferedWriter(open(("out/" + proj + ".R2.fq"), 'ab'))
+    f1 = xopen.xopen("out/" + proj + ".R1.fq.gz", mode='wb')
+    f2 = xopen.xopen("out/" + proj + ".R2.fq.gz", mode='wb')
     files_r1[proj] = f1
     files_r2[proj] = f2
-    file_name_arr1.append("out/" + proj + ".R1.fq")
-    file_name_arr2.append("out/" + proj + ".R2.fq")
+    file_name_arr1.append("out/" + proj + ".R1.fq.gz")
+    file_name_arr2.append("out/" + proj + ".R2.fq.gz")
 
 for file1,file2 in set(zip(file_name_arr1,file_name_arr2)):
     file_names.write(f"{file1}\n")

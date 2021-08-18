@@ -4,8 +4,8 @@
 ############################################################
 
 # Set the base image to Ubuntu 18.04.3
-#FROM ubuntu:focal
-FROM ubuntu@sha256:d1d454df0f579c6be4d8161d227462d69e163a8ff9d20a847533989cf0c94d90
+FROM ubuntu:bionic
+#FROM ubuntu@sha256:d1d454df0f579c6be4d8161d227462d69e163a8ff9d20a847533989cf0c94d90
 
 MAINTAINER Eugenio Mattei
 
@@ -21,16 +21,18 @@ RUN apt-get update && apt-get install -y \
     r-base pigz \ 
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y \
+    build-essential make gcc yasm libisal-dev \ 
+    && rm -rf /var/lib/apt/lists/*
+
 # Make directory for all softwares
 RUN mkdir /software
 WORKDIR /software
 ENV PATH="/software:${PATH}"
 
 # Install system/math python packages (python3)
-RUN pip3 install --no-cache-dir common python-Levenshtein==0.12.2 biopython==1.79 pyyaml
-
-# Install system/math python packages (python3)
-RUN pip3 install --no-cache-dir matplotlib==3.3.4 pandas==1.1.5 RSeQC
+RUN pip3 install --no-cache-dir common python-Levenshtein==0.12.2 biopython==1.79 pyyaml matplotlib==3.3.4 pandas==1.1.5 RSeQC
+RUN pip3 install --no-cache-dir isal xopen
 
 # Copy the external scripts inside
 COPY src/python /software
