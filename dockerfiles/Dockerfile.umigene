@@ -1,0 +1,43 @@
+############################################################
+# Dockerfile for BROAD GRO share-seq-pipeline
+# Based on Ubuntu 18.04.3
+############################################################
+
+# Set the base image to Ubuntu 18.04.3
+FROM r-base:4.0.5
+
+
+MAINTAINER Eugenio Mattei
+
+# To prevent time zone prompt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install softwares from apt repo
+RUN apt-get update && apt-get install -y \
+    libncurses5-dev libcurl4-openssl-dev libfreetype6-dev zlib1g-dev \
+    git wget unzip ghostscript pkg-config libboost-dev \
+    apt-transport-https libxml2-dev \
+    r-base \ 
+    && rm -rf /var/lib/apt/lists/*
+
+# Make directory for all softwares
+RUN mkdir /software
+WORKDIR /software
+ENV PATH="/software:${PATH}"
+
+# Install R packages including spp
+RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.r-project.org'; options(repos = r);" > ~/.Rprofile && \
+    Rscript -e "install.packages('Matrix')" && \
+    Rscript -e "install.packages('matrixStats')" && \
+    Rscript -e "install.packages('reshape2')" && \
+    Rscript -e "install.packages('data.table')" && \
+    Rscript -e "install.packages('R.utils')" && \
+    Rscript -e "install.packages('BiocManager')" && \
+    Rscript -e "BiocManager::install('SummarizedExperiment')" && \
+    Rscript -e "BiocManager::install('rhdf5')" && \
+    Rscript -e "BiocManager::install('DropletUtils')" && \
+    Rscript -e "install.packages('tidyr')"
+
+# Copy the external scripts inside
+COPY src/python /software
+COPY src/R /software

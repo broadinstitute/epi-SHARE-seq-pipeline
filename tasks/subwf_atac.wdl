@@ -53,15 +53,15 @@ workflow wf_atac {
             docker_image = docker
     }
     
-    #call qc_lib_size {
-    #    input:
-    #        raw_counts = count_reads_atac.atac_unfiltered_counts,
-    #        filtered_counts = count_reads_atac.atac_filtered_counts,
-    #        cutoff = cutoff,
-    #        genome_name = genome_name,
-    #        prefix = prefix,
-    #        docker_image = docker
-    #}
+    call qc_lib_size {
+        input:
+            raw_counts = count_reads_atac.atac_unfiltered_counts,
+            filtered_counts = count_reads_atac.atac_filtered_counts,
+            cutoff = cutoff,
+            genome_name = genome_name,
+            prefix = prefix,
+            docker_image = docker
+    }
     
     call qc_stats_atac {
         input:
@@ -86,13 +86,14 @@ workflow wf_atac {
         File atac_fragment_file_filtered = count_reads_atac.bedpe_cleaned_filtered
         File atac_counts_filtered = count_reads_atac.atac_filtered_counts
         File atac_counts_unfiltered = count_reads_atac.atac_unfiltered_counts
-        #File atac_lib_size_count = qc_lib_size.lib_size_counts
-        #File atac_duplicates_log = qc_lib_size.lib_size_log
-        #Array[File] atac_lib_size_plots = qc_lib_size.plots
+        File atac_lib_size_count = qc_lib_size.lib_size_counts
+        File atac_duplicates_log = qc_lib_size.lib_size_log
+        Array[File] atac_lib_size_plots = qc_lib_size.plots
         File atac_qc_final_stats = qc_stats_atac.final_stats
         File atac_qc_hist_plot = qc_stats_atac.final_hist_stats_pdf
         File atac_qc_hist_stats = qc_stats_atac.final_hist_stats
         File atac_qc_tss_pileup = qc_stats_atac.tss_pileup
+        File atac_barcodes = count_reads_atac.atac_barcodes
     }
 }
 
@@ -137,13 +138,13 @@ task align_atac {
             --rg-id ${prefix + "."}atac \
             -x $genome_prefix \
             -1 ${fastq_R1} \
-            -2 ${fastq_R2} |\
+            -2 ${fastq_R2} 2> atac.bowtie2.align.${genome_name}.log |\
             samtools view \
                 -bS \
                 -@ ${cpus} \
                 - \
-                -o ${prefix + "."}atac.align.${genome_name}.bam \
-            2> atac.bowtie2.align.${genome_name}.log
+                -o ${prefix + "."}atac.align.${genome_name}.bam
+            
         
         samtools sort \
             -@ ${cpus} \
@@ -337,7 +338,7 @@ task count_reads_atac {
         # This task takes in input the filtered and cleaned align reads in bedpe format and counts the reads per barcode.
         
         Int cpus = 4
-        Int cutoff = 300
+        Int cutoff = 100
         File bedpe
         String genome_name
         String? prefix
@@ -361,17 +362,17 @@ task count_reads_atac {
         set -e
         
         # Count unfiltered reads
-        zcat ~{bedpe} | awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}' | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= $CUT ) print }'> ~{read_groups_freq}
+        zcat ~{bedpe} | awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}' | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT ) print }'> ~{read_groups_freq}
         
         Rscript $(which sum_reads.R) ~{read_groups_freq} ~{unfiltered_counts} --save
     
         # Count filtered reads
-        zcat ~{bedpe} | cut -f4 | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= $CUT) print }' > ~{read_groups_freq_rmdup}
+        zcat ~{bedpe} | cut -f4 | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
         
         Rscript $(which sum_reads.R) ~{read_groups_freq_rmdup} ~{filtered_counts} --save
         
         # Remove barcode with low counts from the fragment file for ATAC
-        sed -e 's/,/\t/g' ~{filtered_counts} | awk -v CUT=~{cutoff} -v OFS=',' 'NR>=2 {if($5 >= $CUT) print $1,$2,$3,$4} ' > barcodes.txt
+        sed -e 's/,/\t/g' ~{filtered_counts} | awk -v CUT=~{cutoff} -v OFS=',' 'NR>=2 {if($5 >= CUT) print $1,$2,$3,$4} ' > barcodes.txt
         
         grep -wFf barcodes.txt <(zcat ~{bedpe}) | pigz --fast -p ~{cpus} > ~{filtered_bedpe}        
     >>>
@@ -380,6 +381,7 @@ task count_reads_atac {
         File bedpe_cleaned_filtered = filtered_bedpe
         File atac_filtered_counts = filtered_counts
         File atac_unfiltered_counts = unfiltered_counts
+        File atac_barcodes = "barcodes.txt"
     }
 
     runtime {
@@ -451,7 +453,7 @@ task qc_lib_size {
         # both
         #Rscript $(which lib_size_sc_V5_species_mixing.R)./ '${prefix + '.'}atac.${genome_name}' ${cutoff} atac --save
         # hg38/mm10
-        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} atac --save
+        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} ATAC --save
 
     }
     

@@ -31,7 +31,7 @@ workflow wf_preprocess {
   call gather_outputs{
     input:
       yaml = yaml,
-      read_paths = preprocess.read_paths,
+      read_paths = preprocess.demux_fastqs,
       new_table_name = output_table_name
   }
 
@@ -43,7 +43,6 @@ workflow wf_preprocess {
   }
 
   output {
-    File json = entities_batch_upsert.batch_upsert_json
     File response = entities_batch_upsert.upsert_entities_response
     File discarded_R1 = preprocess.discarded_fastq_R1
     File discarded_R2 = preprocess.discarded_fastq_R2
@@ -74,12 +73,12 @@ task preprocess {
     Boolean? qc
     Int cpus= 4
     String? prefix
-    String docker_image = "polumechanos/share-seq"
+    String docker_image = "polumechanos/share-seq-undetermined"
   }
   
   Float input_file_size_gb = size(R1, "G")
   Float mem_gb = 8.0
-  Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+  Int disk_gb = round(20.0 + 6 * input_file_size_gb)
 
   command {
     set -e
@@ -95,16 +94,11 @@ task preprocess {
       ${if defined(qc) then "--qc" else ""} \
       -y ${yaml} \
       --out ${default="shareseq-project." prefix+"."}preprocessed
-        
-    # Compressing the fastqs
-    pigz --fast -p ${cpus} out/*.fq
-    pigz --fast -p ${cpus} discard/*.fq
     
   }
     
   output {
-    #Array[File] read_paths = glob('out/*.fq.gz')
-    Array[File] read_paths = read_lines('path_to_files.txt')
+    Array[File] demux_fastqs = glob('out/*.fq.gz')
     File discarded_fastq_R1 = glob('discard/*R1.fq.gz')[0]
     File discarded_fastq_R2 = glob('discard/*R2.fq.gz')[0]
   }
@@ -209,7 +203,6 @@ task entities_batch_upsert {
   }
 
   output {
-    File   batch_upsert_json = "batch_upsert_request.json"
     String upsert_entities_response = stdout()
   }
 }

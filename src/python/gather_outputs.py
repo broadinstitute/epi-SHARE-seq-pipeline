@@ -5,6 +5,7 @@ import os
 import sys
 import yaml
 from optparse import OptionParser
+from pathlib import Path
 #### OPTIONS ####
 # define options
 opts = OptionParser()
@@ -23,7 +24,6 @@ table_name = options.n
 
 paths_arr = paths_in.strip().split(',')
 
-idx = 0
 terra_table_name = f"entity:{table_name}_Id"
 fieldnames = [terra_table_name, 'Names', 'Type', 'Primer', 'fastq_R1', 'fastq_R2']
 
@@ -49,11 +49,13 @@ with open('results_load_table.tsv', 'w', newline='') as f_output:
                         row[get] = data[entry][get]
                 except KeyError as e:
                     pass
-            row['fastq_R1'] = paths_arr[idx] 
-            row['fastq_R2'] = paths_arr[idx+1]
+            file_name = f"{data[entry]['Name']}.R1.fq.gz"
+            row['fastq_R1'] = list(filter(lambda x: Path(x).name == file_name , paths_arr))[0]
+            file_name = f"{data[entry]['Name']}.R2.fq.gz"
+            row['fastq_R2'] = list(filter(lambda x: Path(x).name == file_name , paths_arr))[0]
             f_output.write("\t".join(row.values()))
             f_output.write("\n")
             #csv_output.writerow(row)
-            idx += 2
+
 
 

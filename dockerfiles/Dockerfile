@@ -38,6 +38,11 @@ RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.r-project.org'; opt
     Rscript -e "install.packages('matrixStats')" && \
     Rscript -e "install.packages('reshape2')" && \
     Rscript -e "install.packages('data.table')" && \
+    Rscript -e "install.packages('R.utils')" && \
+    Rscript -e "install.packages('BiocManager')" && \
+    Rscript -e "BiocManager::install('SummarizedExperiment')" && \
+    Rscript -e "BiocManager::install('rhdf5')" && \
+    Rscript -e "BiocManager::install('DropletUtils')" && \
     Rscript -e "install.packages('tidyr')"
 
 # Install Picard 2.20.7

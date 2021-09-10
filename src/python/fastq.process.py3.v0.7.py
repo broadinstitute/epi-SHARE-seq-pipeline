@@ -688,10 +688,6 @@ for barcode, name in P5fwdstr.items():
     for bc in barcodes:
         p5set[bc] = name
 
-file_names = open("path_to_files.txt","w")
-file_name_arr1 = []
-file_name_arr2 = []
-
 files_r1 = dict()
 files_r2 = dict()
 for proj in project.values():
@@ -699,14 +695,6 @@ for proj in project.values():
     f2 = xopen.xopen("out/" + proj + ".R2.fq.gz", mode='wb')
     files_r1[proj] = f1
     files_r2[proj] = f2
-    file_name_arr1.append("out/" + proj + ".R1.fq.gz")
-    file_name_arr2.append("out/" + proj + ".R2.fq.gz")
-
-for file1,file2 in set(zip(file_name_arr1,file_name_arr2)):
-    file_names.write(f"{file1}\n")
-    file_names.write(f"{file2}\n")
-#print(files_r1)
-file_names.close()
 
 
 start = time.process_time()        

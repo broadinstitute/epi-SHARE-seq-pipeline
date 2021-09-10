@@ -2,8 +2,6 @@
 # plot umi/cell or gene/cell
 
 args <- commandArgs(); # print(args)
-dir <- args[6]
-Name <- args[7]
 
 suppressMessages(library(matrixStats))
 suppressMessages(library(reshape2))
@@ -12,11 +10,12 @@ suppressMessages(library(dplyr))
 suppressMessages(library(data.table))
 
 # load and convert to count matrix
-outFile1 <- paste(Name, ".UMIcounts.csv.gz", sep="")
-inFile1 <- paste(Name, ".cutoff.bed.gz", sep="")
+outFile1 <- "out.UMIcounts.csv.gz"
+#cutoff.bed.gz
+inFile1 <- args[6]
 
 print("Loading linear gene table...")
-linear <- fread(paste(dir, inFile1, sep="/"), header = F, sep="\t")
+linear <- fread(inFile1, header = F, sep="\t")
 print("Finished loading file")
 
 # Df2 <- acast(linear[1:10000, ], V1~V2, value.var="V3", fill=0)
@@ -52,7 +51,7 @@ if (length(cells) > step){
 }
 
 # print(paste("Output to ", outFile1, sep=""))
-# write.table(Df2, gzfile(paste(dir, outFile1, sep="/")), sep = "\t", col.names=T, row.names=T, quote=F)
+# write.table(as.matrix(Df2), gzfile(outFile1), sep = "\t", col.names=T, row.names=T, quote=F)
 
 ## make h5
 suppressPackageStartupMessages(library("DropletUtils"))
@@ -60,11 +59,11 @@ suppressPackageStartupMessages(library("rhdf5"))
 suppressPackageStartupMessages(library("SummarizedExperiment"))
 suppressPackageStartupMessages(library("Matrix"))
 rna.count <- Df2
-print(paste("Writing to ", dir, "/", Name, ".gene.bc.matrices.h5", sep=""))
+print(paste("Writing to ", "out.gene.bc.matrices.h5", sep=""))
 
 
 write10xCounts(
-  path = paste(dir, "/", Name, ".gene.bc.matrices.h5", sep=""),
+  path = "out.gene.bc.matrices.h5",
   x = rna.count,
   barcodes = colnames(rna.count),
   gene.id = rownames(rna.count),
@@ -72,7 +71,7 @@ write10xCounts(
   overwrite = FALSE
 )
 
-print(paste("Finished making h5 file for ", Name, sep=""))
+print("Finished making h5 file for sample")
 
 ## make plots      
 if (ncol(Df2) <= 50000){
@@ -92,8 +91,8 @@ if (ncol(Df2) <= 50000){
    Df3 <- as.data.frame(sort(geneSum$Genes, decreasing = T))
    Df3$Count <- c(1: nrow(Df3)); colnames(Df3) <- c("Gene", "Count")
 
-   file3 <- paste(Name,'.detected.genes.pdf', sep="")
-   pdf(paste(dir,file3, sep="/"))
+   file3 <- 'out.detected.genes.pdf'
+   pdf(file3)
 plot(Df3$Count,log10(Df3$Gene), xlab="Barcode rank", ylab = "log10 (Genes)", main = "Detected Genes per Cell", col="darkblue", pch=16)
 garbage <- dev.off()
 
@@ -114,8 +113,8 @@ Df <- cbind(geneSum$Genes, umiSum[match(rownames(geneSum), rownames(umiSum)), ])
 # head(Df)
 Df <- as.data.frame(Df)
 
-file7 <- paste(Name,'.UMIvsGenes.pdf', sep="")
-pdf(paste(dir,file7, sep="/"))
+file7 <- 'out.UMIvsGenes.pdf'
+pdf(file7)
 plot(Df$UMIs,Df$Genes, xlab="UMIs", ylab = "Detected Genes", main = "Detected Genes per Cell", col="darkblue", pch=16)
 legend("topleft", c(paste("Number of Cells that detected > 0 genes:       ",sum(Df$Genes > 0),sep = ""), 
 paste("Number of Cells that detected > 10 genes:     ",sum(Df$Genes > 10), sep = ""),
