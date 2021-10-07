@@ -18,50 +18,40 @@ workflow wf_rna {
 
         # Align
         File read1
-        File idx_tar
+        File mixed_idx_tar
         String prefix = "shareseq-project"
-        String genome_name
+        String genome_name_mixed
         Int? cpus = 4
         String docker = "polumechanos/share-seq"
+        
         # Update RGID
         Boolean multimappers = false
+        
         # Split mixed genome
-        String? genome_name2
+        Array[String] genome_names
+        
         # Assign features
         Boolean include_multimappers = false
         Boolean include_introns = false
-        File gtf
-        File? gtf2
+        Array[File] gtfs
         String gene_naming = "gene_name"
+        
         # Group UMI
         Boolean remove_single_umi = true
         String mode = "fast"
         Int cutoff = 300
+        
         # Lib_size QC
         Boolean qc = false
-        File genes_annotation_bed
-        File? genes_annotation_bed2
+        Array[File] gene_annotation_beds
     }
 
-    Annotation genome1 = object{
-                                genome_name : genome_name,
-                                gene_gtf : gtf,
-                                gene_bed : genes_annotation_bed
-                                }
-
-    Annotation? genome2 = object{
-                                genome_name : genome_name2,
-                                gene_gtf : gtf2,
-                                gene_bed : genes_annotation_bed2
-                                 }
-
-    Array[Annotation] annotations = select_all([genome1, genome2])
-
+    
     call align_rna {
         input:
             fastq_R1 = read1,
-            genome_name = genome_name,
-            genome_index_tar = idx_tar,
+            genome_name = genome_name_mixed,
+            genome_index_tar = mixed_idx_tar,
             prefix = prefix,
             cpus = cpus,
             docker_image = docker
@@ -71,38 +61,32 @@ workflow wf_rna {
         input:
             bam = align_rna.rna_align_bam,
             multimapper = multimappers,
-            genome_name = genome_name,
+            genome_name = genome_name_mixed,
             prefix = prefix,
             docker_image = docker
     }
 
-    if ( defined(genome_name2) ){
-        call split_mixed_alignments_rna{
-            input:
-                bam = update_rgid_rna.rna_rgid_updated_bam,
-                bai = update_rgid_rna.rna_rgid_updated_bai,
-                genome1_name = genome_name,
-                genome2_name = genome_name2,
-                prefix = prefix,
-                docker_image = docker
-        }
-        Array[Int]? range = [0,1]
+	call split_mixed_alignments_rna{
+		input:
+			bam = update_rgid_rna.rna_rgid_updated_bam,
+			bai = update_rgid_rna.rna_rgid_updated_bai,
+			genome1_name = genome_names[0],
+			genome2_name = genome_names[1],
+			prefix = prefix,
+			docker_image = docker
     }
-
-    Array[Int] indexes = select_first([range,[0]])
-
-    Array[File] assign_feature_inputs = select_first([split_mixed_alignments_rna.rna_splitted_bam,
-                                                     [update_rgid_rna.rna_rgid_updated_bam]])
     
-    scatter( index in indexes ){
+    Array[Int] scatter_range = [0, 1]
+    
+    scatter( i in scatter_range ){
         call assign_features_rna{
             input:
                 multimapper = include_multimappers,
                 intron = include_introns,
-                bam = assign_feature_inputs[index],
-                gtf = annotations[index]["gene_gtf"],
+                bam = split_mixed_alignments_rna.rna_splitted_bam[i],
+                gtf = gtfs[i],
+                genome_name = genome_names[i],
                 gene_naming = gene_naming,
-                genome_name = annotations[index]["genome_name"],
                 prefix = prefix,
                 docker_image = docker
         }
@@ -113,7 +97,7 @@ workflow wf_rna {
                 mode = mode,
                 cutoff = cutoff,
                 remove_single_umi = remove_single_umi,
-                genome_name = annotations[index]["genome_name"],
+                genome_name = genome_names[i],
                 prefix = prefix,
                 docker_image = docker
         }
@@ -124,26 +108,52 @@ workflow wf_rna {
             input:
                 qc = qc,
                 bam = assign_features_rna.assigned_features_rna_bam,
-                genes_annotations_bed = annotations[index]["gene_bed"],
-                genome_name = annotations[index]["genome_name"],
+                genes_annotations_bed = gene_annotation_beds[i],
+                genome_name = genome_names[i],
                 docker_image = docker,
                 prefix = prefix,
         }
+        
+        call qc_lib_size {
+        input:
+            raw_counts = group_umi_rna.unfiltered_counts_rna,
+            filtered_counts = group_umi_rna.filtered_counts_rna,
+            cutoff = cutoff,
+            genome_name = genome_names[i],
+            prefix = prefix,
+            docker_image = docker
+        }
+    
+		call rna_gene_cell_matrix {
+			input:
+				filtered_bed = group_umi_rna.groupped_umi_filtered_rna,
+				docker_image = "polumechanos/share-seq:umi"
+				
+		}
     }
 
     output {
         File rna_aligned_raw_bam = align_rna.rna_align_bam
         File rna_aligned_raw_bai = align_rna.rna_align_bai
         File rna_align_log = align_rna.rna_align_log
-        Array[File] rna_rgid_updated_bam = assign_feature_inputs
+        File rna_rgid_updated_bam = update_rgid_rna.rna_rgid_updated_bam
         Array[File] rna_assigned_features_bam = assign_features_rna.assigned_features_rna_bam
         Array[File] rna_assigned_features_bai = assign_features_rna.assigned_features_rna_bai
         Array[File] rna_filtered_counts = group_umi_rna.filtered_counts_rna
         Array[File] rna_unfiltered_counts = group_umi_rna.unfiltered_counts_rna
         Array[File] rna_groupped_umi_unfiltered = group_umi_rna.groupped_umi_rna
         Array[File] rna_groupped_umi_filtered = group_umi_rna.groupped_umi_filtered_rna
-        Array[File] rna_read_distribution_extra = qc_libsize_rna.read_distribution2_rna
+        Array[File] rna_featureCounts_txt = assign_features_rna.featureCounts_txt
+        Array[File] rna_featureCounts_summary = assign_features_rna.featureCounts_summary
+        Array[File] rna_barcodes = group_umi_rna.barcodes
+        Array[File] rna_read_distribution_txt = qc_libsize_rna.read_distribution_rna
+        Array[File] rna_read_distribution2_txt = qc_libsize_rna.read_distribution2_rna
         Array[File] rna_read_distribution_plot = qc_libsize_rna.read_distribution_plot_rna
+        Array[File] rna_lib_size_count = qc_lib_size.lib_size_counts
+        Array[File] rna_duplicates_log = qc_lib_size.lib_size_log
+        Array[Array[File]] rna_lib_size_plots = qc_lib_size.plots
+        Array[File] h5_matrix = rna_gene_cell_matrix.h5_matrix
+        Array[Array[File]] umi_gene_qc_plots = rna_gene_cell_matrix.umi_qc_plots
     }
 }
 
@@ -451,8 +461,8 @@ task assign_features_rna {
         # aligner run on a mixed index (e.g. mouse + human) and split
         # the reads into the two genomes
         
-        Boolean multimapper = false
-        Boolean intron = false
+        Boolean multimapper
+        Boolean intron
         File bam
         File gtf
         String gene_naming = "gene_name"
@@ -512,6 +522,8 @@ task assign_features_rna {
         File assigned_features_rna_bam = out_bam
         File assigned_features_rna_bai = out_bai
         File featureCounts_log = "featureCount.log"
+        File featureCounts_txt = glob("*.feature.count.txt")[0]
+        File featureCounts_summary = glob("*.feature.count.txt.summary")[0]
     }
 
     runtime {
@@ -588,11 +600,11 @@ task group_umi_rna {
         Boolean remove_single_umi = true
         File bam
         String genome_name
-        String mode = "regular"
+        String mode
         String? prefix
         String docker_image
         Int cpus = 4
-        Int cutoff = 300
+        Int cutoff
         
     }
     
@@ -683,6 +695,7 @@ task group_umi_rna {
         File unfiltered_counts_rna = "${prefix + "."}rna.${genome_name}.unfiltered.counts.csv"
         File groupped_umi_rna = "${prefix + "."}rna.${genome_name}.bed.gz"
         File groupped_umi_filtered_rna = "${prefix + "."}rna.${genome_name}.cutoff.bed.gz"
+        File barcodes = glob("*.barcodes.txt")[0]
     }
 
     runtime {
@@ -794,7 +807,7 @@ task qc_libsize_rna {
     }
     
     output {
-        #File read_distribution_rna= "${prefix + "."}rna.${genome_name}.reads_distribution.txt"
+        File read_distribution_rna= "${prefix + "."}rna.${genome_name}.reads_distribution.txt"
         File read_distribution2_rna= "${prefix + "."}rna.${genome_name}.reads_distribution2.txt"
         File read_distribution_plot_rna= "${prefix + "."}rna.${genome_name}.reads_distribution.pdf"
     }
@@ -837,6 +850,140 @@ task qc_libsize_rna {
         docker_image: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: samtools',
+                example: ['put link to gcr or dockerhub']
+            }
+    }
+}
+
+task qc_lib_size {
+    meta {
+        version: 'v0.1'
+        author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: RNA library size task'
+    }
+    
+    input {
+        # This task computs the the library size for the library.
+        
+        File raw_counts
+        File filtered_counts
+        Int cutoff
+        String genome_name
+        String? prefix
+        String docker_image
+        
+        
+    }
+    
+    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    Int disk_gb = 50
+    Float input_file_size_gb = size(filtered_counts, "G")
+    Int mem_gb = 16
+    
+
+    command {
+        set -e
+        
+        # TODO remove the hard coded file paths from R scripts
+        # TODO create only one R script that uses the parameters to discriminate
+        # Estimate lib size
+        # both
+        #Rscript $(which lib_size_sc_V5_species_mixing.R)./ '${prefix + '.'}atac.${genome_name}' ${cutoff} atac --save
+        # hg38/mm10
+        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} ATAC --save
+
+    }
+    
+    output {
+        File lib_size_counts = glob('*.libsize.counts.csv')[0]
+        File lib_size_log = glob('*.dups.log')[0]
+        Array[File] plots = glob('*.pdf')
+    }
+
+    runtime {
+        #cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
+        maxRetries : 0  
+        docker: docker_image
+    }
+    
+    parameter_meta {
+        raw_counts: {
+                description: 'Barcode count csv',
+                help: 'Barcode counts from raw bam in csv format.',
+                example: 'raw.counts.csv'
+            }
+        filtered_counts: {
+            description: 'Barcode count csv',
+            help: 'Barcode counts from filtered bam in csv format.',
+            example: 'filtered.counts.csv'
+        }
+        genome_name: {
+                description: 'Reference name',
+                help: 'The name of the reference genome used by the aligner.',
+                examples: ['hg38', 'mm10', 'both']
+            }
+        docker_image: {
+                description: 'Docker image.',
+                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
+                example: ['put link to gcr or dockerhub']
+            }
+    }
+
+
+}
+
+task rna_gene_cell_matrix {
+    meta {
+        version: 'v0.1'
+        author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: RNA gene cell matrix'
+    }
+    
+    input {
+        # This task computs the the gene by barcode matrix.
+        
+        File filtered_bed
+        String docker_image
+        
+        
+    }
+    
+    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    Int disk_gb = 50
+    Float input_file_size_gb = size(filtered_bed, "G")
+    Int mem_gb = 16
+    
+
+    command {
+        set -e
+        Rscript $(which UMI_gene_perCell_plot_v2.R) ${filtered_bed} --save
+
+    }
+    
+    output {
+        File h5_matrix = glob('*.h5')[0]
+        Array[File] umi_qc_plots = glob('*.pdf')
+    }
+
+    runtime {
+        #cpu : cpus
+        memory : mem_gb+'G'
+        disks : 'local-disk ${disk_gb} SSD'
+        maxRetries : 0  
+        docker: docker_image
+    }
+    
+    parameter_meta {
+            filtered_bed: {
+            description: 'Barcode count csv',
+            help: 'Barcode counts from filtered bam in csv format.',
+            example: 'filtered.counts.csv'
+        }
+        docker_image: {
+                description: 'Docker image.',
+                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
             }
     }

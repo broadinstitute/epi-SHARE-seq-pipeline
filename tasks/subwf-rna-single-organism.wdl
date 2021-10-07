@@ -121,9 +121,9 @@ workflow wf_rna {
         File rna_read_distribution_txt = qc_libsize_rna.read_distribution_rna
         File rna_read_distribution2_txt = qc_libsize_rna.read_distribution2_rna
         File rna_read_distribution_plot = qc_libsize_rna.read_distribution_plot_rna
-        File atac_lib_size_count = qc_lib_size.lib_size_counts
-        File atac_duplicates_log = qc_lib_size.lib_size_log
-        Array[File] atac_lib_size_plots = qc_lib_size.plots
+        File rna_lib_size_count = qc_lib_size.lib_size_counts
+        File rna_duplicates_log = qc_lib_size.lib_size_log
+        Array[File] rna_lib_size_plots = qc_lib_size.plots
         File h5_matrix = rna_gene_cell_matrix.h5_matrix
         Array[File] umi_gene_qc_plots = rna_gene_cell_matrix.umi_qc_plots
     }
@@ -860,9 +860,9 @@ task qc_lib_size {
         # TODO create only one R script that uses the parameters to discriminate
         # Estimate lib size
         # both
-        #Rscript $(which lib_size_sc_V5_species_mixing.R)./ '${prefix + '.'}atac.${genome_name}' ${cutoff} RNA --save
+        #Rscript $(which lib_size_sc_V5_species_mixing.R)./ '${prefix + '.'}atac.${genome_name}' ${cutoff} atac --save
         # hg38/mm10
-        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} RNA --save
+        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} ATAC --save
 
     }
     
@@ -959,7 +959,4 @@ task rna_gene_cell_matrix {
                 example: ['put link to gcr or dockerhub']
             }
     }
-
-
 }
-
