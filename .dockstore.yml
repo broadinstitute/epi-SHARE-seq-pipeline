@@ -2,7 +2,6 @@ version: 1.2
 workflows:
    - name: "SHARE-seq ATAC processing"
      subclass: WDL
-     publish: True
      primaryDescriptorPath: /tasks/subwf-atac-single-organism.wdl
      filters:  # All tags, no branches
          branches:
