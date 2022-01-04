@@ -6,7 +6,7 @@ workflow wf_atac {
         author: 'Eugenio Mattei (emattei@broadinstitute.org) and Sai Ma @ Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Sub-workflow to process the ATAC portion of SHARE-seq libraries.'
     }
-    
+
     input {
         # ATAC Sub-worflow inputs
         File read1
@@ -16,11 +16,11 @@ workflow wf_atac {
         File tss_bed
         String prefix = "shareseq-project"
         String genome_name
-        Int cutoff        
+        Int cutoff
         Int? cpus = 4
         String docker = "polumechanos/share-seq"
     }
-    
+
     call align_atac {
         input:
             fastq_R1 = read1,
@@ -31,7 +31,7 @@ workflow wf_atac {
             cpus = cpus,
             docker_image = docker
     }
-  
+
     call bam_to_bed_atac {
         input:
             bam = align_atac.atac_bowtie2_align,
@@ -42,7 +42,7 @@ workflow wf_atac {
             cpus = cpus,
             docker_image = docker
     }
-    
+
     call count_reads_atac {
         input:
             cutoff = cutoff,
@@ -52,7 +52,7 @@ workflow wf_atac {
             cpus = cpus,
             docker_image = docker
     }
-    
+
     call qc_lib_size {
         input:
             raw_counts = count_reads_atac.atac_unfiltered_counts,
@@ -62,7 +62,7 @@ workflow wf_atac {
             prefix = prefix,
             docker_image = docker
     }
-    
+
     call qc_stats_atac {
         input:
             raw_bam = align_atac.atac_bowtie2_align,
@@ -75,9 +75,9 @@ workflow wf_atac {
             cpus = cpus,
             docker_image = docker
     }
-    
+
     output {
-        File atac_aligned_raw_bam = align_atac.atac_bowtie2_align 
+        File atac_aligned_raw_bam = align_atac.atac_bowtie2_align
         File atac_aligned_raw_bai = align_atac.atac_bowtie2_align_index
         File atac_bowtie2_log = align_atac.log
         File atac_aligned_filtered_bam = bam_to_bed_atac.bam_filtered
@@ -106,10 +106,10 @@ task align_atac {
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: align ATAC task'
     }
-    
+
     input {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
-        
+
         File fastq_R1
         File fastq_R2
         File genome_index       # This is a tar.gz folder with all the index files.
@@ -117,9 +117,9 @@ task align_atac {
         String? prefix
         String docker_image
         Int cpus = 16
-        
+
     }
-    
+
     Float input_file_size_gb = size(fastq_R1, "G")
     # This is almost fixed for either mouse or human genome
     Int mem_gb = 16
@@ -128,11 +128,11 @@ task align_atac {
 
     command {
         set -e
-        
+
         tar zxvf ${genome_index} --no-same-owner -C ./
         genome_prefix=$(basename $(find . -type f -name "*.rev.1.bt2") .rev.1.bt2)
-        
-        
+
+
         bowtie2 -X2000 \
             -p ${cpus} \
             --rg-id ${prefix + "."}atac \
@@ -144,16 +144,16 @@ task align_atac {
                 -@ ${cpus} \
                 - \
                 -o ${prefix + "."}atac.align.${genome_name}.bam
-            
-        
+
+
         samtools sort \
             -@ ${cpus} \
             -m ${mem_gb}G \
             ${prefix + "."}atac.align.${genome_name}.bam > ${prefix + "."}atac.align.${genome_name}.sorted.bam
         samtools index -@ ${cpus} ${prefix + "."}atac.align.${genome_name}.sorted.bam
-        
+
     }
-    
+
     output {
         File atac_bowtie2_align = glob('*.sorted.bam')[0]
         File atac_bowtie2_align_index = glob('*.sorted.bam.bai')[0]
@@ -166,7 +166,7 @@ task align_atac {
         disks : 'local-disk ${disk_gb} SSD'
         docker : docker_image
     }
-    
+
     parameter_meta {
         fastq_R1: {
                 description: 'Read1 fastq',
@@ -214,11 +214,11 @@ task bam_to_bed_atac {
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: ATAC bam to bed task'
     }
-    
+
     input {
-        # This task takes in input the aligned bam file and rmeove the low quality reads, the extra chromosomes, marks 
+        # This task takes in input the aligned bam file and rmeove the low quality reads, the extra chromosomes, marks
         # the duplicats, and convert to a bedpe file.
-        
+
         File bam
         File bam_index
         String genome_name
@@ -226,14 +226,14 @@ task bam_to_bed_atac {
         String docker_image
         String? prefix
         Int cpus = 4
-        
+
     }
-    
+
     Float input_file_size_gb = size(bam, "G")
     Int mem_gb = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
-    
+
     String filtered_chr_bam = '${prefix + '.'}filtered_chr.bam'
     String bedpe = 'tmp.bedpe'
     String final_bam = '${prefix + '.'}atac.cleaned.${genome_name}.bam'
@@ -242,12 +242,12 @@ task bam_to_bed_atac {
 
     command<<<
         set -e
-        
-        # I need to do this because the bam and bai need to be in the same folder but WDL doesn't allow you to 
+
+        # I need to do this because the bam and bai need to be in the same folder but WDL doesn't allow you to
         # co-localize them in the same path.
         mv ~{bam} in.bam
         mv ~{bam_index} in.bai
-        
+
         # Remove unwanted chromosomes
         chrs=$(samtools view -H in.bam | \
             grep chr | \
@@ -256,32 +256,32 @@ task bam_to_bed_atac {
             grep -v chrM | \
             grep -v Y | \
             awk '{if(length($0)<6)print}')
-        
+
         # Sort file by name, remove low quality reads, namesort the input bam
         samtools view -b -q 30 -f 0x2 in.bam $(echo $chrs) | \
         samtools sort -@ ~{cpus} -m ~{mem_gb}G -n -o ~{filtered_chr_bam} -
-        
+
         # Convert bam to bed.gz and mark duplicates
         # Removing reads that starts and ends at the same position (duplicates)
         bedtools bamtobed -bedpe -i ~{filtered_chr_bam} | \
             sed 's/_/\t/g' | \
-            awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6+4,$8}else if($10=="-"){print $1,$2-5,$6-5,$8}}' | \
-            sort --parallel=~{cpus} -S ~{mem_gb}G  -k4,4 -k1,1 -k2,2 -k3,3 | \
+            awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6-5,$8}else if($10=="-"){print $1,$2-5,$6+4,$8}}' | \
+            sort --parallel=~{cpus} -S ~{mem_gb}G  -k4,4 -k1,1 -k2,2n -k3,3n | \
             uniq -c | \
             awk -v OFS="\t" '{print $2, $3, $4, $5, $1}' > ~{bedpe}
-        
+
         # Convert the bedpe file to a bam file for QC
         bedToBam -i ~{bedpe} -g ~{chrom_sizes} | \
         samtools sort -@ ~{cpus} -o ~{final_bam} -
-        
+
         # and index the bam
         samtools index -@ ~{cpus} ~{final_bam}
-        
+
         # Compress the bedpe file
         pigz --fast -c -p ~{cpus} ~{bedpe} > ~{final_bedpe}
-                
+
     >>>
-    
+
     output {
         File bam_filtered = final_bam
         File bam_filtered_index = final_bam_index
@@ -292,10 +292,10 @@ task bam_to_bed_atac {
         cpu : cpus
         memory : mem_gb+'G'
         disks : 'local-disk ${disk_gb} SSD'
-        maxRetries : 0  
+        maxRetries : 0
         docker: docker_image
     }
-    
+
     parameter_meta {
         bam: {
                 description: 'bam file',
@@ -333,25 +333,25 @@ task count_reads_atac {
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: ATAC count reads task'
     }
-    
+
     input {
         # This task takes in input the filtered and cleaned align reads in bedpe format and counts the reads per barcode.
-        
+
         Int cpus = 4
         Int cutoff = 100
         File bedpe
         String genome_name
         String? prefix
         String docker_image
-        
+
     }
-    
-    
+
+
     Float input_file_size_gb = size(bedpe, "G")
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Int mem_gb = 16
-    
+
     String read_groups_freq = 'read_groups_freq.bed'
     String unfiltered_counts = '${prefix + '.'}atac.${genome_name}.unfiltered.counts.csv'
     String read_groups_freq_rmdup = 'read_groups_freq_rmdup.bed'
@@ -360,23 +360,23 @@ task count_reads_atac {
 
     command <<<
         set -e
-        
+
         # Count unfiltered reads
         zcat ~{bedpe} | awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}' | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT ) print }'> ~{read_groups_freq}
-        
+
         Rscript $(which sum_reads.R) ~{read_groups_freq} ~{unfiltered_counts} --save
-    
+
         # Count filtered reads
         zcat ~{bedpe} | cut -f4 | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
-        
+
         Rscript $(which sum_reads.R) ~{read_groups_freq_rmdup} ~{filtered_counts} --save
-        
+
         # Remove barcode with low counts from the fragment file for ATAC
         sed -e 's/,/\t/g' ~{filtered_counts} | awk -v CUT=~{cutoff} -v OFS=',' 'NR>=2 {if($5 >= CUT) print $1,$2,$3,$4} ' > barcodes.txt
-        
-        grep -wFf barcodes.txt <(zcat ~{bedpe}) | pigz --fast -p ~{cpus} > ~{filtered_bedpe}        
+
+        grep -wFf barcodes.txt <(zcat ~{bedpe}) | pigz --fast -p ~{cpus} > ~{filtered_bedpe}
     >>>
-    
+
     output {
         File bedpe_cleaned_filtered = filtered_bedpe
         File atac_filtered_counts = filtered_counts
@@ -388,10 +388,10 @@ task count_reads_atac {
         cpu : cpus
         memory : mem_gb+'G'
         disks : 'local-disk ${disk_gb} SSD'
-        maxRetries : 0  
+        maxRetries : 0
         docker: docker_image
     }
-    
+
     parameter_meta {
         bedpe: {
                 description: 'bedpe file',
@@ -424,29 +424,29 @@ task qc_lib_size {
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: ATAC library size task'
     }
-    
+
     input {
         # This task computs the the library size for the library.
-        
+
         File raw_counts
         File filtered_counts
         Int cutoff
         String genome_name
         String? prefix
         String docker_image
-        
-        
+
+
     }
-    
+
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Float input_file_size_gb = size(filtered_counts, "G")
     Int mem_gb = 16
-    
+
 
     command {
         set -e
-        
+
         # TODO remove the hard coded file paths from R scripts
         # TODO create only one R script that uses the parameters to discriminate
         # Estimate lib size
@@ -456,7 +456,7 @@ task qc_lib_size {
         Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} ATAC --save
 
     }
-    
+
     output {
         File lib_size_counts = glob('*.libsize.counts.csv')[0]
         File lib_size_log = glob('*.dups.log')[0]
@@ -467,10 +467,10 @@ task qc_lib_size {
         #cpu : cpus
         memory : mem_gb+'G'
         disks : 'local-disk ${disk_gb} SSD'
-        maxRetries : 0  
+        maxRetries : 0
         docker: docker_image
     }
-    
+
     parameter_meta {
         raw_counts: {
                 description: 'Barcode count csv',
@@ -504,12 +504,12 @@ task qc_stats_atac {
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: ATAC qc statistics task'
     }
-    
+
     input {
         # This function takes in input the raw and filtered bams
         # and compute some alignment metrics along with the TSS
         # enrichment plot.
-        
+
         Int cpus= 4
         File raw_bam
         File raw_bam_index
@@ -519,37 +519,37 @@ task qc_stats_atac {
         String genome_name
         String? prefix
         String docker_image
-        
-        
+
+
     }
-    
+
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Float input_file_size_gb = size(raw_bam, "G")
     Int mem_gb = 16
-    
+
     String stats_log = '${prefix + '.'}atac.stats.${genome_name}.log.txt'
     String hist_log = '${prefix + '.'}atac.hist.${genome_name}.log.txt'
     String hist_log_pdf = '${prefix + '.'}atac.hist.${genome_name}.log.pdf'
     String tss_pileup_prefix = '${prefix + '.'}atac.tss.pileup.${genome_name}.log'
     String tss_pileup_out = '${prefix + '.'}atac.tss.pileup.${genome_name}.log.png'
-    
+
 
     command {
         set -e
-        
+
         mv ${raw_bam} in.raw.bam
         mv ${raw_bam_index} in.raw.bai
         mv ${filtered_bam} in.filtered.bam
         mv ${filtered_bam_index} in.filtered.bai
-        
-        
+
+
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
         samtools idxstats in.raw.bam >> ${stats_log}
-        
+
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ${stats_log}
         samtools idxstats in.filtered.bam >> ${stats_log}
-        
+
         echo '' > ${hist_log}
         java -jar $(which picard.jar) CollectInsertSizeMetrics \
             VALIDATION_STRINGENCY=SILENT \
@@ -557,7 +557,7 @@ task qc_stats_atac {
             O=${hist_log} \
             H=${hist_log_pdf} \
             W=1000  2>> picard_run.log
-        
+
         # make TSS pileup fig # original code has a 'set +e' why?
         # the pyMakeVplot is missing
         python $(which make-tss-pileup-jbd.py) \
@@ -570,7 +570,7 @@ task qc_stats_atac {
             -o ${tss_pileup_prefix}
 
     }
-    
+
     output {
         File final_stats = stats_log
         File final_hist_stats_pdf = hist_log_pdf
@@ -582,10 +582,10 @@ task qc_stats_atac {
         cpu : cpus
         memory : mem_gb+'G'
         disks : 'local-disk ${disk_gb} SSD'
-        maxRetries : 0  
+        maxRetries : 0
         docker: docker_image
     }
-    
+
     parameter_meta {
         raw_bam: {
                 description: 'Unfiltered bam',
