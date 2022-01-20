@@ -65,7 +65,7 @@ workflow wf_atac {
             docker_image = docker
     }
 
-    call qc_stats_atac {
+    call qc_stats_atac.qc_stats_atac {
         input:
             raw_bam = align_atac.atac_bowtie2_align,
             raw_bam_index = align_atac.atac_bowtie2_align_index,
