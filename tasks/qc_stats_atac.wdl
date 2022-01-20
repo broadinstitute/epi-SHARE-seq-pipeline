@@ -1,3 +1,5 @@
+version 1.0
+
 task qc_stats_atac {
     meta {
         version: 'v0.1'
