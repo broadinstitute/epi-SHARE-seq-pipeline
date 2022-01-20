@@ -1,6 +1,6 @@
 version 1.0
 
-import "qc_stats_atac.wdl" as qc_stats_atac
+import "./qc_stats_atac.wdl" as qc_stats_atac
 
 workflow wf_atac {
     meta {
