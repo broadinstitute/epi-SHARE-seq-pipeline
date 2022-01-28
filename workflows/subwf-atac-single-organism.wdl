@@ -1,5 +1,10 @@
 version 1.0
 
+# Import the tasks called by the pipeline
+import "../tasks/share_task_bowtie2.wdl" as align
+import "../tasks/qc_stats_atac.wdl" as qc_atac
+
+
 workflow wf_atac {
     meta {
         version: 'v0.1'
@@ -21,21 +26,19 @@ workflow wf_atac {
         String docker = "polumechanos/share-seq"
     }
 
-    call align_atac {
+    call align.share_task_bowtie2 {
         input:
             fastq_R1 = read1,
             fastq_R2 = read2,
             genome_name = genome_name,
             genome_index = idx_tar,
-            prefix = prefix,
-            cpus = cpus,
-            docker_image = docker
+            prefix = prefix
     }
 
     call bam_to_bed_atac {
         input:
-            bam = align_atac.atac_bowtie2_align,
-            bam_index = align_atac.atac_bowtie2_align_index,
+            bam = share_task_bowtie2.share_bowtie2_alignment,
+            bam_index = share_task_bowtie2.share_bowtie2_alignment_index,
             genome_name = genome_name,
             chrom_sizes = chrom_sizes,
             prefix = prefix,
@@ -63,7 +66,7 @@ workflow wf_atac {
             docker_image = docker
     }
 
-    call qc_stats_atac {
+    call qc_atac.qc_stats_atac {
         input:
             raw_bam = align_atac.atac_bowtie2_align,
             raw_bam_index = align_atac.atac_bowtie2_align_index,
@@ -77,9 +80,9 @@ workflow wf_atac {
     }
 
     output {
-        File atac_aligned_raw_bam = align_atac.atac_bowtie2_align
-        File atac_aligned_raw_bai = align_atac.atac_bowtie2_align_index
-        File atac_bowtie2_log = align_atac.log
+        File share_atac_raw_bam = share_task_bowtie2.share_bowtie2_alignment
+        File share_atac_raw_bai = share_task_bowtie2.share_bowtie2_alignment_index
+        File share_atac_alignment_log = share_task_bowtie2.share_bowtie2_alignment_log
         File atac_aligned_filtered_bam = bam_to_bed_atac.bam_filtered
         File atac_aligned_filtered_bai = bam_to_bed_atac.bam_filtered_index
         File atac_fragment_file_raw = bam_to_bed_atac.bedpe_cleaned
@@ -100,113 +103,7 @@ workflow wf_atac {
 
 # TASKS
 
-task align_atac {
-    meta {
-        version: 'v0.1'
-        author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: align ATAC task'
-    }
 
-    input {
-        # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
-
-        File fastq_R1
-        File fastq_R2
-        File genome_index       # This is a tar.gz folder with all the index files.
-        String genome_name
-        String? prefix
-        String docker_image
-        Int cpus = 16
-
-    }
-
-    Float input_file_size_gb = size(fastq_R1, "G")
-    # This is almost fixed for either mouse or human genome
-    Int mem_gb = 16
-    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 50
-
-    command {
-        set -e
-
-        tar zxvf ${genome_index} --no-same-owner -C ./
-        genome_prefix=$(basename $(find . -type f -name "*.rev.1.bt2") .rev.1.bt2)
-
-
-        bowtie2 -X2000 \
-            -p ${cpus} \
-            --rg-id ${prefix + "."}atac \
-            -x $genome_prefix \
-            -1 ${fastq_R1} \
-            -2 ${fastq_R2} 2> atac.bowtie2.align.${genome_name}.log |\
-            samtools view \
-                -bS \
-                -@ ${cpus} \
-                - \
-                -o ${prefix + "."}atac.align.${genome_name}.bam
-
-
-        samtools sort \
-            -@ ${cpus} \
-            -m ${mem_gb}G \
-            ${prefix + "."}atac.align.${genome_name}.bam > ${prefix + "."}atac.align.${genome_name}.sorted.bam
-        samtools index -@ ${cpus} ${prefix + "."}atac.align.${genome_name}.sorted.bam
-
-    }
-
-    output {
-        File atac_bowtie2_align = glob('*.sorted.bam')[0]
-        File atac_bowtie2_align_index = glob('*.sorted.bam.bai')[0]
-        File log = 'atac.bowtie2.align.${genome_name}.log'
-    }
-
-    runtime {
-        cpu : cpus
-        memory : mem_gb+'G'
-        disks : 'local-disk ${disk_gb} SSD'
-        docker : docker_image
-    }
-
-    parameter_meta {
-        fastq_R1: {
-                description: 'Read1 fastq',
-                help: 'Processed fastq for read1.',
-                example: 'processed.atac.R1.fq.gz',
-            }
-        fastq_R2: {
-                description: 'Read2 fastq',
-                help: 'Processed fastq for read2.',
-                example: 'processed.atac.R2.fq.gz'
-            }
-        genome_index: {
-                description: 'Bowtie2 indexes',
-                help: 'Index files for bowtie2 to use during alignment.',
-                examples: ['hg19.tar.gz']
-            }
-        genome_name: {
-                description: 'Reference name',
-                help: 'The name of the reference genome used by the aligner.',
-                examples: ['hg38', 'mm10', 'both']
-            }
-        prefix: {
-                description: 'Prefix for output files',
-                help: 'Prefix that will be used to name the output files',
-                examples: 'MyExperiment'
-            }
-        cpus: {
-                description: 'Number of cpus',
-                help: 'Set the number of cpus useb by bowtie2',
-                default: 16
-            }
-        docker_image: {
-                description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
-                example: ['put link to gcr or dockerhub']
-            }
-    }
-
-
-}
 
 task bam_to_bed_atac {
     meta {
@@ -498,124 +395,3 @@ task qc_lib_size {
 }
 
 
-task qc_stats_atac {
-    meta {
-        version: 'v0.1'
-        author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: ATAC qc statistics task'
-    }
-
-    input {
-        # This function takes in input the raw and filtered bams
-        # and compute some alignment metrics along with the TSS
-        # enrichment plot.
-
-        Int cpus= 4
-        File raw_bam
-        File raw_bam_index
-        File filtered_bam
-        File filtered_bam_index
-        File tss
-        String genome_name
-        String? prefix
-        String docker_image
-
-
-    }
-
-    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 50
-    Float input_file_size_gb = size(raw_bam, "G")
-    Int mem_gb = 16
-
-    String stats_log = '${prefix + '.'}atac.stats.${genome_name}.log.txt'
-    String hist_log = '${prefix + '.'}atac.hist.${genome_name}.log.txt'
-    String hist_log_pdf = '${prefix + '.'}atac.hist.${genome_name}.log.pdf'
-    String tss_pileup_prefix = '${prefix + '.'}atac.tss.pileup.${genome_name}.log'
-    String tss_pileup_out = '${prefix + '.'}atac.tss.pileup.${genome_name}.log.png'
-
-
-    command {
-        set -e
-
-        mv ${raw_bam} in.raw.bam
-        mv ${raw_bam_index} in.raw.bai
-        mv ${filtered_bam} in.filtered.bam
-        mv ${filtered_bam_index} in.filtered.bai
-
-
-        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
-        samtools idxstats in.raw.bam >> ${stats_log}
-
-        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ${stats_log}
-        samtools idxstats in.filtered.bam >> ${stats_log}
-
-        echo '' > ${hist_log}
-        java -jar $(which picard.jar) CollectInsertSizeMetrics \
-            VALIDATION_STRINGENCY=SILENT \
-            I=in.raw.bam \
-            O=${hist_log} \
-            H=${hist_log_pdf} \
-            W=1000  2>> picard_run.log
-
-        # make TSS pileup fig # original code has a 'set +e' why?
-        # the pyMakeVplot is missing
-        python $(which make-tss-pileup-jbd.py) \
-            -a in.filtered.bam \
-            -b ${tss} \
-            -e 2000 \
-            -p ends \
-            -v \
-            -u \
-            -o ${tss_pileup_prefix}
-
-    }
-
-    output {
-        File final_stats = stats_log
-        File final_hist_stats_pdf = hist_log_pdf
-        File final_hist_stats = stats_log
-        File tss_pileup = tss_pileup_out
-    }
-
-    runtime {
-        cpu : cpus
-        memory : mem_gb+'G'
-        disks : 'local-disk ${disk_gb} SSD'
-        maxRetries : 0
-        docker: docker_image
-    }
-
-    parameter_meta {
-        raw_bam: {
-                description: 'Unfiltered bam',
-                help: 'Not filtered alignment bam file.',
-                example: 'aligned.hg38.bam'
-            }
-        raw_bam: {
-                description: 'Filtered bam',
-                help: 'Filtered alignment bam file. Typically, no duplicates and quality filtered.',
-                example: 'aligned.hg38.rmdup.filtered.bam'
-            }
-        tss: {
-                description: 'TSS bed file',
-                help: 'List of TSS in bed format used for the enrichment plot.',
-                example: 'refseq.tss.bed'
-            }
-        genome_name: {
-                description: 'Reference name',
-                help: 'The name of the reference genome used by the aligner.',
-                examples: ['hg38', 'mm10', 'both']
-            }
-        cpus: {
-                description: 'Number of cpus',
-                help: 'Set the number of cpus useb by bowtie2',
-                examples: '4'
-            }
-        docker_image: {
-                description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
-                example: ['put link to gcr or dockerhub']
-            }
-    }
-}
