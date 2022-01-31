@@ -53,7 +53,7 @@ task share_task_bowtie2 {
         samtools sort \
             -@ ${cpus} \
             -m ${mem_gb}G \
-            ${unsorted.bam} > ${sorted_bam}
+            ${unsorted_bam} > ${sorted_bam}
         samtools index -@ ${cpus} ${sorted_bam}
 
     }
