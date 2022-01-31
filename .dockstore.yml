@@ -1,6 +1,6 @@
 version: 1.2
 workflows:
-   - name: "SHARE-seq ATAC processing"
+   - name: "SHARE-seq-atac-processing"
      subclass: WDL
      primaryDescriptorPath: /tasks/subwf-atac-single-organism.wdl
      filters:  # All tags, no branches
@@ -8,7 +8,7 @@ workflows:
              - main
          tags:
              - /.*/
-   - name: "SHARE-seq ATAC processing DEV"
+   - name: "SHARE-seq-atac-processing-dev"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
      filters:  # Only develop or master branches and localAligner/** tags
