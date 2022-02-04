@@ -1,6 +1,9 @@
 version 1.0
 
-task share_task_bowtie2 {
+# TASK
+# SHARE-atac-bowtie2
+
+task share_atac_align {
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
@@ -9,13 +12,13 @@ task share_task_bowtie2 {
 
     input {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
+        Int? cpus = 16
         File fastq_R1
         File fastq_R2
         File genome_index       # This is a tar.gz folder with all the index files.
         String genome_name      # GRCh38, mm10
+        String? docker_image = "polumechanos/share_task_bowtie2"
         String? prefix
-        String? docker_image="polumechanos/share_task_bowtie2"
-        Int? cpus = 16
     }
 
     Float input_file_size_gb = size(fastq_R1, "G")
@@ -24,8 +27,9 @@ task share_task_bowtie2 {
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
 
-    # Define the output names
+    # Define tmp file name
     String unsorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.bam"
+    # Define the output names
     String sorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.sorted.bam"
     String sorted_bai = "${default="share-seq" prefix}.atac.align.${genome_name}.sorted.bai"
     String alignment_log = "${default="share-seq" prefix}.atac.align.${genome_name}.log"
@@ -59,9 +63,9 @@ task share_task_bowtie2 {
     }
 
     output {
-        File share_bowtie2_alignment = sorted_bam
-        File share_bowtie2_alignment_index = sorted_bai
-        File share_bowtie2_alignment_log = alignment_log
+        File atac_alignment = sorted_bam
+        File atac_alignment_index = sorted_bai
+        File atac_alignment_log = alignment_log
     }
 
     runtime {
