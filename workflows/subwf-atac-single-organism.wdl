@@ -63,6 +63,7 @@ workflow wf_atac {
             cutoff = cutoff,
             genome_name = genome_name,
             prefix = prefix,
+            assay = "ATAC"
     }
 
     call share_task_qc_atac.qc_atac as qc_atac{
@@ -81,20 +82,25 @@ workflow wf_atac {
         File share_atac_alignment_raw = align.atac_alignment
         File share_atac_alignment_raw_index = align.atac_alignment_index
         File share_atac_alignment_log = align.atac_alignment_log
+
         File share_atac_alignment_filtered = bam2bed.atac_alignment_filtered
         File share_atac_alignment_filtered_index = bam2bed.atac_alignment_filtered_index
-        File share_atac_barcodes = count.atac_barcodes
         File share_atac_fragments_raw = bam2bed.atac_fragments_raw
+
+
+        File share_atac_barcodes = count.atac_barcodes
         File share_atac_fragments_filtered = count.atac_fragments_filtered
         File share_atac_counts_raw = count.atac_counts_unfiltered
         File share_atac_counts_filtered = count.atac_counts_filtered
-        File atac_lib_size_count = qc_library.lib_size_counts
-        File atac_duplicates_log = qc_library.lib_size_log
-        Array[File] atac_lib_size_plots = qc_library.plots
-        File atac_qc_final_stats = qc_atac.atac_final_stats
-        File atac_qc_hist_plot = qc_atac.atac_final_hist_pdf
-        File atac_qc_hist_stats = qc_atac.atac_final_hist
-        File atac_qc_tss_pileup = qc_atac.atac_tss_pileup_png
+
+        File share_atac_qc_library_counts = qc_library.lib_size_counts
+        File share_atac_qc_library_duplicates = qc_library.lib_size_log
+        Array[File] share_atac_qc_library_plots = qc_library.plots
+
+        File share_atac_qc_final = qc_atac.atac_final_stats
+        File share_atac_qc_hist_plot = qc_atac.atac_final_hist_pdf
+        File share_atac_qc_hist_txt = qc_atac.atac_final_hist
+        File share_atac_qc_tss_enrichment = qc_atac.atac_tss_pileup_png
 
     }
 }

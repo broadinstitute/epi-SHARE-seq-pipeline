@@ -1,7 +1,7 @@
 version 1.0
 
 # TASK
-# SHARE-atac-lib-size-atac
+# SHARE-atac-lib-size-rna
 
 
 task qc_library {
@@ -19,7 +19,8 @@ task qc_library {
         Int cutoff
         String genome_name
         String? prefix
-        String docker_image
+        String? docker_image = "polumechanos/shre_task_qc_library"
+        String assay
 
 
     }
@@ -39,7 +40,7 @@ task qc_library {
         # both
         #Rscript $(which lib_size_sc_V5_species_mixing.R)./ '${prefix + '.'}atac.${genome_name}' ${cutoff} atac --save
         # hg38/mm10
-        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} ATAC --save
+        Rscript $(which lib_size_sc_V5_single_species.R) ${raw_counts} ${filtered_counts} ${cutoff} ${genome_name} ${assay} --save
 
     }
 

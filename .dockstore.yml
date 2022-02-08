@@ -17,3 +17,11 @@ workflows:
          tags:
              - /.*/
 
+   - name: "SHARE-seq-rna-processing-dev"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-rna-single-organism.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - dev
+         tags:
+             - /.*/
