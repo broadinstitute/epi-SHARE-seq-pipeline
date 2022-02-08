@@ -21,7 +21,7 @@ task count_reads_atac {
     }
 
 
-    Float input_file_size_gb = size(bedpe, "G")
+    Float input_file_size_gb = size(fragments_raw, "G")
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Int mem_gb = 16
@@ -36,19 +36,19 @@ task count_reads_atac {
         set -e
 
         # Count unfiltered reads
-        zcat ~{bedpe} | awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}' | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT ) print }'> ~{read_groups_freq}
+        zcat ~{fragments_raw} | awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}' | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT ) print }'> ~{read_groups_freq}
 
         Rscript $(which sum_reads.R) ~{read_groups_freq} ~{unfiltered_counts} --save
 
         # Count filtered reads
-        zcat ~{bedpe} | cut -f4 | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
+        zcat ~{fragments_raw} | cut -f4 | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
 
         Rscript $(which sum_reads.R) ~{read_groups_freq_rmdup} ~{filtered_counts} --save
 
         # Remove barcode with low counts from the fragment file for ATAC
         sed -e 's/,/\t/g' ~{filtered_counts} | awk -v CUT=~{cutoff} -v OFS=',' 'NR>=2 {if($5 >= CUT) print $1,$2,$3,$4} ' > barcodes.txt
 
-        grep -wFf barcodes.txt <(zcat ~{bedpe}) | sort -k1,1 -k2,2n | bgzip -c > ~{filtered_fragments}
+        grep -wFf barcodes.txt <(zcat ~{fragments_raw}) | sort -k1,1 -k2,2n | bgzip -c > ~{filtered_fragments}
     >>>
 
     output {
