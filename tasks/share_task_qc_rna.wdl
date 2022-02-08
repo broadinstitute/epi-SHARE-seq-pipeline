@@ -1,3 +1,9 @@
+version 1.0
+
+# TASK
+# SHARE-rna-qc
+
+
 task qc_rna {
     meta {
         version: 'v0.1'

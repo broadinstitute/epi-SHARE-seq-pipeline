@@ -40,7 +40,7 @@ workflow wf_atac {
 
     call share_task_bam2bed.share_atac_bam2bed as bam2bed {
         input:
-            bam = align.atac_alignment_alignment,
+            bam = align.atac_alignment,
             bam_index = align.atac_alignment_index,
             genome_name = genome_name,
             chrom_sizes = chrom_sizes,
