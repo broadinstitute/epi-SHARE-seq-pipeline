@@ -68,7 +68,7 @@ task count_reads_atac {
     }
 
     parameter_meta {
-        bedpe: {
+        fragments_raw: {
                 description: 'bedpe file',
                 help: 'Aligned reads in bedpe format.',
                 example: 'aligned.hg38.bedpe'

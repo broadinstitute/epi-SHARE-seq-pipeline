@@ -84,14 +84,14 @@ task group_umi_rna {
                 awk 'NR==1{ id="N"} {if(id != $11 ) {id = $11; print $2, $6, $10}}' | \
                 awk -v OFS="\t" 'NR==1{ t1=$1;t2=$2;readsum=0; umisum=0} {if(t1==$1 && t2==$2) {readsum+=$3; umisum+=1} \
                     else {print t1, t2, umisum, readsum; t1=$1;t2=$2;umisum=1;readsum=$3}}' | \
-                pigz --fast -p ~{cpus} > ~{umi_groups_bed}
+                pigz --fast -p ~{cpus} > ~{umi_groups_bed_unfiltered}
         else
 
             less ~{umi_groups_table} | \
                 sort --parallel=~{cpus} -S ~{mem_sort}G -k1,1 -k2,2 | \
                 awk -v thr=~{if remove_single_umi then 1 else 0} -v OFS='\t' '{if($3 > thr){print}}' | \
                 awk -v OFS="\t" 'NR==1 { t1=$1;t2=$2;readsum=0; umisum=0} {if(t1==$1 && t2==$2) {readsum+=$3; umisum+=1} else {print t1, t2, umisum, readsum; t1=$1;t2=$2;umisum=1;readsum=$3}}' | \
-                pigz --fast -p ~{cpus} > ~{umi_groups_bed}
+                pigz --fast -p ~{cpus} > ~{umi_groups_bed_unfiltered}
 
         fi
 
