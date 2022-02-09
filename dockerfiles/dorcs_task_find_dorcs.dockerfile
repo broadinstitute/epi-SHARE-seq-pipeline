@@ -8,6 +8,7 @@ RUN python3 -m pip install jupyter papermill
 
 COPY src/R/install_dorcs_packages.R src/R/DORCS_helper_functions.R src/R/TSSRanges.RData R/
 
+RUN Rscript R/install_dorcs_packages.R
+
 COPY src/jupyter_nb/dorcs_jplot_notebook.ipynb dorcs_jplot_notebook.ipynb
 
-RUN Rscript R/install_dorcs_packages.R

@@ -1,0 +1,52 @@
+version 1.0
+
+
+# Import the tasks called by the pipeline
+import "../tasks/dorks_task_find_dorcs.wdl" as find_dorcs
+
+workflow dorcs_workflow {
+    input {
+        File rna_matrix
+        File atac_fragments
+        File peak_file
+
+        String genome = "hg38"
+        Int n_cores = 4
+        String save_plots_to_dir = "TRUE"
+        String output_filename = "output.ipynb"
+
+        Int minFeature_RNA = 200
+        Int maxFeature_RNA = 2500
+        Float percentMT_RNA = 5
+        Int minCells_RNA = 3
+
+        Int dorcGeneCutOff = 10
+        Float fripCutOff = 0.3
+        Float corrPVal = 0.05
+        Int topNGene = 20
+        Int windowPadSize = 50000
+        Int bootstraps = 100
+    }
+
+    call find_dorcs.find_dorcs {
+        input:
+            rna_matrix = rna_matrix,
+            atac_fragments = atac_fragments,
+            peak_file = peak_file,
+            genome = genome,
+            n_cores = n_cores,
+            save_plots_to_dir = save_plots_to_dir,
+            output_filename = output_filename,
+            minFeature_RNA = minFeature_RNA,
+            maxFeature_RNA = maxFeature_RNA,
+            percentMT_RNA = percentMT_RNA,
+            minCells_RNA = minCells_RNA,
+            dorcGeneCutOff = dorcGeneCutOff,
+            fripCutOff = fripCutOff,
+            corrPVal = corrPVal,
+            topNGene = topNGene,
+            windowPadSize = windowPadSize,
+            bootstraps = bootstraps
+    }
+
+}

@@ -25,3 +25,12 @@ workflows:
              - dev
          tags:
              - /.*/
+
+   - name: "dorcs-find-dorcs-dev"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-find-dorcs.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - dev
+         tags:
+             - /.*/
