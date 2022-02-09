@@ -127,9 +127,9 @@ workflow wf_rna {
         File share_rna_umi_counts_filtered = group_umi.rna_umi_counts_filtered
         File share_rna_umi_counts_unfiltered = group_umi.rna_umi_counts_unfiltered
 
-        File share_rna_qc_reads_distribution = qc_rna.reads_distribution
-        File share_rna_qc_reads_distribution2 = qc_rna.reads_distribution2
-        File share_rna_qc_reads_distribution_plot = qc_rna.reads_distribution_plot
+        File share_rna_qc_reads_distribution = qc_rna.rna_qc_reads_distribution
+        File share_rna_qc_reads_distribution2 = qc_rna.rna_qc_reads_distribution2
+        File share_rna_qc_reads_distribution_plot = qc_rna.rna_qc_reads_distribution_plot
 
         File share_rna_qc_library_counts = qc_lib_size.lib_size_counts
         File share_rna_qc_library_duplicates = qc_lib_size.lib_size_log

@@ -50,7 +50,7 @@ workflow wf_atac {
     call share_task_count.count_reads_atac as count {
         input:
             cutoff = cutoff,
-            bedpe = bam2bed.atac_fragments_raw,
+            fragments_raw = bam2bed.atac_fragments_raw,
             genome_name = genome_name,
             prefix = prefix,
             cpus = cpus
