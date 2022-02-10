@@ -66,10 +66,6 @@ task find_dorcs {
     runtime {
         docker: docker_image
     }
-
-    meta {
-        author: "Siddarth Wekhande"
-    }
 }
 
 
