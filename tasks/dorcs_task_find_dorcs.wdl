@@ -33,7 +33,7 @@ task find_dorcs {
         Int windowPadSize = 50000
         Int bootstraps = 100
 
-        String docker_image = "polumechanos/dorc_task_find_dorcs"
+        String docker_image = "polumechanos/dorcs_task_find_dorcs"
     }
 
     command {
