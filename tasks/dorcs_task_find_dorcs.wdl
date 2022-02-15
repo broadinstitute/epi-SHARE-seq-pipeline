@@ -64,7 +64,9 @@ task find_dorcs {
     }
 
     runtime {
-        docker: docker_image
+        cpu : 4
+        memory : '16G'
+        docker : docker_image
     }
 }
 
