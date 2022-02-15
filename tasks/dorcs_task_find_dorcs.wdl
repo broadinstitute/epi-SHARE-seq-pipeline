@@ -39,22 +39,22 @@ task find_dorcs {
     command {
         gzip -dc ${atac_fragments} > tmp_fragments.bedpe
 
-        papermill /dorcs_jplot_notebook.ipynb ${output_filename}
-        -p rnaCountMatrix ${rna_matrix}
-        -p atacFragFile tmp_fragments.bedpe
-        -p peakFile ${peak_file}
-        -p savePlotsToDir ${save_plots_to_dir}
-        -p nCores ${n_cores}
-        -p genome ${genome}
-        -p minFeature_RNA ${minFeature_RNA}
-        -p maxFeature_RNA ${maxFeature_RNA}
-        -p percentMT_RNA ${percentMT_RNA}
-        -p minCells_RNA ${minCells_RNA}
-        -p dorcGeneCutOff ${dorcGeneCutOff}
-        -p fripCutOff ${fripCutOff}
-        -p corrPVal ${corrPVal}
-        -p topNGene ${topNGene}
-        -p windowPadSize ${windowPadSize}
+        papermill /dorcs_jplot_notebook.ipynb ${output_filename} \
+        -p rnaCountMatrix ${rna_matrix} \
+        -p atacFragFile tmp_fragments.bedpe \
+        -p peakFile ${peak_file} \
+        -p savePlotsToDir ${save_plots_to_dir} \
+        -p nCores ${n_cores} \
+        -p genome ${genome} \
+        -p minFeature_RNA ${minFeature_RNA} \
+        -p maxFeature_RNA ${maxFeature_RNA} \
+        -p percentMT_RNA ${percentMT_RNA} \
+        -p minCells_RNA ${minCells_RNA} \
+        -p dorcGeneCutOff ${dorcGeneCutOff} \
+        -p fripCutOff ${fripCutOff} \
+        -p corrPVal ${corrPVal} \
+        -p topNGene ${topNGene} \
+        -p windowPadSize ${windowPadSize} \
         -p bootstraps ${bootstraps}
     }
 
