@@ -60,7 +60,7 @@ task find_dorcs {
 
     output {
         File output_tsv = output_filename
-        Array[File] plots = glob("./plots/*.pdf")
+        Array[File] plots = glob("*.pdf")
     }
 
     runtime {
