@@ -63,7 +63,7 @@ task find_dorcs {
         File notebook_output = output_filename
         File seurat_violin_plot = "plots/RNAViolinPlot.png"
         File j_plot = "plots/JPlot.png"
-        File plots_zip = "plots/plots.zip"
+        File plots_zip = "plots.zip"
         File dorcs_genes_summary = "dorc_genes_summary.csv"
         File dorcs_regions_summary = "dorc_regions_summary.csv"
     }
