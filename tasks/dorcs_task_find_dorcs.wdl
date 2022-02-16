@@ -34,6 +34,7 @@ task find_dorcs {
         Int bootstraps = 100
 
         String docker_image = "polumechanos/dorcs_task_find_dorcs"
+        Int mem_gb = 16
     }
 
     command {
@@ -59,13 +60,14 @@ task find_dorcs {
     }
 
     output {
-        File output_tsv = output_filename
-        Array[File] plots = glob("*.pdf")
+        File notebook_output = output_filename
+        File seurat_violin_plot = "plots/RNAViolinPlot.pdf"
+        Array[File] total_plots = glob("plots/*.pdf")
     }
 
     runtime {
         cpu : 4
-        memory : '16G'
+        memory : mem_gb+'G'
         docker : docker_image
     }
 }
