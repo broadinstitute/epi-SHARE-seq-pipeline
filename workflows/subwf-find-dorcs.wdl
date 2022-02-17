@@ -26,9 +26,10 @@ workflow dorcs_workflow {
         Int topNGene = 20
         Int windowPadSize = 50000
         Int bootstraps = 100
+        Int mem_gb = 16
     }
 
-    call find_dorcs.find_dorcs {
+    call find_dorcs.find_dorcs as find_dorcs{
         input:
             rna_matrix = rna_matrix,
             atac_fragments = atac_fragments,
@@ -46,7 +47,17 @@ workflow dorcs_workflow {
             corrPVal = corrPVal,
             topNGene = topNGene,
             windowPadSize = windowPadSize,
-            bootstraps = bootstraps
+            bootstraps = bootstraps,
+            mem_gb = mem_gb
+    }
+
+    output {
+        File notebook_output = find_dorcs.notebook_output
+        File seurat_violin_plot = find_dorcs.seurat_violin_plot
+        File j_plot = find_dorcs.j_plot
+        File plots_zip = find_dorcs.plots_zip
+        File dorcs_genes_summary = find_dorcs.dorcs_genes_summary
+        File dorcs_regions_summary = find_dorcs.dorcs_regions_summary
     }
 
 }

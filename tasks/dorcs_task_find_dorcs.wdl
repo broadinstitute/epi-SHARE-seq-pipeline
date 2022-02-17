@@ -34,37 +34,44 @@ task find_dorcs {
         Int bootstraps = 100
 
         String docker_image = "polumechanos/dorcs_task_find_dorcs"
+        Int mem_gb = 16
     }
 
     command {
         gzip -dc ${atac_fragments} > tmp_fragments.bedpe
 
-        papermill /dorcs_jplot_notebook.ipynb ${output_filename}
-        -p rnaCountMatrix ${rna_matrix}
-        -p atacFragFile tmp_fragments.bedpe
-        -p peakFile ${peak_file}
-        -p savePlotsToDir ${save_plots_to_dir}
-        -p nCores ${n_cores}
-        -p genome ${genome}
-        -p minFeature_RNA ${minFeature_RNA}
-        -p maxFeature_RNA ${maxFeature_RNA}
-        -p percentMT_RNA ${percentMT_RNA}
-        -p minCells_RNA ${minCells_RNA}
-        -p dorcGeneCutOff ${dorcGeneCutOff}
-        -p fripCutOff ${fripCutOff}
-        -p corrPVal ${corrPVal}
-        -p topNGene ${topNGene}
-        -p windowPadSize ${windowPadSize}
+        papermill /dorcs_jplot_notebook.ipynb ${output_filename} \
+        -p rnaCountMatrix ${rna_matrix} \
+        -p atacFragFile tmp_fragments.bedpe \
+        -p peakFile ${peak_file} \
+        -p savePlotsToDir ${save_plots_to_dir} \
+        -p nCores ${n_cores} \
+        -p genome ${genome} \
+        -p minFeature_RNA ${minFeature_RNA} \
+        -p maxFeature_RNA ${maxFeature_RNA} \
+        -p percentMT_RNA ${percentMT_RNA} \
+        -p minCells_RNA ${minCells_RNA} \
+        -p dorcGeneCutOff ${dorcGeneCutOff} \
+        -p fripCutOff ${fripCutOff} \
+        -p corrPVal ${corrPVal} \
+        -p topNGene ${topNGene} \
+        -p windowPadSize ${windowPadSize} \
         -p bootstraps ${bootstraps}
     }
 
     output {
-        File output_tsv = output_filename
-        Array[File] plots = glob("./plots/*.pdf")
+        File notebook_output = output_filename
+        File seurat_violin_plot = "plots/RNAViolinPlot.png"
+        File j_plot = "plots/JPlot.png"
+        File plots_zip = "plots.zip"
+        File dorcs_genes_summary = "dorc_genes_summary.csv"
+        File dorcs_regions_summary = "dorc_regions_summary.csv"
     }
 
     runtime {
-        docker: docker_image
+        cpu : 4
+        memory : mem_gb+'G'
+        docker : docker_image
     }
 }
 

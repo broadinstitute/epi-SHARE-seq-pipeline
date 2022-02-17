@@ -1,3 +1,5 @@
+options(Ncpus = 4)
+
 list.of.packages <- c("dplyr", "Seurat","patchwork","ggplot2","ggrepel","reshape2","circlize","networkD3","GGally","igraph","network","foreach","iterators","hdf5r","ggrastr","BiocManager","remotes","pbmcapply","doSNOW","Rmpfr", "glue","magrittr","pillar","RcppArmadillo","reticulate","rlang","yaml","rpart")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
