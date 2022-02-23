@@ -44,7 +44,7 @@ task share_rna_align {
             --chimOutType WithinBAM \
             --genomeDir ./ \
             --readFilesIn ${fastq_R1}  \
-            --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name} \
+            --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name}. \
             --outFilterMultimapNmax 20 \
             --outFilterScoreMinOverLread 0.3 \
             --outFilterMatchNminOverLread 0.3 \
