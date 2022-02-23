@@ -8,6 +8,9 @@ suppressMessages(library(reshape2))
 suppressMessages(library(Matrix))
 suppressMessages(library(dplyr))
 suppressMessages(library(data.table))
+suppressPackageStartupMessages(library("DropletUtils"))
+suppressPackageStartupMessages(library("rhdf5"))
+suppressPackageStartupMessages(library("SummarizedExperiment"))
 
 # load and convert to count matrix
 outFile1 <- "out.UMIcounts.csv.gz"
@@ -41,9 +44,9 @@ if (length(cells) > step){
       rownames(emptyMx) <- emptygenes
       Mx.sub <- rbind(Mx.sub,emptyMx)
       if (i ==1){
-      	Df2 <- Mx.sub
+        Df2 <- Mx.sub
       } else{
-      	Df2 <- cbind(Df2, Mx.sub[rownames(Df2), ])
+        Df2 <- cbind(Df2, Mx.sub[rownames(Df2), ])
       }
    }
 } else {
@@ -73,10 +76,10 @@ write10xCounts(
 
 print("Finished making h5 file for sample")
 
-## make plots      
+## make plots
 if (ncol(Df2) <= 50000){
    Df2 <- as.matrix(Df2)
-   umiSum <- colSums(Df2); 
+   umiSum <- colSums(Df2);
    geneSum <- as.data.frame(colCounts(Df2>0))
    rownames(geneSum) <- colnames(Df2)
 
@@ -98,7 +101,7 @@ garbage <- dev.off()
 
 # set cutoff of UMI
 Cutoff2 <- 0
-Idx2 <- umiSum > Cutoff2; # sum(Idx) # number of cell pass filter 
+Idx2 <- umiSum > Cutoff2; # sum(Idx) # number of cell pass filter
 # mean(umiSum[Idx2])
 Df4 <- as.data.frame(sort(umiSum, decreasing = T))
 Df4$Count <- c(1: nrow(Df4)); colnames(Df4) <- c("Umi", "Count")
@@ -116,11 +119,11 @@ Df <- as.data.frame(Df)
 file7 <- 'out.UMIvsGenes.pdf'
 pdf(file7)
 plot(Df$UMIs,Df$Genes, xlab="UMIs", ylab = "Detected Genes", main = "Detected Genes per Cell", col="darkblue", pch=16)
-legend("topleft", c(paste("Number of Cells that detected > 0 genes:       ",sum(Df$Genes > 0),sep = ""), 
+legend("topleft", c(paste("Number of Cells that detected > 0 genes:       ",sum(Df$Genes > 0),sep = ""),
 paste("Number of Cells that detected > 10 genes:     ",sum(Df$Genes > 10), sep = ""),
 paste("Number of Cells that detected > 100 genes:   ",sum(Df$Genes > 100),sep = ""),
 paste("Number of Cells that detected > 500 genes:   ",sum(Df$Genes > 500),sep = ""),
-paste("Number of Cells that detected > 1000 genes: ",sum(Df$Genes > 1000), sep = "")), bty="n") 
+paste("Number of Cells that detected > 1000 genes: ",sum(Df$Genes > 1000), sep = "")), bty="n")
 garbage <- dev.off()
 
 print(paste("Number of Cells that detected > 0 genes:    ",sum(Df$Genes > 0), sep = ""))
