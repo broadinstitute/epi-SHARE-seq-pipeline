@@ -107,7 +107,7 @@ task share_rna_align {
                 help: 'Set the number of cpus useb by bowtie2',
                 example: '4'
             }
-        docker_image: {
+        docker_img: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: STAR',
                 example: ['put link to gcr or dockerhub']

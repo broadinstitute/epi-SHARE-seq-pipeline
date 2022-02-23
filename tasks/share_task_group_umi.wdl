@@ -32,7 +32,7 @@ task group_umi_rna {
     Int disk_gb = 50
     Int mem_sort = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    String docker_image = ${default="polumechanos/share_task_group_umi" docker_img}
+    String docker_image = "${default="polumechanos/share_task_group_umi" docker_img}"
 
     String umi_groups_table = "${default="share-seq" prefix}.rna.umi.groups.wdup.${genome_name}.tsv"
     String umi_groups_bed_unfiltered = "${default="share-seq" prefix}.rna.umi.groups.unfiltered.wdup.${genome_name}.bed.gz"
@@ -172,7 +172,7 @@ task group_umi_rna {
                 help: 'Set the number of cpus useb by the task',
                 examples: '4'
             }
-        docker_image: {
+        docker_img: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: samtools',
                 example: ['put link to gcr or dockerhub']

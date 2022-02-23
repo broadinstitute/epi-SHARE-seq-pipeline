@@ -29,7 +29,7 @@ task qc_library {
     Int disk_gb = 50
     Float input_file_size_gb = size(filtered_counts, "G")
     Int mem_gb = 16
-    String docker_image = ${default="polumechanos/share_task_qc_library" docker_img}
+    String docker_image = "${default="polumechanos/share_task_qc_library" docker_img}"
 
 
     command {
@@ -75,7 +75,7 @@ task qc_library {
                 help: 'The name of the reference genome used by the aligner.',
                 examples: ['hg38', 'mm10', 'both']
             }
-        docker_image: {
+        docker_img: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']

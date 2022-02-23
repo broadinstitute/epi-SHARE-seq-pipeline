@@ -25,7 +25,7 @@ task share_rna_update_rgid {
     Int mem_gb = 8
     Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    String docker_image = ${default="polumechanos/share_task_update_rgid" docker_img}
+    String docker_image = "${default="polumechanos/share_task_update_rgid" docker_img}"
 
     String updated_bam = "${default="share-seq" prefix}.rna.reheaded.alignment.${if multimapper then "multi" else "unique"}.${genome_name}.bam"
     String updated_bam_index = "${default="share-seq" prefix}.rna.reheaded.alignment.${if multimapper then "multi" else "unique"}.${genome_name}.bam.bai"
@@ -86,7 +86,7 @@ task share_rna_update_rgid {
                 help: 'Set the number of cpus useb by bowtie2',
                 example: '4'
             }
-        docker_image: {
+        docker_img: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: samtools',
                 example: ['put link to gcr or dockerhub']

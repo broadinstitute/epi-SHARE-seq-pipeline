@@ -30,7 +30,7 @@ task feature_counts_rna {
     Int mem_gb = 16
     Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    String docker_image = ${default="polumechanos/share_task_count_rna" docker_img}
+    String docker_image = "${default="polumechanos/share_task_count_rna" docker_img}"
 
 
     String out_bam = "${default="share-seq" prefix}.rna.featurecounts.alignment.wdup.${if multimapper then "multi" else "unique"}.${if intron then "intron" else "exon"}.${genome_name}.bam"
@@ -136,7 +136,7 @@ task feature_counts_rna {
                 help: 'Set the number of cpus useb by bowtie2',
                 example: '4'
             }
-        docker_image: {
+        docker_img: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: samtools',
                 example: ['put link to gcr or dockerhub']

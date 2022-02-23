@@ -107,7 +107,7 @@ task share_atac_align {
                 help: 'Set the number of cpus useb by bowtie2',
                 default: 16
             }
-        docker_image: {
+        docker_img: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']

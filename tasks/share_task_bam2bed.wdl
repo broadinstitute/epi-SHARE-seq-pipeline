@@ -29,7 +29,7 @@ task share_atac_bam2bed {
     Int mem_gb = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
-    String docker_image = ${default="polumechanos/share_task_bam2bed" docker_img}
+    String docker_image = "${default="polumechanos/share_task_bam2bed" docker_img}"
 
     String filtered_chr_bam = '${default="share-seq" prefix}.filtered_chr.bam'
     String bedpe = 'tmp.bedpe'
@@ -114,7 +114,7 @@ task share_atac_bam2bed {
                 help: 'Set the number of cpus useb by bowtie2',
                 examples: '4'
             }
-        docker_image: {
+        docker_img: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
