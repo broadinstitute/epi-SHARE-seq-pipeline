@@ -73,7 +73,7 @@ task share_atac_align {
         cpu : cpus
         memory : mem_gb+'G'
         disks : 'local-disk ${disk_gb} SSD'
-        docker : docker_image
+        docker : "${docker_image}"
     }
 
     parameter_meta {
