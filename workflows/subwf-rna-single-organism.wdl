@@ -26,7 +26,7 @@ workflow wf_rna {
         String prefix = "shareseq-project"
         String genome_name
         Int? cpus = 16
-        String docker = "polumechanos/share-seq"
+        String? docker
         # Update RGID
         Boolean multimappers = false
         # Assign features

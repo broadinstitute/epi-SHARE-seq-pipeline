@@ -19,13 +19,14 @@ task qc_rna {
         File genes_annotations_bed
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/share_task_qc_rna"
+        String? docker_img
     }
 
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = 8
     Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    String docker_image = ${default="polumechanos/share_task_qc_rna" docker_img}
 
     String reads_distribution = "${default="share-seq" prefix}.rna.qc.${genome_name}.reads_distribution.txt"
     # Generated automatically inside the R scripts

@@ -17,7 +17,7 @@ task count_reads_atac {
         File fragments_raw
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/share_task_count_atac"
+        String? docker_img
     }
 
 
@@ -25,6 +25,7 @@ task count_reads_atac {
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Int mem_gb = 16
+    String docker_image = ${default="polumechanos/share_task_count_atac" docker_img}
 
     String read_groups_freq = 'read_groups_freq.bed'
     String read_groups_freq_rmdup = 'read_groups_freq_rmdup.bed'

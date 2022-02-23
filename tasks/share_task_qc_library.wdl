@@ -19,7 +19,7 @@ task qc_library {
         Int cutoff
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/shre_task_qc_library"
+        String? docker_img
         String assay
 
 
@@ -29,6 +29,7 @@ task qc_library {
     Int disk_gb = 50
     Float input_file_size_gb = size(filtered_counts, "G")
     Int mem_gb = 16
+    String docker_image = ${default="polumechanos/share_task_qc_library" docker_img}
 
 
     command {

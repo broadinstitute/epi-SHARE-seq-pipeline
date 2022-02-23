@@ -21,7 +21,7 @@ task group_umi_rna {
         Int cutoff
         String genome_name
         String mode
-        String? docker_image = "polumechanos/share_task_group_umi"
+        String? docker_img
         String? prefix
 
 
@@ -32,6 +32,7 @@ task group_umi_rna {
     Int disk_gb = 50
     Int mem_sort = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    String docker_image = ${default="polumechanos/share_task_group_umi" docker_img}
 
     String umi_groups_table = "${default="share-seq" prefix}.rna.umi.groups.wdup.${genome_name}.tsv"
     String umi_groups_bed_unfiltered = "${default="share-seq" prefix}.rna.umi.groups.unfiltered.wdup.${genome_name}.bed.gz"

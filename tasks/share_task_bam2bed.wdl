@@ -19,7 +19,7 @@ task share_atac_bam2bed {
         File bam_index
         File chrom_sizes
         String genome_name
-        String? docker_image = "polumechanos/share_task_bam2bed"
+        String? docker_img
         String? prefix
 
 
@@ -29,6 +29,7 @@ task share_atac_bam2bed {
     Int mem_gb = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
+    String docker_image = ${default="polumechanos/share_task_bam2bed" docker_img}
 
     String filtered_chr_bam = '${default="share-seq" prefix}.filtered_chr.bam'
     String bedpe = 'tmp.bedpe'

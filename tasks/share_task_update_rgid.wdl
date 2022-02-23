@@ -17,7 +17,7 @@ task share_rna_update_rgid {
         File bam
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/share_task_update_rgid"
+        String? docker_img
         Int cpus = 4
     }
 
@@ -25,6 +25,7 @@ task share_rna_update_rgid {
     Int mem_gb = 8
     Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    String docker_image = ${default="polumechanos/share_task_update_rgid" docker_img}
 
     String updated_bam = "${default="share-seq" prefix}.rna.reheaded.alignment.${if multimapper then "multi" else "unique"}.${genome_name}.bam"
     String updated_bam_index = "${default="share-seq" prefix}.rna.reheaded.alignment.${if multimapper then "multi" else "unique"}.${genome_name}.bam.bai"

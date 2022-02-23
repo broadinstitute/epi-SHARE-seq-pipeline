@@ -23,7 +23,7 @@ task qc_atac {
         File tss
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/share_task_qc_atac"
+        String? docker_img
 
 
     }
@@ -32,6 +32,7 @@ task qc_atac {
     Int disk_gb = 50
     Float input_file_size_gb = size(raw_bam, "G")
     Int mem_gb = 16
+    String docker_image = ${default="polumechanos/share_task_qc_atac" docker_img}
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'

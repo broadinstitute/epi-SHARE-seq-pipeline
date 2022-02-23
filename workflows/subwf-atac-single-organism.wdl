@@ -26,7 +26,7 @@ workflow wf_atac {
         String genome_name
         Int cutoff
         Int? cpus = 4
-        String docker = "polumechanos/share-seq"
+        String? docker
     }
 
     call share_task_align.share_atac_align as align {
