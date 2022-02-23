@@ -26,7 +26,7 @@ task share_atac_align {
     Int mem_gb = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
-    String docker_image = "${default="polumechanos/share_task_bowtie2" docker_img}"
+    String docker_image = "${default='polumechanos/share_task_bowtie2' docker_img}"
 
     # Define tmp file name
     String unsorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.bam"
