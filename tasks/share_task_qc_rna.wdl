@@ -19,14 +19,13 @@ task qc_rna {
         File genes_annotations_bed
         String genome_name
         String? prefix
-        String? docker_img
+        String docker_image = "polumechanos/share_task_qc_rna"
     }
 
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = 8
     Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    String docker_image = "${default="polumechanos/share_task_qc_rna" docker_img}"
 
     String reads_distribution = "${default="share-seq" prefix}.rna.qc.${genome_name}.reads_distribution.txt"
     # Generated automatically inside the R scripts
@@ -105,7 +104,7 @@ task qc_rna {
                 help: 'Prefix that will be used to name the output files',
                 example: 'MyExperiment'
             }
-        docker_img: {
+        docker_image: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: samtools',
                 example: ['put link to gcr or dockerhub']

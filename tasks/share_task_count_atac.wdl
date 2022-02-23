@@ -16,8 +16,8 @@ task count_reads_atac {
         Int? cutoff = 100
         File fragments_raw
         String genome_name
+        String docker_image = "polumechanos/share_task_count_atac"
         String? prefix
-        String? docker_img
     }
 
 
@@ -25,7 +25,7 @@ task count_reads_atac {
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Int mem_gb = 16
-    String docker_image = "${default="polumechanos/share_task_count_atac" docker_img}"
+
 
     String read_groups_freq = 'read_groups_freq.bed'
     String read_groups_freq_rmdup = 'read_groups_freq_rmdup.bed'
@@ -84,7 +84,7 @@ task count_reads_atac {
                 help: 'Set the number of cpus useb by bowtie2',
                 examples: '4'
             }
-        docker_img: {
+        docker_image: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']

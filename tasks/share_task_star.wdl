@@ -18,7 +18,7 @@ task share_rna_align {
         File genome_index_tar
         String genome_name
         String? prefix
-        String? docker_img
+        String docker_image = "polumechanos/share_task_star"
         Int cpus = 16
     }
     #Float input_file_size_gb = size(input[0], "G")
@@ -26,7 +26,6 @@ task share_rna_align {
     Int mem_gb = 40
     Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    String docker_image = "${default="polumechanos/share_task_star" docker_img}"
 
     # Define the output names
     String sorted_bam = "${default="share-seq" prefix}.rna.align.${genome_name}.sorted.bam"
@@ -107,7 +106,7 @@ task share_rna_align {
                 help: 'Set the number of cpus useb by bowtie2',
                 example: '4'
             }
-        docker_img: {
+        docker_image: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: STAR',
                 example: ['put link to gcr or dockerhub']
