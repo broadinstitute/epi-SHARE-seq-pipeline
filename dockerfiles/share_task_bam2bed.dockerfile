@@ -13,8 +13,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
+    autoconf \
     build-essential \
     git \
+    libcurl4-openssl-dev \
     liblz4-dev \
     liblzma-dev \
     libncurses5-dev \
@@ -31,16 +33,15 @@ RUN mkdir /software
 WORKDIR /software
 ENV PATH="/software:${PATH}"
 
-
-# Install samtools 1.9
-RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
-    git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
-    cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
-
 # Install bedtools 2.29.0
 RUN git clone --branch ${BEDTOOLS_VERSION} --single-branch https://github.com/arq5x/bedtools2.git && \
     cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
 
+# Install samtools 1.9
+RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
+    git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
+    cd samtools && make && make install && cd ../ && rm -rf samtools* && \
+    cd htslib && autoreconf -i && make && make install && cd ../ && rm -rf htslib*
 
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
