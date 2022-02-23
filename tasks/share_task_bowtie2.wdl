@@ -17,7 +17,7 @@ task share_atac_align {
         File fastq_R2
         File genome_index       # This is a tar.gz folder with all the index files.
         String genome_name      # GRCh38, mm10
-        String? docker_img
+        String? docker_image = "polumechanos/share_task_bowtie2"
         String? prefix
     }
 
@@ -26,7 +26,6 @@ task share_atac_align {
     Int mem_gb = 16
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
-    String docker_image = "${default='polumechanos/share_task_bowtie2' docker_img}"
 
     # Define tmp file name
     String unsorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.bam"
@@ -107,7 +106,7 @@ task share_atac_align {
                 help: 'Set the number of cpus useb by bowtie2',
                 default: 16
             }
-        docker_img: {
+        docker_image: {
                 description: 'Docker image.',
                 help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
