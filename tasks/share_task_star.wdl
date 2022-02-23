@@ -26,7 +26,7 @@ task share_rna_align {
     Int mem_gb = 40
     Int disk_gb = 50
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    String docker_image = ${default="polumechanos/share_task_star" docker_img}
+    String docker_image = "${default="polumechanos/share_task_star" docker_img}"
 
     # Define the output names
     String sorted_bam = "${default="share-seq" prefix}.rna.align.${genome_name}.sorted.bam"
