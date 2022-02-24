@@ -74,7 +74,7 @@ task share_atac_bam2bed {
         samtools index -@ ~{cpus} ~{final_bam}
 
         # Compress the bedpe file
-        sort -k1,1 -k2,2n {~bedpe} | bgzip -c > ~{fragments}
+        sort -k1,1 -k2,2n ~{bedpe} | bgzip -c > ~{fragments}
 
     >>>
 
