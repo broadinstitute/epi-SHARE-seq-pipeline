@@ -41,8 +41,8 @@ task share_atac_bam2bed {
 
         # I need to do this because the bam and bai need to be in the same folder but WDL doesn't allow you to
         # co-localize them in the same path.
-        mv ~{bam} in.bam
-        mv ~{bam_index} in.bai
+        ln -s ~{bam} in.bam
+        ln -s ~{bam_index} in.bam.bai
 
         # Remove unwanted chromosomes
         chrs=$(samtools view -H in.bam | \
