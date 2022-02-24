@@ -33,7 +33,7 @@ task share_atac_bam2bed {
     String filtered_chr_bam = '${default="share-seq" prefix}.filtered_chr.bam'
     String bedpe = 'tmp.bedpe'
     String final_bam = '${default="share-seq" prefix}.atac.bam2bed.alignment.cleaned.${genome_name}.bam'
-    String final_bam_index = '$${default="share-seq" prefix}.atac.bam2bed.alignment.cleaned.${genome_name}.bam.bai'
+    String final_bam_index = '${default="share-seq" prefix}.atac.bam2bed.alignment.cleaned.${genome_name}.bam.bai'
     String fragments = '${default="share-seq" prefix}.atac.bam2bed.fragments.${genome_name}.tgz'
 
     command<<<
