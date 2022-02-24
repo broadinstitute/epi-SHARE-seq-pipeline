@@ -117,7 +117,7 @@ workflow wf_rna {
 
         File share_rna_featurecount_alignment = count.rna_featurecount_alignment
         File share_rna_featurecount_alignment_index = count.rna_featurecount_alignment_index
-        File share_rna_featurecount_log = count.rna_featurecount_log
+        #File share_rna_featurecount_log = count.rna_featurecount_log
         File share_rna_featurecount_txt = count.rna_featurecount_txt
         File share_rna_featurecount_summary = count.rna_featurecount_summary
 
