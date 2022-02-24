@@ -66,7 +66,7 @@ task feature_counts_rna {
             -R BAM \
             $temp_filename >> ${featurecount_log}
 
-            temp_filename="${temp_filename}.featureCounts.bam"
+            temp_filename="$temp_filename.featureCounts.bam"
         fi
 
         samtools sort -@ ${cpus} -m 2G -o ${out_bam} $temp_filename
