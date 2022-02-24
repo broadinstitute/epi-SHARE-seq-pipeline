@@ -43,10 +43,10 @@ task qc_atac {
     command {
         set -e
 
-        mv ${raw_bam} in.raw.bam
-        mv ${raw_bam_index} in.raw.bai
-        mv ${filtered_bam} in.filtered.bam
-        mv ${filtered_bam_index} in.filtered.bai
+        ln -s ${raw_bam} in.raw.bam
+        ln -s ${raw_bam_index} in.raw.bam.bai
+        ln -s ${filtered_bam} in.filtered.bam
+        ln -s ${filtered_bam_index} in.filtered.bam.bai
 
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
