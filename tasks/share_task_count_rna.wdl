@@ -40,7 +40,6 @@ task feature_counts_rna {
     command {
         set -e
 
-        mv ${bam} temp_input.bam
 
         # Count reads in exons
         # If multimappers are selected use '-Q 0 -M' options.
@@ -52,9 +51,9 @@ task feature_counts_rna {
             -g ${gene_naming} \
             -o ${default="share-seq" prefix}.rna.featurecounts.alignment.wdup.${if multimapper then "multi" else "unique"}.${if intron then "intron" else "exon"}.${genome_name}.featurecount.txt \
             -R BAM \
-            temp_input.bam >> ${featurecount_log}
+            ${bam} >> ${featurecount_log}
 
-        temp_filename = temp_input.bam.featureCounts.bam
+        temp_filename = "${bam}.featureCounts.bam"
 
         # Extract reads that assigned to genes
         if [[ ${intron} == "true" ]]; then
