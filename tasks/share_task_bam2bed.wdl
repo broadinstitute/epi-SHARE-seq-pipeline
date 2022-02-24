@@ -64,7 +64,7 @@ task share_atac_bam2bed {
             awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6-5,$8}else if($10=="-"){print $1,$2-5,$6+4,$8}}' | \
             sort --parallel=~{cpus} -S ~{mem_gb}G  -k4,4 -k1,1 -k2,2n -k3,3n | \
             uniq -c | \
-            awk -v OFS="\t" '{print $2, $3, $4, $5, $1}' |  > ~{bedpe}
+            awk -v OFS="\t" '{print $2, $3, $4, $5, $1}' > ~{bedpe}
 
         # Convert the bedpe file to a bam file for QC
         bedToBam -i ~{bedpe} -g ~{chrom_sizes} | \

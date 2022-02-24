@@ -53,7 +53,7 @@ task feature_counts_rna {
             -R BAM \
             ${bam} >> ${featurecount_log}
 
-        temp_filename = "${bam}.featureCounts.bam"
+        temp_filename="${bam}.featureCounts.bam"
 
         # Extract reads that assigned to genes
         if [[ ${intron} == "true" ]]; then
@@ -66,7 +66,7 @@ task feature_counts_rna {
             -R BAM \
             $temp_filename >> ${featurecount_log}
 
-            temp_filename=$temp_filename.featureCounts.bam
+            temp_filename="${temp_filename}.featureCounts.bam"
         fi
 
         samtools sort -@ ${cpus} -m 2G -o ${out_bam} $temp_filename
