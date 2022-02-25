@@ -38,9 +38,7 @@ task qc_rna {
         ln -s ${bam} in.bam
         INPUT=in.bam
 
-        ln -s ${genes_annotations_bed} gene.bed.gz
-
-        gunzip gene.bed.gz
+        gzip -dc ${genes_annotations_bed} > gene.bed
 
         samtools index in.bam
 
