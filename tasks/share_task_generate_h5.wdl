@@ -15,7 +15,7 @@ task generate_h5 {
         # This task computs the the gene by barcode matrix.
 
         File filtered_bed
-        String? docker_image = "polumechanos/share_task_generate_h5"
+        String docker_image = "polumechanos/share_task_generate_h5"
 
 
     }
