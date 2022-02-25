@@ -48,9 +48,13 @@ LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
 LABEL software.task="qc_atac"
 
+# To prevent time zone prompt
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
     python \
-    openjdk-8-jre &&\
+    openjdk-8-jre \
+    r-base &&\
     rm -rf /var/lib/apt/lists/*
 
 # Create and setup new user

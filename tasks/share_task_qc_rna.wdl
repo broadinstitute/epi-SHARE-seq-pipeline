@@ -35,10 +35,10 @@ task qc_rna {
     command {
         set -e
         # Calculate gene body coverage and reads distribution
-        mv ${bam} in.bam
+        ln -s ${bam} in.bam
         INPUT=in.bam
 
-        mv ${genes_annotations_bed} gene.bed.gz
+        ln -s ${genes_annotations_bed} gene.bed.gz
 
         gunzip gene.bed.gz
 

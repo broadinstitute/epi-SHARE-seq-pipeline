@@ -42,7 +42,7 @@ task count_reads_atac {
         Rscript $(which sum_reads.R) ~{read_groups_freq} ~{unfiltered_counts} --save
 
         # Count filtered reads
-        zcat ~{fragments_raw} | cut -f4 | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
+        zcat ~{fragments_raw} | cut -f4 | sort | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
 
         Rscript $(which sum_reads.R) ~{read_groups_freq_rmdup} ~{filtered_counts} --save
 
