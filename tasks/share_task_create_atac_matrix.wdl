@@ -10,16 +10,15 @@ task create_atac_matrix {
         File atac_fragment_file
         File peak_file
         File output_h5
-        String docker_image
-           
+        
+        String docker_image  
+        Int mem_gb = 8
     }
     
-    Int disk_gb = 1.0
-    Float mem_gb = 8.0
     
-
+    
     command {
-        set -e Rscript /src/R/create_atac_matrix.R ${atac_fragment_file} ${peak_file} ${output_h5}
+        set -e Rscript $(which create_atac_matrix.R) ${atac_fragment_file} ${peak_file} ${output_h5}
     }
     
     output {
@@ -28,8 +27,6 @@ task create_atac_matrix {
 
     runtime {
         memory : '${mem_gb} GB'
-        disks : 'local-disk ${disk_gb} SSD'
-        preemptible: 0 
         docker: docker_image
     }
     
@@ -55,6 +52,4 @@ task create_atac_matrix {
                 example: ['put link to gcr or dockerhub']
             }
     }
-
-
 }
