@@ -1,8 +1,10 @@
 #!/usr/bin/env Rscript
 
+#Possibly not needed anymore
+
 # Use all available CPU cores for the build
 library(parallel)
-options(Ncpus = detectCores())
+options(Ncpus = 4)
 
 # helper to install and load packages one by one
 # to verify they were installed successfully;
@@ -21,9 +23,6 @@ install.packages("magrittr")
 setup(install.packages, c(
   "IRkernel",
   "hdf5r",
-#   "ggplot2",
-#   "magrittr",
-#   "plyr",
   
   # Cistopics
   "densityClust",
@@ -37,13 +36,13 @@ setup(install.packages, c(
   "devtools"
 ))
 
-setup(BiocManager::install, c(
-  "AnVIL"
-))
+#setup(BiocManager::install, c(
+#  "AnVIL"
+#))
 
-setup(AnVIL::install, c(
+setup(BiocManager::install, c(
   "biovizBase",
-  "BSgenome.Hsapiens.UCSC.hg38",
+  #"BSgenome.Hsapiens.UCSC.hg38",
   "EnsDb.Hsapiens.v86",
   "GenomeInfoDbData",
   "GenomicRanges",
@@ -52,17 +51,19 @@ setup(AnVIL::install, c(
 ))
 
 # Jupyter kernel
-IRkernel::installspec()
+#Run this on the production image
+#IRkernel::installspec()
 
 # Signac installation
-if (!require("Signac", character.only = TRUE)){
-    setRepositories(ind=1:2)
-    install.packages("Signac")
-}
+
+# if (!require("Signac", character.only = TRUE)){
+#     setRepositories(ind=1:2)
+#     install.packages("Signac")
+# }
 
 # ArchR installation
 if (!require("ArchR", character.only = TRUE)) {
-  devtools::install_github("GreenleafLab/ArchR", ref="master", repos = BiocManager::repositories())
+  devtools::install_github("GreenleafLab/ArchR@v1.0.1", repos = BiocManager::repositories())
   devtools::reload(pkg = pkgload::inst("pillar"), quiet = FALSE)
   devtools::reload(pkg = pkgload::inst("magrittr"), quiet = FALSE)
   library(ArchR)
@@ -70,8 +71,9 @@ if (!require("ArchR", character.only = TRUE)) {
 }
 
 # Cistopic installation
-if (!require("cisTopic", character.only = TRUE)) {
-  Sys.setenv(LIBARROW_MINIMAL = "false")
-  devtools::install_github("aertslab/cisTopic")
-  library(cisTopic)
-}
+
+# if (!require("cisTopic", character.only = TRUE)) {
+#   Sys.setenv(LIBARROW_MINIMAL = "false")
+#   devtools::install_github("aertslab/cisTopic")
+#   library(cisTopic)
+# }
