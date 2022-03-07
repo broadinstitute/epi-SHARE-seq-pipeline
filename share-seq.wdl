@@ -105,7 +105,7 @@ workflow ShareSeq {
             cutoff = cutfoff_atac,
             cpus = cpus_atac
     }
-    call find_dorcs{
+    call find_dorcs.wf_dorcs as dorcs{
         input:
             rna_matrix = rna.share_rna_h5_matrix,
             atac_fragments = atac.share_atac_alignment_filtered,
