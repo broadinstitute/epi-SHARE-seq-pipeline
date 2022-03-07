@@ -3,7 +3,7 @@ version 1.0
 # Import the sub-workflow for preprocessing the fastqs.
 import "workflows/subwf-atac-single-organism.wdl" as share_atac
 import "workflows/subwf-rna-single-organism.wdl" as share_rna
-import "task/dorcs_task_find_dorcs.wdl" as find_dorcs
+import "tasks/dorcs_task_find_dorcs.wdl" as find_dorcs
 
 # WDL workflow for SHARE-seq
 
