@@ -23,7 +23,7 @@ workflow ShareSeq {
         File idx_tar_atac
         File tss_bed
         Int? cpus_atac
-        Int? cutoff_atac
+        Int cutoff_atac
 
         # RNA specific inputs
         Boolean multimappers = false
