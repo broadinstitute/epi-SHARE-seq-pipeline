@@ -129,8 +129,6 @@ workflow ShareSeq {
             # Regulatory region around TSS. Default is +/- 50Kb
             windowPadSize = windowPadSize,
             bootstraps = bootstraps,
-
-            docker_image = docker_image_dorcs,
             mem_gb = mem_gb_dorcs
     }
 
