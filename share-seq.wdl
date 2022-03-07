@@ -72,65 +72,65 @@ workflow ShareSeq {
 
     call share_rna.wf_rna as rna{
         input:
-            File read1 = read1_rna,
-            File idx_tar = idx_tar_rna,
-            String prefix = prefix,
-            String genome_name = genome_name,
-            Int? cpus = cpus_rna,
+            read1 = read1_rna,
+            idx_tar = idx_tar_rna,
+            prefix = prefix,
+            genome_name = genome_name,
+            cpus = cpus_rna,
             # Update RGID
-            Boolean multimappers = multimappers,
+            multimappers = multimappers,
             # Assign features
-            Boolean include_multimappers = include_multimappers,
-            Boolean include_introns = include_introns,
-            File gtf = gtf,
-            String gene_naming = gene_naming,
+            include_multimappers = include_multimappers,
+            include_introns = include_introns,
+            gtf = gtf,
+            gene_naming = gene_naming,
             # Group UMI
-            Boolean remove_single_umi = remove_single_umi,
-            String mode = mode,
-            Int cutoff = cutoff_rna,
+            remove_single_umi = remove_single_umi,
+            mode = mode,
+            cutoff = cutoff_rna,
             # Lib_size QC
-            Boolean qc = qc,
-            File genes_annotation_bed = genes_annotation_bed
+            qc = qc,
+            genes_annotation_bed = genes_annotation_bed
     }
     call share_atac.wf_atac as atac{
         input:
-            File read1 = read1_atac,
-            File read2 = read2_atac,
-            File chrom_sizes = chrom_sizes,
-            File idx_tar = idx_tar_atac,
-            File tss_bed = tss_bed,
-            String prefix = prefix,
-            String genome_name = genome_name,
-            Int cutoff = cutfoff_atac,
-            Int? cpus = cpus_atac
+            read1 = read1_atac,
+            read2 = read2_atac,
+            chrom_sizes = chrom_sizes,
+            idx_tar = idx_tar_atac,
+            tss_bed = tss_bed,
+            prefix = prefix,
+            genome_name = genome_name,
+            cutoff = cutfoff_atac,
+            cpus = cpus_atac
     }
     call find_dorcs{
         input:
-            File rna_matrix = rna.share_rna_h5_matrix,
-            File atac_fragments = atac.share_atac_alignment_filtered,
-            File peak_file,
+            rna_matrix = rna.share_rna_h5_matrix,
+            atac_fragments = atac.share_atac_alignment_filtered,
+            peak_file,
 
-            String genome = genome_name,
-            Int n_cores = cpus_dorcs,
-            String save_plots_to_dir = save_plots_to_dir,
-            String output_filename = output_filename,
+            genome = genome_name,
+            n_cores = cpus_dorcs,
+            save_plots_to_dir = save_plots_to_dir,
+            output_filename = output_filename,
 
-            Int minFeature_RNA = minFeature_RNA,
-            Int maxFeature_RNA = maxFeature_RNA,
-            Float percentMT_RNA = percentMT_RNA,
-            Int minCells_RNA = minCells_RNA,
+            minFeature_RNA = minFeature_RNA,
+            maxFeature_RNA = maxFeature_RNA,
+            percentMT_RNA = percentMT_RNA,
+            minCells_RNA = minCells_RNA,
 
-            Int dorcGeneCutOff = dorcGeneCutOff,
-            Float fripCutOff = fripCutOff,
-            Float corrPVal = corrPVal,
-            Int topNGene = topNGene,
+            dorcGeneCutOff = dorcGeneCutOff,
+            fripCutOff = fripCutOff,
+            corrPVal = corrPVal,
+            topNGene = topNGene,
 
             # Regulatory region around TSS. Default is +/- 50Kb
-            Int windowPadSize = windowPadSize,
-            Int bootstraps = bootstraps,
+            windowPadSize = windowPadSize,
+            bootstraps = bootstraps,
 
-            String docker_image = docker_image_dorcs,
-            Int mem_gb = mem_gb_dorcs
+            docker_image = docker_image_dorcs,
+            mem_gb = mem_gb_dorcs
     }
 
 }
