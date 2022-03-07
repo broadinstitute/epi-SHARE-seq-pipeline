@@ -1,5 +1,14 @@
 version: 1.2
 workflows:
+   - name: "SHARE-seq-dev"
+     subclass: WDL
+     primaryDescriptorPath: /share-seq.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - dev
+         tags:
+             - /.*/
+
    - name: "SHARE-seq-atac-processing"
      subclass: WDL
      primaryDescriptorPath: /tasks/subwf-atac-single-organism.wdl
