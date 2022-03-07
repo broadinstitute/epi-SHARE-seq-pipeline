@@ -46,6 +46,7 @@ workflow ShareSeq {
 
 
         # DORCs specific inputs
+        File peak_set
         Int? cpus_dorcs = 4
         String save_plots_to_dir = "TRUE"
         String output_filename = "output.ipynb"
@@ -108,7 +109,7 @@ workflow ShareSeq {
         input:
             rna_matrix = rna.share_rna_h5_matrix,
             atac_fragments = atac.share_atac_alignment_filtered,
-            peak_file,
+            peak_file = peak_set,
 
             genome = genome_name,
             n_cores = cpus_dorcs,
