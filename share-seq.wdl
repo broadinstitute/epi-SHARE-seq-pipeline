@@ -102,7 +102,7 @@ workflow ShareSeq {
             tss_bed = tss_bed,
             prefix = prefix,
             genome_name = genome_name,
-            cutoff = cutfoff_atac,
+            cutoff = cutoff_atac,
             cpus = cpus_atac
     }
     call find_dorcs.wf_dorcs as dorcs{
