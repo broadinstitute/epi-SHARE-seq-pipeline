@@ -108,7 +108,7 @@ workflow ShareSeq {
     call find_dorcs.wf_dorcs as dorcs{
         input:
             rna_matrix = rna.share_rna_h5_matrix,
-            atac_fragments = atac.share_atac_alignment_filtered,
+            atac_fragments = atac.atac_fragments_filtered,
             peak_file = peak_set,
 
             genome = genome_name,
