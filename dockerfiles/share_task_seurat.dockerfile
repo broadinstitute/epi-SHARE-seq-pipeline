@@ -62,7 +62,7 @@ RUN python3 -m pip install jupyter papermill
 
 COPY --from=builder --chown=$USER:$USER ${R_LIBS_USER} ${R_LIBS_USER}
 
-COPY --chown=$USER:$USER src/jupyter_nb/umap_seurat.ipynb /usr/local/bin/
+COPY --chown=$USER:$USER src/jupyter_nb/seurat_notebook.ipynb /usr/local/bin/
 
 USER ${USER}
 
