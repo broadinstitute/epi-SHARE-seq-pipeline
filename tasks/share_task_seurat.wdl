@@ -10,8 +10,8 @@ task seurat {
     input {
         #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
         
-        File rna_matrix = "rna.h5" 
-        String genome = "hg38" 
+        File rna_matrix 
+        String genome 
 
         Int min_features = 200 
         Float percent_MT = 5.0
@@ -40,7 +40,7 @@ task seurat {
         
         String papermill = "TRUE" 
         String output_filename = "output.ipynb"
-        String docker_image = ""
+        String docker_image
         Int mem_gb = 16
     }
 
@@ -68,20 +68,35 @@ task seurat {
         -p prefix ${prefix} \
         -p papermill ${papermill}
     }
+    
+    #Plot filepaths 
+    String violin_plot = 'plots/${prefix}.rna.seurat.violin.${genome}.png'
+    String MT_qc_plot = 'plots/${prefix}.rna.seurat.mitochondria.${genome}.png'
+    String features_plot = 'plots/${prefix}.rna.seurat.features.${genome}.png'
+    String PCA_dim_loadings_plot = 'plots/${prefix}.rna.seurat.dimLoadings.${genome}.png'
+    String PCA_plot = 'plots/${prefix}.rna.seurat.pca.${genome}.png'
+    String heatmap_plot = 'plots/${prefix}.rna.seurat.heatmap.${genome}.png'
+    String jackstraw_plot = 'plots/${prefix}.rna.seurat.jackstraw.${genome}.png'
+    String elbow_plot = 'plots/${prefix}.rna.seurat.elbow.${genome}.png'
+    String umap_plot = 'plots/${prefix}.rna.seurat.umap.${genome}.png'
+    
+    #Other filepaths
+    String seurat_rds = '${prefix}.rna.seurat.rds.${genome}.rds'
+    String plots_zip_dir = 'plots.zip' 
 
     output {
         File notebook_output = output_filename
-        File seurat_violin_plot = glob("plots/*violin*.png")[0]
-        File seurat_mitochondria_qc_plot = glob("plots/*mitochondria*.png")[0]
-        File seurat_features_plot = glob("plots/*features*.png")[0]
-        File seurat_PCA_dim_loadings_plot = glob("plots/*dimLoadings*.png")[0]
-        File seurat_PCA_plot = glob("plots/*pca*.png")[0]
-        File seurat_heatmap_plot = glob("plots/*heatmap*.png")[0]
-        File seurat_jackstraw_plot = glob("plots/*jackstraw*.png")[0]
-        File seurat_elbow_plot = glob("plots/*elbow*.png")[0]
-        File seurat_umap_plot = glob("plots/*umap*.png")[0]
-        File seurat_obj = glob("*.rds")[0]
-        File plots_zip = "plots.zip"
+        File seurat_violin_plot = violin_plot
+        File seurat_mitochondria_qc_plot = MT_qc_plot
+        File seurat_features_plot = features_plot
+        File seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
+        File seurat_PCA_plot = PCA_plot
+        File seurat_heatmap_plot = heatmap_plot
+        File seurat_jackstraw_plot = jackstraw_plot
+        File seurat_elbow_plot = elbow_plot
+        File seurat_umap_plot = umap_plot
+        File seurat_obj = seurat_rds
+        File plots_zip = plots_zip_dir
     }
 
     runtime {

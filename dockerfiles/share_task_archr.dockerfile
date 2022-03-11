@@ -26,10 +26,11 @@ RUN apt-get update -qq && \
 		libtiff5-dev \
 		libxml2-dev \
 		libxt-dev \
+        libmagick++-dev \
 		meson \
 		pkg-config 
 
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('devtools','hdf5r','IRkernel','BiocManager','Cairo','GenomeInfoDbData','GenomicRanges','Rsamtools'));devtools::install_github('GreenleafLab/ArchR@v1.0.1', repos = BiocManager::repositories());ArchR::installExtraPackages()"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('devtools','hdf5r','IRkernel','BiocManager','Cairo','GenomeInfoDbData','GenomicRanges','Rsamtools','magick'));devtools::install_github('GreenleafLab/ArchR@v1.0.1', repos = BiocManager::repositories());ArchR::installExtraPackages();devtools::install_github('immunogenomics/presto')"
 
 #############################################################
 FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79
@@ -39,7 +40,7 @@ LABEL software = "Share-seq pipeline"
 LABEL software.version="0.0.1"
 LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
-LABEL software.task="archr_umap"
+LABEL software.task="archr"
 
 # Create and setup new user
 ENV USER=shareseq
@@ -55,17 +56,17 @@ RUN apt-get update -qq && \
     libxml2 \
     libhdf5-dev \
     libcairo2-dev \
+    libmagick++-dev \
     python3 \
-    python3-pip \
-    tabix
-
+    python3-pip 
+    
 RUN python3 -m pip install jupyter papermill
 
 RUN chown $USER:$USER /usr/local/lib/R
 
 COPY --from=builder --chown=$USER:$USER ${R_LIBS_USER} ${R_LIBS_USER}
 
-COPY --chown=$USER:$USER src/jupyter_nb/umap_archr.ipynb /usr/local/bin/
+COPY --chown=$USER:$USER src/jupyter_nb/archr_notebook.ipynb /usr/local/bin/
 
 USER ${USER}
 
