@@ -22,7 +22,7 @@ task create_atac_matrix {
     }
     
     output {
-        File count_matrix_h5= glob('*.h5')
+        File count_matrix_h5 = ${output_h5}
     }
 
     runtime {
