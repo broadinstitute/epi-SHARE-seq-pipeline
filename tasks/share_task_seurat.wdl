@@ -43,20 +43,20 @@ task seurat {
         Int mem_gb = 16
     }
 
-    #Plot filepaths 
-    String violin_plot = 'plots/${prefix}.rna.seurat.violin.${genome}.png'
-    String MT_qc_plot = 'plots/${prefix}.rna.seurat.mitochondria.${genome}.png'
-    String features_plot = 'plots/${prefix}.rna.seurat.features.${genome}.png'
-    String PCA_dim_loadings_plot = 'plots/${prefix}.rna.seurat.dimLoadings.${genome}.png'
-    String PCA_plot = 'plots/${prefix}.rna.seurat.pca.${genome}.png'
-    String heatmap_plot = 'plots/${prefix}.rna.seurat.heatmap.${genome}.png'
-    String jackstraw_plot = 'plots/${prefix}.rna.seurat.jackstraw.${genome}.png'
-    String elbow_plot = 'plots/${prefix}.rna.seurat.elbow.${genome}.png'
-    String umap_plot = 'plots/${prefix}.rna.seurat.umap.${genome}.png'
-    
+    #Plot filepaths
+    String violin_plot = 'plots/${prefix}.rna.seurat.violin.${genome_name}.png'
+    String MT_qc_plot = 'plots/${prefix}.rna.seurat.mitochondria.${genome_name}.png'
+    String features_plot = 'plots/${prefix}.rna.seurat.features.${genome_name}.png'
+    String PCA_dim_loadings_plot = 'plots/${prefix}.rna.seurat.dimLoadings.${genome_name}.png'
+    String PCA_plot = 'plots/${prefix}.rna.seurat.pca.${genome_name}.png'
+    String heatmap_plot = 'plots/${prefix}.rna.seurat.heatmap.${genome_name}.png'
+    String jackstraw_plot = 'plots/${prefix}.rna.seurat.jackstraw.${genome_name}.png'
+    String elbow_plot = 'plots/${prefix}.rna.seurat.elbow.${genome_name}.png'
+    String umap_plot = 'plots/${prefix}.rna.seurat.umap.${genome_name}.png'
+
     #Other filepaths
-    String seurat_rds = '${prefix}.rna.seurat.rds.${genome}.rds'
-    String plots_zip_dir = 'plots.zip' 
+    String seurat_rds = '${prefix}.rna.seurat.rds.${genome_name}.rds'
+    String plots_zip_dir = 'plots.zip'
 
     command {
 
@@ -82,7 +82,7 @@ task seurat {
         -p prefix ${prefix} \
         -p papermill ${papermill}
     }
-    
+
 
     output {
         File notebook_output = output_filename
@@ -118,9 +118,9 @@ task seurat {
             example: 'TRUE'
         }
 
-        genome: {
+        genome_name: {
             description: 'Reference name',
-            help: 'The name genome reference used to align.',
+            help: 'The name genome_name reference used to align.',
             examples: ['hg38', 'mm10', 'hg19', 'mm9']
         }
 
