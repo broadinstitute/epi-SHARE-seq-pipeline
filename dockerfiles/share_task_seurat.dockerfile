@@ -40,7 +40,7 @@ LABEL software = "Share-seq pipeline"
 LABEL software.version="0.0.1"
 LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
-LABEL software.task="seurat_umap"
+LABEL software.task="seurat"
 
 # Create and setup new user
 ENV USER=shareseq
