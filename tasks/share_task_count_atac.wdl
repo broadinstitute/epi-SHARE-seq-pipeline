@@ -31,7 +31,7 @@ task count_reads_atac {
     String read_groups_freq_rmdup = 'read_groups_freq_rmdup.bed'
     String filtered_counts = '${default="share-seq" prefix}.atac.counts.${genome_name}.filtered.csv'
     String unfiltered_counts = '${default="share-seq" prefix}.atac.counts.${genome_name}.unfiltered.csv'
-    String filtered_fragments = '${default="share-seq" prefix}.atac.counts.fragments.filtered.${genome_name}.bgz'
+    String filtered_fragments = '${default="share-seq" prefix}.atac.counts.fragments.filtered.${genome_name}.tgz'
 
     command <<<
         set -e

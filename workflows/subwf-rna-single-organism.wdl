@@ -44,7 +44,7 @@ workflow wf_rna {
         File genes_annotation_bed
         # Seurat
         Int umap_dim = 10
-        Int umap_resolution = 0.5
+        Float umap_resolution = 0.5
     }
 
     call share_task_align.share_rna_align as align {
