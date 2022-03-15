@@ -82,13 +82,11 @@ workflow wf_atac {
     call share_task_archr.archr as archr{
         input:
         atac_frag = count.atac_fragments_filtered,
-        genome = genome_name
-
-        #ArchR QC
-        min_tss = 4
-        min_frags = 1000
-        doublet_k = 10
-        doublet_knn_method = "UMAP"
+        genome = genome_name,
+        min_tss = 4,
+        min_frags = 1000,
+        doublet_k = 10,
+        doublet_knn_method = "UMAP",
         lsi_method = 1
     }
 
