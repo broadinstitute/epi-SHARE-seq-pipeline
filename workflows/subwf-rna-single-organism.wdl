@@ -115,7 +115,7 @@ workflow wf_rna {
         input:
             rna_matrix = generate_h5.h5_matrix,
             genome_name = genome_name,
-            umap_dim = 1umap_dim,
+            umap_dim = umap_dim,
             umap_resolution = umap_resolution
     }
 
