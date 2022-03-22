@@ -17,7 +17,7 @@ task share_rna_update_rgid {
         File bam
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/share_task_update_rgid"
+        String docker_image = "polumechanos/share_task_update_rgid"
         Int cpus = 4
     }
 

@@ -5,22 +5,16 @@ duplicates based on the barcode + UMI (edit distance <= 1), and chromatin and st
 time, it will output the duplication number for each read, and generate the histogram plot for the read
 per duplication number
 '''
+
+import io
 import os
 import re
 import sys
-from Levenshtein import distance
-import sys
-import matplotlib as mpl
-import numpy as np
-mpl.use('Agg')
-import matplotlib.pyplot as plt
-import pandas as pd
-from optparse import OptionParser
 import time
-import io
+from Levenshtein import distance
+from optparse import OptionParser
 
 # sys.setrecursionlimit(1000000)
-      
 
 if __name__ == "__main__":
     start = time.process_time()
@@ -31,7 +25,7 @@ if __name__ == "__main__":
     opts.add_option("-o", help="<output> tsv file")
     opts.add_option("--m", help="<mismatch> number of mismatch", default="1")
     options, arguments = opts.parse_args()
-    
+
     # return usage information if no argvs given
     if len(sys.argv)==1:
         os.system(sys.argv[0]+" --help")
@@ -39,7 +33,7 @@ if __name__ == "__main__":
     file_in = options.i
     file_out = options.o
     mismatch = options.m
- 
+
     filein = io.BufferedReader(open(file_in, 'rb'))
     fileout = io.BufferedWriter(open(file_out, 'wb'))
 
@@ -59,14 +53,14 @@ if __name__ == "__main__":
         if len(line) == 0:
             break
         count = count + 1
-        
+
         read = line.split('\t')
         chrom_num = read[0]
         start_site = read[1]
         barcode = read[2]
         umi = read[3]
         gene = read[4]
-        
+
 #        print(line)
         ## same starting pos and barcode
         if umi != "GGGGGGGG":
@@ -84,7 +78,7 @@ if __name__ == "__main__":
                         dups += 1
                     else:
                         # print("new UMI")
-                        umiset[barcode] = [umi, 1]      
+                        umiset[barcode] = [umi, 1]
                 else:
                     umiset[barcode] = [umi, 1]
                     # print("new bc")

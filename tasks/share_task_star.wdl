@@ -18,7 +18,7 @@ task share_rna_align {
         File genome_index_tar
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/share_task_star"
+        String docker_image = "polumechanos/share_task_star"
         Int cpus = 16
     }
     #Float input_file_size_gb = size(input[0], "G")
@@ -44,7 +44,7 @@ task share_rna_align {
             --chimOutType WithinBAM \
             --genomeDir ./ \
             --readFilesIn ${fastq_R1}  \
-            --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name} \
+            --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name}. \
             --outFilterMultimapNmax 20 \
             --outFilterScoreMinOverLread 0.3 \
             --outFilterMatchNminOverLread 0.3 \

@@ -5,7 +5,7 @@
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
 
-ENV BOWTIE2_VERSION 2.4.3
+ENV STAR_VERSION 2.5.1b
 ENV SAMTOOLS_VERSION 1.9
 
 # To prevent time zone prompt
@@ -14,7 +14,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
     build-essential \
-    cpanminus \
     git \
     liblz4-dev \
     liblzma-dev \
@@ -31,13 +30,9 @@ RUN mkdir /software
 WORKDIR /software
 ENV PATH="/software:${PATH}"
 
-RUN cpanm Sys::Hostname
-
-# Install Bowtie2 2.3.4.3
-RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-source.zip && \
-    unzip bowtie2-${BOWTIE2_VERSION}-source.zip && cd bowtie2-${BOWTIE2_VERSION} && make static-libs && make STATIC_BUILD=1 && \
-    cp bowtie2* .. && \
-    cd .. && rm -rf bowtie2-${BOWTIE2_VERSION}*
+# Install STAR 2.5.1b
+RUN wget https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz && tar -xzf ${STAR_VERSION}.tar.gz
+RUN cd STAR-${STAR_VERSION} && make STAR && rm ../${STAR_VERSION}.tar.gz && mv /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
 
 # Install samtools 1.9
 RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
@@ -51,7 +46,9 @@ LABEL software = "Share-seq pipeline"
 LABEL software.version="0.0.1"
 LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
-LABEL software.task="Bowtie2"
+LABEL software.task="STAR"
+
+ENV STAR_VERSION 2.5.1b
 
 # Create and setup new user
 ENV USER=shareseq
@@ -65,11 +62,9 @@ RUN groupadd -r $USER &&\
 ENV PATH="/software:${PATH}"
 
 # Copy the compiled software from the builder
-COPY --from=builder --chown=$USER:$USER /software/bowtie2* /software/
+#COPY --from=builder --chown=$USER:$USER /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
-COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/perl/5.32 /usr/lib/x86_64-linux-gnu/perl/5.32/
-
+COPY --from=builder --chown=$USER:$USER /usr/lib/x86_64-linux-gnu/libgomp.so.1 /lib/x86_64-linux-gnu/libncurses.so.6 /lib/x86_64-linux-gnu/
 
 
 USER $USER

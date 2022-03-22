@@ -19,7 +19,7 @@ task qc_library {
         Int cutoff
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/shre_task_qc_library"
+        String docker_image = "polumechanos/share_task_qc_library"
         String assay
 
 

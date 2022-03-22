@@ -17,7 +17,7 @@ task share_atac_align {
         File fastq_R2
         File genome_index       # This is a tar.gz folder with all the index files.
         String genome_name      # GRCh38, mm10
-        String? docker_image = "polumechanos/share_task_bowtie2"
+        String docker_image = "polumechanos/share_task_bowtie2"
         String? prefix
     }
 
@@ -31,7 +31,7 @@ task share_atac_align {
     String unsorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.bam"
     # Define the output names
     String sorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.sorted.bam"
-    String sorted_bai = "${default="share-seq" prefix}.atac.align.${genome_name}.sorted.bai"
+    String sorted_bai = "${default="share-seq" prefix}.atac.align.${genome_name}.sorted.bam.bai"
     String alignment_log = "${default="share-seq" prefix}.atac.align.${genome_name}.log"
 
     command {

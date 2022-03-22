@@ -19,7 +19,7 @@ task share_atac_bam2bed {
         File bam_index
         File chrom_sizes
         String genome_name
-        String? docker_image = "polumechanos/share_task_bam2bed"
+        String docker_image = "polumechanos/share_task_bam2bed"
         String? prefix
 
 
@@ -33,16 +33,16 @@ task share_atac_bam2bed {
     String filtered_chr_bam = '${default="share-seq" prefix}.filtered_chr.bam'
     String bedpe = 'tmp.bedpe'
     String final_bam = '${default="share-seq" prefix}.atac.bam2bed.alignment.cleaned.${genome_name}.bam'
-    String final_bam_index = '$${default="share-seq" prefix}.atac.bam2bed.alignment.cleaned.${genome_name}.bam.bai'
-    String fragments = '${default="share-seq" prefix}.atac.bam2bed.fragments.${genome_name}.tgz'
+    String final_bam_index = '${default="share-seq" prefix}.atac.bam2bed.alignment.cleaned.${genome_name}.bam.bai'
+    String fragments = '${default="share-seq" prefix}.atac.bam2bed.fragments.${genome_name}.bgz'
 
     command<<<
         set -e
 
         # I need to do this because the bam and bai need to be in the same folder but WDL doesn't allow you to
         # co-localize them in the same path.
-        mv ~{bam} in.bam
-        mv ~{bam_index} in.bai
+        ln -s ~{bam} in.bam
+        ln -s ~{bam_index} in.bam.bai
 
         # Remove unwanted chromosomes
         chrs=$(samtools view -H in.bam | \
@@ -64,7 +64,7 @@ task share_atac_bam2bed {
             awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6-5,$8}else if($10=="-"){print $1,$2-5,$6+4,$8}}' | \
             sort --parallel=~{cpus} -S ~{mem_gb}G  -k4,4 -k1,1 -k2,2n -k3,3n | \
             uniq -c | \
-            awk -v OFS="\t" '{print $2, $3, $4, $5, $1}' |  > ~{bedpe}
+            awk -v OFS="\t" '{print $2, $3, $4, $5, $1}' > ~{bedpe}
 
         # Convert the bedpe file to a bam file for QC
         bedToBam -i ~{bedpe} -g ~{chrom_sizes} | \
@@ -74,7 +74,7 @@ task share_atac_bam2bed {
         samtools index -@ ~{cpus} ~{final_bam}
 
         # Compress the bedpe file
-        sort -k1,1 -k2,2n {~bedpe} | bgzip -c > ~{fragments}
+        sort -k1,1 -k2,2n ~{bedpe} | bgzip -c > ~{fragments}
 
     >>>
 

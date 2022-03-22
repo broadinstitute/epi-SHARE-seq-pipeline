@@ -1,90 +1,137 @@
 version 1.0
 
 # Import the sub-workflow for preprocessing the fastqs.
-import "tasks/subwf_preprocess.wdl" as step1
-import "tasks/subwf_atac.wdl" as atac
+import "workflows/subwf-atac-single-organism.wdl" as share_atac
+import "workflows/subwf-rna-single-organism.wdl" as share_rna
+import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 
-# WDLworkflow for SHARE-seq
+# WDL workflow for SHARE-seq
 
 workflow ShareSeq {
-    input {
-        # Preprocess inputs
-        Array[File] R1
-        Array[File] R2
-        # The index files are not requested but putting them as optional creates a lot of problem in the logic of WDL.
-        Array[File] I1 = []
-        Array[File] I2 = []
-        Boolean? qc = false
-        String atac_primers
-        String rna_primers
-        String? prefix
-        Int preprocess_cpus = 4
-        # WDL does not allow to assign None|null|nill if I want to explicitly pass an empty value so I am creating it
-        # myself and use this as a substitute. Look inside the wf_preprocess call to see how I am using it.
-        File? empty
-        
-        # ATAC inputs
-        Array[String] genomes_alignment_atac
-        Array[String] genomes_annotations
-        
-        # RNA inputs
-        #Array[String] genomes_alignment_rna
-    }
-    
-    # Check if the number of reads in input is correct
-    if ( length(R1) != length(R2) ) {
-        call raise_exception as error_input_data { 
-            input:
-                msg = 'Length of inputs for Read_1 and Read_2 are different. Please check your inputs.'
-        }
-    }
-    
-    
-    # Preprocess the input fastqs lane by lane.
-    scatter( i in range(length(R1)) ){
-        # Call the preprocess step for each lane
-        call step1.wf_preprocess {
-            input:
-                read1 = R1[i],
-                read2 = R2[i],
-                # If the user passed the index files than get the file from the array. If not the task expect an 
-                # optional value. WDL does not allow to use None, so I created an optional values that I use instead
-                # of that. TODO: Is there a bettere way to do?
-                index1 = if length(I1) > 0 then I1[i] else empty,
-                index2 = if length(I2) > 0 then I2[i] else empty,
-                qc = qc,
-                atac_primers = atac_primers,
-                rna_primers = rna_primers,
-                prefix = prefix,
-                cpus = preprocess_cpus
-        }
-    }
-    
-    # TODO: If I just have one lane is there a way to skip this?
-    call merge_fastqs{
-        input:
-            atac_read1 = wf_preprocess.atac_processed_fastq_R1,
-            atac_read2 = wf_preprocess.atac_processed_fastq_R2,
-            rna_read1 = wf_preprocess.rna_processed_fastq_R1,
-            prefix = prefix
-    }
-    
-    # Need to make the logic for the indexes
-    scatter( genome in genomes ){
-        call atac.wf_atac{
-            input:
-                fdsafsda
-                genome_name = genome
-        }
-    }
-    
 
-    output {
-        File output1 = merge_fastqs.merged_atac_fastq_R1
-        File output2 = merge_fastqs.merged_atac_fastq_R2
-        File output3 = merge_fastqs.merged_rna_fastq_R1
+    input {
+        # Common inputs
+        String prefix = "shareseq-project"
+        String genome_name
+        Int? cpus = 16
+
+
+        # ATAC specific inputs
+        File chrom_sizes
+        File read1_atac
+        File read2_atac
+        File idx_tar_atac
+        File tss_bed
+        Int? cpus_atac
+        Int cutoff_atac
+
+        # RNA specific inputs
+        Boolean multimappers = false
+        Boolean include_multimappers = false
+        Boolean include_introns = false
+        File read1_rna
+        File genes_annotation_bed
+        File gtf
+        File idx_tar_rna
+        Int? cpus_rna
+        String? gene_naming = "gene_name"
+
+        # Group UMI
+        Boolean remove_single_umi = true
+        String mode = "fast"
+        Int cutoff_rna = 100
+
+        # Lib_size QC
+        Boolean qc = false
+
+
+        # DORCs specific inputs
+        File peak_set
+        Int? cpus_dorcs = 4
+        String save_plots_to_dir = "TRUE"
+        String output_filename = "output.ipynb"
+
+        # Seurat filters
+        Int minFeature_RNA = 200
+        Int maxFeature_RNA = 2500
+        Float percentMT_RNA = 5
+        Int minCells_RNA = 3
+
+        # DORCs filter
+        Int dorcGeneCutOff = 10
+        Float fripCutOff = 0.3
+        Float corrPVal = 0.05
+        Int topNGene = 20
+
+        # Regulatory region around TSS. Default is +/- 50Kb
+        Int windowPadSize = 50000
+        Int bootstraps = 100
+
+        String docker_image_dorcs = "polumechanos/dorcs_task_find_dorcs"
+        Int mem_gb_dorcs = 16
     }
-    
+
+    call share_rna.wf_rna as rna{
+        input:
+            read1 = read1_rna,
+            idx_tar = idx_tar_rna,
+            prefix = prefix,
+            genome_name = genome_name,
+            cpus = cpus_rna,
+            # Update RGID
+            multimappers = multimappers,
+            # Assign features
+            include_multimappers = include_multimappers,
+            include_introns = include_introns,
+            gtf = gtf,
+            gene_naming = gene_naming,
+            # Group UMI
+            remove_single_umi = remove_single_umi,
+            mode = mode,
+            cutoff = cutoff_rna,
+            # Lib_size QC
+            qc = qc,
+            genes_annotation_bed = genes_annotation_bed
+    }
+    call share_atac.wf_atac as atac{
+        input:
+            read1 = read1_atac,
+            read2 = read2_atac,
+            chrom_sizes = chrom_sizes,
+            idx_tar = idx_tar_atac,
+            tss_bed = tss_bed,
+            prefix = prefix,
+            genome_name = genome_name,
+            cutoff = cutoff_atac,
+            cpus = cpus_atac
+    }
+    call find_dorcs.wf_dorcs as dorcs{
+        input:
+            rna_matrix = rna.share_rna_h5_matrix,
+            atac_fragments = atac.share_atac_fragments_filtered,
+            peak_file = peak_set,
+
+            genome = genome_name,
+            n_cores = cpus_dorcs,
+            save_plots_to_dir = save_plots_to_dir,
+            output_filename = output_filename,
+
+            minFeature_RNA = minFeature_RNA,
+            maxFeature_RNA = maxFeature_RNA,
+            percentMT_RNA = percentMT_RNA,
+            minCells_RNA = minCells_RNA,
+
+            dorcGeneCutOff = dorcGeneCutOff,
+            fripCutOff = fripCutOff,
+            corrPVal = corrPVal,
+            topNGene = topNGene,
+
+            # Regulatory region around TSS. Default is +/- 50Kb
+            windowPadSize = windowPadSize,
+            bootstraps = bootstraps,
+            mem_gb = mem_gb_dorcs
+    }
+
 }
 
 

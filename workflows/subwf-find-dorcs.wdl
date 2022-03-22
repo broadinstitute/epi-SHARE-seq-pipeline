@@ -4,7 +4,7 @@ version 1.0
 # Import the tasks called by the pipeline
 import "../tasks/dorcs_task_find_dorcs.wdl" as find_dorcs
 
-workflow dorcs_workflow {
+workflow wf_dorcs {
     input {
         File rna_matrix
         File atac_fragments

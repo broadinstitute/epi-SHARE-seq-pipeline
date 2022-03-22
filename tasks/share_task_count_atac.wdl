@@ -16,8 +16,8 @@ task count_reads_atac {
         Int? cutoff = 100
         File fragments_raw
         String genome_name
+        String docker_image = "polumechanos/share_task_count_atac"
         String? prefix
-        String? docker_image = "polumechanos/share_task_count_atac"
     }
 
 
@@ -25,6 +25,7 @@ task count_reads_atac {
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Int mem_gb = 16
+
 
     String read_groups_freq = 'read_groups_freq.bed'
     String read_groups_freq_rmdup = 'read_groups_freq_rmdup.bed'
@@ -41,7 +42,7 @@ task count_reads_atac {
         Rscript $(which sum_reads.R) ~{read_groups_freq} ~{unfiltered_counts} --save
 
         # Count filtered reads
-        zcat ~{fragments_raw} | cut -f4 | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
+        zcat ~{fragments_raw} | cut -f4 | sort | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
 
         Rscript $(which sum_reads.R) ~{read_groups_freq_rmdup} ~{filtered_counts} --save
 

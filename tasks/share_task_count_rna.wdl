@@ -22,7 +22,7 @@ task feature_counts_rna {
         String gene_naming = "gene_name"
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/share_task_count_rna"
+        String docker_image = "polumechanos/share_task_count_rna"
         Int cpus= 4
     }
 
@@ -40,7 +40,7 @@ task feature_counts_rna {
     command {
         set -e
 
-        mv ${bam} temp_input.bam
+        ln -s ${bam} temp_input.bam
 
         # Count reads in exons
         # If multimappers are selected use '-Q 0 -M' options.
@@ -54,7 +54,7 @@ task feature_counts_rna {
             -R BAM \
             temp_input.bam >> ${featurecount_log}
 
-        temp_filename = temp_input.bam.featureCounts.bam
+        temp_filename="temp_input.bam.featureCounts.bam"
 
         # Extract reads that assigned to genes
         if [[ ${intron} == "true" ]]; then
@@ -67,7 +67,7 @@ task feature_counts_rna {
             -R BAM \
             $temp_filename >> ${featurecount_log}
 
-            temp_filename=$temp_filename.featureCounts.bam
+            temp_filename="$temp_filename.featureCounts.bam"
         fi
 
         samtools sort -@ ${cpus} -m 2G -o ${out_bam} $temp_filename
@@ -78,7 +78,7 @@ task feature_counts_rna {
     output {
         File rna_featurecount_alignment = out_bam
         File rna_featurecount_alignment_index = out_bai
-        File rna_featurecount_log = "featureCount.log"
+        #File rna_featurecount_log = "featureCount.log"
         File rna_featurecount_txt = glob("*.featurecount.txt")[0]
         File rna_featurecount_summary = glob("*.featurecount.txt.summary")[0]
     }

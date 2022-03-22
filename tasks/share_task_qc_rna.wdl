@@ -19,7 +19,7 @@ task qc_rna {
         File genes_annotations_bed
         String genome_name
         String? prefix
-        String? docker_image = "polumechanos/share_task_qc_rna"
+        String docker_image = "polumechanos/share_task_qc_rna"
     }
 
     #Float input_file_size_gb = size(input[0], "G")
@@ -35,12 +35,10 @@ task qc_rna {
     command {
         set -e
         # Calculate gene body coverage and reads distribution
-        mv ${bam} in.bam
+        ln -s ${bam} in.bam
         INPUT=in.bam
 
-        mv ${genes_annotations_bed} gene.bed.gz
-
-        gunzip gene.bed.gz
+        gzip -dc ${genes_annotations_bed} > gene.bed
 
         samtools index in.bam
 
