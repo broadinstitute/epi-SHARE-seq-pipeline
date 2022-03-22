@@ -19,7 +19,7 @@ COMPLEMENT = {'A': 'T',
               'G': 'C',
               'N': 'N'}
 
-def main(bam_file, r1_barcode_sets, r2_barcode_file, r3_barcode_file, sample_type, file_prefix=None):
+def main(bam_file, r1_barcode_sets, r2_barcode_file, r3_barcode_file, library_barcode, sample_type, file_prefix=None):
     """
     Open involved files, read in barcode file and create dictionary,
     write unaligned BAM reads with barcodes matching 
@@ -50,7 +50,7 @@ def main(bam_file, r1_barcode_sets, r2_barcode_file, r3_barcode_file, sample_typ
             fp = open(file_prefix + '_' + value + '_R2.fastq', 'w')
             right[value] = fp
     with pysam.Samfile(bam_file, 'rb', check_sq=False) as bam:
-        process_bam(bam, left, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, sample_type, right)
+        process_bam(bam, left, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, library_barcode, sample_type, right)
 
 def create_barcode_dict(barcode_list):
     """
@@ -78,7 +78,7 @@ def create_barcode_set(file_path):
                 barcodelist.append(item)
     return barcodeset, barcodelist
 
-def process_bam(bam, left, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, sample_type, right):
+def process_bam(bam, left, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, library_barcode, sample_type, right):
     """
     Get reads from open BAM file and write them in pairs.
     """
@@ -104,25 +104,24 @@ def process_bam(bam, left, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, ba
                 
                 if R1 and R2 and R3:
                     # add cell barcodes to queryname
+                    qname_barcode = ",".join([R1,R2,R3,library_barcode])
+                    qname = qname + "_" + qname_barcode
                     read_right = read
                     if sample_type == 'ATAC':
-                        qname = qname + "_" + ",".join([R1,R2,R3])
                         read_left.qname = qname
                         read_right.qname = qname
                         # trim adapters for ATAC
                         where = trim(read_left.seq, read_right.seq)
-                        # left and right contain open file pointers, write read to correct file
-                        # based on R1 barcode
+                        # left and right contain open file pointers
+                        # write read to correct file based on R1 barcode
                         write_read(left[barcode_set[R1]], read_left, where)
                         write_read(right[barcode_set[R1]], read_right, where)
                     elif sample_type == 'RNA':
-                        # add cell barcodes to queryname
-                        qname = qname + "_" + ",".join([R1,R2,R3])
                         # add UMI to queryname
                         qname = qname + "_" + read_right.seq[0:10]
                         read_left.qname = qname
-                        # left contains open file pointers, write read to correct file
-                        # based on R1 barcode
+                        # left contains open file pointers
+                        # write read to correct file based on R1 barcode
                         write_read(left[barcode_set[R1]], read_left)
 
 def check_putative_barcode(barcode_str, barcode_dict):
@@ -214,10 +213,12 @@ if __name__ == '__main__':
                        help='file containing R2 barcodes')
     group.add_argument('r3_barcode_file', 
                        help='file containing R3 barcodes')
+    group.add_argument('library_barcode',
+                       help='library barcode')
     group.add_argument('-p', dest='file_prefix', help='prefix for FASTQ files'
                        ' (default: BAM_FILE_R1.fq, BAM_FILE_R2.fq')
     group.add_argument('-s', dest='sample_type', help='sample type in this library'
                        ' (default: ATAC)', choices=['ATAC', 'RNA'], default='ATAC')
     args = parser.parse_args()
-    main(args.bam_file, args.r1_barcode_sets, args.r2_barcode_file, args.r3_barcode_file, args.sample_type, args.file_prefix)
+    main(args.bam_file, args.r1_barcode_sets, args.r2_barcode_file, args.r3_barcode_file, args.library_barcode, args.sample_type, args.file_prefix)
 
