@@ -1,208 +1,275 @@
 version 1.0
 
 workflow wf_preprocess {
-    
   input {
     # Preprocess inputs
-    File read1
-    File read2
-    File? index1
-    File? index2
-    File yaml
-    Boolean? qc
-    String prefix = "shareseq-project"
-    String output_table_name
-    String terra_project
-    String workspace_name
-    Int? cpus = 4
+    File bcl
+    Map[String,String] libraryBarcodes
+    String readStructure = "50T14S10M28S10M28S9M8B50T"
+    String sequencingCenter = "BI"
+    String dockerImage = "nchernia/share_task_preprocess:2"
   }
 
-  call preprocess {
-    input:
-      R1 = read1,
-      R2 = read2,
-      I1 = index1,
-      I2 = index2,
-      yaml = yaml,
-      qc = qc,
-      prefix = prefix      
-  }
-  
-  call gather_outputs{
-    input:
-      yaml = yaml,
-      read_paths = preprocess.demux_fastqs,
-      new_table_name = output_table_name
+  String untarBcl =
+    'gsutil -m -o GSUtil:parallel_thread_count=1' +
+    ' -o GSUtil:sliced_object_download_max_components=8' +
+    ' cp "~{bcl}" . && ' +
+    'tar xf "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images && ' +
+    'rm "~{basename(bcl)}"'
+
+  call GetLanes { 
+    input: bcl = bcl, untarBcl = untarBcl
   }
 
-  call entities_batch_upsert{
-    input:
-      tsv_file = gather_outputs.load_tsv,
-      terra_project = terra_project,
-      workspace_name = workspace_name
-  }
+  scatter (lane in GetLanes.lanes) {
+   call ExtractBarcodes {
+      input:
+        bcl = bcl,
+        untarBcl = untarBcl,
+        libraryBarcodes = libraryBarcodes,
+        readStructure = readStructure,
+        lane = lane,
+        dockerImage = dockerImage
+    }
 
+    call BasecallsToBams {
+        input:
+          bcl = bcl,
+          untarBcl = untarBcl,
+          barcodes = ExtractBarcodes.barcodes,
+          libraryBarcodes = libraryBarcodes,
+          readStructure = readStructure,
+          lane = lane,
+          sequencingCenter = sequencingCenter,
+          dockerImage = dockerImage
+      }
+  }
   output {
-    File response = entities_batch_upsert.upsert_entities_response
-    File discarded_R1 = preprocess.discarded_fastq_R1
-    File discarded_R2 = preprocess.discarded_fastq_R2
+    Array[Array[File]] bams = BasecallsToBams.bams
+	Array[File] barcodeMetrics = ExtractBarcodes.barcodeMetrics
   }
 }
 
-
-task preprocess {
-  meta {
-    version: 'v0.1'
-    author: 'Eugenio Mattei (emattei@broadinstitute.org) and Sai Ma @ Broad Institute of MIT and Harvard'
-    description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: preprocess task'
-  }
-    
+task GetLanes {
   input {
-    # This function takes in input the raw fastqs from Novaseq or
-    # Nextseq and perform trimming, adapter removal, appending
-    # cell barcode to the read name, and splitting ATAC and RNA.
- 
-    # TODO: Create a log file inside the python script that can be
-    # reported to the user
-    
-    File R1
-    File R2
-    File? I1
-    File? I2
-    File yaml
-    Boolean? qc
-    Int cpus= 4
-    String? prefix
-    String docker_image = "polumechanos/share-seq-undetermined"
-  }
-  
-  Float input_file_size_gb = size(R1, "G")
-  Float mem_gb = 8.0
-  Int disk_gb = round(20.0 + 6 * input_file_size_gb)
-
-  command {
-    set -e
-    
-    mkdir out
-    mkdir discard
-
-    python3 $(which fastq.process.py3.v0.7.py) \
-      -a ${R1} \
-      -b ${R2} \
-      ${if defined(I1) then "--c " + I1 else ""} \
-      ${if defined(I2) then "--d " + I2 else ""} \
-      ${if defined(qc) then "--qc" else ""} \
-      -y ${yaml} \
-      --out ${default="shareseq-project." prefix+"."}preprocessed
-    
-  }
-    
-  output {
-    Array[File] demux_fastqs = glob('out/*.fq.gz')
-    File discarded_fastq_R1 = glob('discard/*R1.fq.gz')[0]
-    File discarded_fastq_R2 = glob('discard/*R2.fq.gz')[0]
-  }
-
-  runtime {
-    cpu : 4
-    memory : '${mem_gb} GB'
-    disks : 'local-disk ${disk_gb} SSD'
-    preemptible: 0 
-    docker: docker_image
+    File bcl
+    String untarBcl
   }
   
   parameter_meta {
-    R1: {
-      description: 'Read1 fastq',
-      help: 'Array containing read1 for different lanes.',
-      example: ['R1.L1', 'R1.L2', 'R1.L3', 'R1.L4']
+    bcl: {
+      localization_optional: true
     }
-    R2: {
-      description: 'Read2 fastq',
-      help: 'Array containing read2 for different lanes.',
-      example: ['R2.L1', 'R2.L2', 'R2.L3', 'R2.L4']
-    }
-    I1: {
-      description: 'Index1 FASTQ',
-      help: 'Optional array containing first index file (check the correct name for this) for different lanes.',
-      example: ['I1.L1', 'I1.L2', 'I1.L3', 'I1.L4']
-    }
-    I2: {
-      description: 'Index2 FASTQ',
-      help: 'Optional array containing first index file (check the correct name for this) for different lanes.',
-      example: ['I2.L1', 'I2.L2', 'I2.L3', 'I2.L4']
-    }
-    yaml: {
-      description: 'YAML file',
-      help: 'YAML-formatted file containing the metadata describing the experiment.'
-    }
-    prefix: {
-      description: 'Prefix for output.',
-      help: 'String to use as prefix for the outputs',
-      examples: "my-experiment"
-    }
-    qc: {
-      description: 'Boolean used to switch to QC run.',
-      default: false,
-      example: [true, false]
-    }
-    docker_image: {
-      description: 'Docker image.',
-      help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein Bio; apt install pigz.',
-      example: ['put link to gcr or dockerhub']
-    }
-    }
-}
-  
-
-
-task gather_outputs {
-    input {
-        Array[String] read_paths
-        File yaml
-        String new_table_name
-        
-        
-    }
-
-    command <<<
-        python3 /software/gather_outputs.py -n ~{new_table_name} -y ~{yaml} -p ~{sep="," read_paths}
-    >>>
-
-    runtime {
-        docker: "polumechanos/share-seq-undetermined"
-
-    }
-
-    output {
-        File load_tsv = "results_load_table.tsv"
-    }
-}
-
-task entities_batch_upsert {
-  input {
-    File      tsv_file
-    String    terra_project
-    String    workspace_name
   }
-    String    docker="polumechanos/update_terra_table"
+  Float bclSize = size(bcl, 'G')
 
+  Int diskSize = ceil(1.9 * bclSize + 5)
+  String diskType = if diskSize > 375 then "SSD" else "LOCAL"
+  Float memory = ceil(5.4 * bclSize + 147) * 0.25
   command {
     set -e
 
-    python3 /software/batch_upsert_entities_standard.py \
-        -t "~{tsv_file}" \
-        -p "~{terra_project}" \
-        -w "~{workspace_name}"
+    ~{untarBcl}
+    tail -n+2 SampleSheet.csv | cut -d, -f2
   }
-
+  output {
+    Array[Int] lanes = read_lines(stdout())
+  }
   runtime {
-    docker : docker
-    memory: "2 GB"
-    cpu: 1
+    docker: "gcr.io/google.com/cloudsdktool/cloud-sdk:alpine"
+    disks: "local-disk ~{diskSize} ~{diskType}"
+    memory: memory + 'G'
+    cpu: 14
+  }
+}
+
+task ExtractBarcodes {
+   input {
+    # This function calls Picard to do library demultiplexing
+     File bcl
+     String untarBcl
+     Map[String,String] libraryBarcodes
+     String readStructure 
+     Int lane 
+     String dockerImage
+  }
+  parameter_meta {
+    bcl: {
+      localization_optional: true
+    }
+  }
+  String barcodeParamsFile = "barcode_params.tsv"
+  String barcodeMetricsFile = "barcode_metrics.tsv"
+  
+  
+  Float bclSize = size(bcl, 'G')
+
+  Int diskSize = ceil(1.9 * bclSize + 5)
+  String diskType = if diskSize > 375 then "SSD" else "LOCAL"
+
+  Float memory = ceil(0.8 * bclSize) * 1.25  # an unusual increase from 0.25 x for black swan
+  Int javaMemory = ceil((memory - 0.5) * 1000)
+  Int nBarcodes = 1
+  command <<<
+    ~{untarBcl}
+ 
+    printf "barcode_name\tbarcode_sequence1" | tee "~{barcodeParamsFile}"
+    while read -r params; do	
+      name=$(echo "${params}" | cut -d$'\t' -f1)
+      barcodes=$(echo "${params}" | cut -d$'\t' -f2-)
+      printf "\n%s\t%s" "${name}" "${barcodes}" | tee -a "~{barcodeParamsFile}"
+    done < "~{write_map(libraryBarcodes)}"
+    # Extract barcodes, write to metrics file
+    java -Xmx~{javaMemory}m -jar /software/picard.jar ExtractIlluminaBarcodes \
+      -BASECALLS_DIR "Data/Intensities/BaseCalls" \
+      -TMP_DIR . \
+      -OUTPUT_DIR . \
+      -BARCODE_FILE "~{barcodeParamsFile}" \
+      -METRICS_FILE "~{barcodeMetricsFile}" \
+      -READ_STRUCTURE "~{readStructure}" \
+      -LANE "~{lane}" \
+      -NUM_PROCESSORS 0 \
+      -COMPRESSION_LEVEL 1 \
+      -GZIP true
+	
+  >>>
+  
+   runtime {
+    docker: dockerImage
+    disks: "local-disk ~{diskSize} ~{diskType}"
+    memory: memory + 'G'
+    cpu: 4
   }
 
   output {
-    String upsert_entities_response = stdout()
+    File barcodeMetrics = barcodeMetricsFile
+    File barcodes = write_lines(glob("*_barcode.txt.gz"))
+  }
+
+}
+
+task BasecallsToBams {
+   input {
+    # This function calls Picard to do library demultiplexing
+     File bcl
+     String untarBcl
+     File barcodes
+     Map[String,String] libraryBarcodes
+     String readStructure 
+     Int lane
+     String sequencingCenter
+     String dockerImage
+  }
+#    Array[Array[String]] round1BarcodeSet
+  
+  parameter_meta {
+    bcl: {
+      localization_optional: true
+    }
+  }
+  
+  String runIdFile = 'run_id.txt'
+  String flowcellIdFile = 'flowcell_id.txt'
+  String instrumentIdFile = 'instrument_id.txt'
+
+  Float bclSize = size(bcl, 'G')
+
+  Int diskSize = ceil(1.9 * bclSize + 5)
+  String diskType = if diskSize > 375 then "SSD" else "LOCAL"
+
+  Float memory = ceil(5.4 * bclSize + 147) * 0.25
+  Int javaMemory = ceil((memory - 0.5) * 1000)
+    
+
+  command <<<
+    set -e
+    
+    ~{untarBcl}
+    time gsutil -m cp -I . < "~{barcodes}"
+    # extract run parameters
+    get_param () {
+      param=$(xmlstarlet sel -t -v "/RunInfo/Run/$1" RunInfo.xml)
+      echo "${param}" | tee "$2"
+    }
+    RUN_ID=$(get_param "@Number" "~{runIdFile}")
+    FLOWCELL_ID=$(get_param "Flowcell" "~{flowcellIdFile}")
+    INSTRUMENT_ID=$(get_param "Instrument" "~{instrumentIdFile}")
+
+    # prepare library parameter files
+    LIBRARY_PARAMS="library_params.tsv"
+    printf "SAMPLE_ALIAS\tLIBRARY_NAME\tOUTPUT\tBARCODE_1\n" | tee "${LIBRARY_PARAMS}"
+    while read -r params; do	
+      name=$(echo "${params}" | cut -d$'\t' -f1)
+      barcodes=$(echo "${params}" | cut -d$'\t' -f2-)
+      printf "\n%s\t%s\t%s_L%d.bam\t%s" \
+        "${name}" "${name}" "${name// /_}" "~{lane}" "${barcodes}" \
+        | tee -a "${LIBRARY_PARAMS}"
+    done < "~{write_map(libraryBarcodes)}"
+    # generate BAMs
+    java -Xmx~{javaMemory}m -jar /software/picard.jar IlluminaBasecallsToSam \
+      BASECALLS_DIR="Data/Intensities/BaseCalls" \
+      BARCODES_DIR=. \
+      TMP_DIR=. \
+      LIBRARY_PARAMS="${LIBRARY_PARAMS}" \
+      IGNORE_UNEXPECTED_BARCODES=true \
+      INCLUDE_NON_PF_READS=false \
+      READ_STRUCTURE="~{readStructure}" \
+      LANE="~{lane}" \
+      RUN_BARCODE="${INSTRUMENT_ID}:${RUN_ID}:${FLOWCELL_ID}" \
+      SEQUENCING_CENTER="~{sequencingCenter}" \
+      NUM_PROCESSORS=0 \
+      MAX_RECORDS_IN_RAM=5000000 
+  >>>
+
+  runtime {
+    docker: dockerImage
+    disks: "local-disk ~{diskSize} ~{diskType}"
+    memory: memory + 'G'
+    cpu: 14
+  }
+  output {
+    Array[File] bams = glob("*.bam")
   }
 }
+
+#task gather_outputs {
+#    input {
+#        Array[String] read_paths
+#        File yaml
+#        String new_table_name       
+#    }
+#
+#    command <<<
+#        python3 /software/gather_outputs.py -n ~{new_table_name} -y ~{yaml} -p ~{sep="," read_paths}
+#    >>>
+#
+#    runtime {
+#        docker: "polumechanos/share-seq-undetermined"
+#    }
+#    output {
+#        File load_tsv = "results_load_table.tsv"
+#    }
+#}
+#task entities_batch_upsert {
+#  input {
+#    File      tsv_file
+#    String    terra_project
+#    String    workspace_name
+#  }
+#    String    docker="polumechanos/update_terra_table"
+#  command {
+#    set -e
+#    python3 /software/batch_upsert_entities_standard.py \
+#        -t "~{tsv_file}" \
+#        -p "~{terra_project}" \
+#        -w "~{workspace_name}"
+#  }
+#  runtime {
+#    docker : docker
+#    memory: "2 GB"
+#    cpu: 1
+#  }
+#  output {
+#    String upsert_entities_response = stdout()
+#  }
+#}
