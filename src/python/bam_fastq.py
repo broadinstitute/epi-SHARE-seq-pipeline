@@ -10,6 +10,7 @@ mismatch tolerance.
 import argparse
 import Levenshtein
 import os
+import sys
 import pysam
 
 # DNA base complements
@@ -29,9 +30,9 @@ def main(bam_file, r1_barcode_sets, r2_barcode_file, r3_barcode_file, library_ba
     r1_barcode_dict = create_barcode_dict(r1_barcodes)
     # Read in barcodes, create dictionary including mismatches
     with open(r2_barcode_file) as f:
-        r2_barcode_dict = create_barcode_dict(f.read().splitlines())
+        r2_barcode_dict = create_barcode_dict(f.read().strip().split())
     with open(r3_barcode_file) as f:
-        r3_barcode_dict = create_barcode_dict(f.read().splitlines())
+        r3_barcode_dict = create_barcode_dict(f.read().strip().split())
 
     barcode_set_values = set(barcode_set.values())
     name, _ = os.path.splitext(bam_file)
@@ -70,12 +71,13 @@ def create_barcode_set(file_path):
     with open(file_path) as f:
         barcodeset = dict()
         barcodelist = list()
+        count = 1
         for row in f.readlines():
             row = row.strip().split()
-            name = row[0]
-            for item in row[1:]:
-                barcodeset[item] = name
+            for item in row:
+                barcodeset[item] = "set" + str(count)
                 barcodelist.append(item)
+            count = count+1
     return barcodeset, barcodelist
 
 def process_bam(bam, left, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, library_barcode, sample_type, right):
@@ -208,11 +210,11 @@ if __name__ == '__main__':
     group.add_argument('bam_file', metavar='BAM_FILE',
                        help='file in BAM format to extract reads from')
     group.add_argument('r1_barcode_sets',
-                       help='file containing biosample splits in R1 barcodes')
+                       help='file containing biosample splits in R1 barcodes, one split per line')
     group.add_argument('r2_barcode_file', 
-                       help='file containing R2 barcodes')
+                       help='file containing R2 barcodes, one line')
     group.add_argument('r3_barcode_file', 
-                       help='file containing R3 barcodes')
+                       help='file containing R3 barcodes, one line')
     group.add_argument('library_barcode',
                        help='library barcode')
     group.add_argument('-p', dest='file_prefix', help='prefix for FASTQ files'
@@ -221,4 +223,3 @@ if __name__ == '__main__':
                        ' (default: ATAC)', choices=['ATAC', 'RNA'], default='ATAC')
     args = parser.parse_args()
     main(args.bam_file, args.r1_barcode_sets, args.r2_barcode_file, args.r3_barcode_file, args.library_barcode, args.sample_type, args.file_prefix)
-
