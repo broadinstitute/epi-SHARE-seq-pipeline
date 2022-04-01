@@ -35,10 +35,10 @@ task archr {
         String heatmap_transpose = "TRUE"
         Int heatmap_label_n = 5
 
-        String heatmap_cutoff = "FDR <= 0.01 & Log2FC >= 0.5" # Fix - use two float as parameters and create the string inside the task
+        String heatmap_cutoff = "'FDR <= 0.01 & Log2FC >= 0.5'" # Fix - use two float as parameters and create the string inside the task
 
         #papermill specific parameters
-        String papermill = "FALSE"
+        String papermill = "TRUE"
 
         String output_filename = "output.ipynb"
         String docker_image = "polumechanos/share_task_archr"
