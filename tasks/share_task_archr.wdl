@@ -84,7 +84,7 @@ task archr {
     output {
         File notebook_output = output_filename
         File archr_umap_plot = umap_plot
-        File archr_heatmap_plot = heatmap_plot
+        File? archr_heatmap_plot = heatmap_plot
         File archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
         File archr_TSS_uniq_frags_filtered_plot = TSS_uniq_frags_filtered_plot
         File archr_fragment_size_dist_plot = fragment_size_dist_plot
