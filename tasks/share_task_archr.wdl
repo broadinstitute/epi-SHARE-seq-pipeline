@@ -41,7 +41,7 @@ task archr {
         String papermill = "TRUE"
 
         String output_filename = "output.ipynb"
-        String docker_image = "polumechanos/share_task_archr"
+        String docker_image = "swekhande/dorcs:epi-umap-archr"
         Int mem_gb = 16
     }
 
