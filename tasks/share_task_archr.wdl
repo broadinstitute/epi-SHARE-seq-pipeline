@@ -43,7 +43,7 @@ task archr {
         String output_filename = "output.ipynb"
         String docker_image = "swekhande/dorcs:epi-umap-archr"
         Int? mem_gb = 32
-        Int? disk_gb = 100
+        Int? disk_gb = 50
     }
 
     #Plot filepaths
@@ -101,7 +101,7 @@ task archr {
         cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
-        disks : 'local-disk ${disk_gb} SSD'
+        disks : 'local-disk ${disk_gb} LOCAL'
         maxRetries : 0
     }
 
