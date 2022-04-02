@@ -15,6 +15,7 @@ task share_atac_bam2bed {
         # This task takes in input the aligned bam file and rmeove the low quality reads, the extra chromosomes, marks
         # the duplicats, and convert to a bedpe file.
         Int? cpus = 4
+        Int? memory_gb = 16
         File bam
         File bam_index
         File chrom_sizes
@@ -26,7 +27,7 @@ task share_atac_bam2bed {
     }
 
     Float input_file_size_gb = size(bam, "G")
-    Int mem_gb = 16
+    Int mem_gb = memory_gb
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
 

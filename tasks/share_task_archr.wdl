@@ -42,7 +42,7 @@ task archr {
 
         String output_filename = "output.ipynb"
         String docker_image = "swekhande/dorcs:epi-umap-archr"
-        Int mem_gb = 16
+        Int? mem_gb = 16
     }
 
     #Plot filepaths
@@ -57,6 +57,8 @@ task archr {
     String arrow_file = '${prefix}.arrow'
     String archr_rds = '${prefix}.atac.archr.rds.${genome}.rds'
     String plots_zip_dir = 'plots.zip'
+
+    Int disk_gb = 50
 
     command {
 
@@ -99,6 +101,8 @@ task archr {
         cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
+        disks : 'local-disk ${disk_gb} SSD'
+        maxRetries : 0
     }
 
     parameter_meta {
