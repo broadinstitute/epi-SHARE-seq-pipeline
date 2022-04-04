@@ -98,7 +98,7 @@ task archr {
     }
 
     runtime {
-        cpu : 4
+        cpu : 32
         memory : mem_gb+'G'
         docker : docker_image
         disks : '/mnt/tmp 50 GiB'
