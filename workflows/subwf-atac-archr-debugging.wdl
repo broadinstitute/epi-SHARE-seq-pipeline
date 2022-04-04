@@ -14,6 +14,7 @@ workflow wf_atac {
     input {
         # ATAC Sub-worflow inputs
         File atac_fragments_filtered
+        File atac_fragments_tabix
         String genome_name
         Int? cpus = 4
         String? docker
@@ -23,6 +24,7 @@ workflow wf_atac {
     call share_task_archr.archr as archr{
         input:
             atac_frag = atac_fragments_filtered,
+            atac_frag_index = atac_fragments_tabix
             genome = genome_name,
             min_tss = 4,
             min_frags = minimum_frags,
