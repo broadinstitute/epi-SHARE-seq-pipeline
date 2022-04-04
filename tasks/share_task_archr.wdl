@@ -63,32 +63,30 @@ task archr {
 
 
     command {
-    
-        Rscript /usr/local/bin/archr_script.R ${atac_frag} ${genome}
 
-        #papermill $(which archr_notebook.ipynb) ${output_filename} \
-        #-p atac_frag ${atac_frag} \
-        #-p genome ${genome} \
-        #-p papermill ${papermill} \
-        #-p min_tss ${min_tss} \
-        #-p min_frags ${min_frags} \
-        #-p add_tile_mat ${add_tile_mat} \
-        #-p add_gene_score_mat ${add_gene_score_mat} \
-        #-p doublet_k ${doublet_k} \
-        #-p doublet_knn_method ${doublet_knn_method} \
-        #-p lsi_method ${lsi_method} \
-        #-p copy_arrow_files ${copy_arrow_files} \
-        #-p iter_LSI_matrix ${iter_LSI_matrix} \
-        #-p threads ${threads} \
-        #-p prefix ${prefix} \
-        #-p marker_features_test ${marker_features_test} \
-        #-p heatmap_transpose ${heatmap_transpose} \
-        #-p heatmap_label_n ${heatmap_label_n} \
-        #-p heatmap_cutoff ${heatmap_cutoff}
+        papermill $(which archr_notebook.ipynb) ${output_filename} \
+        -p atac_frag ${atac_frag} \
+        -p genome ${genome} \
+        -p papermill ${papermill} \
+        -p min_tss ${min_tss} \
+        -p min_frags ${min_frags} \
+        -p add_tile_mat ${add_tile_mat} \
+        -p add_gene_score_mat ${add_gene_score_mat} \
+        -p doublet_k ${doublet_k} \
+        -p doublet_knn_method ${doublet_knn_method} \
+        -p lsi_method ${lsi_method} \
+        -p copy_arrow_files ${copy_arrow_files} \
+        -p iter_LSI_matrix ${iter_LSI_matrix} \
+        -p threads ${threads} \
+        -p prefix ${prefix} \
+        -p marker_features_test ${marker_features_test} \
+        -p heatmap_transpose ${heatmap_transpose} \
+        -p heatmap_label_n ${heatmap_label_n} \
+        -p heatmap_cutoff ${heatmap_cutoff}
     }
 
     output {
-        File? notebook_output = output_filename
+        File notebook_output = output_filename
         File? archr_umap_plot = umap_plot
         File? archr_heatmap_plot = heatmap_plot
         File? archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
@@ -98,14 +96,14 @@ task archr {
 
         File? plots_zip = plots_zip_dir
         File? archr_arrow = arrow_file
-        File? archr_obj = glob("*")
+        File? archr_obj = glob("ArchRLogs/ArchR-createArrows-*.log")[0]
     }
 
     runtime {
-        cpu : 32
+        cpu : 1
         memory : mem_gb+'G'
         docker : docker_image
-        disks : '/mnt/tmp 100 HDD'
+        disks : 'local-disk ${disk_gb} LOCAL'
         maxRetries : 0
         bootDiskSizeGb: 50
     }
