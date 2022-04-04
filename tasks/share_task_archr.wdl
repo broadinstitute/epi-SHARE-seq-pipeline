@@ -103,6 +103,7 @@ task archr {
         docker : docker_image
         disks : 'local-disk ${disk_gb} LOCAL'
         maxRetries : 0
+        bootDiskSizeGb: 50
     }
 
     parameter_meta {
