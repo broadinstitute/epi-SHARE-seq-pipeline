@@ -94,7 +94,7 @@ task archr {
 
         File? plots_zip = plots_zip_dir
         File? archr_arrow = arrow_file
-        File? archr_obj = archr_rds
+        File? archr_obj = glob("ArchRLogs/ArchR-createArrows-*.log")[0]
     }
 
     runtime {
