@@ -34,7 +34,7 @@ workflow wf_atac {
     }
 
     output {
-        File share_atac_archr_notebook_output = archr.notebook_output
+        File? share_atac_archr_notebook_output = archr.notebook_output
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
         File? share_atac_archr_tss_enrichment_raw = archr.archr_TSS_uniq_frags_plot
         File? share_atac_archr_tss_enrichment_filtered = archr.archr_TSS_uniq_frags_filtered_plot
