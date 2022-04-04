@@ -101,7 +101,7 @@ task archr {
         cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
-        disks : 'local-disk ${disk_gb} LOCAL'
+        disks : '/mnt/tmp 50 GiB'
         maxRetries : 0
         bootDiskSizeGb: 50
     }
