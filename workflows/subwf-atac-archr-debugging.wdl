@@ -24,7 +24,7 @@ workflow wf_atac {
             atac_frag = atac_fragments_filtered,
             genome = genome_name,
             min_tss = 4,
-            min_frags = 100,
+            min_frags = 1000,
             doublet_k = 10,
             doublet_knn_method = "UMAP",
             lsi_method = 1
