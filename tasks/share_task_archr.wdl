@@ -44,6 +44,8 @@ task archr {
         String docker_image = "swekhande/dorcs:epi-umap-archr"
         Int? mem_gb = 32
         Int? disk_gb = 50
+        
+        File atac_frag_index 
     }
 
     #Plot filepaths
