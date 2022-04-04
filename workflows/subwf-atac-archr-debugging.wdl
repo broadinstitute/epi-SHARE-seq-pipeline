@@ -17,6 +17,7 @@ workflow wf_atac {
         String genome_name
         Int? cpus = 4
         String? docker
+        Int minimum_frags = 1000
     }
 
     call share_task_archr.archr as archr{
@@ -24,7 +25,7 @@ workflow wf_atac {
             atac_frag = atac_fragments_filtered,
             genome = genome_name,
             min_tss = 4,
-            min_frags = 1000,
+            min_frags = minimum_frags,
             doublet_k = 10,
             doublet_knn_method = "UMAP",
             lsi_method = 1
