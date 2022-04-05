@@ -64,9 +64,7 @@ task archr {
 
     command {
     
-        mkdir tmp
-        
-        echo "hello" >> tmp/temp.arrow
+        Rscript /usr/local/bin/archr_script.R ${atac_frag} ${genome} 
         
         #papermill $(which archr_notebook.ipynb) ${output_filename} \
         #-p atac_frag ${atac_frag} \
@@ -90,8 +88,7 @@ task archr {
     }
 
     output {
-        #File? notebook_output = output_filename
-        File? notebook_output = "tmp/temp.arrow"
+        File? notebook_output = output_filename
         File? archr_umap_plot = umap_plot
         File? archr_heatmap_plot = heatmap_plot
         File? archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
@@ -101,11 +98,11 @@ task archr {
 
         File? plots_zip = plots_zip_dir
         File? archr_arrow = arrow_file
-        File? archr_obj = glob("ArchRLogs/ArchR-createArrows-*.log")[0]
+        File? archr_obj = archr_rds
     }
 
     runtime {
-        cpu : 1
+        cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
         disks : 'local-disk ${disk_gb} LOCAL'
