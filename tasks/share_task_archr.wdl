@@ -63,30 +63,35 @@ task archr {
 
 
     command {
-
-        papermill $(which archr_notebook.ipynb) ${output_filename} \
-        -p atac_frag ${atac_frag} \
-        -p genome ${genome} \
-        -p papermill ${papermill} \
-        -p min_tss ${min_tss} \
-        -p min_frags ${min_frags} \
-        -p add_tile_mat ${add_tile_mat} \
-        -p add_gene_score_mat ${add_gene_score_mat} \
-        -p doublet_k ${doublet_k} \
-        -p doublet_knn_method ${doublet_knn_method} \
-        -p lsi_method ${lsi_method} \
-        -p copy_arrow_files ${copy_arrow_files} \
-        -p iter_LSI_matrix ${iter_LSI_matrix} \
-        -p threads ${threads} \
-        -p prefix ${prefix} \
-        -p marker_features_test ${marker_features_test} \
-        -p heatmap_transpose ${heatmap_transpose} \
-        -p heatmap_label_n ${heatmap_label_n} \
-        -p heatmap_cutoff ${heatmap_cutoff}
+    
+        mkdir tmp
+        
+        echo "hello" >> tmp/temp.arrow
+        
+        #papermill $(which archr_notebook.ipynb) ${output_filename} \
+        #-p atac_frag ${atac_frag} \
+        #-p genome ${genome} \
+        #-p papermill ${papermill} \
+        #-p min_tss ${min_tss} \
+        #-p min_frags ${min_frags} \
+        #-p add_tile_mat ${add_tile_mat} \
+        #-p add_gene_score_mat ${add_gene_score_mat} \
+        #-p doublet_k ${doublet_k} \
+        #-p doublet_knn_method ${doublet_knn_method} \
+        #-p lsi_method ${lsi_method} \
+        #-p copy_arrow_files ${copy_arrow_files} \
+        #-p iter_LSI_matrix ${iter_LSI_matrix} \
+        #-p threads ${threads} \
+        #-p prefix ${prefix} \
+        #-p marker_features_test ${marker_features_test} \
+        #-p heatmap_transpose ${heatmap_transpose} \
+        #-p heatmap_label_n ${heatmap_label_n} \
+        #-p heatmap_cutoff ${heatmap_cutoff}
     }
 
     output {
-        File notebook_output = output_filename
+        #File? notebook_output = output_filename
+        File? notebook_output = "tmp/temp.arrow"
         File? archr_umap_plot = umap_plot
         File? archr_heatmap_plot = heatmap_plot
         File? archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
