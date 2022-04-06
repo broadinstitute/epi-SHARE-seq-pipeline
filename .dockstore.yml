@@ -1,10 +1,11 @@
 version: 1.2
 workflows:
-   - name: "SHARE-seq-dev"
+   - name: "SHARE-seq"
      subclass: WDL
      primaryDescriptorPath: /share-seq.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
+             - main
              - dev
          tags:
              - /.*/
@@ -17,6 +18,7 @@ workflows:
              - main
          tags:
              - /.*/
+
    - name: "SHARE-seq-atac-processing-dev"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
@@ -26,12 +28,30 @@ workflows:
          tags:
              - /.*/
 
+   - name: "SHARE-seq-rna-processing"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-rna-single-organism.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+         tags:
+             - /.*/
+
    - name: "SHARE-seq-rna-processing-dev"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-rna-single-organism.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - dev
+         tags:
+             - /.*/
+
+   - name: "dorcs-find-dorcs"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-find-dorcs.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
          tags:
              - /.*/
 
