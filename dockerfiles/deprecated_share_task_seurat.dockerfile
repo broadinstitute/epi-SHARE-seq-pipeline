@@ -52,7 +52,7 @@ RUN groupadd -r $USER &&\
 ENV R_LIBS_USER=/usr/local/lib/R
 
 RUN apt-get update -qq && \
-	apt-get install -y -qq --no-install-recommends\
+    apt-get install -y -qq --no-install-recommends\
     libxml2 \
     libhdf5-dev \
     python3 \

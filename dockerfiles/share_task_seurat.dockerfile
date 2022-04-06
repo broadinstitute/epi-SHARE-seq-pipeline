@@ -19,26 +19,26 @@ ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
 	apt-get install -y -qq --no-install-recommends\
-		gtk-doc-tools \
-		libcairo2-dev \
-		libcurl4-openssl-dev \
-		libfreetype6-dev \
-		libfribidi-dev \
-		libgsl-dev \
-		libharfbuzz-dev \
-		libhdf5-dev \
-		libjpeg-dev \
-		libmpfr-dev \
-		libpng-dev \
-		libssl-dev \
-		libtiff5-dev \
-		libxml2-dev \
-		libxt-dev \
-		meson \
-		pkg-config \
-        python3 \
-        python3-pip \
-        && rm -rf /var/lib/apt/lists/*
+    gtk-doc-tools \
+    libcairo2-dev \
+    libcurl4-openssl-dev \
+    libfreetype6-dev \
+    libfribidi-dev \
+    libgsl-dev \
+    libharfbuzz-dev \
+    libhdf5-dev \
+    libjpeg-dev \
+    libmpfr-dev \
+    libpng-dev \
+    libssl-dev \
+    libtiff5-dev \
+    libxml2-dev \
+    libxt-dev \
+    meson \
+    pkg-config \
+    python3 \
+    python3-pip && \
+    rm -rf /var/lib/apt/lists/*
         
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','Seurat','IRkernel'))"
 
