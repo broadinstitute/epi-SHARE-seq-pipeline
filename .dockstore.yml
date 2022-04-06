@@ -1,6 +1,15 @@
 version: 1.2
 workflows:
-   - name: "SHARE-seq ATAC processing"
+   - name: "SHARE-seq-dev"
+     subclass: WDL
+     primaryDescriptorPath: /share-seq.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - dev
+         tags:
+             - /.*/
+
+   - name: "SHARE-seq-atac-processing"
      subclass: WDL
      primaryDescriptorPath: /tasks/subwf-atac-single-organism.wdl
      filters:  # All tags, no branches
@@ -8,12 +17,38 @@ workflows:
              - main
          tags:
              - /.*/
-   - name: "SHARE-seq ATAC processing DEV"
+   - name: "SHARE-seq-atac-processing-dev"
      subclass: WDL
-     primaryDescriptorPath: /tasks/subwf-atac-single-organism.wdl
+     primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - dev
          tags:
              - /.*/
 
+   - name: "SHARE-seq-rna-processing-dev"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-rna-single-organism.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - dev
+         tags:
+             - /.*/
+
+   - name: "dorcs-find-dorcs-dev"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-find-dorcs.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - dev
+         tags:
+             - /.*/
+
+   - name: "SHARE-seq-atac-archr-debugging"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-atac-archr-debugging.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - dev
+         tags:
+             - /.*/

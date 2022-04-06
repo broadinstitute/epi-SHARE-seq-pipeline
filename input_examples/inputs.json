@@ -1,0 +1,12 @@
+{
+  "wf_atac.prefix": "String (optional, default = \"shareseq-project\")",
+  "wf_atac.cutoff": "Int",
+  "wf_atac.read2": "File",
+  "wf_atac.genome_name": "String",
+  "wf_atac.chrom_sizes": "File",
+  "wf_atac.read1": "File",
+  "wf_atac.docker": "String (optional, default = \"polumechanos/share-seq\")",
+  "wf_atac.idx_tar": "File",
+  "wf_atac.tss_bed": "File",
+  "wf_atac.cpus": "Int? (optional, default = 4)"
+}
