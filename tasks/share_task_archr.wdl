@@ -3,7 +3,7 @@ version 1.0
 task archr {
     meta {
         version: 'v0.1'
-        author: 'Kevin Dong (kdong@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        author: 'Siddarth Wekhande (swekhand@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: run archr task'
     }
 
@@ -16,7 +16,7 @@ task archr {
 
         #ArchR QC
         Int min_tss = 4
-        Int min_frags = 1000
+        Int min_frags = 100
         String add_tile_mat = "TRUE"
         String add_gene_score_mat = "TRUE"
 
@@ -44,8 +44,6 @@ task archr {
         String docker_image = "swekhande/dorcs:epi-umap-archr"
         Int? mem_gb = 32
         Int? disk_gb = 50
-        
-        File atac_frag_index 
     }
 
     #Plot filepaths
@@ -64,8 +62,6 @@ task archr {
 
     command {
     
-        #Rscript /usr/local/bin/archr_script.R ${atac_frag} ${genome} 
-        
         papermill $(which archr_notebook.ipynb) ${output_filename} \
         -p atac_frag ${atac_frag} \
         -p genome ${genome} \
@@ -88,17 +84,17 @@ task archr {
     }
 
     output {
-        File? notebook_output = output_filename
-        File? archr_umap_plot = umap_plot
+        File notebook_output = output_filename
+        File archr_umap_plot = umap_plot
         File? archr_heatmap_plot = heatmap_plot
-        File? archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
-        File? archr_TSS_uniq_frags_filtered_plot = TSS_uniq_frags_filtered_plot
-        File? archr_fragment_size_dist_plot = fragment_size_dist_plot
-        File? archr_doublet_plot = doublet_summary_plot
+        File archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
+        File archr_TSS_uniq_frags_filtered_plot = TSS_uniq_frags_filtered_plot
+        File archr_fragment_size_dist_plot = fragment_size_dist_plot
+        File archr_doublet_plot = doublet_summary_plot
 
-        File? plots_zip = plots_zip_dir
-        File? archr_arrow = arrow_file
-        File? archr_obj = archr_rds
+        File plots_zip = plots_zip_dir
+        File archr_arrow = arrow_file
+        File archr_obj = archr_rds
     }
 
     runtime {
