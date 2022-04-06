@@ -14,35 +14,32 @@ workflow wf_atac {
     input {
         # ATAC Sub-worflow inputs
         File atac_fragments_filtered
-        File atac_fragments_tabix
         String genome_name
         Int? cpus = 4
         String? docker
-        Int minimum_frags = 1000
     }
 
     call share_task_archr.archr as archr{
         input:
             atac_frag = atac_fragments_filtered,
-            atac_frag_index = atac_fragments_tabix,
             genome = genome_name,
             min_tss = 4,
-            min_frags = minimum_frags,
+            min_frags = 100,
             doublet_k = 10,
             doublet_knn_method = "UMAP",
             lsi_method = 1
     }
 
     output {
-        File? share_atac_archr_notebook_output = archr.notebook_output
+        File share_atac_archr_notebook_output = archr.notebook_output
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
-        File? share_atac_archr_tss_enrichment_raw = archr.archr_TSS_uniq_frags_plot
-        File? share_atac_archr_tss_enrichment_filtered = archr.archr_TSS_uniq_frags_filtered_plot
-        File? share_atac_archr_fragment_size_plot = archr.archr_fragment_size_dist_plot
-        File? share_atac_archr_doublet_plot = archr.archr_doublet_plot
-        File? share_atac_archr_umap_plot = archr.archr_umap_plot
-        File? share_atac_archr_arrow = archr.archr_arrow
-        File? share_atac_archr_obj = archr.archr_obj
-        File? share_atac_archr_plots_zip = archr.plots_zip
+        File share_atac_archr_tss_enrichment_raw = archr.archr_TSS_uniq_frags_plot
+        File share_atac_archr_tss_enrichment_filtered = archr.archr_TSS_uniq_frags_filtered_plot
+        File share_atac_archr_fragment_size_plot = archr.archr_fragment_size_dist_plot
+        File share_atac_archr_doublet_plot = archr.archr_doublet_plot
+        File share_atac_archr_umap_plot = archr.archr_umap_plot
+        File share_atac_archr_arrow = archr.archr_arrow
+        File share_atac_archr_obj = archr.archr_obj
+        File share_atac_archr_plots_zip = archr.plots_zip
     }
 }
