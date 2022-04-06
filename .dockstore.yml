@@ -6,14 +6,6 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-         tags:
-             - /.*/
-
-   - name: "SHARE-seq"
-     subclass: WDL
-     primaryDescriptorPath: /share-seq.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
              - dev
          tags:
              - /.*/
