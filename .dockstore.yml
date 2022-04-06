@@ -12,7 +12,7 @@ workflows:
 
    - name: "SHARE-seq-atac-processing"
      subclass: WDL
-     primaryDescriptorPath: /tasks/subwf-atac-single-organism.wdl
+     primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
      filters:  # All tags, no branches
          branches:
              - main
