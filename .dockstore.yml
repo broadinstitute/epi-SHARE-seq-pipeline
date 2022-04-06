@@ -16,14 +16,6 @@ workflows:
      filters:  # All tags, no branches
          branches:
              - main
-         tags:
-             - /.*/
-
-   - name: "SHARE-seq-atac-processing-dev"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
              - dev
          tags:
              - /.*/
@@ -34,14 +26,6 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-         tags:
-             - /.*/
-
-   - name: "SHARE-seq-rna-processing-dev"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-rna-single-organism.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
              - dev
          tags:
              - /.*/
@@ -52,14 +36,6 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-         tags:
-             - /.*/
-
-   - name: "dorcs-find-dorcs-dev"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-find-dorcs.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
              - dev
          tags:
              - /.*/
