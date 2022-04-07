@@ -10,4 +10,6 @@ Cargo.lock
 **/*.rs.bk
 
 .DS_Store
+
 .ipynb_checkpoints*
+

@@ -1,45 +1,61 @@
 version: 1.2
 workflows:
-   - name: "SHARE-seq-dev"
+   - name: "SHARE-seq"
      subclass: WDL
      primaryDescriptorPath: /share-seq.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
+             - main
              - dev
          tags:
              - /.*/
 
    - name: "SHARE-seq-atac-processing"
      subclass: WDL
-     primaryDescriptorPath: /tasks/subwf-atac-single-organism.wdl
+     primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
      filters:  # All tags, no branches
          branches:
              - main
-         tags:
-             - /.*/
-   - name: "SHARE-seq-atac-processing-dev"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
              - dev
          tags:
              - /.*/
 
-   - name: "SHARE-seq-rna-processing-dev"
+   - name: "SHARE-seq-rna-processing"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-rna-single-organism.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
+             - main
              - dev
          tags:
              - /.*/
 
-   - name: "dorcs-find-dorcs-dev"
+   - name: "dorcs-find-dorcs"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-find-dorcs.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
+             - main
+             - dev
+         tags:
+             - /.*/
+
+   - name: "SHARE-seq-atac-archr"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-atac-archr.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+             - dev
+         tags:
+             - /.*/
+
+   - name: "SHARE-seq-rna-seurat"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-rna-seurat.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
              - dev
          tags:
              - /.*/

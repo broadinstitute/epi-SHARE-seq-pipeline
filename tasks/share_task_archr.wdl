@@ -3,7 +3,7 @@ version 1.0
 task archr {
     meta {
         version: 'v0.1'
-        author: 'Kevin Dong (kdong@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        author: 'Siddarth Wekhande (swekhand@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: run archr task'
     }
 
@@ -16,7 +16,7 @@ task archr {
 
         #ArchR QC
         Int min_tss = 4
-        Int min_frags = 1000
+        Int min_frags = 100
         String add_tile_mat = "TRUE"
         String add_gene_score_mat = "TRUE"
 
@@ -35,14 +35,15 @@ task archr {
         String heatmap_transpose = "TRUE"
         Int heatmap_label_n = 5
 
-        String heatmap_cutoff = "FDR <= 0.01 & Log2FC >= 0.5" # Fix - use two float as parameters and create the string inside the task
+        String heatmap_cutoff = "'FDR <= 0.01 & Log2FC >= 0.5'" # Fix - use two float as parameters and create the string inside the task
 
         #papermill specific parameters
-        String papermill = "FALSE"
+        String papermill = "TRUE"
 
         String output_filename = "output.ipynb"
-        String docker_image = "polumechanos/share_task_archr"
-        Int mem_gb = 16
+        String docker_image = "swekhande/dorcs:epi-umap-archr"
+        Int? mem_gb = 32
+        Int? disk_gb = 50
     }
 
     #Plot filepaths
@@ -58,8 +59,9 @@ task archr {
     String archr_rds = '${prefix}.atac.archr.rds.${genome}.rds'
     String plots_zip_dir = 'plots.zip'
 
-    command {
 
+    command {
+    
         papermill $(which archr_notebook.ipynb) ${output_filename} \
         -p atac_frag ${atac_frag} \
         -p genome ${genome} \
@@ -84,7 +86,7 @@ task archr {
     output {
         File notebook_output = output_filename
         File archr_umap_plot = umap_plot
-        File archr_heatmap_plot = heatmap_plot
+        File? archr_heatmap_plot = heatmap_plot
         File archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
         File archr_TSS_uniq_frags_filtered_plot = TSS_uniq_frags_filtered_plot
         File archr_fragment_size_dist_plot = fragment_size_dist_plot
@@ -99,6 +101,9 @@ task archr {
         cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
+        disks : 'local-disk ${disk_gb} LOCAL'
+        maxRetries : 0
+        bootDiskSizeGb: 50
     }
 
     parameter_meta {

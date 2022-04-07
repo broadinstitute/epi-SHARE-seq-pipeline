@@ -13,6 +13,7 @@ task count_reads_atac {
     input {
         # This task takes in input the fragment file and counts the reads per barcode.
         Int? cpus = 4
+        Int? memory_gb = 16
         Int? cutoff = 100
         File fragments_raw
         String genome_name
@@ -24,14 +25,14 @@ task count_reads_atac {
     Float input_file_size_gb = size(fragments_raw, "G")
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
-    Int mem_gb = 16
+    Int mem_gb = memory_gb
 
 
     String read_groups_freq = 'read_groups_freq.bed'
     String read_groups_freq_rmdup = 'read_groups_freq_rmdup.bed'
     String filtered_counts = '${default="share-seq" prefix}.atac.counts.${genome_name}.filtered.csv'
     String unfiltered_counts = '${default="share-seq" prefix}.atac.counts.${genome_name}.unfiltered.csv'
-    String filtered_fragments = '${default="share-seq" prefix}.atac.counts.fragments.filtered.${genome_name}.tgz'
+    String filtered_fragments = '${default="share-seq" prefix}.atac.counts.fragments.filtered.${genome_name}.tsv.gz'
 
     command <<<
         set -e
