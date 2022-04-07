@@ -27,7 +27,7 @@ workflow wf_rna {
 
     call share_task_seurat.seurat as seurat{
         input:
-            rna_matrix = generate_h5.h5_matrix,
+            rna_matrix = h5_matrix,
             genome_name = genome_name,
             umap_dim = umap_dim,
             umap_resolution = umap_resolution
