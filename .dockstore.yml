@@ -40,11 +40,22 @@ workflows:
          tags:
              - /.*/
 
-   - name: "SHARE-seq-atac-archr-debugging"
+   - name: "SHARE-seq-atac-archr"
      subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-atac-archr-debugging.wdl
+     primaryDescriptorPath: /workflows/subwf-atac-archr.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
+             - main
+             - dev
+         tags:
+             - /.*/
+
+       - name: "SHARE-seq-rna-seurat"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-rna-seurat.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
              - dev
          tags:
              - /.*/
