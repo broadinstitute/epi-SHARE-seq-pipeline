@@ -39,7 +39,6 @@ task share_rna_update_rgid {
 
         cat header.sam <($(which samtools) view -@ ~{cpus} ~{bam} | \
             sed 's/chrMT/chrM/g' | \
-            awk -v OFS='\t' '{$1=substr($1,1,length($1)-34)""substr($1,length($1)-22,23)""substr($1,length($1)-34,11); print $0}') | \
             $(which samtools) view -@ ~{cpus} -bS ~{if multimapper then "-F 256" else "-q 30"} > ~{updated_bam}
 
         $(which samtools) index -@ ~{cpus} ~{updated_bam}
