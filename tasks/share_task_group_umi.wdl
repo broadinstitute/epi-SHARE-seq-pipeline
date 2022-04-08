@@ -110,8 +110,7 @@ task group_umi_rna {
         Rscript $(which sum_reads.R) ~{prefix + "."}rna.~{genome_name}.rmdup.RG.freq.bed ~{umi_counts_filtered} --save
 
         # Remove barcode combinations with less then N reads
-        sed -e 's/,/\t/g' ~{umi_counts_filtered} | \
-            awk -v thr=~{cutoff} -v OFS=',' 'NR>=2 {if($5 >= thr) print $1,$2,$3,$4} ' > ~{umi_barcodes}
+        awk -v thr=100 -v FS=',' -v OFS=',' 'NR>1 && $NF>=thr {NF--; print } ' ~{umi_counts_filtered} > ~{umi_barcodes}
         grep -wFf ~{umi_barcodes} <(zcat ~{umi_groups_bed_unfiltered}) | \
         pigz --fast -p ~{cpus} > ~{umi_groups_bed_filtered}
 
