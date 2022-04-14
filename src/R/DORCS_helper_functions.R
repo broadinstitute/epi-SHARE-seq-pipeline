@@ -11,6 +11,8 @@ library(GenomicRanges)
 library(ggplot2)
 library(ggrepel)
 library(pbmcapply)
+library(data.table)
+library(tidyft)
 
 smoothScoresNN <- function(NNmat,
                            TSSmat,
@@ -170,19 +172,6 @@ splitAndFetch <- function (vec, delim, part)
   }
 }
 
-chunkCore <- function (chunk, A, R, O, met)
-{
-  geneIndices <- O$Gene[chunk[1]:chunk[2]]
-  peakIndices <- O$Peak[chunk[1]:chunk[2]]
-  pairnames <-
-    cbind(rownames(A)[peakIndices], rownames(R)[geneIndices])
-  uniquegenes <- unique(geneIndices)
-  uniquepeaks <- unique(peakIndices)
-  M1 <- as.matrix(Matrix::t(A[uniquepeaks, , drop = FALSE]))
-  M2 <- as.matrix(Matrix::t(R[uniquegenes, , drop = FALSE]))
-  cor(x = M1, y = M2, method = met)[pairnames]
-}
-
 centerCounts <- function (obj,
                           doInChunks = TRUE,
                           chunkSize = 1000)
@@ -246,6 +235,10 @@ centerCounts <- function (obj,
   }
 }
 
+chunkCore <- function (A, R, met, pairnames)
+{
+  cor(x = A, y = R, method = met)[pairnames]
+}
 
 fastGenePeakcorr <-
   function (ATAC.se,
@@ -260,7 +253,8 @@ fastGenePeakcorr <-
             n_bg = 100,
             n_BgPairs = 1e+05,
             n_bootstrapPairs = 1e+05,
-            p.cut = NULL)
+            p.cut = NULL,
+            chunkSize = 50000)
   {
     require(dplyr)
     stopifnot(inherits(ATAC.se, "RangedSummarizedExperiment"))
@@ -275,18 +269,18 @@ fastGenePeakcorr <-
       message("Peaks with 0 accessibility across cells exist ..")
       message("Removing these peaks prior to running correlations ..")
       peaksToKeep <- Matrix::rowSums(assay(ATAC.se)) != 0
-      ATAC.se <- ATAC.se[peaksToKeep,]
+      ATAC.se <- ATAC.se[peaksToKeep, ]
       message("Important: peak indices in returned gene-peak maps are relative to original input SE")
     }
     ATACmat <- assay(ATAC.se)
     if (normalizeATACmat)
-      ATACmat <- centerCounts(ATACmat)
+      ATACmat <- centerCounts(ATACmat, chunkSize = chunkSize)
     peakRanges <- granges(ATAC.se)
     if (any(Matrix::rowSums(RNAmat) == 0)) {
       message("Genes with 0 expression across cells exist ..")
       message("Removing these genes prior to running correlations ..")
       genesToKeep <- Matrix::rowSums(RNAmat) != 0
-      RNAmat <- RNAmat[genesToKeep,]
+      RNAmat <- RNAmat[genesToKeep, ]
     }
     cat("Number of peaks in ATAC data:", nrow(ATACmat), "\n")
     cat("Number of genes in RNA data:", nrow(RNAmat), "\n")
@@ -324,7 +318,7 @@ fastGenePeakcorr <-
       length(genesToKeep),
       "\n"
     )
-    RNAmat <- RNAmat[genesToKeep,]
+    RNAmat <- RNAmat[genesToKeep, ]
     TSSg <- TSSg[genesToKeep]
     TSSflank <- GenomicRanges::flank(TSSg, width = windowPadSize,
                                      both = TRUE)
@@ -364,7 +358,7 @@ fastGenePeakcorr <-
     bgPairPeaks <- sample(1:length(peakSummits), n_BgPairs,
                           replace = TRUE)
     bgPairFeatures <-
-      data.frame(
+      data.table(
         GC = ATAC.se@rowRanges$bias[bgPairPeaks],
         accessibility = Matrix::rowMeans(ATACmat)[bgPairPeaks],
         expression = Matrix::rowMeans(RNAmat)[bgPairGenes]
@@ -372,21 +366,24 @@ fastGenePeakcorr <-
     obPairGenes <- genePeakOv@from
     obPairPeaks <- genePeakOv@to
     obPairFeatures <-
-      data.frame(
+      data.table(
         GC = ATAC.se@rowRanges$bias[obPairPeaks],
         accessibility = Matrix::rowMeans(ATACmat)[obPairPeaks],
         expression = Matrix::rowMeans(RNAmat)[obPairGenes]
       )
-    allPairFeatures <- scale(rbind(as.matrix(bgPairFeatures),
-                                   as.matrix(obPairFeatures)))
-    bgPairFeatures <- allPairFeatures[1:nrow(bgPairFeatures),]
-    obPairFeatures <- allPairFeatures[(nrow(bgPairFeatures) +
-                                         1):(nrow(bgPairFeatures) + nrow(obPairFeatures)),]
+    allPairFeatures <- scale(rbind(as.matrix(bgPairFeatures),as.matrix(obPairFeatures)))
+    bgPairFeatures <- allPairFeatures[1:nrow(bgPairFeatures), ]
+    obPairFeatures <- allPairFeatures[(nrow(bgPairFeatures) + 1):(nrow(bgPairFeatures) + nrow(obPairFeatures)), ]
     bgPairsInds <-
-      FNN::get.knnx(data = bgPairFeatures, query = obPairFeatures,
-                    k = n_bg)$nn.index
+      FNN::get.knnx(
+        data = as.data.frame(bgPairFeatures),
+        query = as.data.frame(obPairFeatures),
+        k = n_bg
+      )$nn.index
+    
     metric <- "spearman"
-    pairsPerChunk <- 500
+    pairsPerChunk <- 1000 #parameter? this affects memory usage - currently takes ~6GB per thread
+    
     pairCorrs <- list()
     for (pairs in c("bg", "ob")) {
       if (pairs == "bg") {
@@ -402,12 +399,12 @@ fastGenePeakcorr <-
       ends[length(ends)] <- numPairs
       chunkList <- mapply(c, starts, ends, SIMPLIFY = FALSE)
       if (pairs == "bg") {
-        corPairs <- data.frame(Gene = bgPairGenes,
+        corPairs <- data.table(Gene = bgPairGenes,
                                Peak = bgPairPeaks,
                                stringsAsFactors = FALSE)
       }
       else if (pairs == "ob") {
-        corPairs <- data.frame(Gene = obPairGenes,
+        corPairs <- data.table(Gene = obPairGenes,
                                Peak = obPairPeaks,
                                stringsAsFactors = FALSE)
       }
@@ -433,12 +430,23 @@ fastGenePeakcorr <-
           .packages = c("dplyr",
                         "Matrix")
         ) %dopar% {
+          chunk = chunkList[[x]]
+          geneIndices <- corPairs$Gene[chunk[1]:chunk[2]]
+          peakIndices <- corPairs$Peak[chunk[1]:chunk[2]]
+          pairnames <-
+            cbind(rownames(ATACmat)[peakIndices], rownames(RNAmat)[geneIndices])
+          uniquegenes <- unique(geneIndices)
+          uniquepeaks <- unique(peakIndices)
+          M1 <-
+            as.matrix(Matrix::t(ATACmat[uniquepeaks, , drop = FALSE]))
+          M2 <-
+            as.matrix(Matrix::t(RNAmat[uniquegenes, , drop = FALSE]))
+          
           corrs <- chunkCore(
-            chunk = chunkList[[x]],
-            A = ATACmat,
-            R = RNAmat,
-            O = corPairs,
-            met = metric
+            A = M1,
+            R = M2,
+            met = metric,
+            pairnames = pairnames
           )
           return(corrs)
         }
@@ -453,7 +461,7 @@ fastGenePeakcorr <-
     cat("\nCalculating correlation P-values based on background distribution ..\n")
     pvals <- pbmcapply::pbmcmapply(function(pair_ind) {
       obcor <- pairCorrs[["ob"]][pair_ind]
-      bgCorrs <- pairCorrs[["bg"]][bgPairsInds[pair_ind,]]
+      bgCorrs <- pairCorrs[["bg"]][bgPairsInds[pair_ind, ]]
       pval <- 1 - stats::pnorm(q = obcor,
                                mean = mean(bgCorrs),
                                sd = sd(bgCorrs))
@@ -465,7 +473,7 @@ fastGenePeakcorr <-
       units(time_elapsed),
       "\n"
     ))
-    corrResults <- data.frame(
+    corrResults <- data.table(
       Peak = obPairPeaks,
       Gene = obPairGenes,
       rObs = pairCorrs[["ob"]],
@@ -474,15 +482,19 @@ fastGenePeakcorr <-
     )
     if (keepPosCorOnly) {
       cat("Only considering positive associations ..\n")
-      corrResults <- corrResults %>% filter(rObs > 0)
+      #corrResults <- corrResults %>% filter(rObs > 0)
+      corrResults = corrResults[rObs > 0]
+      
     }
     if (!keepMultiMappingPeaks) {
       cat("Keeping max correlation for multi-mapping peaks ..\n")
-      corrResults <-
-        corrResults %>% group_by(Peak) %>% filter(rObs ==
-                                                    max(rObs))
+      #corrResults <-
+      # corrResults %>% group_by(Peak) %>% filter(rObs ==
+      #                                            max(rObs))
+      corrResults = corrResults[, .SD[rObs == max(rObs)], by = .(Peak)]
     }
-    corrResults$Gene <- as.character(TSSg$gene_name)[corrResults$Gene]
+    corrResults$Gene <-
+      as.character(TSSg$gene_name)[corrResults$Gene]
     corrResults$Peak <-
       as.numeric(splitAndFetch(rownames(ATACmat)[corrResults$Peak],
                                "Peak", 2))
@@ -491,19 +503,19 @@ fastGenePeakcorr <-
       cat("Using significance cut-off of ",
           p.cut,
           " to subset to resulting associations\n")
-      corrResults <- corrResults[corrResults$pvalZ <= p.cut,]
+      corrResults <- corrResults[pvalZ <= p.cut, ]
     }
     corrResults$PeakRanges <-
       paste(as.character(seqnames(peakRanges.OG[corrResults$Peak])),
             paste(start(peakRanges.OG[corrResults$Peak]), end(peakRanges.OG[corrResults$Peak]),
                   sep = "-"), sep = ":")
-    return(corrResults %>% as.data.frame(stringsAsFactors = FALSE) %>%
-             dplyr::select(c(
-               "Peak", "PeakRanges", "Gene", "rObs",
-               "pvalZ"
-             )))
+    #return(corrResults %>% as.data.frame(stringsAsFactors = FALSE) %>%
+    #        dplyr::select(c(
+    #         "Peak", "PeakRanges", "Gene", "rObs",
+    #        "pvalZ"
+    #     )))
+    return(as.data.frame(corrResults[, .(Peak, PeakRanges, Gene, rObs, pvalZ)]))
   }
-
 
 # Function to make J plot of significant peak-gene assocoations to call DORCs using
 dorcJPlot <-
@@ -511,8 +523,7 @@ dorcJPlot <-
            # table returned from runGenePeakcorr function
            cutoff = 7,
            labelTop = 25,
-           returnGeneList = FALSE,
-           # Returns genes passing numPeak filter
+           returnGeneList = FALSE, # Returns genes passing numPeak filter
            cleanLabels = TRUE,
            labelSize = 4,
            ... ) { # Additional params passed to ggrepel
@@ -520,7 +531,7 @@ dorcJPlot <-
     
     # Count the number of significant peak associations for each gene (without pre-filtering genes)
     numDorcs <-
-      dorcTab  %>% group_by(Gene) %>% tally() %>% arrange(desc(n))
+      dorcTab  %>% dplyr::group_by(Gene) %>% dplyr::tally() %>% dplyr::arrange(desc(n))
     numDorcs$Index <- 1:nrow(numDorcs) # Add order index
     numDorcs %>% as.data.frame(stringsAsFactors = FALSE) -> numDorcs
     rownames(numDorcs) <- numDorcs$Gene
@@ -528,8 +539,8 @@ dorcJPlot <-
     dorcGenes <- numDorcs$Gene[numDorcs$n >= cutoff]
     
     numDorcs <- numDorcs %>%
-      mutate(isDORC = ifelse(Gene %in% dorcGenes, "Yes", "No")) %>%
-      mutate(Label = ifelse(Gene %in% dorcGenes[1:labelTop], Gene, ""))
+      dplyr::mutate(isDORC = ifelse(Gene %in% dorcGenes, "Yes", "No")) %>%
+      dplyr::mutate(Label = ifelse(Gene %in% dorcGenes[1:labelTop], Gene, ""))
     
     # Plot
     dorcG <-
@@ -579,14 +590,22 @@ dorcJPlot <-
   }
 
 
-getCountsFromFrags <- function (fragRanges,
-                                peaks,
+getCountsFromFrags <- function (fragFile,
+                                peakFile,
                                 barcodeList = NULL,
                                 maxFragLength = NULL,
                                 addColData = TRUE) {
+  
+  myFrags = fread(fragFile, sep="\t", header=F, data.table=FALSE)
+  myPeaks = fread(peakFile, sep="\t", header=F, data.table=FALSE)
+  
+  peaks = makeGRangesFromDataFrame(myPeaks,seqnames.field = "V1",start.field = "V2",end.field = "V3",starts.in.df.are.0based = TRUE)
+  GA = makeGRangesFromDataFrame(myFrags, seqnames.field = "V1", start.field = "V2", end.field = "V3", keep.extra.columns = TRUE, starts.in.df.are.0based = TRUE)
+  rm(myFrags)
+  rm(myPeaks)
   start_time <- Sys.time()
   
-  GA <- fragRanges
+  #GA <- fragRanges
   if (!is.null(barcodeList)) {
     cat("Retaining only select barcodes specified within list ..\\n")
     GA <- GA[mcols(GA)[, 1] %in% barcodeList]
@@ -626,14 +645,20 @@ getCountsFromFrags <- function (fragRanges,
   cat(
     "Filtering for valid fragment-peak overlaps based on cut site start/end coordinates ..\n"
   )
-  validHits <- unique.data.frame(rbind(as.data.frame(ovPEAKStarts),
-                                       as.data.frame(ovPEAKEnds)))
-  require(dplyr)
-  cat("Generating matrix of counts ..\n")
-  countdf <-
-    data.frame(peaks = validHits$queryHits, sample = as.numeric(id)[validHits$subjectHits]) %>%
-    dplyr::group_by(peaks, sample) %>% dplyr::summarise(count = n()) %>%
-    data.matrix()
+  #validHits <- unique.data.frame(rbind(as.data.frame(ovPEAKStarts),as.data.frame(ovPEAKEnds)))
+  
+  validHits = merge(as.data.table(ovPEAKStarts), as.data.table(ovPEAKEnds),all=T)
+
+    cat("Generating matrix of counts ..\n")
+  # countdf <-
+  #   data.frame(peaks = validHits$queryHits, sample = as.numeric(id)[validHits$subjectHits]) %>%
+  #   dplyr::group_by(peaks, sample) %>% dplyr::summarise(count = n()) %>%
+  #   data.matrix()
+  
+  ft = as_fst(data.table(peaks = validHits$queryHits, sample = as.numeric(id)[validHits$subjectHits])) #what happens here? data.table removed from memory?
+  
+  countdf = ft %>% select_fst(peaks, sample) %>% arrange(peaks, sample) %>% summarise(count = .N, by = list(peaks, sample)) %>% data.matrix()
+  
   m <- Matrix::sparseMatrix(
     i = c(countdf[, 1], length(peaks)),
     j = c(countdf[, 2], length(uniqueBarcodes)),
@@ -644,7 +669,7 @@ getCountsFromFrags <- function (fragRanges,
   if (addColData) {
     cat("Computing sample read depth and FRIP ..\n")
     colData <-
-      data.frame(
+      data.table(
         sample = uniqueBarcodes,
         depth = as.numeric(denom),
         FRIP = Matrix::colSums(m) / as.numeric(denom),
