@@ -39,7 +39,7 @@ task find_dorcs {
 
     command {
 
-        papermill $(which dorcs_notebook_rds.ipynb) ${output_filename} \
+        papermill /usr/local/bin/dorcs_notebook_rds.ipynb ${output_filename} \
         -p rnaRDS ${rna_rds} \
         -p atacFragFile ${atac_frag_file} \
         -p peakFile ${peak_file} \
