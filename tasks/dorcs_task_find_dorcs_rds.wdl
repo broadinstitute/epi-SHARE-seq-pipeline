@@ -35,6 +35,7 @@ task find_dorcs {
 
         String docker_image = "polumechanos/dorcs_task_find_dorcs"
         Int mem_gb = 16
+        Int disk_gb = 100
     }
 
     command {
@@ -71,5 +72,7 @@ task find_dorcs {
         cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
+        disks : 'local-disk ${disk_gb} LOCAL'
+        maxRetries : 0
     }
 }
