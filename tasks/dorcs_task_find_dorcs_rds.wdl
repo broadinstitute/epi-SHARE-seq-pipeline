@@ -63,7 +63,7 @@ task find_dorcs {
         -p bootstraps ${bootstraps} \
         -p numNearestNeighbor ${numNearestNeighbor} \
         -p numBackgroundPairs ${numBackgroundPairs} \
-        -p chunkSize {chunkSize}
+        -p chunkSize ${chunkSize}
     }
 
     output {
