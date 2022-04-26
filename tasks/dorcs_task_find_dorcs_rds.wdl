@@ -34,8 +34,8 @@ task find_dorcs {
         Int bootstraps = 100
         
         Int numNearestNeighbor = 100
-        Int numBackgroundPairs = 100000
-        Int chunkSize = 50000
+        Float numBackgroundPairs = 100000
+        Float chunkSize = 50000
 
         String docker_image = "polumechanos/dorcs_task_find_dorcs"
         Int mem_gb = 16

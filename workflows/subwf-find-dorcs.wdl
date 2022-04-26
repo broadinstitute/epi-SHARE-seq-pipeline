@@ -30,8 +30,8 @@ workflow wf_dorcs {
         Int disk_gb = 100
         
         Int numNearestNeighbor = 100
-        Int numBackgroundPairs = 100000
-        Int chunkSize = 50000
+        Float numBackgroundPairs = 100000
+        Float chunkSize = 50000
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
