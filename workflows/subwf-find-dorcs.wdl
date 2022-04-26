@@ -28,6 +28,10 @@ workflow wf_dorcs {
         Int bootstraps = 100
         Int mem_gb = 16
         Int disk_gb = 100
+        
+        Int numNearestNeighbor = 100
+        Int numBackgroundPairs = 100000
+        Int chunkSize = 50000
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
@@ -48,6 +52,9 @@ workflow wf_dorcs {
             corrPVal = corrPVal,
             topNGene = topNGene,
             windowPadSize = windowPadSize,
+            numNearestNeighbor = numNearestNeighbor,
+            numBackgroundPairs = numBackgroundPairs,
+            chunkSize = chunkSize,
             bootstraps = bootstraps,
             mem_gb = mem_gb,
             disk_gb = disk_gb

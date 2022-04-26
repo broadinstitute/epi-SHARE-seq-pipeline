@@ -32,6 +32,10 @@ task find_dorcs {
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
         Int bootstraps = 100
+        
+        Int numNearestNeighbor = 100
+        Int numBackgroundPairs = 100000
+        Int chunkSize = 50000
 
         String docker_image = "polumechanos/dorcs_task_find_dorcs"
         Int mem_gb = 16
@@ -56,7 +60,10 @@ task find_dorcs {
         -p corrPVal ${corrPVal} \
         -p topNGene ${topNGene} \
         -p windowPadSize ${windowPadSize} \
-        -p bootstraps ${bootstraps}
+        -p bootstraps ${bootstraps} \
+        -p numNearestNeighbor ${numNearestNeighbor} \
+        -p numBackgroundPairs ${numBackgroundPairs} \
+        -p chunkSize {chunkSize}
     }
 
     output {
