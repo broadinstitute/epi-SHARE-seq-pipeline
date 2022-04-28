@@ -1,7 +1,7 @@
 substitutions:
     _DELETION_POLICY: delete
     _REPO_OWNER: broadinstitute
-    _GCR_REGISTRY: us.gcr.io
+    _GCR_REGISTRY: us-docker.pkg.dev
     _BUCKETS_REGION: us-east1
 
 steps:
