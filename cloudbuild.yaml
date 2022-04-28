@@ -1,13 +1,13 @@
 substitutions:
     _DELETION_POLICY: delete
     _REPO_OWNER: broadinstitute
-    _GCR_REGISTRY: us-docker.pkg.dev
+    _GCR_REGISTRY: us.gcr.io
     _BUCKETS_REGION: us-east1
 
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bam2bed:latest',
           '-f',
           'dockerfiles/share_task_bam2bed.dockerfile',
           '.' ]
@@ -15,4 +15,4 @@ steps:
 # Docker Push
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bam2bed:latest']
