@@ -16,3 +16,4 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bam2bed:latest']
+timeout: 5400s
