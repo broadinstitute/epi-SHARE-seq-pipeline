@@ -9,7 +9,7 @@ steps:
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest',
           '-f',
-          'dockerfiles/share_task_bam2bed.dockerfile'
+          'dockerfiles/share_task_bam2bed.dockerfile',
           '.' ]
 # Docker Push
 - name: '${_GCR_REGISTRY}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed'
