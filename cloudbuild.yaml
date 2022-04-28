@@ -5,7 +5,7 @@ substitutions:
     _BUCKETS_REGION: us-east1
 
 steps:
-- name: '${_GCR_REGISTRY}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed'
+- name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest',
           '-f',
