@@ -5,16 +5,13 @@ substitutions:
     _BUCKETS_REGION: us-east1
 
 steps:
-    - name: '${_GCR_REGISTRY}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed'
-    args: [ 'build', '-t',
-            '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest',
-            '-f',
-            'dockerfiles/share_task_bam2bed.dockerfile'
-            '.' ]
-    images:
-    - '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest'
-
-  # Docker Push
-  - name: '${_GCR_REGISTRY}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed'
-    args: ['push', 
-           '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest']
+- name: '${_GCR_REGISTRY}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest',
+          '-f',
+          'dockerfiles/share_task_bam2bed.dockerfile'
+          '.' ]
+# Docker Push
+- name: '${_GCR_REGISTRY}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest']
