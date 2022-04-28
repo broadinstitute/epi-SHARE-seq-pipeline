@@ -1,0 +1,18 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image for Bam2Bed task
+      run: docker build . --file dockerfiles/share_task_bam2bed.dockerfile --tag share_task_bam2bed:$(date +%s)
