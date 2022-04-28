@@ -12,6 +12,6 @@ steps:
           'dockerfiles/share_task_bam2bed.dockerfile',
           '.' ]
 # Docker Push
-- name: 'gcr.io/cloud-builders/docker''
+- name: 'gcr.io/cloud-builders/docker'
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/broad-epi-igvf-multiomics-pipeline/share_task_bam2bed:latest']
