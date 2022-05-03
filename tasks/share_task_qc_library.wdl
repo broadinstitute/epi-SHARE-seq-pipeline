@@ -17,7 +17,7 @@ task qc_library {
         File raw_counts
         File filtered_counts
         Int cutoff
-        Int? mem_gb = 16
+        Int? memory_gb = 16
         String genome_name
         String? prefix
         String docker_image = "polumechanos/share_task_qc_library"
@@ -29,7 +29,7 @@ task qc_library {
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Float input_file_size_gb = size(filtered_counts, "G")
-    Int mem_gb = mem_gb
+    Int mem_gb = memory_gb
 
 
     command {
