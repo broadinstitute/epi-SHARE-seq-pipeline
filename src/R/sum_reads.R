@@ -27,7 +27,9 @@ colnames(Counts) <- c("Freq","Barcode")
 
 
 #barcodes=unlist(lapply(Counts$Barcode,function(x){strsplit(x,",")[[1]][c(1,2,3)]}))
-print(length(unique(barcodes)))
+print(length(unique(barcodes.R1)))
+print(length(unique(barcodes.R2)))
+print(length(unique(barcodes.R3)))
 #If empty is giving NA
 pkrs=unlist(lapply(Counts$Barcode,function(x){strsplit(x,",")[[1]][4]}))
 # generate all combinations
