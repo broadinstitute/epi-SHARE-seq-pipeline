@@ -37,15 +37,17 @@ task count_reads_atac {
     command <<<
         set -e
 
+        cut -f4 ~{fragments_raw} | sort -u > observed_barcodes_combinations
+
         # Count unfiltered reads
         zcat ~{fragments_raw} | awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}' | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT ) print }'> ~{read_groups_freq}
 
-        Rscript $(which sum_reads.R) ~{read_groups_freq} ~{unfiltered_counts} --save
+        Rscript $(which sum_reads.R) ~{read_groups_freq} ~{unfiltered_counts} observed_barcodes_combinations --save
 
         # Count filtered reads
         zcat ~{fragments_raw} | cut -f4 | sort | uniq -c | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT) print }' > ~{read_groups_freq_rmdup}
 
-        Rscript $(which sum_reads.R) ~{read_groups_freq_rmdup} ~{filtered_counts} --save
+        Rscript $(which sum_reads.R) ~{read_groups_freq_rmdup} ~{filtered_counts} observed_barcodes_combinations --save
 
         # Remove barcode with low counts from the fragment file for ATAC
         sed -e 's/,/\t/g' ~{filtered_counts} | awk -v CUT=~{cutoff} -v OFS=',' 'NR>=2 {if($5 >= CUT) print $1,$2,$3,$4} ' > barcodes.txt
