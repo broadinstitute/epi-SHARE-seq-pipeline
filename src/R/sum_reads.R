@@ -5,6 +5,14 @@ args <- commandArgs()
 
 inp <- args[6]
 out <- args[7]
+barcodes_list_fnp <- args[8]
+
+# Read barcodes
+observed_barcodes = read.csv(barcodes_list_fnp, header=F, sep = "")
+# Convert into one line
+barcodes.R1=unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][c(1)]}))
+barcodes.R2=unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][c(2)]}))
+barcodes.R3=unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][c(3)]}))
 
 # read csv
 Counts <- read.csv(inp, header=F, sep = "")
@@ -18,7 +26,7 @@ colnames(Counts) <- c("Freq","Barcode")
 #print("P5s are"); print(P5s)
 
 
-barcodes=unlist(lapply(Counts$Barcode,function(x){strsplit(x,",")[[1]][c(1,2,3)]}))
+#barcodes=unlist(lapply(Counts$Barcode,function(x){strsplit(x,",")[[1]][c(1,2,3)]}))
 print(length(unique(barcodes)))
 #If empty is giving NA
 pkrs=unlist(lapply(Counts$Barcode,function(x){strsplit(x,",")[[1]][4]}))
@@ -30,7 +38,7 @@ pkrs=unlist(lapply(Counts$Barcode,function(x){strsplit(x,",")[[1]][4]}))
 library(tidyr)
 library(dplyr)
 
-Df <- crossing(R1 = barcodes, R2 = barcodes, R3 = barcodes, PKR = pkrs)
+Df <- crossing(R1 = barcodes.R1, R2 = barcodes.R2, R3 = barcodes.R3, PKR = pkrs)
 if(is.na(Df$PKR[1])){
     Df = dplyr::select(Df,-PKR)
 }
