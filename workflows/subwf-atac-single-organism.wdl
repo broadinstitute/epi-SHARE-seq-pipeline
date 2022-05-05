@@ -6,7 +6,7 @@ import "../tasks/share_task_bam2bed.wdl" as share_task_bam2bed
 import "../tasks/share_task_count_atac.wdl" as share_task_count
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_qc_library.wdl" as share_task_qc_library
-#import "../tasks/share_task_archr.wdl" as share_task_archr
+import "../tasks/share_task_archr.wdl" as share_task_archr
 
 
 workflow wf_atac {
@@ -79,16 +79,16 @@ workflow wf_atac {
             cpus = cpus
     }
 
-#    call share_task_archr.archr as archr{
-#        input:
-#            atac_frag = count.atac_fragments_filtered,
-#            genome = genome_name,
-#            min_tss = 4,
-#            min_frags = 1000,
-#            doublet_k = 10,
-#            doublet_knn_method = "UMAP",
-#            lsi_method = 1
-#    }
+    call share_task_archr.archr as archr{
+        input:
+            atac_frag = count.atac_fragments_filtered,
+            genome = genome_name,
+            min_tss = 4,
+            min_frags = 1000,
+            doublet_k = 10,
+            doublet_knn_method = "UMAP",
+            lsi_method = 1
+    }
 
     output {
         File share_atac_alignment_raw = align.atac_alignment
@@ -114,16 +114,16 @@ workflow wf_atac {
         File share_atac_qc_hist_txt = qc_atac.atac_final_hist
         File share_atac_qc_tss_enrichment = qc_atac.atac_tss_pileup_png
 
-#        File share_atac_archr_notebook_output = archr.notebook_output
-#        File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
-#        File share_atac_archr_tss_enrichment_raw = archr.archr_TSS_uniq_frags_plot
-#        File share_atac_archr_tss_enrichment_filtered = archr.archr_TSS_uniq_frags_filtered_plot
-#        File share_atac_archr_fragment_size_plot = archr.archr_fragment_size_dist_plot
-#        File share_atac_archr_doublet_plot = archr.archr_doublet_plot
-#        File share_atac_archr_umap_plot = archr.archr_umap_plot
-#        File share_atac_archr_arrow = archr.archr_arrow
-#        File share_atac_archr_obj = archr.archr_obj
-#        File share_atac_archr_plots_zip = archr.plots_zip
+        File share_atac_archr_notebook_output = archr.notebook_output
+        File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
+        File share_atac_archr_tss_enrichment_raw = archr.archr_TSS_uniq_frags_plot
+        File share_atac_archr_tss_enrichment_filtered = archr.archr_TSS_uniq_frags_filtered_plot
+        File share_atac_archr_fragment_size_plot = archr.archr_fragment_size_dist_plot
+        File share_atac_archr_doublet_plot = archr.archr_doublet_plot
+        File share_atac_archr_umap_plot = archr.archr_umap_plot
+        File share_atac_archr_arrow = archr.archr_arrow
+        File share_atac_archr_obj = archr.archr_obj
+        File share_atac_archr_plots_zip = archr.plots_zip
 
 
     }
