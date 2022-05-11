@@ -116,9 +116,6 @@ steps:
           '.' ]
   timeout: 14400s
 
-
-options:
-  machineType: 'E2_HIGHCPU_8'
 # Docker Push
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -178,3 +175,5 @@ options:
          '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest']
 
 timeout: 14400s
+options:
+  machineType: 'E2_HIGHCPU_8'
