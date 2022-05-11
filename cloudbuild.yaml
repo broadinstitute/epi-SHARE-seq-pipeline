@@ -7,13 +7,171 @@ substitutions:
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest',
+          '-f',
+          'dockerfiles/share_task_archr.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bam2bed:latest',
           '-f',
           'dockerfiles/share_task_bam2bed.dockerfile',
           '.' ]
   timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:latest',
+          '-f',
+          'dockerfiles/share_task_bowtie2.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_atac:latest',
+          '-f',
+          'dockerfiles/share_task_count_atac.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_rna:latest',
+          '-f',
+          'dockerfiles/share_task_count_rna.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:latest',
+          '-f',
+          'dockerfiles/share_task_generate_h5.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_group_umi:latest',
+          '-f',
+          'dockerfiles/share_task_group_umi.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_atac:latest',
+          '-f',
+          'dockerfiles/share_task_qc_atac.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_library:latest',
+          '-f',
+          'dockerfiles/share_task_qc_library.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_rna:latest',
+          '-f',
+          'dockerfiles/share_task_qc_rna.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_seurat:latest',
+          '-f',
+          'dockerfiles/share_task_seurat.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:latest',
+          '-f',
+          'dockerfiles/share_task_star.dockerfile',
+          '.' ]
+  timeout: 7200s
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest',
+          '-f',
+          'dockerfiles/share_task_update_rgid.dockerfile',
+          '.' ]
+  timeout: 7200s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest',
+          '-f',
+          'dockerfiles/'dorcs_task_find_dorcs.dockerfile,
+          '.' ]
+  timeout: 7200s
+
 # Docker Push
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest']
+
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bam2bed:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_atac:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_rna:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_group_umi:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_atac:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_library:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_rna:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_seurat:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest']
+
 timeout: 7200s
