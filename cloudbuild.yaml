@@ -112,7 +112,7 @@ steps:
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest',
           '-f',
-          'dockerfiles/'dorcs_task_find_dorcs.dockerfile,
+          'dockerfiles/'dorcs_task_find_dorcs.dockerfile',
           '.' ]
   timeout: 7200s
 
