@@ -11,7 +11,7 @@ steps:
           '-f',
           'dockerfiles/share_task_archr.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -19,7 +19,7 @@ steps:
           '-f',
           'dockerfiles/share_task_bam2bed.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -27,7 +27,7 @@ steps:
           '-f',
           'dockerfiles/share_task_bowtie2.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -35,7 +35,7 @@ steps:
           '-f',
           'dockerfiles/share_task_count_atac.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -43,7 +43,7 @@ steps:
           '-f',
           'dockerfiles/share_task_count_rna.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -51,7 +51,7 @@ steps:
           '-f',
           'dockerfiles/share_task_generate_h5.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -59,7 +59,7 @@ steps:
           '-f',
           'dockerfiles/share_task_group_umi.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -67,7 +67,7 @@ steps:
           '-f',
           'dockerfiles/share_task_qc_atac.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -75,7 +75,7 @@ steps:
           '-f',
           'dockerfiles/share_task_qc_library.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -83,7 +83,7 @@ steps:
           '-f',
           'dockerfiles/share_task_qc_rna.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -91,7 +91,7 @@ steps:
           '-f',
           'dockerfiles/share_task_seurat.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -99,14 +99,14 @@ steps:
           '-f',
           'dockerfiles/share_task_star.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest',
           '-f',
           'dockerfiles/share_task_update_rgid.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
@@ -114,8 +114,10 @@ steps:
           '-f',
           'dockerfiles/dorcs_task_find_dorcs.dockerfile',
           '.' ]
-  timeout: 7200s
+  timeout: 14400s
 
+options:
+  machineType: 'E2_HIGHCPU_8'
 # Docker Push
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -174,4 +176,4 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest']
 
-timeout: 7200s
+timeout: 14400s
