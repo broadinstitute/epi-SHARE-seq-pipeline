@@ -116,6 +116,7 @@ steps:
           '.' ]
   timeout: 14400s
 
+
 options:
   machineType: 'E2_HIGHCPU_8'
 # Docker Push
