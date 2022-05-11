@@ -4,11 +4,12 @@ workflow wf_preprocess {
   input {
     # Preprocess inputs
     File bcl
-    Map[String,String] libraryBarcodes
-    String readStructure = "50T14S10M28S10M28S9M8B50T"
-    String sequencingCenter = "BI"
-    String dockerImage = "nchernia/share_task_preprocess:2"
+    Map[String,String] libraryBarcodes  
+    String dockerImage = "nchernia/share_task_preprocess:4"
   }
+  
+  String readStructure = "50T14S10M28S10M28S9M8B50T"
+  String sequencingCenter = "BI"
 
   String untarBcl =
     'gsutil -m -o GSUtil:parallel_thread_count=1' +
@@ -31,7 +32,7 @@ workflow wf_preprocess {
         lane = lane,
         dockerImage = dockerImage
     }
-
+    
     call BasecallsToBams {
         input:
           bcl = bcl,
@@ -43,13 +44,33 @@ workflow wf_preprocess {
           sequencingCenter = sequencingCenter,
           dockerImage = dockerImage
       }
-  }
-  output {
-    Array[Array[File]] bams = BasecallsToBams.bams
-	Array[File] barcodeMetrics = ExtractBarcodes.barcodeMetrics
-  }
-}
+      scatter (bams in BasecallsToBams.bams) {
+          # Convert unmapped, library-separated bams to fastqs
+          # will assign cell barcode to read name 
+          # assigns UMI for RNA to read name and adapter trims for ATAC
+	      call BamToFastq {
+	        input: 
+              bam=bam, 
+              sampleType = sampleType, 
+              pkrId = pkrId,
+              R1barcodeSet = R1barcodeSet, 
+              R2barcodes = R2barcodes, 
+              R3barcodes = R3barcodes,
+              dockerImage = dockerImage
+	      }
+      }
+      }
+      call QC {
+        input:
+          barcodeMetrics = ExtractBarcodes.barcodeMetrics
+      }
 
+      output {
+	Array[String] percentMismatch = QC.percentMismatch
+	Array[File] fastqs = BamToFastq.fastqs
+      }
+}  
+       
 task GetLanes {
   input {
     File bcl
@@ -145,8 +166,29 @@ task ExtractBarcodes {
     File barcodeMetrics = barcodeMetricsFile
     File barcodes = write_lines(glob("*_barcode.txt.gz"))
   }
-
 }
+
+task QC {
+   input {
+     Array[File] barcodeMetrics    
+   }
+   Int total = length(barcodeMetrics)
+   command <<<
+    ARRAY=(~{sep=" " barcodeMetrics}) # Load array into bash variable
+    for (( c = 0; c < ~{total}; c++ )) # bash array are 0-indexed ;)
+       do
+           awk '$1=="NNNNNNNN"' ${ARRAY[$c]}  | cut -f11
+          
+       done
+  >>>
+  output {
+    Array[String] percentMismatch = read_lines(stdout())
+  }
+  runtime {
+    docker:  "ubuntu:latest"    
+  }
+}
+
 
 task BasecallsToBams {
    input {
@@ -160,7 +202,6 @@ task BasecallsToBams {
      String sequencingCenter
      String dockerImage
   }
-#    Array[Array[String]] round1BarcodeSet
   
   parameter_meta {
     bcl: {
@@ -231,6 +272,47 @@ task BasecallsToBams {
     Array[File] bams = glob("*.bam")
   }
 }
+
+task BamToFastq {
+    # Convert unmapped, library-separated bams to fastqs
+    # will assign cell barcode to read name 
+    # assigns UMI for RNA to read name and adapter trims for ATAC
+    
+    # Defaults to file R1.txt in the src/python directory if no round barcodes given
+	input {
+		File bam
+		String sampleType
+		String pkrId
+		Array[Array[String]] R1barcodeSet
+		Array[Array[String]]? R2barcodes
+		Array[Array[String]]? R3barcodes
+        String dockerImage
+	}
+    
+    # Workaround since write_tsv does not take type "?", must be defined
+    Array[Array[String]] R2_if_defined = select_first([R2barcodes, []])
+    Array[Array[String]] R3_if_defined = select_first([R3barcodes, []])
+
+	# Use round 1 default barcode set in rounds 2 and 3 if not sent in
+    File R1file = write_tsv(R1barcodeSet)
+    File R2file = if defined(R2barcodes)
+    				then write_tsv(R2_if_defined) else R1file
+    File R3file = if defined(R3barcodes)
+    				then write_tsv(R3_if_defined) else R1file 
+    
+	command <<<
+		python3 /software/bam_fastq.py ~{bam} ~{R1file} ~{R2file} ~{R3file} ~{pkrId} -s ~{sampleType}  
+    >>>
+    
+	output {
+		Array[File] fastqs = glob("*.fastq")
+	}
+	runtime {
+		docker: dockerImage
+	}
+}
+  
+  
 
 #task gather_outputs {
 #    input {

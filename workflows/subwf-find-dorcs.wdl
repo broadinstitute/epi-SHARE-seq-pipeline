@@ -2,12 +2,12 @@ version 1.0
 
 
 # Import the tasks called by the pipeline
-import "../tasks/dorcs_task_find_dorcs.wdl" as find_dorcs
+import "../tasks/dorcs_task_find_dorcs_rds.wdl" as find_dorcs
 
 workflow wf_dorcs {
     input {
-        File rna_matrix
-        File atac_fragments
+        File rna_rds
+        File atac_frag_file
         File peak_file
 
         String genome = "hg38"
@@ -27,12 +27,17 @@ workflow wf_dorcs {
         Int windowPadSize = 50000
         Int bootstraps = 100
         Int mem_gb = 16
+        Int disk_gb = 100
+        
+        Int numNearestNeighbor = 100
+        Float numBackgroundPairs = 100000
+        Float chunkSize = 50000
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
         input:
-            rna_matrix = rna_matrix,
-            atac_fragments = atac_fragments,
+            rna_rds = rna_rds,
+            atac_frag_file = atac_frag_file,
             peak_file = peak_file,
             genome = genome,
             n_cores = n_cores,
@@ -47,17 +52,21 @@ workflow wf_dorcs {
             corrPVal = corrPVal,
             topNGene = topNGene,
             windowPadSize = windowPadSize,
+            numNearestNeighbor = numNearestNeighbor,
+            numBackgroundPairs = numBackgroundPairs,
+            chunkSize = chunkSize,
             bootstraps = bootstraps,
-            mem_gb = mem_gb
+            mem_gb = mem_gb,
+            disk_gb = disk_gb
     }
 
     output {
         File notebook_output = find_dorcs.notebook_output
-        File seurat_violin_plot = find_dorcs.seurat_violin_plot
+        File? seurat_violin_plot = find_dorcs.seurat_violin_plot
         File j_plot = find_dorcs.j_plot
         File plots_zip = find_dorcs.plots_zip
-        File dorcs_genes_summary = find_dorcs.dorcs_genes_summary
-        File dorcs_regions_summary = find_dorcs.dorcs_regions_summary
+        File? dorcs_genes_summary = find_dorcs.dorcs_genes_summary
+        File? dorcs_regions_summary = find_dorcs.dorcs_regions_summary
     }
 
 }

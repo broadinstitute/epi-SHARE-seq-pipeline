@@ -41,7 +41,8 @@ task archr {
         String papermill = "TRUE"
 
         String output_filename = "output.ipynb"
-        String docker_image = "swekhande/dorcs:epi-umap-archr"
+        String docker_image = "swekhande/dorcs:epi-umap-archr-basic"
+
         Int? mem_gb = 32
         Int? disk_gb = 50
     }
@@ -61,7 +62,7 @@ task archr {
 
 
     command {
-    
+
         papermill $(which archr_notebook.ipynb) ${output_filename} \
         -p atac_frag ${atac_frag} \
         -p genome ${genome} \
