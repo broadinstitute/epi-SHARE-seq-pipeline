@@ -6,8 +6,8 @@ import "../tasks/dorcs_task_find_dorcs_rds.wdl" as find_dorcs
 
 workflow wf_dorcs {
     input {
-        File rna_rds
-        File atac_frag_file
+        File rna_matrix
+        File atac_fragments
         File peak_file
 
         String genome = "hg38"
@@ -28,7 +28,7 @@ workflow wf_dorcs {
         Int bootstraps = 100
         Int mem_gb = 16
         Int disk_gb = 100
-        
+
         Int numNearestNeighbor = 100
         Float numBackgroundPairs = 100000
         Float chunkSize = 50000
