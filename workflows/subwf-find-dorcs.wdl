@@ -36,8 +36,8 @@ workflow wf_dorcs {
 
     call find_dorcs.find_dorcs as find_dorcs{
         input:
-            rna_rds = rna_rds,
-            atac_frag_file = atac_frag_file,
+            rna_matrix = rna_matrix,
+            atac_fragments = atac_fragments,
             peak_file = peak_file,
             genome = genome,
             n_cores = n_cores,
