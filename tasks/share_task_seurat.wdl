@@ -39,7 +39,7 @@ task seurat {
 
         String papermill = "TRUE"
         String output_filename = "output.ipynb"
-        String docker_image = "polumechanos/share_task_seurat"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
         Int mem_gb = 16
     }
 

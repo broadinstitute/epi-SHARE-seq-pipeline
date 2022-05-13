@@ -67,7 +67,7 @@ workflow ShareSeq {
         Int windowPadSize = 50000
         Int bootstraps = 100
 
-        String docker_image_dorcs = "polumechanos/dorcs_task_find_dorcs"
+        String docker_image_dorcs = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
         Int mem_gb_dorcs = 16
     }
 

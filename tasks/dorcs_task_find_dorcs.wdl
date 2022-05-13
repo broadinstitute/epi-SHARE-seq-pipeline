@@ -33,7 +33,7 @@ task find_dorcs {
         Int windowPadSize = 50000
         Int bootstraps = 100
 
-        String docker_image = "polumechanos/dorcs_task_find_dorcs"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_archr"
         Int mem_gb = 16
     }
 

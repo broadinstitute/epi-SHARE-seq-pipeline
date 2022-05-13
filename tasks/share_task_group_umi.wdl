@@ -21,7 +21,7 @@ task group_umi_rna {
         Int cutoff
         String genome_name
         String mode
-        String docker_image = "polumechanos/share_task_group_umi"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_group_umi"
         String? prefix
         Int? memory_gb = 16
 
