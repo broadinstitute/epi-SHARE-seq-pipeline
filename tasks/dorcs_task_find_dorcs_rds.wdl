@@ -10,8 +10,8 @@ task find_dorcs {
     input {
         #This task takes in the RNA and ATAC files and finds the DORCs based on the cut-off criteria provided
 
-        File rna_rds
-        File atac_frag_file
+        File rna_matrix
+        File atac_fragments
         File peak_file
 
         String genome = "hg38"
@@ -32,7 +32,7 @@ task find_dorcs {
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
         Int bootstraps = 100
-        
+
         Int numNearestNeighbor = 100
         Float numBackgroundPairs = 100000
         Float chunkSize = 50000
@@ -45,8 +45,8 @@ task find_dorcs {
     command {
 
         papermill /usr/local/bin/dorcs_notebook_rds.ipynb ${output_filename} \
-        -p rnaRDS ${rna_rds} \
-        -p atacFragFile ${atac_frag_file} \
+        -p rnaRDS ${rna_matrix} \
+        -p atacFragFile ${atac_fragments} \
         -p peakFile ${peak_file} \
         -p savePlotsToDir ${save_plots_to_dir} \
         -p nCores ${n_cores} \
