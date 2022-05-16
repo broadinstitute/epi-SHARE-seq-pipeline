@@ -86,17 +86,17 @@ task seurat {
 
     output {
         File notebook_output = output_filename
-        File seurat_violin_plot = violin_plot
-        File seurat_mitochondria_qc_plot = MT_qc_plot
-        File seurat_features_plot = features_plot
-        File seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
-        File seurat_PCA_plot = PCA_plot
-        File seurat_heatmap_plot = heatmap_plot
-        File seurat_jackstraw_plot = jackstraw_plot
-        File seurat_elbow_plot = elbow_plot
-        File seurat_umap_plot = umap_plot
-        File seurat_obj = seurat_rds
-        File plots_zip = plots_zip_dir
+        File? seurat_violin_plot = violin_plot
+        File? seurat_mitochondria_qc_plot = MT_qc_plot
+        File? seurat_features_plot = features_plot
+        File? seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
+        File? seurat_PCA_plot = PCA_plot
+        File? seurat_heatmap_plot = heatmap_plot
+        File? seurat_jackstraw_plot = jackstraw_plot
+        File? seurat_elbow_plot = elbow_plot
+        File? seurat_umap_plot = umap_plot
+        File? seurat_obj = seurat_rds
+        File? plots_zip = plots_zip_dir
     }
 
     runtime {
