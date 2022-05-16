@@ -9,7 +9,7 @@ import "../tasks/share_task_group_umi.wdl" as share_task_group_umi
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_qc_library.wdl" as share_task_qc_library
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
-#import "../tasks/share_task_seurat.wdl" as share_task_seurat
+import "../tasks/share_task_seurat.wdl" as share_task_seurat
 
 workflow wf_rna {
     meta {
@@ -111,13 +111,13 @@ workflow wf_rna {
             filtered_bed = group_umi.rna_umi_bed_filtered
     }
 
-#    call share_task_seurat.seurat as seurat{
-#        input:
-#            rna_matrix = generate_h5.h5_matrix,
-#            genome_name = genome_name,
-#            umap_dim = umap_dim,
-#            umap_resolution = umap_resolution
-#    }
+    call share_task_seurat.seurat as seurat{
+        input:
+            rna_matrix = generate_h5.h5_matrix,
+            genome_name = genome_name,
+            umap_dim = umap_dim,
+            umap_resolution = umap_resolution
+    }
 
     output {
         File share_rna_alignment_raw = align.rna_alignment
@@ -150,17 +150,17 @@ workflow wf_rna {
         File share_rna_h5_matrix = generate_h5.h5_matrix
         Array[File] share_rna_umi_qc_plots = generate_h5.umi_qc_plots
 
-#        File share_rna_notebook_output = seurat.notebook_output
-#        File share_rna_seurat_violin_plot = seurat.seurat_violin_plot
-#        File share_rna_seurat_mitochondria_qc_plot = seurat.seurat_mitochondria_qc_plot
-#        File share_rna_seurat_features_plot = seurat.seurat_features_plot
-#        File share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
-#        File share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
-#        File share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
-#        File share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
-#        File share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
-#        File share_rna_seurat_umap_plot = seurat.seurat_umap_plot
-#        File share_rna_seurat_obj = seurat.seurat_obj
-#        File share_rna_plots_zip = seurat.plots_zip
+        File share_rna_notebook_output = seurat.notebook_output
+        File share_rna_seurat_violin_plot = seurat.seurat_violin_plot
+        File share_rna_seurat_mitochondria_qc_plot = seurat.seurat_mitochondria_qc_plot
+        File share_rna_seurat_features_plot = seurat.seurat_features_plot
+        File share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
+        File share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
+        File share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
+        File share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
+        File share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
+        File share_rna_seurat_umap_plot = seurat.seurat_umap_plot
+        File share_rna_seurat_obj = seurat.seurat_obj
+        File share_rna_plots_zip = seurat.plots_zip
     }
 }
