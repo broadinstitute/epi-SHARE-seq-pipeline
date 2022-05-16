@@ -50,7 +50,7 @@ task count_reads_atac {
         Rscript $(which sum_reads.R) ~{read_groups_freq_rmdup} ~{filtered_counts} observed_barcodes_combinations --save
 
         # Remove barcode with low counts from the fragment file for ATAC
-        sed -e 's/,/\t/g' ~{filtered_counts} | awk -v CUT=~{cutoff} -v OFS=',' 'NR>=2 {if($NF >= CUT) print $1,$2,$3,$4} ' > barcodes.txt
+        sed -e 's/,/\t/g' ~{filtered_counts} | awk -v CUT=~{cutoff} -v OFS=',' 'NR>=2 {if($NF >= CUT) print $1,$2,$3} ' > barcodes.txt
 
         grep -wFf barcodes.txt <(zcat ~{fragments_raw}) | sort -k1,1 -k2,2n | bgzip -c > ~{filtered_fragments}
     >>>
