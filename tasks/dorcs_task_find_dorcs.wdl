@@ -14,7 +14,7 @@ task find_dorcs {
         File atac_fragments
         File peak_file
 
-        String genome = "hg38"
+        String genome
         Int n_cores = 4
         String save_plots_to_dir = "TRUE"
         String output_filename = "output.ipynb"
