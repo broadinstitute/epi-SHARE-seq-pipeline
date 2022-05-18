@@ -40,7 +40,7 @@ task find_dorcs {
     command {
         gzip -dc ${atac_fragments} > tmp_fragments.bedpe
 
-        papermill /usr/local/bin/dorcs_jplot_notebook.ipynb ${output_filename} \
+        papermill $(which dorcs_jplot_notebook.ipynb) ${output_filename} \
         -p rnaCountMatrix ${rna_matrix} \
         -p atacFragFile tmp_fragments.bedpe \
         -p peakFile ${peak_file} \
