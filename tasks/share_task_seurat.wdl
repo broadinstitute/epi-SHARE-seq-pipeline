@@ -39,7 +39,7 @@ task seurat {
 
         String papermill = "TRUE"
         String output_filename = "output.ipynb"
-        String docker_image = "swekhande/dorcs:epi-umap-seurat"
+        String docker_image = "swekhande/dorcs:seurat-notebook"
         Int mem_gb = 16
     }
 

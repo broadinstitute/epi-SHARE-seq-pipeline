@@ -31,7 +31,8 @@ workflow wf_rna {
             genome_name = genome_name,
             umap_dim = umap_dim,
             umap_resolution = umap_resolution,
-            docker_image = docker
+            docker_image = docker,
+            prefix = prefix
     }
 
     output {
