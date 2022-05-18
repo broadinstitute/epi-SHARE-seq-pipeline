@@ -2,7 +2,7 @@ version 1.0
 
 
 # Import the tasks called by the pipeline
-import "../tasks/dorcs_task_find_dorcs_rds.wdl" as find_dorcs
+import "../tasks/dorcs_task_find_dorcs.wdl" as find_dorcs
 
 workflow wf_dorcs {
     input {
