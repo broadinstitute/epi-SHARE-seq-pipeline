@@ -32,9 +32,14 @@ task find_dorcs {
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
         Int bootstraps = 100
+        
+        Int numNearestNeighbor = 100
+        Float numBackgroundPairs = 100000
+        Float chunkSize = 50000
 
         String docker_image = "swekhande/dorcs:dorcs-notebook"
         Int mem_gb = 16
+        Int disk_gb = 100
     }
 
     command {
@@ -56,7 +61,10 @@ task find_dorcs {
         -p corrPVal ${corrPVal} \
         -p topNGene ${topNGene} \
         -p windowPadSize ${windowPadSize} \
-        -p bootstraps ${bootstraps}
+        -p bootstraps ${bootstraps} \
+        -p numNearestNeighbor ${numNearestNeighbor} \
+        -p numBackgroundPairs ${numBackgroundPairs} \
+        -p chunkSize ${chunkSize}
     }
 
     output {
@@ -72,6 +80,8 @@ task find_dorcs {
         cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
+        disks : 'local-disk ${disk_gb} LOCAL'
+        maxRetries : 0
     }
 }
 
