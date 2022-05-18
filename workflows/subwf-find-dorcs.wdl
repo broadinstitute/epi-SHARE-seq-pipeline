@@ -27,7 +27,6 @@ workflow wf_dorcs {
         Int windowPadSize = 50000
         Int bootstraps = 100
         Int mem_gb = 16
-        Int disk_gb = 100
 
     }
 
@@ -50,8 +49,7 @@ workflow wf_dorcs {
             topNGene = topNGene,
             windowPadSize = windowPadSize,
             bootstraps = bootstraps,
-            mem_gb = mem_gb,
-            disk_gb = disk_gb
+            mem_gb = mem_gb
     }
 
     output {
