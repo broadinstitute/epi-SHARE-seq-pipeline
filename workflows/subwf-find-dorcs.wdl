@@ -25,7 +25,6 @@ workflow wf_dorcs {
         Float corrPVal = 0.05
         Int topNGene = 20
         Int windowPadSize = 50000
-        Int bootstraps = 100
         
         Int numNearestNeighbor = 100
         Float numBackgroundPairs = 100000
@@ -53,7 +52,6 @@ workflow wf_dorcs {
             corrPVal = corrPVal,
             topNGene = topNGene,
             windowPadSize = windowPadSize,
-            bootstraps = bootstraps,
             numNearestNeighbor = numNearestNeighbor,
             numBackgroundPairs = numBackgroundPairs,
             chunkSize = chunkSize,

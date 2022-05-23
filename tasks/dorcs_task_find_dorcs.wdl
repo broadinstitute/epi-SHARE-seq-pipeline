@@ -31,7 +31,6 @@ task find_dorcs {
 
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
-        Int bootstraps = 100
         
         Int numNearestNeighbor = 100
         Float numBackgroundPairs = 100000
@@ -61,7 +60,6 @@ task find_dorcs {
         -p corrPVal ${corrPVal} \
         -p topNGene ${topNGene} \
         -p windowPadSize ${windowPadSize} \
-        -p bootstraps ${bootstraps} \
         -p numNearestNeighbor ${numNearestNeighbor} \
         -p numBackgroundPairs ${numBackgroundPairs} \
         -p chunkSize ${chunkSize}
