@@ -38,8 +38,8 @@ task seurat {
         String prefix = "prefix"
 
         String papermill = "TRUE"
-        String output_filename = "output.ipynb"
-        String docker_image = "polumechanos/share_task_seurat"
+        String output_filename = "${prefix}.rna.seurat.notebook.${genome}.ipynb"
+        String docker_image = "swekhande/dorcs:seurat-notebook"
         Int mem_gb = 16
     }
 
