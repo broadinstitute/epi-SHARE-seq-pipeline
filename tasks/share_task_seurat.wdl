@@ -38,7 +38,7 @@ task seurat {
         String prefix = "prefix"
 
         String papermill = "TRUE"
-        String output_filename = "${prefix}.rna.seurat.notebook.${genome}.ipynb"
+        String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String docker_image = "swekhande/dorcs:seurat-notebook"
         Int mem_gb = 16
     }
