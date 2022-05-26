@@ -3,7 +3,7 @@ version 1.0
 task seurat {
     meta {
         version: 'v0.1'
-        author: 'Kevin Dong (kdong@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        author: 'Siddarth Wekhande (swekhand@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: run seurat task'
     }
 
