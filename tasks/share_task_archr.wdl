@@ -40,7 +40,7 @@ task archr {
         #papermill specific parameters
         String papermill = "TRUE"
 
-        String output_filename = "output.ipynb"
+        String output_filename = "${prefix}.atac.archr.notebook.${genome}.ipynb"
         String docker_image = "swekhande/dorcs:epi-umap-archr-basic"
 
         Int? mem_gb = 32
