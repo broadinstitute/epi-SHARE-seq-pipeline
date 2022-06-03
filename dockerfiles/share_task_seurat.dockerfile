@@ -40,10 +40,10 @@ RUN apt-get update -qq && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
         
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','Seurat','IRkernel'))"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','Seurat','IRkernel','logr'))"
 
 RUN python3 -m pip install jupyter papermill
 
-COPY src/jupyter_nb/seurat_notebook.ipynb /usr/local/bin/
+COPY src/jupyter_nb/seurat_notebook_test.ipynb /usr/local/bin/
 
 RUN R -e "IRkernel::installspec()"
