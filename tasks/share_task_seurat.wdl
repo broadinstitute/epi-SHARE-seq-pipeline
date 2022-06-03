@@ -62,7 +62,7 @@ task seurat {
 
     command {
 
-        papermill $(which seurat_notebook.ipynb) ${output_filename} \
+        papermill $(which seurat_notebook_test.ipynb) ${output_filename} \
         -p rna_matrix ${rna_matrix} \
         -p genome ${genome_name} \
         -p min_features ${min_features} \
