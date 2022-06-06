@@ -27,7 +27,8 @@ workflow wf_atac {
             min_frags = 100,
             doublet_k = 10,
             doublet_knn_method = "UMAP",
-            lsi_method = 1
+            lsi_method = 1,
+            docker_image = docker
     }
 
     output {

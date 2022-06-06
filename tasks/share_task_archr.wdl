@@ -42,7 +42,7 @@ task archr {
 
         String output_filename = "${prefix}.atac.archr.notebook.${genome}.ipynb"
         String docker_image = "swekhande/dorcs:epi-umap-archr-basic"
-        String log_filename = "log/${prefix}.atac.archr.logfile.${genome_name}.txt"
+        String log_filename = "log/${prefix}.atac.archr.logfile.${genome}.txt"
 
         Int? mem_gb = 32
         Int? disk_gb = 50
