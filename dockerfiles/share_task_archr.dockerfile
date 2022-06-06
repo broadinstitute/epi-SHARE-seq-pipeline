@@ -40,10 +40,16 @@ RUN apt-get update -qq && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('devtools','hdf5r','IRkernel','BiocManager','Cairo','GenomeInfoDbData','GenomicRanges','Rsamtools','magick'));devtools::install_github('GreenleafLab/ArchR@v1.0.1', repos = BiocManager::repositories());ArchR::installExtraPackages();devtools::install_github('immunogenomics/presto')"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('devtools','hdf5r','IRkernel','BiocManager','Cairo','magick'))"
+
+RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('GenomeInfoDbData','GenomicRanges','Rsamtools'), update=F, ask=F)"
+
+RUN R --no-echo --no-restore --no-save -e "devtools::install_github('GreenleafLab/ArchR@v1.0.1', repos = BiocManager::repositories());ArchR::installExtraPackages()"
+
+RUN R --no-echo --no-restore --no-save -e "devtools::install_github('immunogenomics/presto')"
 
 RUN python3 -m pip install jupyter papermill
 
-COPY src/jupyter_nb/archr_notebook.ipynb /usr/local/bin/
+COPY src/jupyter_nb/archr_notebook_test.ipynb /usr/local/bin/
 
 RUN R -e "IRkernel::installspec()"
