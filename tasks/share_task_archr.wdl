@@ -65,7 +65,7 @@ task archr {
 
     command {
 
-        papermill $(which archr_notebook.ipynb) ${output_filename} \
+        papermill $(which archr_notebook_test.ipynb) ${output_filename} \
         -p atac_frag ${atac_frag} \
         -p genome ${genome} \
         -p papermill ${papermill} \
