@@ -34,13 +34,15 @@ RUN apt-get update -qq && \
     libtiff5-dev \
     libxml2-dev \
     libxt-dev \
+    libgeos-dev \
     meson \
     pkg-config \
     python3 \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
         
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','Seurat','IRkernel','logr'))"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','IRkernel','logr'))"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
 
 RUN python3 -m pip install jupyter papermill
 

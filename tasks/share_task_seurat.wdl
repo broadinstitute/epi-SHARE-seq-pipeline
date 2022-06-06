@@ -39,7 +39,7 @@ task seurat {
 
         String papermill = "TRUE"
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
-        String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.log"
+        String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
         String docker_image = "swekhande/dorcs:seurat-notebook"
         Int mem_gb = 16
     }
@@ -58,7 +58,7 @@ task seurat {
     #Other filepaths
     String seurat_rds = '${prefix}.rna.seurat.rds.${genome_name}.rds'
     String plots_zip_dir = 'plots.zip'
-    String papermill_log_filename = 'papermill.log'
+    String papermill_log_filename = 'papermill.logfile.txt'
 
     command {
 
@@ -83,7 +83,7 @@ task seurat {
         -p umap_resolution ${umap_resolution} \
         -p prefix ${prefix} \
         -p papermill ${papermill} \
-        --log-output &> papermill.log
+        --log-output &> papermill.logfile.txt
     }
 
 
