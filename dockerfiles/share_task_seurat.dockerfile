@@ -46,6 +46,6 @@ RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', ve
 
 RUN python3 -m pip install jupyter papermill
 
-COPY src/jupyter_nb/seurat_notebook_test.ipynb /usr/local/bin/
+COPY src/jupyter_nb/seurat_notebook.ipynb /usr/local/bin/
 
 RUN R -e "IRkernel::installspec()"

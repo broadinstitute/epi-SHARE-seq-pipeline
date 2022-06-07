@@ -15,6 +15,7 @@ LABEL software.task="archr"
 RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-save -e "cat(Sys.getenv('R_HOME'))")/etc/Rprofile.site 
 
 ENV R_LIBS_USER=/usr/local/lib/R
+ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
 	apt-get install -y -qq --no-install-recommends\
@@ -34,6 +35,7 @@ RUN apt-get update -qq && \
     libxml2-dev \
     libxt-dev \
     libmagick++-dev \
+    libgeos-dev \
     meson \
     pkg-config \
     python3 \
@@ -48,8 +50,10 @@ RUN R --no-echo --no-restore --no-save -e "devtools::install_github('GreenleafLa
 
 RUN R --no-echo --no-restore --no-save -e "devtools::install_github('immunogenomics/presto')"
 
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
+
 RUN python3 -m pip install jupyter papermill
 
-COPY src/jupyter_nb/archr_notebook_test.ipynb /usr/local/bin/
+COPY src/jupyter_nb/archr_notebook.ipynb /usr/local/bin/
 
 RUN R -e "IRkernel::installspec()"

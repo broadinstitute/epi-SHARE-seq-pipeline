@@ -40,7 +40,7 @@ task seurat {
         String papermill = "TRUE"
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
-        String docker_image = "swekhande/dorcs:seurat-notebook"
+        String docker_image = "swekhande/shareseq-prod:share-task-seurat"
         Int mem_gb = 16
     }
 
@@ -62,7 +62,7 @@ task seurat {
 
     command {
 
-        papermill $(which seurat_notebook_test.ipynb) ${output_filename} \
+        papermill $(which seurat_notebook.ipynb) ${output_filename} \
         -p rna_matrix ${rna_matrix} \
         -p genome ${genome_name} \
         -p min_features ${min_features} \

@@ -41,7 +41,7 @@ task archr {
         String papermill = "TRUE"
 
         String output_filename = "${prefix}.atac.archr.notebook.${genome}.ipynb"
-        String docker_image = "swekhande/dorcs:epi-umap-archr-basic"
+        String docker_image = "swekhande/shareseq-prod:share-task-archr"
         String log_filename = "log/${prefix}.atac.archr.logfile.${genome}.txt"
 
         Int? mem_gb = 32
@@ -65,7 +65,7 @@ task archr {
 
     command {
 
-        papermill $(which archr_notebook_test.ipynb) ${output_filename} \
+        papermill $(which archr_notebook.ipynb) ${output_filename} \
         -p atac_frag ${atac_frag} \
         -p genome ${genome} \
         -p papermill ${papermill} \
