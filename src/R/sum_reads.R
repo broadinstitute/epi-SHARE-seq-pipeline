@@ -1,41 +1,65 @@
 #!/usr/bin/Rscript
-# Generates matrix containing read frequency of all barcode combinations
-
-suppressMessages(library(tidyr))
-suppressMessages(library(dplyr))
 
 args <- commandArgs()
+#print(args)
 
-read_freq_file <- args[6] # read frequency file (frequency, barcodes)
-output_file <- args[7] # output filename (R1, R2, R3, PKR, fragments)
-observed_barcodes_file <- args[8] # barcode combination file (sorted barcodes w no dups)
+inp <- args[6]
+out <- args[7]
+barcodes_list_fnp <- args[8]
 
-# Read in barcodes file
-observed_barcodes <- read.csv(observed_barcodes_file, header=F, sep="")
-# Get R1, R2, R3 vectors
-R1_barcodes <- unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][1]}))
-R2_barcodes <- unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][2]}))
-R3_barcodes <- unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][3]}))
+# Read barcodes
+observed_barcodes = read.csv(barcodes_list_fnp, header=F, sep = "")
+# Convert into one line
+barcodes.R1=unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][c(1)]}))
+barcodes.R2=unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][c(2)]}))
+barcodes.R3=unlist(lapply(observed_barcodes$V1,function(x){strsplit(x,",")[[1]][c(3)]}))
 
-# Read in read frequency file
-read_freq <- read.csv(read_freq_file, header=F, sep="")
-colnames(read_freq) <- c("freq", "barcode")
-# Get PKR vector
-PKRs <- unlist(lapply(read_freq$barcode, function(x){strsplit(x,",")[[1]][4]}))
+# read csv
+Counts <- read.csv(inp, header=F, sep = "")
+colnames(Counts) <- c("Freq","Barcode")
+#head(Table)
 
-# Generate dataframe containing all combinations of R1, R2, R3, and PKR
-combos <- tidyr::crossing(R1=R1_barcodes, R2=R2_barcodes, R3=R3_barcodes, PKR=PKRs)
-# Drop PKR column if NA
-if(is.na(combos$PKR[1])){
-  combos <- dplyr::select(combos,-PKR)
+#split barcode name
+#Counts$P5 <- substr(Counts$Barcode,19,23)
+#head(Counts)
+#P5s <- sort(unique(Counts$P5))
+#print("P5s are"); print(P5s)
+
+
+#barcodes=unlist(lapply(Counts$Barcode,function(x){strsplit(x,",")[[1]][c(1,2,3)]}))
+print(length(unique(barcodes.R1)))
+print(length(unique(barcodes.R2)))
+print(length(unique(barcodes.R3)))
+#If empty is giving NA
+pkrs=unlist(lapply(Counts$Barcode,function(x){strsplit(x,",")[[1]][4]}))
+# generate all combinations
+#R1s <- paste("R1.", formatC(1:96, width=2, flag="0"), sep="")
+#R2s <- paste("R2.", formatC(1:96, width=2, flag="0"), sep="")
+#R3s <- paste("R3.", formatC(1:96, width=2, flag="0"), sep="")
+
+library(tidyr)
+library(dplyr)
+
+Df <- crossing(R1 = barcodes.R1, R2 = barcodes.R2, R3 = barcodes.R3, PKR = pkrs)
+if(is.na(Df$PKR[1])){
+  Df = dplyr::select(Df,-PKR)
 }
-# Concatenate elements to get barcode
-combos$barcode <- apply(combos, 1, paste, collapse=",")
+Df$Barcode <- apply(Df, 1, paste, collapse = ",")
 
-# Match possible combinations to observed combinations and get read frequency of matches
-combos$fragments <- read_freq$freq[match(combos$barcode, read_freq$barcode)]
-combos[is.na(combos)] <- 0
-combos <- dplyr::select(combos,-barcode)
+# match
+Df$fragments <- Counts$Freq[match(Df$Barcode, Counts$Barcode)]
+Df[is.na(Df)] <- 0
+head(Df[order(-Df$fragments),])
 
-# Write output file
-write.csv(combos, output_file, quote=F, row.names=F)
+Df=dplyr::select(Df,-Barcode)
+
+#stop("")
+
+# re-organize format
+#library(tibble)
+#Df2 <- tibble(R1=Df$R1, R2=Df$R2, R3=Df$R3, fragments=Df$Count)
+#head(Df2)
+
+write.csv(Df, out, quote = F, row.names = F)
+
+#stop()
