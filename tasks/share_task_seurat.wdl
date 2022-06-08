@@ -38,8 +38,11 @@ task seurat {
         String prefix = "prefix"
 
         String papermill = "TRUE"
+        
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
-        String docker_image = "swekhande/dorcs:seurat-notebook"
+        String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
+        
+        String docker_image = "swekhande/shareseq-prod:share-task-seurat"
         Int mem_gb = 16
     }
 
@@ -57,6 +60,7 @@ task seurat {
     #Other filepaths
     String seurat_rds = '${prefix}.rna.seurat.rds.${genome_name}.rds'
     String plots_zip_dir = 'plots.zip'
+    String papermill_log_filename = 'papermill.logfile.txt'
 
     command {
 
@@ -80,23 +84,26 @@ task seurat {
         -p umap_dim ${umap_dim} \
         -p umap_resolution ${umap_resolution} \
         -p prefix ${prefix} \
-        -p papermill ${papermill}
+        -p papermill ${papermill} \
+        --log-output &> papermill.logfile.txt
     }
 
 
     output {
         File notebook_output = output_filename
-        File seurat_violin_plot = violin_plot
-        File seurat_mitochondria_qc_plot = MT_qc_plot
-        File seurat_features_plot = features_plot
-        File seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
-        File seurat_PCA_plot = PCA_plot
-        File seurat_heatmap_plot = heatmap_plot
-        File seurat_jackstraw_plot = jackstraw_plot
-        File seurat_elbow_plot = elbow_plot
-        File seurat_umap_plot = umap_plot
-        File seurat_obj = seurat_rds
-        File plots_zip = plots_zip_dir
+        File notebook_log = log_filename
+        File papermill_log = papermill_log_filename
+        File? seurat_violin_plot = violin_plot
+        File? seurat_mitochondria_qc_plot = MT_qc_plot
+        File? seurat_features_plot = features_plot
+        File? seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
+        File? seurat_PCA_plot = PCA_plot
+        File? seurat_heatmap_plot = heatmap_plot
+        File? seurat_jackstraw_plot = jackstraw_plot
+        File? seurat_elbow_plot = elbow_plot
+        File? seurat_umap_plot = umap_plot
+        File? seurat_obj = seurat_rds
+        File? plots_zip = plots_zip_dir
     }
 
     runtime {

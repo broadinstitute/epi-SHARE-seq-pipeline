@@ -41,7 +41,8 @@ RUN apt-get update -qq && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
         
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','IRkernel'))"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','IRkernel','logr'))"
+
 RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
 
 RUN python3 -m pip install jupyter papermill

@@ -41,7 +41,8 @@ task archr {
         String papermill = "TRUE"
 
         String output_filename = "${prefix}.atac.archr.notebook.${genome}.ipynb"
-        String docker_image = "swekhande/dorcs:epi-umap-archr-basic"
+        String docker_image = "swekhande/shareseq-prod:share-task-archr"
+        String log_filename = "log/${prefix}.atac.archr.logfile.${genome}.txt"
 
         Int? mem_gb = 32
         Int? disk_gb = 50
@@ -59,6 +60,7 @@ task archr {
     String arrow_file = '${prefix}.arrow'
     String archr_rds = '${prefix}.atac.archr.rds.${genome}.rds'
     String plots_zip_dir = 'plots.zip'
+    String papermill_log_filename = 'papermill.logfile.txt'
 
 
     command {
@@ -81,21 +83,24 @@ task archr {
         -p marker_features_test ${marker_features_test} \
         -p heatmap_transpose ${heatmap_transpose} \
         -p heatmap_label_n ${heatmap_label_n} \
-        -p heatmap_cutoff ${heatmap_cutoff}
+        -p heatmap_cutoff ${heatmap_cutoff} \
+        --log-output &> papermill.logfile.txt
     }
 
     output {
         File notebook_output = output_filename
-        File archr_umap_plot = umap_plot
+        File notebook_log = log_filename
+        File papermill_log = papermill_log_filename
+        File? archr_umap_plot = umap_plot
         File? archr_heatmap_plot = heatmap_plot
-        File archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
-        File archr_TSS_uniq_frags_filtered_plot = TSS_uniq_frags_filtered_plot
-        File archr_fragment_size_dist_plot = fragment_size_dist_plot
-        File archr_doublet_plot = doublet_summary_plot
+        File? archr_TSS_uniq_frags_plot = TSS_uniq_frags_plot
+        File? archr_TSS_uniq_frags_filtered_plot = TSS_uniq_frags_filtered_plot
+        File? archr_fragment_size_dist_plot = fragment_size_dist_plot
+        File? archr_doublet_plot = doublet_summary_plot
 
-        File plots_zip = plots_zip_dir
-        File archr_arrow = arrow_file
-        File archr_obj = archr_rds
+        File? plots_zip = plots_zip_dir
+        File? archr_arrow = arrow_file
+        File? archr_obj = archr_rds
     }
 
     runtime {

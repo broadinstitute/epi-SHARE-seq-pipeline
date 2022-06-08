@@ -42,7 +42,7 @@ library(dplyr)
 
 Df <- crossing(R1 = barcodes.R1, R2 = barcodes.R2, R3 = barcodes.R3, PKR = pkrs)
 if(is.na(Df$PKR[1])){
-    Df = dplyr::select(Df,-PKR)
+  Df = dplyr::select(Df,-PKR)
 }
 Df$Barcode <- apply(Df, 1, paste, collapse = ",")
 

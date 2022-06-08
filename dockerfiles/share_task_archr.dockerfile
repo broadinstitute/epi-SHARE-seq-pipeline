@@ -15,6 +15,7 @@ LABEL software.task="archr"
 RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-save -e "cat(Sys.getenv('R_HOME'))")/etc/Rprofile.site 
 
 ENV R_LIBS_USER=/usr/local/lib/R
+ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
 	apt-get install -y -qq --no-install-recommends\
@@ -34,13 +35,22 @@ RUN apt-get update -qq && \
     libxml2-dev \
     libxt-dev \
     libmagick++-dev \
+    libgeos-dev \
     meson \
     pkg-config \
     python3 \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('devtools','hdf5r','IRkernel','BiocManager','Cairo','GenomeInfoDbData','GenomicRanges','Rsamtools','magick'));devtools::install_github('GreenleafLab/ArchR@v1.0.1', repos = BiocManager::repositories());ArchR::installExtraPackages();devtools::install_github('immunogenomics/presto')"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('devtools','hdf5r','IRkernel','BiocManager','Cairo','magick'))"
+
+RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('GenomeInfoDbData','GenomicRanges','Rsamtools'), update=F, ask=F)"
+
+RUN R --no-echo --no-restore --no-save -e "devtools::install_github('GreenleafLab/ArchR@v1.0.1', repos = BiocManager::repositories());ArchR::installExtraPackages()"
+
+RUN R --no-echo --no-restore --no-save -e "devtools::install_github('immunogenomics/presto')"
+
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
 
 RUN python3 -m pip install jupyter papermill
 
