@@ -14,7 +14,7 @@ task find_dorcs {
         File atac_fragments
         File peak_file
 
-        String genome = "hg38"
+        String genome
         Int n_cores = 4
         String save_plots_to_dir = "TRUE"
         String output_filename = "output.ipynb"
@@ -31,16 +31,20 @@ task find_dorcs {
 
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
-        Int bootstraps = 100
+        
+        Int numNearestNeighbor = 100
+        Float numBackgroundPairs = 100000
+        Float chunkSize = 50000
 
-        String docker_image = "polumechanos/dorcs_task_find_dorcs"
+        String docker_image = "swekhande/dorcs:dorcs-notebook"
         Int mem_gb = 16
+        Int disk_gb = 100
     }
 
     command {
         gzip -dc ${atac_fragments} > tmp_fragments.bedpe
 
-        papermill /dorcs_jplot_notebook.ipynb ${output_filename} \
+        papermill $(which dorcs_jplot_notebook.ipynb) ${output_filename} \
         -p rnaCountMatrix ${rna_matrix} \
         -p atacFragFile tmp_fragments.bedpe \
         -p peakFile ${peak_file} \
@@ -56,7 +60,9 @@ task find_dorcs {
         -p corrPVal ${corrPVal} \
         -p topNGene ${topNGene} \
         -p windowPadSize ${windowPadSize} \
-        -p bootstraps ${bootstraps}
+        -p numNearestNeighbor ${numNearestNeighbor} \
+        -p numBackgroundPairs ${numBackgroundPairs} \
+        -p chunkSize ${chunkSize}
     }
 
     output {
@@ -72,6 +78,8 @@ task find_dorcs {
         cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
+        disks : 'local-disk ${disk_gb} LOCAL'
+        maxRetries : 0
     }
 }
 

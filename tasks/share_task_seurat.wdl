@@ -38,8 +38,10 @@ task seurat {
         String prefix = "prefix"
 
         String papermill = "TRUE"
+        
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
+        
         String docker_image = "swekhande/shareseq-prod:share-task-seurat"
         Int mem_gb = 16
     }

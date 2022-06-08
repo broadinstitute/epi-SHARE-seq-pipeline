@@ -15,7 +15,7 @@ task generate_h5 {
         # This task computs the the gene by barcode matrix.
 
         File filtered_bed
-        String docker_image = "polumechanos/share_task_generate_h5"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
 
 
     }
@@ -23,7 +23,7 @@ task generate_h5 {
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Float input_file_size_gb = size(filtered_bed, "G")
-    Int mem_gb = 16
+    Int mem_gb = 32
 
 
     command {

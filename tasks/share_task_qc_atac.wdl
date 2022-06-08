@@ -23,7 +23,7 @@ task qc_atac {
         File tss
         String genome_name
         String? prefix
-        String docker_image = "polumechanos/share_task_qc_atac"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
 
 
     }
