@@ -32,7 +32,7 @@ workflow wf_dorcs {
         
         Int mem_gb = 16
         Int disk_gb = 100
-        String docker
+        String docker = "swekhande/dorcs:epi-dorcs-rds"
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
