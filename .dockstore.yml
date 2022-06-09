@@ -17,6 +17,7 @@ workflows:
          branches:
              - main
              - dev
+             - knudson 
          tags:
              - /.*/
 
