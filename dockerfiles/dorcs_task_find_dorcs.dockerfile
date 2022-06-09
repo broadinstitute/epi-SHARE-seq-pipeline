@@ -46,13 +46,14 @@ RUN apt-get update -qq && \
 		meson \
 		pkg-config 
         
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('dplyr','patchwork','ggplot2','ggrepel','reshape2','circlize','networkD3','GGally','igraph','network','foreach','iterators','hdf5r','ggrastr','BiocManager','remotes','pbmcapply','doSNOW','Rmpfr', 'glue','magrittr','pillar','RcppArmadillo','reticulate','rlang','yaml','rpart','IRkernel','data.table', 'tidyft'))"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('dplyr','patchwork','ggplot2','ggrepel','reshape2','circlize','networkD3','GGally','igraph','network','foreach','iterators','hdf5r','ggrastr','BiocManager','remotes','pbmcapply','doSNOW','Rmpfr', 'glue','magrittr','pillar','RcppArmadillo','reticulate','rlang','yaml','rpart','IRkernel','data.table', 'tidyft','qlcMatrix'))"
+
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
+
 
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('Biostrings','rtracklayer','GenomicRanges','motifmatchr','ComplexHeatmap','chromVAR'), update=T, ask=F)"
 
 RUN R --no-echo --no-restore --no-save -e  "remotes::install_github('caleblareau/BuenColors')"
-
-RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
 
 #############################################################
 FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79
@@ -90,13 +91,12 @@ RUN chown $USER:$USER /usr/local/lib/R
 
 COPY --from=builder --chown=$USER:$USER ${R_LIBS_USER} ${R_LIBS_USER}
 
-COPY --chown=$USER:$USER src/jupyter_nb/dorcs_jplot_notebook.ipynb /usr/local/bin/
+COPY --chown=$USER:$USER src/jupyter_nb/dorcs_notebook_rds.ipynb /usr/local/bin/
 
 RUN mkdir -p /home/R/
 
-COPY --chown=$USER:$USER src/R/DORCS_helper_functions.R src/R/TSSRanges.RData /home/R/
+COPY --chown=$USER:$USER src/R/DORCS_helper_functions_optimized.R src/R/TSSRanges.RData /home/R/
 
 #USER ${USER}
 
 RUN R -e "IRkernel::installspec()"
-

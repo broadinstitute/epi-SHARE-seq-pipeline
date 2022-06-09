@@ -2,11 +2,11 @@ version 1.0
 
 
 # Import the tasks called by the pipeline
-import "../tasks/dorcs_task_find_dorcs.wdl" as find_dorcs
+import "../tasks/dorcs_task_find_dorcs_rds.wdl" as find_dorcs
 
 workflow wf_dorcs {
     input {
-        File rna_matrix
+        File rna_rds
         File atac_fragments
         File peak_file
 
@@ -32,11 +32,12 @@ workflow wf_dorcs {
         
         Int mem_gb = 16
         Int disk_gb = 100
+        String docker
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
         input:
-            rna_matrix = rna_matrix,
+            rna_rds = rna_rds,
             atac_fragments = atac_fragments,
             peak_file = peak_file,
             genome = genome,
@@ -56,7 +57,8 @@ workflow wf_dorcs {
             numBackgroundPairs = numBackgroundPairs,
             chunkSize = chunkSize,
             mem_gb = mem_gb,
-            disk_gb = disk_gb
+            disk_gb = disk_gb,
+            docker = docker
     }
 
     output {
