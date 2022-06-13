@@ -64,8 +64,8 @@ workflow wf_dorcs {
     output {
         File notebook_output = find_dorcs.notebook_output
         File? seurat_violin_plot = find_dorcs.seurat_violin_plot
-        File j_plot = find_dorcs.j_plot
-        File plots_zip = find_dorcs.plots_zip
+        File? j_plot = find_dorcs.j_plot
+        File? plots_zip = find_dorcs.plots_zip
         File? dorcs_genes_summary = find_dorcs.dorcs_genes_summary
         File? dorcs_regions_summary = find_dorcs.dorcs_regions_summary
     }
