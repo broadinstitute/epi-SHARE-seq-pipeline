@@ -87,18 +87,19 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
         if read.is_read1:
             # save and continue processing
             read_left = read
-            qname = read_left.qname
+            qname = read_left.query_name
         else:
             # check that right/left query names are the same
-            if qname == read.qname:
+            if qname == read.query_name:
                 # check barcode via RX tag, change readname
                 barcode_tag = read.get_tag("RX")
                 R1str,R2str,R3str = barcode_tag.split("-",2)
-
+                quality_tag = read.get_tag("QX")
+                Q1str,Q2str,Q3str = quality_tag.split("-",2)
                 R1 = R2 = R3 = None
-                R1 = check_putative_barcode(R1str, r1_barcode_dict)
-                R2 = check_putative_barcode(R2str, r2_barcode_dict)
-                R3 = check_putative_barcode(R3str, r3_barcode_dict)
+                R1,Q1 = check_putative_barcode(R1str, r1_barcode_dict, Q1str)
+                R2,Q2 = check_putative_barcode(R2str, r2_barcode_dict, Q2str)
+                R3,Q3 = check_putative_barcode(R3str, r3_barcode_dict, Q3str)
                 
                 if R1 and R2 and R3:
                     # add cell barcodes to queryname
@@ -106,43 +107,50 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                     qname = qname + "_" + qname_barcode
                     read_right = read
                     if sample_type == 'ATAC':
-                        read_left.qname = qname
-                        read_right.qname = qname
+                        read_left.query_name = qname
+                        read_right.query_name = qname
                         # trim adapters for ATAC
-                        where = trim(read_left.seq, read_right.seq)
+                        where = trim(read_left.query_sequence, read_right.query_sequence)
                         # left and right contain open file pointers
                         # write read to correct file based on R1 barcode
                         write_read(left[barcode_set[R1]], read_left, where)
                         write_read(right[barcode_set[R1]], read_right, where)
                     elif sample_type == 'RNA':
                         # add UMI to queryname
-                        umi = read_right.seq[0:10]
+                        umi = read_right.query_sequence[0:10]
+                        umi_qual = read_right.qual[0:10]
+                        #umi_qual = ''.join(map(lambda x: chr( x+33 ), read_right.query_qualities[0:10]))
                         qname = qname + "_" + umi
-                        read_left.qname = qname
-                        read_right.qname = qname
-                        read_right.seq = R1 + R2 + R3 + umi
+                        read_left.query_name = qname
+                        read_right.query_name = qname
+                        read_right.query_sequence = R1 + R2 + R3 + umi
+                        read_right.qual = Q1 + Q2 + Q3 + umi_qual
                         # left contains open file pointers
                         # write read to correct file based on R1 barcode
                         write_read(left[barcode_set[R1]], read_left)
                         write_read(right[barcode_set[R1]], read_right)
 
-def check_putative_barcode(barcode_str, barcode_dict):
+def check_putative_barcode(barcode_str, barcode_dict, quality_str):
     '''
     Procedure: check exact match R1, the 1bp left/right shift
     In the future the exact match will allow 2 mismatches
     and the 1bp left/right only 1 mismatch
     '''
     value = barcode_dict.get(barcode_str[1:9]) # check exact location first
+    quality = quality_str[1:9]
     if value is None:
         value = barcode_dict.get(barcode_str[:8]) # check 1bp shift left
+        quality = quality_str[:8]
         if value is None:
             # check 1bp shift right
             # round 3 is shorter so add "N" for those
             if len(barcode_str) < 10: 
                 value = barcode_dict.get(barcode_str[2:]+"N")
+                quality = quality_str[2:]+"F"
             else:
                 value = barcode_dict.get(barcode_str[2:])
-    return value
+                quality = quality_str[2:]
+    return value,quality
 
 
 def trim(seq1,seq2):
@@ -183,17 +191,17 @@ def write_read(fastq, read, idx=-1):
     Write read to open FASTQ file.
     """
     info = {'index': int(not read.is_read1) + 1,
-            'name':  read.qname}
+            'name':  read.query_name}
                         
     if read.is_reverse:
         info.update({'quality':  read.qual[::-1],
-                     'sequence': reverse_complement(read.seq)})
+                     'sequence': reverse_complement(read.query_sequence)})
     else:
         info.update({'quality':  read.qual,
-                     'sequence': read.seq})
+                     'sequence': read.query_sequence})
     if idx > -1:
         info.update({'quality':  read.qual[0:idx],
-                    'sequence': read.seq[0:idx]})
+                    'sequence': read.query_sequence[0:idx]})
     fastq.write('@{name}\n{sequence}\n+\n{quality}\n'.format(**info))
 
 def reverse_complement(sequence):
