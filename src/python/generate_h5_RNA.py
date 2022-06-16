@@ -39,9 +39,9 @@ count_ad = ad.AnnData(count_mat)
 count_ad.obs_names = count_df.index
 count_ad.var_names = count_df.columns
 
-print("Writing to out.gene.bc.matrices.csv")
-count_df.to_csv("out.gene.bc.matrices.csv", index=False)
-print("Finished writing csv file")
+#print("Writing to out.gene.bc.matrices.csv")
+#count_df.to_csv("out.gene.bc.matrices.csv", index=False)
+#print("Finished writing csv file")
 
 print("Writing to out.gene.bc.matrices.h5ad")
 count_ad.write(filename="out.gene.bc.matrices.h5ad")
