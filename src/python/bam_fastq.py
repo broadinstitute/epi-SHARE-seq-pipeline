@@ -67,13 +67,12 @@ def create_barcode_set(file_path):
     with open(file_path) as f:
         barcodeset = dict()
         barcodelist = list()
-        count = 1
         for row in f.readlines():
             row = row.strip().split()
-            for item in row:
-                barcodeset[item] = "set" + str(count)
+            name = row[0]
+            for item in row[1:]:
+                barcodeset[item] = name
                 barcodelist.append(item)
-            count = count+1
     return barcodeset, barcodelist
 
 def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, pkr_id, sample_type):
