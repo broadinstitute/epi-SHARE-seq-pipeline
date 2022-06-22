@@ -65,7 +65,7 @@ workflow ShareSeq {
 
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
-        Int bootstraps = 100
+        #Int bootstraps = 100
 
         String docker_image_dorcs = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
         Int mem_gb_dorcs = 16
@@ -128,7 +128,7 @@ workflow ShareSeq {
 
             # Regulatory region around TSS. Default is +/- 50Kb
             windowPadSize = windowPadSize,
-            bootstraps = bootstraps,
+            #bootstraps = bootstraps,
             mem_gb = mem_gb_dorcs
     }
 
