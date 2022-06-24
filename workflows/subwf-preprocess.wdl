@@ -20,7 +20,7 @@ workflow wf_preprocess {
 		# TODO read length variable
 		# TODO array of ints for lane number
 		String workspace_name
-		String dockerImage = "nchernia/share_task_preprocess:5"
+		String dockerImage = "nchernia/share_task_preprocess:7"
 	}
 
 	String readStructure = "50T14S10M28S10M28S9M8B50T"
@@ -122,92 +122,6 @@ workflow wf_preprocess {
 		String terraResponse = TerraUpsert.upsert_response
 		# Array[Fastq] fastqs = flatten(BamToFastq.out)
 		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
-	}
-}
-
-task WriteTsvRow {
-	input {
-		Fastq fastq
-	}
-
-	Array[String] read1 = fastq.read1
-	Array[String] read2 = fastq.read2
-
-	command <<<
-		# echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tNotes" > fastq.tsv
-		echo -e "~{fastq.library}\t~{fastq.pkrId}\t~{fastq.R1}\t~{fastq.sampleType}\t~{sep=',' read1}\t~{sep=',' read2}\t~{fastq.notes}" > row.tsv
-	>>>
-
-	output {
-		File row = 'row.tsv'
-	}
-
-	runtime {
-		docker: "ubuntu:latest"
-	}
-}
-
-task GatherOutputs {
-	input {
-		Array[File] rows
-		String name       
-		String dockerImage
-	}
-
-	command <<<
-		echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tNotes" > fastq.tsv
-		cat ~{sep=' ' rows} >> fastq.tsv
-
-		python3 /software/write_terra_tables.py --input 'fastq.tsv' --name ~{name}
-	>>>
-
-	runtime {
-		docker: dockerImage
-	}
-	output {
-		File rna_tsv = "rna.tsv"
-		File atac_tsv = "atac.tsv"
-		File run_tsv = "run.tsv"
-	}
-}
-
-task TerraUpsert {
-	input {
-		File rna_tsv
-		File atac_tsv
-		File run_tsv
-		String terra_project
-		String workspace_name
-		String dockerImage
-	}
-	String docker="polumechanos/update_terra_table"
-	
-	command <<<
-		set -e
-		python3 /software/batch_upsert_entities_standard.py \
-			-t "~{rna_tsv}" \
-			-p "~{terra_project}" \
-			-w "~{workspace_name}"
-
-		python3 /software/batch_upsert_entities_standard.py \
-			-t "~{atac_tsv}" \
-			-p "~{terra_project}" \
-			-w "~{workspace_name}"
-
-		python3 /software/batch_upsert_entities_standard.py \
-			-t "~{run_tsv}" \
-			-p "~{terra_project}" \
-			-w "~{workspace_name}"
-	>>>
-	
-	runtime {
-		docker: dockerImage
-		memory: "2 GB"
-		cpu: 1
-	}
-	
-	output {
-		String upsert_response = stdout()
 	}
 }
 
@@ -551,5 +465,91 @@ task QC {
 	
 	runtime {
 		docker: "ubuntu:latest"
+	}
+}
+
+
+task WriteTsvRow {
+	input {
+		Fastq fastq
+	}
+
+	Array[String] read1 = fastq.read1
+	Array[String] read2 = fastq.read2
+
+	command <<<
+		# echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tNotes" > fastq.tsv
+		echo -e "~{fastq.library}\t~{fastq.pkrId}\t~{fastq.R1}\t~{fastq.sampleType}\t~{sep=',' read1}\t~{sep=',' read2}\t~{fastq.notes}" > row.tsv
+	>>>
+
+	output {
+		File row = 'row.tsv'
+	}
+
+	runtime {
+		docker: "ubuntu:latest"
+	}
+}
+
+task GatherOutputs {
+	input {
+		Array[File] rows
+		String name       
+		String dockerImage
+	}
+
+	command <<<
+		echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tNotes" > fastq.tsv
+		cat ~{sep=' ' rows} >> fastq.tsv
+
+		python3 /software/write_terra_tables.py --input 'fastq.tsv' --name ~{name}
+	>>>
+
+	runtime {
+		docker: dockerImage
+	}
+	output {
+		File rna_tsv = "rna.tsv"
+		File atac_tsv = "atac.tsv"
+		File run_tsv = "run.tsv"
+	}
+}
+
+task TerraUpsert {
+	input {
+		File rna_tsv
+		File atac_tsv
+		File run_tsv
+		String terra_project
+		String workspace_name
+		String dockerImage
+	}
+	
+	command <<<
+		set -e
+		python3 /software/flexible_import_entities_standard.py \
+			-t "~{rna_tsv}" \
+			-p "~{terra_project}" \
+			-w "~{workspace_name}"
+
+		python3 /software/flexible_import_entities_standard.py \
+			-t "~{atac_tsv}" \
+			-p "~{terra_project}" \
+			-w "~{workspace_name}"
+
+		python3 /software/flexible_import_entities_standard.py \
+			-t "~{run_tsv}" \
+			-p "~{terra_project}" \
+			-w "~{workspace_name}"
+	>>>
+	
+	runtime {
+		docker: dockerImage
+		memory: "2 GB"
+		cpu: 1
+	}
+	
+	output {
+		String upsert_response = stdout()
 	}
 }
