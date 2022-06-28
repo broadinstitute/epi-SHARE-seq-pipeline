@@ -18,8 +18,8 @@ workflow ShareSeq {
 
         # ATAC specific inputs
         File chrom_sizes
-        File read1_atac
-        File read2_atac
+        Array[File] read1_atac
+        Array[File] read2_atac
         File idx_tar_atac
         File tss_bed
         Int? cpus_atac

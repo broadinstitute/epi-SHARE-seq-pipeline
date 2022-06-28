@@ -46,8 +46,8 @@ task share_atac_align {
             -p ${cpus} \
             --rg-id ${prefix + "."}atac \
             -x $genome_prefix \
-            -1 ${fastq_R1} \
-            -2 ${fastq_R2} 2> ${alignment_log} |\
+            -1 ${sep="," fastq_R1} \
+            -2 ${sep="," fastq_R2} 2> ${alignment_log} |\
             samtools view \
                 -bS \
                 -@ ${cpus} \

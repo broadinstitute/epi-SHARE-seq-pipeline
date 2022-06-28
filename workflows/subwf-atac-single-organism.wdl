@@ -18,8 +18,8 @@ workflow wf_atac {
 
     input {
         # ATAC Sub-worflow inputs
-        File read1
-        File read2
+        Array[File] read1
+        Array[File] read2
         File chrom_sizes
         File idx_tar
         File tss_bed
