@@ -29,7 +29,7 @@ workflow ShareSeq {
         Boolean multimappers = false
         Boolean include_multimappers = false
         Boolean include_introns = false
-        File read1_rna
+        Array[File] read1_rna
         File genes_annotation_bed
         File gtf
         File idx_tar_rna

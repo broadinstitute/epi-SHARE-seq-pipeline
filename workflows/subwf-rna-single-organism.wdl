@@ -22,7 +22,7 @@ workflow wf_rna {
         # RNA Sub-worflow inputs
 
         # Align
-        File read1
+        Array[File] read1
         File idx_tar
         String prefix = "shareseq-project"
         String genome_name
