@@ -14,8 +14,8 @@ task share_atac_align {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Int? cpus = 16
         Int? memory_gb = 32
-        File fastq_R1
-        File fastq_R2
+        Array[File] fastq_R1
+        Array[File] fastq_R2
         File genome_index       # This is a tar.gz folder with all the index files.
         String genome_name      # GRCh38, mm10
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
