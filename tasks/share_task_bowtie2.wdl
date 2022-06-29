@@ -57,7 +57,7 @@ task share_atac_align {
 
         samtools sort \
             -@ ${cpus} \
-            -m ${mem_gb}G \
+            -m 2G \
             ${unsorted_bam} > ${sorted_bam}
         samtools index -@ ${cpus} ${sorted_bam}
 
