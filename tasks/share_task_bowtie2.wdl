@@ -26,7 +26,7 @@ task share_atac_align {
     # This is almost fixed for either mouse or human genome
     Int mem_gb = memory_gb
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 50
+    Int disk_gb = 100
 
     # Define tmp file name
     String unsorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.bam"
