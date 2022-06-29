@@ -17,6 +17,7 @@ workflow wf_atac {
         String genome_name
         Int? cpus = 4
         String? docker
+        String? prefix
     }
 
     call share_task_archr.archr as archr{
@@ -28,7 +29,8 @@ workflow wf_atac {
             doublet_k = 10,
             doublet_knn_method = "UMAP",
             lsi_method = 1,
-            docker_image = docker
+            docker_image = docker,
+            prefix = prefix
     }
 
     output {
