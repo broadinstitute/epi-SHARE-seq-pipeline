@@ -13,7 +13,7 @@ task share_atac_align {
     input {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Int? cpus = 16
-        Int? memory_gb = 32
+        Int? memory_gb = 64
         Array[File] fastq_R1
         Array[File] fastq_R2
         File genome_index       # This is a tar.gz folder with all the index files.
@@ -26,7 +26,7 @@ task share_atac_align {
     # This is almost fixed for either mouse or human genome
     Int mem_gb = memory_gb
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 100
+    Int disk_gb = 200
 
     # Define tmp file name
     String unsorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.bam"
