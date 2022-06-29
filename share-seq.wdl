@@ -18,8 +18,8 @@ workflow ShareSeq {
 
         # ATAC specific inputs
         File chrom_sizes
-        File read1_atac
-        File read2_atac
+        Array[File] read1_atac
+        Array[File] read2_atac
         File idx_tar_atac
         File tss_bed
         Int? cpus_atac
@@ -29,7 +29,7 @@ workflow ShareSeq {
         Boolean multimappers = false
         Boolean include_multimappers = false
         Boolean include_introns = false
-        File read1_rna
+        Array[File] read1_rna
         File genes_annotation_bed
         File gtf
         File idx_tar_rna
@@ -65,7 +65,7 @@ workflow ShareSeq {
 
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
-        Int bootstraps = 100
+        #Int bootstraps = 100
 
         String docker_image_dorcs = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
         Int mem_gb_dorcs = 16
@@ -128,7 +128,7 @@ workflow ShareSeq {
 
             # Regulatory region around TSS. Default is +/- 50Kb
             windowPadSize = windowPadSize,
-            bootstraps = bootstraps,
+            #bootstraps = bootstraps,
             mem_gb = mem_gb_dorcs
     }
 

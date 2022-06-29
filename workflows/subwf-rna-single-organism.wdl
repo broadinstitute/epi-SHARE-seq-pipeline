@@ -22,7 +22,7 @@ workflow wf_rna {
         # RNA Sub-worflow inputs
 
         # Align
-        File read1
+        Array[File] read1
         File idx_tar
         String prefix = "shareseq-project"
         String genome_name
@@ -150,17 +150,19 @@ workflow wf_rna {
         File share_rna_h5_matrix = generate_h5.h5_matrix
         Array[File] share_rna_umi_qc_plots = generate_h5.umi_qc_plots
 
-        File share_rna_notebook_output = seurat.notebook_output
-        File share_rna_seurat_violin_plot = seurat.seurat_violin_plot
-        File share_rna_seurat_mitochondria_qc_plot = seurat.seurat_mitochondria_qc_plot
-        File share_rna_seurat_features_plot = seurat.seurat_features_plot
-        File share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
-        File share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
-        File share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
-        File share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
-        File share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
-        File share_rna_seurat_umap_plot = seurat.seurat_umap_plot
-        File share_rna_seurat_obj = seurat.seurat_obj
-        File share_rna_plots_zip = seurat.plots_zip
+        File share_rna_seurat_notebook_output = seurat.notebook_output
+        File share_rna_seurat_notebook_log = seurat.notebook_log
+        File share_rna_seurat_papermill_log = seurat.papermill_log
+        File? share_rna_seurat_violin_plot = seurat.seurat_violin_plot
+        File? share_rna_seurat_mitochondria_qc_plot = seurat.seurat_mitochondria_qc_plot
+        File? share_rna_seurat_features_plot = seurat.seurat_features_plot
+        File? share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
+        File? share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
+        File? share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
+        File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
+        File? share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
+        File? share_rna_seurat_umap_plot = seurat.seurat_umap_plot
+        File? share_rna_seurat_obj = seurat.seurat_obj
+        File? share_rna_plots_zip = seurat.plots_zip
     }
 }

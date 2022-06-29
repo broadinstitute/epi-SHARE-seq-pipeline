@@ -14,7 +14,8 @@ task share_rna_align {
         # This function takes in input the pre-processed fastq and align it to the genome
         # using STAR.
 
-        File fastq_R1
+        Array[File] fastq_R1
+        Array[File]? fastq_R2
         File genome_index_tar
         String genome_name
         String? prefix
@@ -24,7 +25,7 @@ task share_rna_align {
     #Float input_file_size_gb = size(input[0], "G")
     Int samtools_mem_gb = 2
     Int mem_gb = 40
-    Int disk_gb = 50
+    Int disk_gb = 100
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     # Define the output names
@@ -43,7 +44,7 @@ task share_rna_align {
             --runThreadN ${cpus} \
             --chimOutType WithinBAM \
             --genomeDir ./ \
-            --readFilesIn ${fastq_R1}  \
+            --readFilesIn ${sep=',' fastq_R1} ${sep=',' fastq_R2}  \
             --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name}. \
             --outFilterMultimapNmax 20 \
             --outFilterScoreMinOverLread 0.3 \
