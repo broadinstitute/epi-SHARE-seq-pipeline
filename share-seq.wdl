@@ -154,7 +154,7 @@ workflow ShareSeq {
 
         File share_rna_qc_reads_distribution = rna.share_rna_qc_reads_distribution
         File share_rna_qc_reads_distribution2 = rna.share_rna_qc_reads_distribution2
-        File share_rna_qc_reads_distribution_plot = qrnac_rna.share_rna_qc_reads_distribution_plot
+        File share_rna_qc_reads_distribution_plot = rna.share_rna_qc_reads_distribution_plot
 
         File share_rna_qc_library_counts = rna.share_rna_qc_library_counts
         File share_rna_qc_library_duplicates = rna.share_rna_qc_library_duplicates
