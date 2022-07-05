@@ -15,7 +15,7 @@ task share_atac_bam2bed {
         # This task takes in input the aligned bam file and rmeove the low quality reads, the extra chromosomes, marks
         # the duplicats, and convert to a bedpe file.
         Int? cpus = 8
-        Int? memory_gb = 32
+        Int? memory_gb = 64
         File bam
         File bam_index
         File chrom_sizes
@@ -28,6 +28,8 @@ task share_atac_bam2bed {
 
     Float input_file_size_gb = size(bam, "G")
     Int mem_gb = memory_gb
+    Int samtools_cpu = 6
+    Int samtools_mem_gb = 8
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 200
 
@@ -56,7 +58,7 @@ task share_atac_bam2bed {
 
         # Sort file by name, remove low quality reads, namesort the input bam
         samtools view -b -q 30 -f 0x2 in.bam $(echo $chrs) | \
-        samtools sort -@ ~{cpus} -m 2G -n -o ~{filtered_chr_bam} -
+        samtools sort -@ ~{samtools_cpu} -m ~{samtools_mem_gb}G -n -o ~{filtered_chr_bam} -
 
         # Convert bam to bed.gz and mark duplicates
         # Removing reads that starts and ends at the same position (duplicates)
@@ -69,7 +71,7 @@ task share_atac_bam2bed {
 
         # Convert the bedpe file to a bam file for QC
         bedToBam -i ~{bedpe} -g ~{chrom_sizes} | \
-        samtools sort -@ ~{cpus} -o ~{final_bam} -
+        samtools sort -@ ~{samtools_cpu} -m ~{samtools_mem_gb}G -o ~{final_bam} -
 
         # and index the bam
         samtools index -@ ~{cpus} ~{final_bam}

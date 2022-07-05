@@ -23,8 +23,9 @@ task share_rna_align {
         Int cpus = 16
     }
     #Float input_file_size_gb = size(input[0], "G")
-    Int samtools_mem_gb = 2
-    Int mem_gb = 40
+    Int samtools_cpu = 6
+    Int samtools_mem_gb = 8
+    Int mem_gb = 64
     Int disk_gb = 250
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
@@ -57,7 +58,7 @@ task share_rna_align {
             --readFilesCommand zcat
 
         $(which samtools) sort \
-            -@ ${cpus} \
+            -@ ${samtools_cpus} \
             -m ${samtools_mem_gb}G \
             -o out/${sorted_bam} \
             out/${default="share-seq" prefix}.rna.align.${genome_name}.Aligned.out.bam
