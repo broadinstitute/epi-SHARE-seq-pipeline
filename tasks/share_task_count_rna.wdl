@@ -23,11 +23,11 @@ task feature_counts_rna {
         String genome_name
         String? prefix
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_count_rna"
-        Int cpus= 4
+        Int cpus= 6
     }
 
     #Float input_file_size_gb = size(input[0], "G")
-    Int mem_gb = 32
+    Int mem_gb = 64
     Int disk_gb = 200
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
@@ -70,7 +70,7 @@ task feature_counts_rna {
             temp_filename="$temp_filename.featureCounts.bam"
         fi
 
-        samtools sort -@ ${cpus} -m 7G -o ${out_bam} $temp_filename
+        samtools sort -@ ${cpus} -m 8G -o ${out_bam} $temp_filename
         samtools index -@ ${cpus} ${out_bam}
 
     }
