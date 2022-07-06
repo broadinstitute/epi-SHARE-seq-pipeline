@@ -23,7 +23,7 @@ task share_rna_align {
         Int cpus = 16
     }
     #Float input_file_size_gb = size(input[0], "G")
-    Int samtools_cpu = 6
+    Int samtools_cpus = 6
     Int samtools_mem_gb = 8
     Int mem_gb = 64
     Int disk_gb = 250
