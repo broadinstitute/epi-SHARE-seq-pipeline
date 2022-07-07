@@ -82,11 +82,17 @@ task find_dorcs {
 
     output {
         File notebook_output = output_filename
-        File seurat_violin_plot = violin_plot
-        File j_plot = jplot
-        File plots_zip = plots_zip_dir
-        File dorcs_genes_summary = dorc_genes_summ
-        File dorcs_regions_summary = all_regions_summ
+        File notebook_log = log_filename
+        File papermill_log = papermill_log_filename
+        
+        File? seurat_violin_plot = violin_plot
+        File? j_plot = jplot
+        File? plots_zip = plots_zip_dir
+        
+        File? dorcs_genes_summary = dorc_genes_summ
+        File? dorcs_regions_summary = all_regions_summ
+        
+        
     }
 
     runtime {

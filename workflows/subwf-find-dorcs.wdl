@@ -5,6 +5,13 @@ version 1.0
 import "../tasks/dorcs_task_find_dorcs.wdl" as find_dorcs
 
 workflow wf_dorcs {
+
+    meta {
+        version: 'v0.1'
+        author: 'Siddarth Wekhande (swekhand@broadinstitute.org)'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Sub-workflow to find DORCs from SHARE-seq data.'
+    }
+    
     input {
         File rna_matrix
         File atac_fragments
@@ -30,9 +37,10 @@ workflow wf_dorcs {
         Float numBackgroundPairs = 100000
         Float chunkSize = 50000
         
+        String? prefix 
         Int mem_gb = 16
         Int disk_gb = 100
-        String docker = "swekhande/shareseq-prod:share-task-dorcs"
+        String? docker 
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
@@ -58,7 +66,8 @@ workflow wf_dorcs {
             chunkSize = chunkSize,
             mem_gb = mem_gb,
             disk_gb = disk_gb,
-            docker_image = docker
+            docker_image = docker,
+            prefix = prefix
     }
 
     output {
