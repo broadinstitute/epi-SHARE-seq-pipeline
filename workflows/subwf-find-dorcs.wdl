@@ -20,7 +20,7 @@ workflow wf_dorcs {
         String genome
         Int n_cores = 4
         String save_plots_to_dir = "TRUE"
-        String output_filename 
+        String? output_filename 
 
         Int minFeature_RNA = 200
         Int maxFeature_RNA = 2500
