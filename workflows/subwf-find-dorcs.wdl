@@ -2,18 +2,18 @@ version 1.0
 
 
 # Import the tasks called by the pipeline
-import "../tasks/dorcs_task_find_dorcs_rds.wdl" as find_dorcs
+import "../tasks/dorcs_task_find_dorcs.wdl" as find_dorcs
 
 workflow wf_dorcs {
     input {
-        File rna_rds
+        File rna_matrix
         File atac_fragments
         File peak_file
 
         String genome
         Int n_cores = 4
         String save_plots_to_dir = "TRUE"
-        String output_filename = "output.ipynb"
+        String output_filename 
 
         Int minFeature_RNA = 200
         Int maxFeature_RNA = 2500
@@ -32,12 +32,12 @@ workflow wf_dorcs {
         
         Int mem_gb = 16
         Int disk_gb = 100
-        String docker = "swekhande/dorcs:epi-dorcs-rds"
+        String docker = "swekhande/shareseq-prod:share-task-dorcs"
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
         input:
-            rna_rds = rna_rds,
+            rna_matrix = rna_matrix,
             atac_fragments = atac_fragments,
             peak_file = peak_file,
             genome = genome,
@@ -58,7 +58,7 @@ workflow wf_dorcs {
             chunkSize = chunkSize,
             mem_gb = mem_gb,
             disk_gb = disk_gb,
-            docker = docker
+            docker_image = docker
     }
 
     output {
