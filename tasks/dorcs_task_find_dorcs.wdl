@@ -17,7 +17,7 @@ task find_dorcs {
         String genome
         Int n_cores = 4
         String save_plots_to_dir = "TRUE"
-        Sting prefix = "prefix"
+        String prefix = "prefix"
         
         #RNA QC parameters
         Int minFeature_RNA = 200
