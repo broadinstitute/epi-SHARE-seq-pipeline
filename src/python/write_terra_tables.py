@@ -48,6 +48,12 @@ def update_sub_dict(key, pkr, lib, r1, fq1, fq2, typ, notes):
 		else:
 			rna[key].fq1.append(fq1)
 			rna[key].fq2.append(fq2)
+	if typ == 'RNA-no-align':
+		if key not in rna_no:
+			rna_no[key] = SubTableRow(pkr, lib, r1, [fq1], [fq2], notes)
+		else:
+			rna_no[key].fq1.append(fq1)
+			rna_no[key].fq2.append(fq2)
 
 def update_main_dict(key, pkr, r1, rna_lib = None, rna_fq1 = None, rna_fq2 = None, atac_lib = None, atac_fq1 = None, atac_fq2 = None):
 	if rna_lib is None:
@@ -97,10 +103,12 @@ def update_main_subsets(key, pkr, r1, rna_lib = None, rna_fq1 = None, rna_fq2 = 
 parser = argparse.ArgumentParser( description='Generate tables for Terra')
 parser.add_argument('-i', '--input', type=str, required=True)
 parser.add_argument('-n', '--name', type=str, required=True)
+parser.add_argument('-m', '--meta', type=str, required=True)
 args = parser.parse_args()
 
 atac = dict()
 rna = dict()
+rna_no = dict()
 main = dict()
 
 in_fh = open(args.input)#args.input)
@@ -118,6 +126,19 @@ for record in csv_reader:
 		key = make_sub_key(lib, r1[i], args.name) #put args.name back in
 		update_sub_dict(key, pkr, lib, r1[i], fq1[i], fq2[i], typ, notes)
 
+with open('atac.tsv', 'wt') as outfile:
+	tsv_writer = csv.writer(outfile, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)
+	tsv_writer.writerow(['entity:scATAC_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'fastq_R1', 'fastq_R2', 'Notes'])
+	for key in atac.keys():
+		pkr = atac[key].pkr
+		lib = atac[key].lib
+		r1 = atac[key].r1
+		fq1 = list(atac[key].fq1)
+		fq2 = list(atac[key].fq2)
+		tsv_writer.writerow([key, args.name, pkr, lib, r1, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', atac[key].notes])
+		main_key = make_main_key(pkr, r1)
+		update_main_dict(main_key, pkr, r1, atac_lib=lib, atac_fq1=fq1, atac_fq2=fq2)
+
 with open('rna.tsv', 'wt') as outfile:
 	tsv_writer = csv.writer(outfile, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)
 	tsv_writer.writerow(['entity:scRNA_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'fastq_R1', 'fastq_R2', 'Notes'])
@@ -131,18 +152,16 @@ with open('rna.tsv', 'wt') as outfile:
 		main_key = make_main_key(pkr, r1)
 		update_main_dict(main_key, pkr, r1, rna_lib=lib, rna_fq1=fq1, rna_fq2=fq2)
 
-with open('atac.tsv', 'wt') as outfile:
+with open('rna_no.tsv', 'wt') as outfile:
 	tsv_writer = csv.writer(outfile, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)
-	tsv_writer.writerow(['entity:scATAC_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'fastq_R1', 'fastq_R2', 'Notes'])
-	for key in atac.keys():
-		pkr = atac[key].pkr
-		lib = atac[key].lib
-		r1 = atac[key].r1
-		fq1 = list(atac[key].fq1)
-		fq2 = list(atac[key].fq2)
-		tsv_writer.writerow([key, args.name, pkr, lib, r1, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', atac[key].notes])
-		main_key = make_main_key(pkr, r1)
-		update_main_dict(main_key, pkr, r1, atac_lib=lib, atac_fq1=fq1, atac_fq2=fq2)
+	tsv_writer.writerow(['entity:scRNA-no-align_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'fastq_R1', 'fastq_R2', 'Notes'])
+	for key in rna_no.keys():
+		pkr = rna_no[key].pkr
+		lib = rna_no[key].lib
+		r1 = rna_no[key].r1
+		fq1 = list(rna_no[key].fq1)
+		fq2 = list(rna_no[key].fq2)
+		tsv_writer.writerow([key, args.name, pkr, lib, r1, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', rna[key].notes])
 
 # Merge all subsets together
 for key in list(main.keys()):
