@@ -38,7 +38,7 @@ task find_dorcs {
         Float chunkSize = 50000
 
         String docker_image = "swekhande/dorcs:epi-dorcs-rds"
-        String prefix
+        String prefix = "prefix"
         Int mem_gb = 16
         Int disk_gb = 100
     }
