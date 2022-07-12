@@ -37,7 +37,8 @@ task find_dorcs {
         Float numBackgroundPairs = 100000
         Float chunkSize = 50000
 
-        String docker = "swekhande/dorcs:epi-dorcs-rds"
+        String docker_image = "swekhande/dorcs:epi-dorcs-rds"
+        String prefix
         Int mem_gb = 16
         Int disk_gb = 100
     }
@@ -78,7 +79,7 @@ task find_dorcs {
     runtime {
         cpu : 4
         memory : mem_gb+'G'
-        docker : docker
+        docker : docker_image
         disks : 'local-disk ${disk_gb} LOCAL'
         maxRetries : 0
     }
