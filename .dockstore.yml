@@ -7,6 +7,7 @@ workflows:
          branches:
              - main
              - dev
+             - neva
          tags:
              - /.*/
 
@@ -18,6 +19,7 @@ workflows:
              - main
              - dev
              - knudson 
+             - neva
          tags:
              - /.*/
 
@@ -28,6 +30,7 @@ workflows:
          branches:
              - main
              - dev
+             - neva
          tags:
              - /.*/
 
@@ -38,6 +41,7 @@ workflows:
          branches:
              - main
              - dev
+             - neva
          tags:
              - /.*/
 
@@ -48,6 +52,7 @@ workflows:
          branches:
              - main
              - dev
+             - neva
          tags:
              - /.*/
 
@@ -58,5 +63,18 @@ workflows:
          branches:
              - main
              - dev
+             - neva
+         tags:
+             - /.*/
+
+   - name: "SHARE-seq-sample-demultiplexing"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-preprocess.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+             - dev
+             - neva
+             - kdong
          tags:
              - /.*/

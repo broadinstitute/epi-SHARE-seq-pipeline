@@ -17,6 +17,7 @@ workflow wf_atac {
         String genome_name
         Int? cpus = 4
         String? docker
+        String? prefix
     }
 
     call share_task_archr.archr as archr{
@@ -28,13 +29,14 @@ workflow wf_atac {
             doublet_k = 10,
             doublet_knn_method = "UMAP",
             lsi_method = 1,
-            docker_image = docker
+            docker_image = docker,
+            prefix = prefix
     }
 
     output {
         File share_atac_archr_notebook_output = archr.notebook_output
-        File share_atac_notebook_log = archr.notebook_log
-        File share_atac_papermill_log = archr.papermill_log
+        File share_atac_archr_notebook_log = archr.notebook_log
+        File share_atac_archr_papermill_log = archr.papermill_log
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
         File? share_atac_archr_tss_enrichment_raw = archr.archr_TSS_uniq_frags_plot
         File? share_atac_archr_tss_enrichment_filtered = archr.archr_TSS_uniq_frags_filtered_plot
