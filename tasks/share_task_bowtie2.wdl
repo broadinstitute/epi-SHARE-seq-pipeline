@@ -13,9 +13,9 @@ task share_atac_align {
     input {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Int? cpus = 16
-        Int? memory_gb = 32
-        File fastq_R1
-        File fastq_R2
+        Int? memory_gb = 64
+        Array[File] fastq_R1
+        Array[File] fastq_R2
         File genome_index       # This is a tar.gz folder with all the index files.
         String genome_name      # GRCh38, mm10
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
@@ -26,7 +26,7 @@ task share_atac_align {
     # This is almost fixed for either mouse or human genome
     Int mem_gb = memory_gb
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 50
+    Int disk_gb = 200
 
     # Define tmp file name
     String unsorted_bam = "${default="share-seq" prefix}.atac.align.${genome_name}.bam"
@@ -46,8 +46,8 @@ task share_atac_align {
             -p ${cpus} \
             --rg-id ${prefix + "."}atac \
             -x $genome_prefix \
-            -1 ${fastq_R1} \
-            -2 ${fastq_R2} 2> ${alignment_log} |\
+            -1 ${sep="," fastq_R1} \
+            -2 ${sep="," fastq_R2} 2> ${alignment_log} |\
             samtools view \
                 -bS \
                 -@ ${cpus} \
@@ -57,7 +57,7 @@ task share_atac_align {
 
         samtools sort \
             -@ ${cpus} \
-            -m ${mem_gb}G \
+            -m 2G \
             ${unsorted_bam} > ${sorted_bam}
         samtools index -@ ${cpus} ${sorted_bam}
 
