@@ -54,6 +54,8 @@ RUN chown $USER:$USER /usr/local/lib/R
 
 COPY --chown=$USER:$USER src/jupyter_nb/dorcs_jplot_notebook.ipynb /usr/local/bin/
 
+COPY --chown=$USER:$USER src/jupyter_nb/dorcs_notebook_rds.ipynb /usr/local/bin/
+
 RUN mkdir -p /home/R/
 
 COPY --chown=$USER:$USER src/R/DORCS_helper_functions_optimized.R src/R/TSSRanges.RData /home/R/
