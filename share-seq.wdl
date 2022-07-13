@@ -143,7 +143,8 @@ workflow ShareSeq {
         File share_rna_featurecount_alignment = rna.share_rna_featurecount_alignment
         File share_rna_featurecount_alignment_index = rna.share_rna_featurecount_alignment_index
         #File share_rna_featurecount_log = rna.share_rna_featurecount_log
-        File share_rna_featurecount_txt = rna.share_rna_featurecount_txt
+        File share_rna_featurecount_exon_txt = rna.share_rna_featurecount_exon_txt
+        File? share_rna_featurecount_intron_txt = rna.share_rna_featurecount_intron_txt
         File share_rna_featurecount_summary = rna.share_rna_featurecount_summary
 
         File share_rna_umi_barcodes = rna.share_rna_umi_barcodes
@@ -151,6 +152,7 @@ workflow ShareSeq {
         File share_rna_umi_bed_unfiltered = rna.share_rna_umi_bed_unfiltered
         File share_rna_umi_counts_filtered = rna.share_rna_umi_bed_unfiltered
         File share_rna_umi_counts_unfiltered = rna.share_rna_umi_counts_unfiltered
+        File share_rna_umi_rm_dup_log = ran.share_rna_umi_rm_dup_log
 
         File share_rna_qc_reads_distribution = rna.share_rna_qc_reads_distribution
         File share_rna_qc_reads_distribution2 = rna.share_rna_qc_reads_distribution2
