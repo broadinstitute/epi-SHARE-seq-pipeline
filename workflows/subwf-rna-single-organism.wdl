@@ -132,7 +132,7 @@ workflow wf_rna {
         #File share_rna_featurecount_log = count.rna_featurecount_log
         File share_rna_featurecount_exon_txt = count.rna_featurecount_exon_txt
         File? share_rna_featurecount_intron_txt = count.rna_featurecount_intron_txt
-        File share_rna_featurecount_summary = count.rna_featurecount_summary
+        #File share_rna_featurecount_summary = count.rna_featurecount_summary
 
         File share_rna_umi_barcodes = group_umi.rna_umi_barcodes_filtered
         File share_rna_umi_bed_filtered = group_umi.rna_umi_bed_filtered

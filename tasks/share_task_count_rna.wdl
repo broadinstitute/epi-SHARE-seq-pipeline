@@ -54,7 +54,7 @@ task feature_counts_rna {
             -R BAM \
             temp_input.bam >> ${featurecount_log}
 
-            mv *.featurecount.txt summary.exon.featurecount.txt
+            mv *.featurecount.txt.summary summary.exon.featurecount.txt
 
         temp_filename="temp_input.bam.featureCounts.bam"
 
@@ -69,7 +69,7 @@ task feature_counts_rna {
             -R BAM \
             $temp_filename >> ${featurecount_log}
 
-            mv *.featurecount.txt summary.intron.featurecount.txt
+            mv *.featurecount.txt.summary summary.intron.featurecount.txt
 
             temp_filename="$temp_filename.featureCounts.bam"
         fi
@@ -85,7 +85,7 @@ task feature_counts_rna {
         #File rna_featurecount_log = "featureCount.log"
         File rna_featurecount_exon_txt = glob("*intron.featurecount.txt")[0]
         File? rna_featurecount_intron_txt = glob("*exon.featurecount.txt")[0]
-        File rna_featurecount_summary = glob("*.featurecount.txt.summary")[0]
+        #File rna_featurecount_summary = glob("*.featurecount.txt.summary")[0]
     }
 
     runtime {

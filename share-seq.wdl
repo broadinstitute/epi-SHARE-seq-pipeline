@@ -144,7 +144,7 @@ workflow ShareSeq {
         #File share_rna_featurecount_log = rna.share_rna_featurecount_log
         File share_rna_featurecount_exon_txt = rna.share_rna_featurecount_exon_txt
         File? share_rna_featurecount_intron_txt = rna.share_rna_featurecount_intron_txt
-        File share_rna_featurecount_summary = rna.share_rna_featurecount_summary
+        #File share_rna_featurecount_summary = rna.share_rna_featurecount_summary
 
         File share_rna_umi_barcodes = rna.share_rna_umi_barcodes
         File share_rna_umi_bed_filtered = rna.share_rna_umi_bed_filtered
