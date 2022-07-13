@@ -72,7 +72,7 @@ workflow wf_dorcs {
 
     output {
         File dorcs_notebook_output = find_dorcs.notebook_output
-        File dorcs_notebook_log = dorcs.notebook_log
+        File dorcs_notebook_log = find_dorcs.notebook_log
         File? seurat_violin_plot = find_dorcs.seurat_violin_plot
         File? j_plot = find_dorcs.j_plot
         File? plots_zip = find_dorcs.plots_zip
