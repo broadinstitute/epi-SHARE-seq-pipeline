@@ -5,6 +5,13 @@ version 1.0
 import "../tasks/dorcs_task_find_dorcs.wdl" as find_dorcs
 
 workflow wf_dorcs {
+
+    meta {
+        version: 'v0.1'
+        author: 'Siddarth Wekhande (swekhand@broadinstitute.org)'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Sub-workflow to find DORCs from SHARE-seq data.'
+    }
+    
     input {
         File rna_matrix
         File atac_fragments
@@ -13,7 +20,7 @@ workflow wf_dorcs {
         String genome
         Int n_cores = 4
         String save_plots_to_dir = "TRUE"
-        String output_filename = "output.ipynb"
+        String? output_filename 
 
         Int minFeature_RNA = 200
         Int maxFeature_RNA = 2500
@@ -30,8 +37,10 @@ workflow wf_dorcs {
         Float numBackgroundPairs = 100000
         Float chunkSize = 50000
         
+        String? prefix 
         Int mem_gb = 16
         Int disk_gb = 100
+        String? docker 
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
@@ -56,16 +65,19 @@ workflow wf_dorcs {
             numBackgroundPairs = numBackgroundPairs,
             chunkSize = chunkSize,
             mem_gb = mem_gb,
-            disk_gb = disk_gb
+            disk_gb = disk_gb,
+            docker_image = docker,
+            prefix = prefix
     }
 
     output {
-        File notebook_output = find_dorcs.notebook_output
-        File seurat_violin_plot = find_dorcs.seurat_violin_plot
-        File j_plot = find_dorcs.j_plot
-        File plots_zip = find_dorcs.plots_zip
-        File dorcs_genes_summary = find_dorcs.dorcs_genes_summary
-        File dorcs_regions_summary = find_dorcs.dorcs_regions_summary
+        File dorcs_notebook_output = find_dorcs.notebook_output
+        File dorcs_notebook_log = find_dorcs.notebook_log
+        File? seurat_violin_plot = find_dorcs.seurat_violin_plot
+        File? j_plot = find_dorcs.j_plot
+        File? plots_zip = find_dorcs.plots_zip
+        File? dorcs_genes_summary = find_dorcs.dorcs_genes_summary
+        File? dorcs_regions_summary = find_dorcs.dorcs_regions_summary
     }
 
 }

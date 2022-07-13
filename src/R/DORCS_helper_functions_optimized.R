@@ -13,6 +13,39 @@ library(ggrepel)
 library(pbmcapply)
 library(data.table)
 library(tidyft)
+library(qlcMatrix)
+
+##custom code from https://github.com/saketkc/blog/blob/main/2022-03-10/SparseSpearmanCorrelation2.ipynb
+SparsifiedRanks2 <- function(X) {
+  if (class(X)[1] != "dgCMatrix") {
+    X <- as(object = X, Class = "dgCMatrix")
+  }
+  non_zeros_per_col <- diff(x = X@p)
+  n_zeros_per_col <- nrow(x = X) - non_zeros_per_col
+  offsets <- (n_zeros_per_col - 1) / 2
+  x <- X@x
+  ## split entries to columns
+  col_lst <- split(x = x, f = rep.int(1:ncol(X), non_zeros_per_col))
+  ## calculate sparsified ranks and do shifting
+  sparsified_ranks <- unlist(x = lapply(X = seq_along(col_lst), 
+                                        FUN = function(i) rank(x = col_lst[[i]]) + offsets[i]))
+  ## Create template rank matrix
+  X.ranks <- X
+  X.ranks@x <- sparsified_ranks
+  return(X.ranks)
+}
+
+SparseSpearmanCor2 <- function(X, Y = NULL, cov = FALSE) {
+  
+  # Get sparsified ranks
+  rankX <- SparsifiedRanks2(X)
+  if (is.null(Y)){
+    # Calculate pearson correlation on rank matrices
+    return (corSparse(X=rankX, cov=cov))
+  }
+  rankY <- SparsifiedRanks2(Y)
+  return(corSparse( X = rankX, Y = rankY, cov = cov))
+}
 
 smoothScoresNN <- function(NNmat,
                            TSSmat,
@@ -350,7 +383,9 @@ fastGenePeakcorr <-
           BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
       ATAC.se <- chromVAR::addGCBias(ATAC.se, genome = myGenome)
     }
-    cat("Using ", n_bg, " iterations ..\n\n")
+    cat("Using ", n_BgPairs, " background gene-peak pairs ..\n\n")
+    cat("Finding ", n_bg, " nearest neighbors ..\n\n")
+    
     start.time <- Sys.time()
     set.seed(123)
     bgPairGenes <- sample(1:length(genesToKeep), n_BgPairs,
@@ -381,87 +416,168 @@ fastGenePeakcorr <-
         k = n_bg
       )$nn.index
     
-    metric <- "spearman"
-    pairsPerChunk <- 1000 
+    uniq_ids = unique(unlist(split(bgPairsInds, seq(nrow(bgPairsInds))),recursive=F))
+    
+    end.time <- Sys.time()
+    
+    cat(paste(
+      "\nTime Elapsed to find nearest neighbors: ",
+      round(end.time - start.time, 2),
+      units(end.time - start.time),
+      "\n"
+    ))
+    
+    cat(paste(
+      "\n# of unique nearest neighbors: ",
+      length(uniq_ids),
+      "\n"
+    ))
     
     library(doParallel)
     
-    pairCorrs <- list()
-    for (pairs in c("bg", "ob")) {
-      cl <- makeCluster(nCores)
-      registerDoParallel(cl)
-      cat("\n",pairs)
-      if (pairs == "bg") {
-        numPairs <- length(bgPairGenes)
-        cat("\nComputing background peak-gene pair correlations ..\n")
+    cl <- makeCluster(nCores)
+    registerDoParallel(cl)
+    
+    ##Calculate corr for bg pairs
+    corPairs <- data.table(Gene = bgPairGenes[uniq_ids],
+                           Peak = bgPairPeaks[uniq_ids],
+                           ID = uniq_ids,
+                           stringsAsFactors = FALSE)
+    
+    #corPairs_grp = corPairs[, .(Peak = .(Peak)), by = .(Gene)]
+    #numPairs <- nrow(corPairs_grp)
+    #pairsPerChunk = as.integer(numPairs/100)
+   
+    pairsPerChunk = 1000
+    numPairs <- length(uniq_ids)
+    
+    starts <- seq(1, numPairs, pairsPerChunk)
+    ends <- starts + pairsPerChunk - 1
+    ends[length(ends)] <- numPairs
+    
+    chunkList <- mapply(c, starts, ends, SIMPLIFY = FALSE)
+    
+    start.time <- Sys.time()
+    
+    corList_bg <-
+      foreach(
+        x = 1:length(chunkList),
+        .combine = c,
+        .inorder = T,
+        .multicombine = TRUE,
+        .maxcombine = 1000,
+        .export = c("SparseSpearmanCor2","SparsifiedRanks2"),
+        .packages = c("dplyr",
+                      "Matrix","qlcMatrix")
+      ) %dopar% {
+        chunk = chunkList[[x]]
+        geneIndices <- corPairs$Gene[chunk[1]:chunk[2]]
+        peakIndices <- corPairs$Peak[chunk[1]:chunk[2]]
+        
+        diag(SparseSpearmanCor2(Matrix::t(ATACmat[peakIndices, , drop = FALSE]), Matrix::t(RNAmat[geneIndices, , drop = FALSE]))) 
       }
-      else if (pairs == "ob") {
-        numPairs <- length(obPairGenes)
-        cat("\nComputing observed peak-gene pair correlations ..\n")
-      }
-      starts <- seq(1, numPairs, pairsPerChunk)
-      ends <- starts + pairsPerChunk - 1
-      ends[length(ends)] <- numPairs
-      chunkList <- mapply(c, starts, ends, SIMPLIFY = FALSE)
-      if (pairs == "bg") {
-        corPairs <- data.table(Gene = bgPairGenes,
-                               Peak = bgPairPeaks,
-                               stringsAsFactors = FALSE)
-      }
-      else if (pairs == "ob") {
-        corPairs <- data.table(Gene = obPairGenes,
-                               Peak = obPairPeaks,
-                               stringsAsFactors = FALSE)
-      }
-      if (nCores > 1)
-        cat("Running in parallel using ", nCores, " cores ..\n\n")
-      
-      time_elapsed <- Sys.time()
+    
+    end.time <- Sys.time()
+    
+    cat(paste(
+      "\nTime Elapsed to calculate background corr: ",
+      round(end.time - start.time, 2),
+      units(end.time - start.time),
+      "\n"
+    ))
 
-      corList <-
-        foreach(
-          x = 1:length(chunkList),
-          .export = c("chunkCore"),
-          .packages = c("dplyr",
-                        "Matrix")
-        ) %dopar% {
-          chunk = chunkList[[x]]
-          geneIndices <- corPairs$Gene[chunk[1]:chunk[2]]
-          peakIndices <- corPairs$Peak[chunk[1]:chunk[2]]
-          pairnames <-
-            cbind(rownames(ATACmat)[peakIndices], rownames(RNAmat)[geneIndices])
-          uniquegenes <- unique(geneIndices)
-          uniquepeaks <- unique(peakIndices)
-          M1 <- as.matrix(Matrix::t(ATACmat[uniquepeaks, , drop = FALSE]))
-          M2 <- as.matrix(Matrix::t(RNAmat[uniquegenes, , drop = FALSE]))
-          
-          corrs <- chunkCore(
-            A = M1,
-            R = M2,
-            met = metric,
-            pairnames = pairnames
-          )
-          return(corrs)
-        }
-      stopCluster(cl)
-      if (any(unlist(sapply(corList, is.null)))) {
-        message("One or more of the chunk processes failed unexpectedly (returned NULL) ..")
-        message("Please check to see you have enough cores/memory allocated")
-        message("Also make sure you have filtered down to non-zero peaks/genes")
-      }
-      pairCorrs[[pairs]] <- unlist(corList)
-    }
-    cat("\nCalculating correlation P-values based on background distribution ..\n")
+    parallel::stopCluster(cl)
+    
+    corList_bg = data.table(ID = uniq_ids, corr = corList_bg) #maintain background IDs
+    setkey(corList_bg,ID) #assign IDs as keys for faster search/subset
+    
+    ##Calculate corr for ob pairs
+    cl <- makeCluster(nCores)
+    registerDoParallel(cl)
+    
+     corPairs <- data.table(Gene = obPairGenes,
+                            Peak = obPairPeaks,
+                            stringsAsFactors = FALSE)
+     
+     #corPairs_grp = corPairs[, .(Peak = .(Peak)), by = .(Gene)]
+     #numPairs <- nrow(corPairs_grp)
+     #pairsPerChunk = as.integer(numPairs/100)
+     
+     pairsPerChunk = 1000
+     numPairs <- length(obPairGenes)
+     
+     starts <- seq(1, numPairs, pairsPerChunk)
+     ends <- starts + pairsPerChunk - 1
+     ends[length(ends)] <- numPairs
+     
+     chunkList <- mapply(c, starts, ends, SIMPLIFY = FALSE)
+     
+     start.time <- Sys.time()
+     
+     # corList_ob <- foreach(
+     #   x = 1:nrow(corPairs_grp),
+     #   .combine = c,
+     #   .inorder = T,
+     #   .multicombine = TRUE,
+     #   .export = c("SparseSpearmanCor2","SparsifiedRanks2"),
+     #   .packages = c("dplyr",
+     #                 "Matrix","qlcMatrix")
+     # ) %dopar% {
+     #   tryCatch({
+     #     geneIndices <- corPairs_grp[x,]$Gene
+     #     peakIndices <- corPairs_grp[x,]$Peak[[1]]
+     #     
+     #     sub_mat = cbind(Matrix::t(RNAmat[geneIndices, , drop = FALSE]), Matrix::t(ATACmat[peakIndices, , drop = FALSE]))
+     #     
+     #     sapply(2:ncol(sub_mat), function(i) SparseSpearmanCor2(sub_mat[,1, drop=F], sub_mat[,i, drop=F]))
+     #     
+     #   },
+     #   error = function(e){ 
+     #     print(e)
+     #   })
+     # }
+     
+     corList_ob <-
+       foreach(
+         x = 1:length(chunkList),
+         .combine = c,
+         .inorder = T,
+         .multicombine = TRUE,
+         .maxcombine = 1000,
+         .export = c("SparseSpearmanCor2","SparsifiedRanks2"),
+         .packages = c("dplyr",
+                       "Matrix","qlcMatrix")
+       ) %dopar% {
+         chunk = chunkList[[x]]
+         geneIndices <- corPairs$Gene[chunk[1]:chunk[2]]
+         peakIndices <- corPairs$Peak[chunk[1]:chunk[2]]
+         
+         diag(SparseSpearmanCor2(Matrix::t(ATACmat[peakIndices, , drop = FALSE]), Matrix::t(RNAmat[geneIndices, , drop = FALSE]))) 
+       }
+    
+     end.time <- Sys.time()
+     
+     cat(paste(
+       "\nTime Elapsed to calculate observed corr: ",
+       round(end.time - start.time, 2),
+       units(end.time - start.time),
+       "\n"
+     ))
+     
+     parallel::stopCluster(cl)
+    
+    start.time <- Sys.time()
+    
     pvals <- pbmcapply::pbmcmapply(function(pair_ind) {
-      obcor <- pairCorrs[["ob"]][pair_ind]
-      bgCorrs <- pairCorrs[["bg"]][bgPairsInds[pair_ind, ]]
+      obcor <- corList_ob[pair_ind]
+      bgCorrs <- corList_bg[ID %in% bgPairsInds[pair_ind, ]]$corr
       pval <- 1 - stats::pnorm(q = obcor,
                                mean = mean(bgCorrs),
                                sd = sd(bgCorrs))
     }, 1:length(obPairGenes), mc.cores = nCores)
     time_elapsed <- Sys.time() - start.time
     cat(paste(
-      "\nTime Elapsed: ",
+      "\nTime Elapsed to calculate pvals: ",
       round(time_elapsed, 2),
       units(time_elapsed),
       "\n"
@@ -469,7 +585,7 @@ fastGenePeakcorr <-
     corrResults <- data.table(
       Peak = obPairPeaks,
       Gene = obPairGenes,
-      rObs = pairCorrs[["ob"]],
+      rObs = corList_ob,
       pvalZ = pvals,
       stringsAsFactors = FALSE
     )
@@ -641,8 +757,8 @@ getCountsFromFrags <- function (fragFile,
   #validHits <- unique.data.frame(rbind(as.data.frame(ovPEAKStarts),as.data.frame(ovPEAKEnds)))
   
   validHits = merge(as.data.table(ovPEAKStarts), as.data.table(ovPEAKEnds),all=T)
-
-    cat("Generating matrix of counts ..\n")
+  
+  cat("Generating matrix of counts ..\n")
   # countdf <-
   #   data.frame(peaks = validHits$queryHits, sample = as.numeric(id)[validHits$subjectHits]) %>%
   #   dplyr::group_by(peaks, sample) %>% dplyr::summarise(count = n()) %>%
