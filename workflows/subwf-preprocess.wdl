@@ -25,7 +25,7 @@ workflow wf_preprocess {
 		String dockerImage = "nchernia/share_task_preprocess:7"
 	}
 
-	String readStructure = "50T14S10M28S10M28S9M8B50T"
+	String barcodeStructure = "14S10M28S10M28S9M8B"
 	String sequencingCenter = "BI"
 	String tar_flags = if zipped then 'xzf' else 'xf'
 	String untarBcl =
@@ -60,7 +60,7 @@ workflow wf_preprocess {
 				bcl = bcl,
 				untarBcl = untarBcl,
 				libraryBarcodes = BarcodeMap.out,
-				readStructure = readStructure,
+				barcodeStructure = barcodeStructure,
 				lane = lane,
 				dockerImage = dockerImage
 		}
@@ -71,7 +71,7 @@ workflow wf_preprocess {
 				untarBcl = untarBcl,
 				barcodes = ExtractBarcodes.barcodes,
 				libraryBarcodes = BarcodeMap.out,
-				readStructure = readStructure,
+				readStructure = ExtractBarcodes.readStructure,
 				lane = lane,
 				sequencingCenter = sequencingCenter,
 				dockerImage = dockerImage
@@ -123,6 +123,7 @@ workflow wf_preprocess {
 	call TerraUpsert {
 		input:
 			rna_tsv = GatherOutputs.rna_tsv,
+			rna_no_tsv = GatherOutputs.rna_no_tsv,
 			atac_tsv = GatherOutputs.atac_tsv,
 			run_tsv = GatherOutputs.run_tsv,
 			terra_project = terra_project,
@@ -198,7 +199,7 @@ task ExtractBarcodes {
 		File bcl
 		String untarBcl
 		Map[String,String] libraryBarcodes
-		String readStructure 
+		String barcodeStructure 
 		Int lane 
 		String dockerImage
 	}
@@ -229,6 +230,10 @@ task ExtractBarcodes {
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
 
+		readLength=$(xmlstarlet sel -t -v "/RunInfo/Run/Reads/Read/@NumCycles" RunInfo.xml | head -n 1)T
+		readStructure=${readLength}"~{barcodeStructure}"${readLength}
+		echo ${readStructure} > readStructure.txt
+
 		printf "barcode_name\tbarcode_sequence1" | tee "~{barcodeParamsFile}"
 		while read -r params; do	
 			name=$(echo "${params}" | cut -d$'\t' -f1)
@@ -243,7 +248,7 @@ task ExtractBarcodes {
 			-OUTPUT_DIR . \
 			-BARCODE_FILE "~{barcodeParamsFile}" \
 			-METRICS_FILE "~{barcodeMetricsFile}" \
-			-READ_STRUCTURE "~{readStructure}" \
+			-READ_STRUCTURE "${readStructure}" \
 			-LANE "~{lane}" \
 			-NUM_PROCESSORS 0 \
 			-COMPRESSION_LEVEL 1 \
@@ -258,6 +263,7 @@ task ExtractBarcodes {
 	}
 
 	output {
+		String readStructure = read_string("readStructure.txt")
 		File barcodeMetrics = barcodeMetricsFile
 		File barcodes = write_lines(glob("*_barcode.txt.gz"))
 	}
@@ -551,7 +557,7 @@ task TerraUpsert {
 			-w "~{workspace_name}"
 		
 		python3 /software/flexible_import_entities_standard.py \
-			-t "~{run_no_tsv}" \
+			-t "~{rna_no_tsv}" \
 			-p "~{terra_project}" \
 			-w "~{workspace_name}"
 
