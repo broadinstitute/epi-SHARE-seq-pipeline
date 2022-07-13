@@ -51,8 +51,8 @@ task find_dorcs {
     String jplot = 'plots/${prefix}.dorcs.jplot.${genome}.png'
     String dorc_genes_summ = '${prefix}.dorcs.dorc_genes_summary.${genome}.csv'
     String all_regions_summ = '${prefix}.dorcs.all_regions_summary.${genome}.csv'
-    String plots_zip_dir = 'plots.zip'
-    String papermill_log_filename = 'papermill.logfile.txt'
+    String plots_zip_dir = '${prefix}.dorcs.plots.${genome}.zip'
+    #String papermill_log_filename = 'papermill.logfile.txt'
     String log_filename = "log/${prefix}.dorcs.logfile.${genome}.txt"
 
     command {
@@ -77,13 +77,13 @@ task find_dorcs {
         -p numNearestNeighbor ${numNearestNeighbor} \
         -p numBackgroundPairs ${numBackgroundPairs} \
         -p chunkSize ${chunkSize} \
-         --log-output &> papermill.logfile.txt
+         --log-output 
     }
 
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
-        File papermill_log = papermill_log_filename
+        #File papermill_log = papermill_log_filename
         
         File? seurat_violin_plot = violin_plot
         File? j_plot = jplot
