@@ -47,8 +47,8 @@ task find_dorcs {
     
     #Output filepaths
     
-    String violin_plot = 'plots/${prefix}.dorcs.rna_violin_plot.${genome}.png'
-    String jplot = 'plots/${prefix}.dorcs.jplot.${genome}.png'
+    String violin_plot = '${prefix}.dorcs.plots.${genome}/${prefix}.dorcs.rna_violin_plot.${genome}.png'
+    String jplot = '${prefix}.dorcs.plots.${genome}/${prefix}.dorcs.jplot.${genome}.png'
     String dorc_genes_summ = '${prefix}.dorcs.dorc_genes_summary.${genome}.csv'
     String all_regions_summ = '${prefix}.dorcs.all_regions_summary.${genome}.csv'
     String plots_zip_dir = '${prefix}.dorcs.plots.${genome}.zip'
