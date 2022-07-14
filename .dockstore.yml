@@ -78,3 +78,13 @@ workflows:
              - kdong
          tags:
              - /.*/
+
+   - name: "SHARE-seq-rna-starsolo"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-rna-starsolo.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+             - dev
+         tags:
+             - /.*/
