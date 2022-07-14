@@ -521,7 +521,7 @@ task GatherOutputs {
 	}
 
 	command <<<
-		echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tNotes" > fastq.tsv
+		echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tGenome\tNotes" > fastq.tsv
 		cat ~{sep=' ' rows} >> fastq.tsv
 
 		python3 /software/write_terra_tables.py --input 'fastq.tsv' --name ~{name} --meta ~{metaCsv}
