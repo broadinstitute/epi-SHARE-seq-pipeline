@@ -128,7 +128,6 @@ workflow ShareSeq {
 
             # Regulatory region around TSS. Default is +/- 50Kb
             windowPadSize = windowPadSize,
-            #bootstraps = bootstraps,
             mem_gb = mem_gb_dorcs
     }
 
@@ -143,14 +142,16 @@ workflow ShareSeq {
         File share_rna_featurecount_alignment = rna.share_rna_featurecount_alignment
         File share_rna_featurecount_alignment_index = rna.share_rna_featurecount_alignment_index
         #File share_rna_featurecount_log = rna.share_rna_featurecount_log
-        File share_rna_featurecount_txt = rna.share_rna_featurecount_txt
-        File share_rna_featurecount_summary = rna.share_rna_featurecount_summary
+        File share_rna_featurecount_exon_txt = rna.share_rna_featurecount_exon_txt
+        File? share_rna_featurecount_intron_txt = rna.share_rna_featurecount_intron_txt
+        #File share_rna_featurecount_summary = rna.share_rna_featurecount_summary
 
         File share_rna_umi_barcodes = rna.share_rna_umi_barcodes
         File share_rna_umi_bed_filtered = rna.share_rna_umi_bed_filtered
         File share_rna_umi_bed_unfiltered = rna.share_rna_umi_bed_unfiltered
         File share_rna_umi_counts_filtered = rna.share_rna_umi_bed_unfiltered
         File share_rna_umi_counts_unfiltered = rna.share_rna_umi_counts_unfiltered
+        File share_rna_umi_rm_dup_log = rna.share_rna_umi_rm_dup_log
 
         File share_rna_qc_reads_distribution = rna.share_rna_qc_reads_distribution
         File share_rna_qc_reads_distribution2 = rna.share_rna_qc_reads_distribution2
@@ -214,12 +215,13 @@ workflow ShareSeq {
         File? share_atac_archr_obj = atac.share_atac_archr_obj
         File? share_atac_archr_plots_zip = atac.share_atac_archr_plots_zip
 
-        File notebook_output = dorcs.notebook_output
-        File seurat_violin_plot = dorcs.seurat_violin_plot
-        File j_plot = dorcs.j_plot
-        File plots_zip = dorcs.plots_zip
-        File dorcs_genes_summary = dorcs.dorcs_genes_summary
-        File dorcs_regions_summary = dorcs.dorcs_regions_summary
+        File dorcs_notebook_output = dorcs.dorcs_notebook_output
+        File dorcs_notebook_log = dorcs.dorcs_notebook_log
+        File? seurat_violin_plot = dorcs.seurat_violin_plot
+        File? j_plot = dorcs.j_plot
+        File? plots_zip = dorcs.plots_zip
+        File? dorcs_genes_summary = dorcs.dorcs_genes_summary
+        File? dorcs_regions_summary = dorcs.dorcs_regions_summary
 
     }
 

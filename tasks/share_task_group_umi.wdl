@@ -69,7 +69,7 @@ task group_umi_rna {
             python3 $(which rm_dup_barcode_UMI_v3.py) \
                     -i ~{prefix + "."}rna.~{genome_name}.wdup.bed \
                     -o ~{umi_groups_table} \
-                    --m 1
+                    --m 1 > ~{prefix}.rm_dup_barcode.log.txt
         fi
 
         cut -f1 ~{umi_groups_table} | sort -u > observed_barcodes_combinations
@@ -125,6 +125,7 @@ task group_umi_rna {
         File rna_umi_bed_unfiltered = "${umi_groups_bed_unfiltered}"
         File rna_umi_counts_filtered = "${umi_counts_filtered}"
         File rna_umi_counts_unfiltered = "${umi_counts_unfiltered}"
+        File rna_umi_rm_dup_log = "${prefix}.rm_dup_barcode.log.txt"
     }
 
     runtime {
