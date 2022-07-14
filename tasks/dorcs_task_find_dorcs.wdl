@@ -41,8 +41,8 @@ task find_dorcs {
         
         String output_filename = "${prefix}.dorcs.notebook.${genome}.ipynb"
         String docker_image = "swekhande/shareseq-prod:share-task-dorcs"
-        Int mem_gb = 64
-        Int disk_gb = 100
+        Int mem_gb = 128
+	Int disk_gb = 200
     }
     
     #Output filepaths
