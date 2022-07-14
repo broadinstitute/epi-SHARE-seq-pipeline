@@ -76,8 +76,7 @@ task find_dorcs {
         -p windowPadSize ${windowPadSize} \
         -p numNearestNeighbor ${numNearestNeighbor} \
         -p numBackgroundPairs ${numBackgroundPairs} \
-        -p chunkSize ${chunkSize} \
-         --log-output 
+        -p chunkSize ${chunkSize} 
     }
 
     output {

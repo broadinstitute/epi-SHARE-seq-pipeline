@@ -38,7 +38,7 @@ workflow wf_dorcs {
         Float chunkSize = 50000
         
         String? prefix 
-        Int mem_gb = 16
+        Int mem_gb = 64
         Int disk_gb = 100
         String? docker 
     }
