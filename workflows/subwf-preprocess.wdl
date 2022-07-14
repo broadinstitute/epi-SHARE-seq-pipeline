@@ -115,7 +115,7 @@ workflow wf_preprocess {
 	call GatherOutputs {
 		input:
 			rows = flatten(WriteTsvRow.row),
-			name = basename(bcl, ".tar.gz"),
+			name =  if zipped then basename(bcl, ".tar.gz") else basename(bcl, ".tar"),
 			metaCsv = metaCsv, 
 			dockerImage = dockerImage
 	}
