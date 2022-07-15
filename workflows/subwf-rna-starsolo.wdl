@@ -81,6 +81,7 @@ task share_task_align_starsolo {
         --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
         --soloUMIfiltering MultiGeneUMI_CR \
         --soloUMIdedup 1MM_CR \
+        --soloCBwhitelist None \
         --clipAdapterType CellRanger4 \
         --outFilterScoreMin 30 \
         --outSAMtype BAM SortedByCoordinate \
