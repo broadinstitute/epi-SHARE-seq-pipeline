@@ -94,7 +94,6 @@ task share_task_align_starsolo {
         --outFilterScoreMinOverLread 0.3 \
         --outFilterMatchNminOverLread 0.3 \
         --limitOutSJcollapsed 2000000 \
-        --limitIObufferSize 400000000 \
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
     }
