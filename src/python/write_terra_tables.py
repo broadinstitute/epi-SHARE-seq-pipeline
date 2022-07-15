@@ -187,6 +187,7 @@ with open('run.tsv', 'wt') as outfile:
 	for key in sorted(main.keys()):
 		print(key)
 		pkr = main[key].pkr
+		genome = main[key].genome
 		r1 = '["' + '","'.join(main[key].r1) + '"]'
 		atac_lib = '["' + '","'.join(set(main[key].atac_lib)) + '"]'
 		atac_fq1 = '["' + '","'.join(main[key].atac_fq1) + '"]'
@@ -194,4 +195,4 @@ with open('run.tsv', 'wt') as outfile:
 		rna_lib = '["' + '","'.join(set(main[key].rna_lib)) + '"]'
 		rna_fq1 = '["' + '","'.join(main[key].rna_fq1) + '"]'
 		rna_fq2 = '["' + '","'.join(main[key].rna_fq2) + '"]'
-		tsv_writer.writerow([key.replace(" ", "_"), pkr, r1, atac_lib, atac_fq1, atac_fq2, rna_lib, rna_fq1, rna_fq2])
+		tsv_writer.writerow([key.replace(" ", "_"), pkr, genome, r1, atac_lib, atac_fq1, atac_fq2, rna_lib, rna_fq1, rna_fq2])

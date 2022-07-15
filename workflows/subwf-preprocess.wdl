@@ -19,10 +19,8 @@ workflow wf_preprocess {
 		Array[Int]? lanes
 		File metaCsv
 		String terra_project # set to none or make optional
-		# TODO read length variable
-		# TODO array of ints for lane number
 		String workspace_name
-		String dockerImage = "nchernia/share_task_preprocess:7"
+		String dockerImage = "nchernia/share_task_preprocess:8"
 	}
 
 	String barcodeStructure = "14S10M28S10M28S9M8B"
@@ -87,7 +85,6 @@ workflow wf_preprocess {
 					metaCsv = metaCsv,
 			}
 
-			# TODO: Add flag to skip splitting by set for Buenrostro lab use
 			call BamToFastq { 
 				input: 
 					bam=bam,
