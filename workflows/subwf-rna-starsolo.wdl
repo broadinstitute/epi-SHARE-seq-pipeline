@@ -45,10 +45,8 @@ workflow wf_rna {
 
 
     output {
-        File share_rna_alignment_raw = align.rna_alignment
-        File share_rna_alignment_index = align.rna_alignment_index
-        File share_rna_alignment_log = align.rna_alignment_log
-
+        Array[File] share_rna_starsolo_ouputs = align.total_outputs
+        Array[File]? share_rna_starsolo_logs = align.total_logs
     }
 }
 
@@ -100,8 +98,8 @@ task share_task_align_starsolo {
         --readFilesCommand zcat
     }
     output{
-        Array[File] = glob("out/*")
-        Array[File]? = glob("*log*")
+        Array[File] total_outputs = glob("out/*")
+        Array[File]? total_logs = glob("*log*")
     }
     runtime{
         cpu : cpus
