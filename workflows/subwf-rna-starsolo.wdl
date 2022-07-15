@@ -72,7 +72,8 @@ task share_task_align_starsolo {
         mkdir out
 
         $(which STAR) \
-            --soloType CB_UMI_Simple \
+        --readFilesIn ${sep=',' fastq_R1} ${sep=',' fastq_R2}  \
+        --soloType CB_UMI_Simple \
         --soloCBstart 1 \
         --soloCBlen 24 \
         --soloUMIstart 25 \
@@ -83,17 +84,16 @@ task share_task_align_starsolo {
         --clipAdapterType CellRanger4 \
         --outFilterScoreMin 30 \
         --outSAMtype BAM SortedByCoordinate \
-        --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD
+        --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD \
         --runThreadN ${cpus} \
         --chimOutType WithinBAM \
         --genomeDir ./ \
-        --readFilesIn ${sep=',' fastq_R1} ${sep=',' fastq_R2}  \
         --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name}. \
-        #--outFilterMultimapNmax 20 \
-        #--outFilterScoreMinOverLread 0.3 \
-        #--outFilterMatchNminOverLread 0.3 \
-        #--limitOutSJcollapsed 2000000 \
-        #--limitIObufferSize 400000000 \
+        --outFilterMultimapNmax 20 \
+        --outFilterScoreMinOverLread 0.3 \
+        --outFilterMatchNminOverLread 0.3 \
+        --limitOutSJcollapsed 2000000 \
+        --limitIObufferSize 400000000 \
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
     }
