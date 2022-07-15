@@ -47,9 +47,9 @@ workflow ShareSeq {
 
         # DORCs specific inputs
         File peak_set
-        Int? cpus_dorcs = 4
+        Int? cpus_dorcs 
         String save_plots_to_dir = "TRUE"
-        String output_filename = "output.ipynb"
+        String? dorcs_output_filename 
 
         # Seurat filters
         Int minFeature_RNA = 200
@@ -68,7 +68,7 @@ workflow ShareSeq {
         #Int bootstraps = 100
 
         String docker_image_dorcs = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
-        Int mem_gb_dorcs = 16
+        Int? mem_gb_dorcs 
     }
 
     call share_rna.wf_rna as rna{
@@ -114,7 +114,7 @@ workflow ShareSeq {
             genome = genome_name,
             n_cores = cpus_dorcs,
             save_plots_to_dir = save_plots_to_dir,
-            output_filename = output_filename,
+            output_filename = dorcs_output_filename,
 
             minFeature_RNA = minFeature_RNA,
             maxFeature_RNA = maxFeature_RNA,
@@ -126,7 +126,6 @@ workflow ShareSeq {
             corrPVal = corrPVal,
             topNGene = topNGene,
 
-            # Regulatory region around TSS. Default is +/- 50Kb
             windowPadSize = windowPadSize,
             mem_gb = mem_gb_dorcs
     }
