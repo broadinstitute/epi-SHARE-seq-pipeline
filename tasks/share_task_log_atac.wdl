@@ -52,23 +52,3 @@ task log_atac {
         }
     }
 }
-
-workflow call_log_atac {
-    input {
-        File alignment_log
-        File dups_log
-    }
-    
-    call log_atac { 
-        input: alignment_log = alignment_log, dups_log = dups_log
-    }
-    
-    output {
-        Int atac_total_reads = log_atac.atac_total_reads
-        Int atac_aligned_uniquely = log_atac.atac_aligned_uniquely
-        Int atac_unaligned = log_atac.atac_unaligned
-        Int atac_feature_reads = log_atac.atac_feature_reads
-        Int atac_duplicate_reads = log_atac.atac_duplicate_reads
-    }
-}
-

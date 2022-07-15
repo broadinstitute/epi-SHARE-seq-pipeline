@@ -7,7 +7,7 @@ import "../tasks/share_task_count_atac.wdl" as share_task_count
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_qc_library.wdl" as share_task_qc_library
 import "../tasks/share_task_archr.wdl" as share_task_archr
-
+import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
 
 workflow wf_atac {
     meta {
@@ -78,6 +78,12 @@ workflow wf_atac {
             prefix = prefix,
             cpus = cpus
     }
+  
+    call share_task_log_atac.log_atac as log_atac {
+       input:
+           alignment_log = align.atac_alignment_log,
+           dups_log = qc_library.lib_size_log
+    }
 
     call share_task_archr.archr as archr{
         input:
@@ -128,6 +134,10 @@ workflow wf_atac {
         File? share_atac_archr_obj = archr.archr_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
 
-
+        Int atac_total_reads = log_atac.atac_total_reads
+        Int atac_aligned_uniquely = log_atac.atac_aligned_uniquely
+        Int atac_unaligned = log_atac.atac_unaligned
+        Int atac_feature_reads = log_atac.atac_feature_reads
+        Int atac_duplicate_reads = log_atac.atac_duplicate_reads
     }
 }
