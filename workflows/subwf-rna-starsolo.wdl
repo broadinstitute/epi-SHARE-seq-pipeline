@@ -67,7 +67,7 @@ task share_task_align_starsolo {
     Int disk_gb = 250
 
     command{
-    	 set -e
+         set -e
         # Untar the genome
         tar xvzf ${genome_index_tar} --no-same-owner -C ./
 
@@ -75,35 +75,36 @@ task share_task_align_starsolo {
 
         $(which STAR) \
             --soloType CB_UMI_Simple \
-	    --soloCBstart 1 \
-	    --soloCBlen 24 \
-	    --soloUMIstart 25 \
-	    --soloUMIlen 10 \
-	    --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
-	    --soloUMIfiltering MultiGeneUMI_CR \
-	    --soloUMIdedup 1MM_CR \
-	    --clipAdapterType CellRanger4 \
-	    --outFilterScoreMin 30 \
-	    --outSAMtype BAM SortedByCoordinate \
-	    --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD
-            --runThreadN ${cpus} \
-            --chimOutType WithinBAM \
-            --genomeDir ./ \
-            --readFilesIn ${sep=',' fastq_R1} ${sep=',' fastq_R2}  \
-            --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name}. \
-            #--outFilterMultimapNmax 20 \
-            #--outFilterScoreMinOverLread 0.3 \
-            #--outFilterMatchNminOverLread 0.3 \
-            #--limitOutSJcollapsed 2000000 \
-            #--limitIObufferSize 400000000 \
-            --outReadsUnmapped Fastx \
-            --readFilesCommand zcat
+        --soloCBstart 1 \
+        --soloCBlen 24 \
+        --soloUMIstart 25 \
+        --soloUMIlen 10 \
+        --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
+        --soloUMIfiltering MultiGeneUMI_CR \
+        --soloUMIdedup 1MM_CR \
+        --clipAdapterType CellRanger4 \
+        --outFilterScoreMin 30 \
+        --outSAMtype BAM SortedByCoordinate \
+        --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD
+        --runThreadN ${cpus} \
+        --chimOutType WithinBAM \
+        --genomeDir ./ \
+        --readFilesIn ${sep=',' fastq_R1} ${sep=',' fastq_R2}  \
+        --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name}. \
+        #--outFilterMultimapNmax 20 \
+        #--outFilterScoreMinOverLread 0.3 \
+        #--outFilterMatchNminOverLread 0.3 \
+        #--limitOutSJcollapsed 2000000 \
+        #--limitIObufferSize 400000000 \
+        --outReadsUnmapped Fastx \
+        --readFilesCommand zcat
     }
     output{
-    	File 
+        Array[File] = glob("out/*")
+        Array[File]? = glob("*log*")
     }
     runtime{
-    	cpu : cpus
+        cpu : cpus
         memory : mem_gb+'G'
         disks : 'local-disk ${disk_gb} SSD'
         maxRetries: 0
