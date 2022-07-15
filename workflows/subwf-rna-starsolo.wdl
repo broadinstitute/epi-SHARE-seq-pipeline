@@ -33,7 +33,7 @@ workflow wf_rna {
         Int cutoff = 100
     }
 
-    call share_task_align_starsolo {
+    call share_task_align_starsolo as align {
         input:
             fastq_R1 = read1,
             fastq_R2 = read2,
