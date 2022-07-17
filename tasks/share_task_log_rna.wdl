@@ -50,7 +50,7 @@ task log_rna {
         }
 
         group_umi_log: {
-            description: 'Group UMI log file'
+            description: 'Group UMI log file',
             help: 'Log file from group UMI task',
             example: 'SS-PKR-30-96-ENTIRE-PLATE.rm_dup_barcode.log.txt'
         }
