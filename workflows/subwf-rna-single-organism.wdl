@@ -10,6 +10,7 @@ import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_qc_library.wdl" as share_task_qc_library
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
+import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
 
 workflow wf_rna {
     meta {
@@ -94,6 +95,12 @@ workflow wf_rna {
             genes_annotations_bed = genes_annotation_bed,
             genome_name = genome_name,
             prefix = prefix
+    }
+
+    call share_task_log_atac.log_atac as log_atac {
+       input:
+           alignment_log = align.rna_alignment_log,
+           dups_log = group_umi.rna_umi_rm_dup_log
     }
 
     call share_task_qc_library.qc_library as qc_library {
