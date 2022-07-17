@@ -31,12 +31,12 @@ task log_rna {
         awk -F":" '$1~/total dup reads/{print $2}' ~{dups_log} > duplicate_reads.txt
     >>>
     output {
-        Int rna_total_reads = read_lines("total_reads.txt")
-        Int rna_aligned_uniquely = read_lines("aligned_uniquely.txt")
-        Int rna_aligned_multimap = read_lines("aligned_multimap.txt")
-        Int rna_unaligned = read_lines("unaligned.txt")	    
-        Int rna_feature_reads = read_lines("feature_reads.txt")
-        Int rna_duplicate_reads = read_lines("duplicate_reads.txt")
+        Int rna_total_reads = read_int("total_reads.txt")
+        Int rna_aligned_uniquely = read_int("aligned_uniquely.txt")
+        Int rna_aligned_multimap = read_int("aligned_multimap.txt")
+        Int rna_unaligned = read_int("unaligned.txt")	    
+        Int rna_feature_reads = read_int("feature_reads.txt")
+        Int rna_duplicate_reads = read_int("duplicate_reads.txt")
     }
 
     runtime {
