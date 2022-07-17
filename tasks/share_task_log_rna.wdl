@@ -16,7 +16,7 @@ task log_rna {
         # This function takes as input the necessary log files and extracts
         # the quality metrics
         File alignment_log
-        File group_umi_log
+        File dups_log
     }
 
     command <<<
@@ -27,8 +27,8 @@ task log_rna {
         aligned_multimap=$(awk -F"|" '$1~/Number of reads mapped to multiple loci/{print $2}' ~{alignment_log})
         echo $aligned_multimap > aligned_multimap.txt
         echo $(($total_reads - $aligned_uniquely - $aligned_multimap)) > unaligned.txt
-        awk -F":" '$1~/total reads/{print $2}' ~{group_umi_log} > feature_reads.txt
-        awk -F":" '$1~/total dup reads/{print $2}' ~{group_umi_log} > duplicate_reads.txt
+        awk -F":" '$1~/total reads/{print $2}' ~{dups_log} > feature_reads.txt
+        awk -F":" '$1~/total dup reads/{print $2}' ~{dups_log} > duplicate_reads.txt
     >>>
     output {
         Int rna_total_reads = read_lines("total_reads.txt")
@@ -49,8 +49,8 @@ task log_rna {
             example: 'SS-PKR-30-96-ENTIRE-PLATE.rna.align.hg38.Log.out'
         }
 
-        group_umi_log: {
-            description: 'Group UMI log file',
+        dups_log: {
+            description: 'Group UMI dups log file',
             help: 'Log file from group UMI task',
             example: 'SS-PKR-30-96-ENTIRE-PLATE.rm_dup_barcode.log.txt'
         }
