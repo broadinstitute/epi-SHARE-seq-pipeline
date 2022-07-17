@@ -96,7 +96,7 @@ workflow wf_rna {
             prefix = prefix
     }
 
-    call share_task_log_atac.log_atac as log_atac {
+    call share_task_log_rna.log_rna as log_rna {
        input:
            alignment_log = align.rna_alignment_log,
            dups_log = group_umi.rna_umi_rm_dup_log
