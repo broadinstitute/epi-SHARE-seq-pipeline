@@ -47,7 +47,7 @@ task log_rna {
             description: 'RNA alignment log file',
 	    help: 'Log file from RNA alignment step.',
             example: 'SS-PKR-30-96-ENTIRE-PLATE.rna.align.hg38.Log.out'
-        }
+        },
         group_umi_log: {
             description: 'Group UMI log file'
             help: 'Log file from group UMI task',

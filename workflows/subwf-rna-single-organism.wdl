@@ -1,6 +1,5 @@
 version 1.0
 
-
 # Import the tasks called by the pipeline
 import "../tasks/share_task_star.wdl" as share_task_align
 import "../tasks/share_task_update_rgid.wdl" as share_task_update_rgid
@@ -173,5 +172,12 @@ workflow wf_rna {
         File? share_rna_seurat_umap_plot = seurat.seurat_umap_plot
         File? share_rna_seurat_obj = seurat.seurat_obj
         File? share_rna_plots_zip = seurat.plots_zip
+
+        Int rna_total_reads = log_rna.rna_total_reads
+        Int rna_aligned_uniquely = log_rna.rna_aligned_uniquely
+	Int rna_aligned_multimap = log_rna.rna_aligned_multimap
+        Int rna_unaligned = log_rna.rna_unaligned
+        Int rna_feature_reads = log_rna.rna_feature_reads
+        Int rna_duplicate_reads = log_rna.rna_duplicate_reads
     }
 }
