@@ -33,12 +33,12 @@ workflow wf_dorcs {
         Int topNGene = 20
         Int windowPadSize = 50000
         
-        Int numNearestNeighbor = 100
+        Int numNearestNeighbor = 30
         Float numBackgroundPairs = 100000
         Float chunkSize = 50000
         
         String? prefix 
-        Int mem_gb = 16
+        Int mem_gb = 64
         Int disk_gb = 100
         String? docker 
     }

@@ -130,14 +130,16 @@ workflow wf_rna {
         File share_rna_featurecount_alignment = count.rna_featurecount_alignment
         File share_rna_featurecount_alignment_index = count.rna_featurecount_alignment_index
         #File share_rna_featurecount_log = count.rna_featurecount_log
-        File share_rna_featurecount_txt = count.rna_featurecount_txt
-        File share_rna_featurecount_summary = count.rna_featurecount_summary
+        File share_rna_featurecount_exon_txt = count.rna_featurecount_exon_txt
+        File? share_rna_featurecount_intron_txt = count.rna_featurecount_intron_txt
+        #File share_rna_featurecount_summary = count.rna_featurecount_summary
 
         File share_rna_umi_barcodes = group_umi.rna_umi_barcodes_filtered
         File share_rna_umi_bed_filtered = group_umi.rna_umi_bed_filtered
         File share_rna_umi_bed_unfiltered = group_umi.rna_umi_bed_unfiltered
         File share_rna_umi_counts_filtered = group_umi.rna_umi_counts_filtered
         File share_rna_umi_counts_unfiltered = group_umi.rna_umi_counts_unfiltered
+        File share_rna_umi_rm_dup_log = group_umi.rna_umi_rm_dup_log
 
         File share_rna_qc_reads_distribution = qc_rna.rna_qc_reads_distribution
         File share_rna_qc_reads_distribution2 = qc_rna.rna_qc_reads_distribution2
