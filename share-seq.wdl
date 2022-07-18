@@ -131,63 +131,64 @@ workflow ShareSeq {
             mem_gb = mem_gb_dorcs
     }
     call html_report.html_report as html_report {
-        Int atac_total_reads = atac.atac_total_reads
-        Int atac_aligned_uniquely = atac.atac_aligned_uniquely
-        Int atac_unaligned = atac.atac_unaligned
-        Int atac_feature_reads = atac.atac_feature_reads
-        Int atac_duplicate_reads = atac.atac_duplicate_reads
-        Int rna_total_reads = rna.rna_total_reads
-        Int rna_aligned_uniquely = rna.rna_aligned_uniquely
-	Int rna_aligned_multimap = rna.rna_aligned_multimap
-        Int rna_unaligned = rna.rna_unaligned
-        Int rna_feature_reads = rna.rna_feature_reads
-        Int rna_duplicate_reads = rna.rna_duplicate_reads   
+        input:
+            atac_total_reads = atac.atac_total_reads,
+            atac_aligned_uniquely = atac.atac_aligned_uniquely,
+            atac_unaligned = atac.atac_unaligned,
+            atac_feature_reads = atac.atac_feature_reads,
+            atac_duplicate_reads = atac.atac_duplicate_reads,
+            rna_total_reads = rna.rna_total_reads,
+            rna_aligned_uniquely = rna.rna_aligned_uniquely,
+	    rna_aligned_multimap = rna.rna_aligned_multimap,
+            rna_unaligned = rna.rna_unaligned,
+            rna_feature_reads = rna.rna_feature_reads,
+            rna_duplicate_reads = rna.rna_duplicate_reads,   
 
-        ## JPEG files to be encoded and appended to html
-        # RNA plots
-        File share_rna_qc_library_plot = rna.share_rna_qc_library_plot
-        Array[File] share_rna_umi_qc_plots = rna.share_rna_umi_qc_plots
-        File? share_rna_seurat_violin_plot = rna.share_rna_seurat_violin_plot
-        File? share_rna_seurat_mitochondria_qc_plot = rna.share_rna_seurat_mitochondria_qc_plot
-        File? share_rna_seurat_features_plot = rna.share_rna_seurat_features_plot
-        File? share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot
-        File? share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot
-        File? share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot
-        File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
-        File? share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot
-        File? share_rna_seurat_umap_plot = rna.share_rna_seurat_umap_plot
+            ## JPEG files to be encoded and appended to html
+            # RNA plots
+            share_rna_qc_library_plot = rna.share_rna_qc_library_plot,
+            share_rna_umi_qc_plots = rna.share_rna_umi_qc_plots,
+            share_rna_seurat_violin_plot = rna.share_rna_seurat_violin_plot,
+            share_rna_seurat_mitochondria_qc_plot = rna.share_rna_seurat_mitochondria_qc_plot,
+            share_rna_seurat_features_plot = rna.share_rna_seurat_features_plot,
+            share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot,
+            share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot,
+            share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot,
+            share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot,
+            share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot,
+            share_rna_seurat_umap_plot = rna.share_rna_seurat_umap_plot,
 
-        # ATAC plots
-        File share_atac_qc_library_plot = atac.share_atac_qc_library_plot
-        File share_atac_qc_hist_plot = atac.share_atac_qc_hist_plot
-        File share_atac_qc_tss_enrichment = atac.share_atac_qc_tss_enrichment
-        File? share_atac_archr_gene_heatmap_plot = atac.share_atac_archr_gene_heatmap_plot
-        File? share_atac_archr_tss_enrichment_raw = atac.share_atac_archr_tss_enrichment_raw
-        File? share_atac_archr_tss_enrichment_filtered = atac.share_atac_archr_tss_enrichment_filtered
-        File? share_atac_archr_fragment_size_plot = atac.share_atac_archr_fragment_size_plot
-        File? share_atac_archr_doublet_plot = atac.share_atac_archr_doublet_plot
-        File? share_atac_archr_umap_plot = atac.share_atac_archr_umap_plot
+            # ATAC plots
+            share_atac_qc_library_plot = atac.share_atac_qc_library_plot,
+            share_atac_qc_hist_plot = atac.share_atac_qc_hist_plot,
+            share_atac_qc_tss_enrichment = atac.share_atac_qc_tss_enrichment,
+            share_atac_archr_gene_heatmap_plot = atac.share_atac_archr_gene_heatmap_plot,
+            share_atac_archr_tss_enrichment_raw = atac.share_atac_archr_tss_enrichment_raw,
+            share_atac_archr_tss_enrichment_filtered = atac.share_atac_archr_tss_enrichment_filtered,
+            share_atac_archr_fragment_size_plot = atac.share_atac_archr_fragment_size_plot,
+            share_atac_archr_doublet_plot = atac.share_atac_archr_doublet_plot,
+            share_atac_archr_umap_plot = atac.share_atac_archr_umap_plot,
         
-        # DORC plots
-        File? seurat_violin_plot = dorcs.seurat_violin_plot 
-        File? j_plot = dorcs.j_plot
+            # DORC plots
+            seurat_violin_plot = dorcs.seurat_violin_plot, 
+            j_plot = dorcs.j_plot,
 
-        ## Raw text logs to append to end of html
-        # RNA logs
-        File share_rna_alignment_log = rna.share_rna_alignment_log
-        File share_rna_featurecount_exon_txt = rna.share_rna_featurecount_exon_txt
-        File? share_rna_featurecount_intron_txt = rna.share_rna_featurecount_intron_txt
-        File share_rna_qc_reads_distribution = rna.share_rna_qc_reads_distribution
-        File share_rna_qc_reads_distribution2 = rna.share_rna_qc_reads_distribution2
-        File share_rna_umi_rm_dup_log = rna.share_rna_umi_rm_dup_log
-        File share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
-        # ATAC logs
-        File share_atac_alignment_log = atac.share_atac_alignment_log
-        File share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
-        File share_atac_archr_notebook_log = atac.share_atac_archr_notebook_log
-        File share_atac_archr_papermill_log = atac.share_atac_archr_papermill_log
-        # DORCs logs
-        File dorcs_notebook_log = dorcs.dorcs_notebook_log
+            ## Raw text logs to append to end of html
+            # RNA logs
+            share_rna_alignment_log = rna.share_rna_alignment_log,
+            share_rna_featurecount_exon_txt = rna.share_rna_featurecount_exon_txt,
+            share_rna_featurecount_intron_txt = rna.share_rna_featurecount_intron_txt,
+            share_rna_qc_reads_distribution = rna.share_rna_qc_reads_distribution,
+            share_rna_qc_reads_distribution2 = rna.share_rna_qc_reads_distribution2,
+            share_rna_umi_rm_dup_log = rna.share_rna_umi_rm_dup_log,
+            share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log,
+            # ATAC logs
+            share_atac_alignment_log = atac.share_atac_alignment_log,
+            share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output,
+            share_atac_archr_notebook_log = atac.share_atac_archr_notebook_log,
+            share_atac_archr_papermill_log = atac.share_atac_archr_papermill_log,
+            # DORCs logs
+            dorcs_notebook_log = dorcs.dorcs_notebook_log
     }
 
     output{
