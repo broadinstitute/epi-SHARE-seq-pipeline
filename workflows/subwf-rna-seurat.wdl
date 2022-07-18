@@ -38,16 +38,16 @@ workflow wf_rna {
     output {
         File share_rna_seurat_notebook_output = seurat.notebook_output
         File share_rna_seurat_notebook_log = seurat.notebook_log
-        File share_rna_seurat_papermill_log = seurat.papermill_log
-        File? share_rna_seurat_violin_plot = seurat.seurat_violin_plot
-        File? share_rna_seurat_mitochondria_qc_plot = seurat.seurat_mitochondria_qc_plot
-        File? share_rna_seurat_features_plot = seurat.seurat_features_plot
+        #File share_rna_seurat_papermill_log = seurat.papermill_log
+        File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
+        File? share_rna_seurat_filtered_qc_scatter_plot = seurat.seurat_filtered_qc_scatter_plot
+        File? share_rna_seurat_variable_genes_plot = seurat.seurat_variable_genes_plot
         File? share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
         File? share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
         File? share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
         File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
         File? share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
-        File? share_rna_seurat_umap_plot = seurat.seurat_umap_plot
+        File? share_rna_seurat_umap_cluster_plot = seurat.seurat_umap_cluster_plot
         File? share_rna_seurat_obj = seurat.seurat_obj
         File? share_rna_plots_zip = seurat.plots_zip
     }
