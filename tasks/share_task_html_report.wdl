@@ -94,22 +94,10 @@ task html_report {
         python3 $(which write_html.py) $fnames $text	
     >>>
     output {
-	File html_report = output.html
+	File html_report_file = glob('*.html')[0]
     }
 
     runtime {
-        docker: 'ubuntu:latest'
-    }
-    parameter_meta {
-        alignment_log: {
-            description: 'ATAC alignment log file',
-	    help: 'Log file from ATAC alignment step.',
-            example: 'SS-PKR-30-96-ENTIRE-PLATE.atac.align.hg38.Log.out'
-        }
-        dups_log: {
-            description: 'ATAC dups log file',
-            help: 'Log file from ATAC rmdups step.',
-            example: 'SS-PKR-12.atac.counts.mm10.filtered.cs.log'
-        }
+        docker: 'nchernia/share_task_preprocess:9'
     }
 }

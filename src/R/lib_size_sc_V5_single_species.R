@@ -1,7 +1,6 @@
 #!/usr/bin/Rscript
 
 args <- commandArgs()
-# print(args)
 elbow_finder <- function(x_values, y_values) {
   # Max values to create line
   max_x_x <- max(x_values)
@@ -31,7 +30,6 @@ Cutoff <- as.integer(args[8])
 Genome1 <- args[9]
 libtype <- args[10]
 
-# print(paste(dir, Namehg, File1, sep="/"))
 hg_unfil <- read.csv(unfilt, header=T)
 hg_fil <- read.csv(filt, header=T)
 
@@ -41,23 +39,16 @@ Genome1_unique <- paste(Genome1, "unique", sep ="_")
 Genome1_total <- paste(Genome1, "total", sep ="_")
 Genome1_dup <- paste(Genome1, "dup", sep ="_")
 
-
 ncol = dim(Df)[2]
 colnames(Df)[ncol] = Genome1_total
 colnames(Df)[ncol-1] = Genome1_unique
-#colnames(Df) <- c("R1", "R2", "R3", "P5", Genome1_unique, Genome1_total)
-#head(Df)
 
-
-#Df$uniqueNuc <- Df$hg_unique + Df$mm_unique
-#Df$totalNuc <- Df$hg_total + Df$mm_total
 Df$dup <- 1 - Df[ ,ncol-1]/Df[ ,ncol]
 colnames(Df)[ncol+1] <- Genome1_dup
 
 Genome1_libsize <- paste(Genome1, "libsize", sep ="_")
 Df$temp <- 0
 colnames(Df)[ncol+2] <- Genome1_libsize
-#head(Df)
 
 # remove barcode combination with less than N reads
 Df <- Df[Df[ ,ncol] >= Cutoff, ]
@@ -76,7 +67,6 @@ if (libtype != "RNA"){
       Df[ ,ncol+2] <- Df[ ,ncol+2]/2
    }
 }
-#head(Df)
 print(paste("Average ", Genome1, " lib size of sample is:", sep=""))
 mean(Df[Df[, ncol+2] > Cutoff,ncol+2])
 
@@ -97,15 +87,10 @@ out = data.frame(LIBRARY="Unknown",
 fileout <- paste(basename(filt), 'dups.log', sep=".")
 write.table(out, fileout, quote=F, row.names=F, col.names=T, sep="\t")
 
-# PERCENT_DUPLICATION     ESTIMATED_LIBRARY_SIZE
-# Brian_ATAC.mm10.dups.log
-
 # Plot lib size
-print("Plot Libsize, Species mixing etc...")
-
 Size2 <-Df[, ncol+2];  Size2 <- Size2[Size2 >0]; # plot(Size)
 file6 <- paste(basename(filt), 'libSize.jpg', sep=".")
-jpeg(file6)
+jpeg(file6, width = 8, height = 8, units = 'in', res = 300)
 par(mfrow = c(2,1))
 Size2 <- sort(Size2, decreasing = T)
 elbow <- elbow_finder(1:length(Size2), log10(Size2))
@@ -116,7 +101,7 @@ plot(Size2[1:elbow[1]], log="y", xlab="Barcode rank", ylab = "Reads per barcode"
 elbow <- elbow_finder(1:elbow[1], log10(Size2[1:elbow[1]]))
 abline(v = elbow[1])
 abline(h = 10^(elbow[2]))
-
+axis(1, at=elbow[1], labels=elbow[1])
 garbage <- dev.off()
 
 ## Removing for now as we've been told it's hard to interpret
