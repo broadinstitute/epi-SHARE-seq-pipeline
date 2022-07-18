@@ -227,15 +227,15 @@ workflow ShareSeq {
         File share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
         File share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
         File share_rna_seurat_papermill_log = rna.share_rna_seurat_papermill_log
-        File? share_rna_seurat_violin_plot = rna.share_rna_seurat_violin_plot
-        File? share_rna_seurat_mitochondria_qc_plot = rna.share_rna_seurat_mitochondria_qc_plot
-        File? share_rna_seurat_features_plot = rna.share_rna_seurat_features_plot
+        File? share_rna_seurat_filtered_violin_plot = rna.share_rna_seurat_filtered_violin_plot
+        File? share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot
+        File? share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot
         File? share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot
         File? share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot
         File? share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot
         File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
         File? share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot
-        File? share_rna_seurat_umap_plot = rna.share_rna_seurat_umap_plot
+        File? share_rna_seurat_umap_cluster_plot = rna.share_rna_seurat_umap_cluster_plot
         File? share_rna_seurat_obj = rna.share_rna_seurat_obj
         File? share_rna_plots_zip = rna.share_rna_plots_zip
 
