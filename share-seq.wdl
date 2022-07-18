@@ -4,6 +4,7 @@ version 1.0
 import "workflows/subwf-atac-single-organism.wdl" as share_atac
 import "workflows/subwf-rna-single-organism.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
+import "tasks/share_task_html_report.wdl" as html_report
 
 # WDL workflow for SHARE-seq
 
@@ -128,6 +129,48 @@ workflow ShareSeq {
 
             windowPadSize = windowPadSize,
             mem_gb = mem_gb_dorcs
+    }
+    call html_report.html_report as html_report {
+        Int atac_total_reads = atac.atac_total_reads
+        Int atac_aligned_uniquely = atac.atac_aligned_uniquely
+        Int atac_unaligned = atac.atac_unaligned
+        Int atac_feature_reads = atac.atac_feature_reads
+        Int atac_duplicate_reads = atac.atac_duplicate_reads
+        Int rna_total_reads = rna.rna_total_reads
+        Int rna_aligned_uniquely = rna.rna_aligned_uniquely
+	Int rna_aligned_multimap = rna.rna_aligned_multimap
+        Int rna_unaligned = rna.rna_unaligned
+        Int rna_feature_reads = rna.rna_feature_reads
+        Int rna_duplicate_reads = rna.rna_duplicate_reads   
+
+        ## JPEG files to be encoded and appended to html
+        # RNA plots
+        File share_rna_qc_library_plot = rna.share_rna_qc_library_plot
+        Array[File] share_rna_umi_qc_plots = rna.share_rna_umi_qc_plots
+        File? share_rna_seurat_violin_plot = rna.share_rna_seurat_violin_plot
+        File? share_rna_seurat_mitochondria_qc_plot = rna.share_rna_seurat_mitochondria_qc_plot
+        File? share_rna_seurat_features_plot = rna.share_rna_seurat_features_plot
+        File? share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot
+        File? share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot
+        File? share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot
+        File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
+        File? share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot
+        File? share_rna_seurat_umap_plot = rna.share_rna_seurat_umap_plot
+
+        # ATAC plots
+        File share_atac_qc_library_plot = atac.share_atac_qc_library_plot
+        File share_atac_qc_hist_plot = atac.share_atac_qc_hist_plot
+        File share_atac_qc_tss_enrichment = atac.share_atac_qc_tss_enrichment
+        File? share_atac_archr_gene_heatmap_plot = atac.share_atac_archr_gene_heatmap_plot
+        File? share_atac_archr_tss_enrichment_raw = atac.share_atac_archr_tss_enrichment_raw
+        File? share_atac_archr_tss_enrichment_filtered = atac.share_atac_archr_tss_enrichment_filtered
+        File? share_atac_archr_fragment_size_plot = atac.share_atac_archr_fragment_size_plot
+        File? share_atac_archr_doublet_plot = atac.share_atac_archr_doublet_plot
+        File? share_atac_archr_umap_plot = atac.share_atac_archr_umap_plot
+        
+        # DORC plots
+        File? seurat_violin_plot = dorcs.seurat_violin_plot 
+        File? j_plot = dorcs.j_plot
     }
 
     output{
