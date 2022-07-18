@@ -38,7 +38,7 @@ workflow wf_rna {
     output {
         File share_rna_seurat_notebook_output = seurat.notebook_output
         File share_rna_seurat_notebook_log = seurat.notebook_log
-        File share_rna_seurat_papermill_log = seurat.papermill_log
+        #File share_rna_seurat_papermill_log = seurat.papermill_log
         File? share_rna_seurat_violin_plot = seurat.seurat_violin_plot
         File? share_rna_seurat_mitochondria_qc_plot = seurat.seurat_mitochondria_qc_plot
         File? share_rna_seurat_features_plot = seurat.seurat_features_plot

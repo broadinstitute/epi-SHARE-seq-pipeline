@@ -47,20 +47,26 @@ task seurat {
     }
 
     #Plot filepaths
-    String violin_plot = 'plots/${prefix}.rna.seurat.violin.${genome_name}.png'
-    String MT_qc_plot = 'plots/${prefix}.rna.seurat.mitochondria.${genome_name}.png'
-    String features_plot = 'plots/${prefix}.rna.seurat.features.${genome_name}.png'
-    String PCA_dim_loadings_plot = 'plots/${prefix}.rna.seurat.dimLoadings.${genome_name}.png'
-    String PCA_plot = 'plots/${prefix}.rna.seurat.pca.${genome_name}.png'
-    String heatmap_plot = 'plots/${prefix}.rna.seurat.heatmap.${genome_name}.png'
-    String jackstraw_plot = 'plots/${prefix}.rna.seurat.jackstraw.${genome_name}.png'
-    String elbow_plot = 'plots/${prefix}.rna.seurat.elbow.${genome_name}.png'
-    String umap_plot = 'plots/${prefix}.rna.seurat.umap.${genome_name}.png'
+    String plots_filepath = '${prefix}.rna.seurat.plots.${genome_name}'
+    String raw_violin_plot = '${plots_filepath}/${prefix}.rna.seurat.prefiltered_violin.${genome_name}.png'
+    String filtered_violin_plot = '${plots_filepath}/${prefix}.rna.seurat.postfiltered_violin.${genome_name}.png'
+    String raw_qc_scatter_plot = '${plots_filepath}/${prefix}.rna.seurat.prefiltered_qc_scatterplots.${genome_name}.png'
+    String filtered_qc_scatter_plot = '${plots_filepath}/${prefix}.rna.seurat.postfiltered_qc_scatterplots.${genome_name}.png'
+    String variable_genes_plot = '${plots_filepath}/${prefix}.rna.seurat.variable_genes.${genome_name}.png'
+    String PCA_dim_loadings_plot = '${plots_filepath}/${prefix}.rna.seurat.pca_dim_loadings.${genome_name}.png'
+    String PCA_plot = '${plots_filepath}/${prefix}.rna.seurat.pca.${genome_name}.png'
+    String heatmap_plot = '${plots_filepath}/${prefix}.rna.seurat.heatmap.${genome_name}.png'
+    String jackstraw_plot = '${plots_filepath}/${prefix}.rna.seurat.jackstraw.${genome_name}.png'
+    String elbow_plot = '${plots_filepath}/${prefix}.rna.seurat.elbow.${genome_name}.png'
+    String umap_cluster_plot = '${plots_filepath}/${prefix}.rna.seurat.umap.${genome_name}.png'
+    String umap_rna_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_count_rna.${genome_name}.png'
+    String umap_gene_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_count_gene.${genome_name}.png'
+    String umap_mito_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_mito.${genome_name}.png'
 
     #Other filepaths
     String seurat_rds = '${prefix}.rna.seurat.rds.${genome_name}.rds'
-    String plots_zip_dir = 'plots.zip'
-    String papermill_log_filename = 'papermill.logfile.txt'
+    String plots_zip_dir = '${plots_filepath}.zip'
+    #String papermill_log_filename = 'papermill.logfile.txt'
 
     command {
 
@@ -84,24 +90,28 @@ task seurat {
         -p umap_dim ${umap_dim} \
         -p umap_resolution ${umap_resolution} \
         -p prefix ${prefix} \
-        -p papermill ${papermill} \
-        --log-output &> papermill.logfile.txt
+        -p papermill ${papermill}
     }
 
 
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
-        File papermill_log = papermill_log_filename
-        File? seurat_violin_plot = violin_plot
-        File? seurat_mitochondria_qc_plot = MT_qc_plot
-        File? seurat_features_plot = features_plot
-        File? seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
+        #File papermill_log = papermill_log_filename
+        File? seurat_raw_violin_plot = raw_violin_plot
+        File? seurat_filtered_violin_plot = filtered_violin_plot
+        File? seurat_raw_qc_scatter_plot = raw_qc_scatter_plot
+        File? seurat_filtered_qc_scatter_plot = filtered_qc_scatter_plot
+        File? seurat_variable_genes_plot = variable_genes_plot
+        File? seurat_PCA_dim_loadings = PCA_dim_loadings_plot
         File? seurat_PCA_plot = PCA_plot
         File? seurat_heatmap_plot = heatmap_plot
         File? seurat_jackstraw_plot = jackstraw_plot
         File? seurat_elbow_plot = elbow_plot
-        File? seurat_umap_plot = umap_plot
+        File? seurat_umap_cluster_plot = umap_cluster_plot
+        File? seurat_umap_rna_count_plot = umap_rna_count_plot
+        File? seurat_umap_gene_count_plot = umap_gene_count_plot
+        File? seurat_umap_mito_plot = umap_mito_plot
         File? seurat_obj = seurat_rds
         File? plots_zip = plots_zip_dir
     }
