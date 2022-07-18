@@ -153,7 +153,7 @@ workflow wf_rna {
 
         File share_rna_qc_library_counts = qc_library.lib_size_counts
         File share_rna_qc_library_duplicates = qc_library.lib_size_log
-        Array[File] share_rna_qc_library_plots = qc_library.plots
+        File share_rna_qc_library_plot = qc_library.plot
 
         File share_rna_h5_matrix = generate_h5.h5_matrix
         Array[File] share_rna_umi_qc_plots = generate_h5.umi_qc_plots

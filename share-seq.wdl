@@ -158,7 +158,7 @@ workflow ShareSeq {
 
         File share_rna_qc_library_counts = rna.share_rna_qc_library_counts
         File share_rna_qc_library_duplicates = rna.share_rna_qc_library_duplicates
-        Array[File] share_rna_qc_library_plots = rna.share_rna_qc_library_plots
+        File share_rna_qc_library_plot = rna.share_rna_qc_library_plot
 
         File share_rna_h5_matrix = rna.share_rna_h5_matrix
         Array[File] share_rna_umi_qc_plots = rna.share_rna_umi_qc_plots
@@ -194,7 +194,7 @@ workflow ShareSeq {
 
         File share_atac_qc_library_counts = atac.share_atac_qc_library_counts
         File share_atac_qc_library_duplicates = atac.share_atac_qc_library_duplicates
-        Array[File] share_atac_qc_library_plots = atac.share_atac_qc_library_plots
+        File share_atac_qc_library_plot = atac.share_atac_qc_library_plot
 
         File share_atac_qc_final = atac.share_atac_qc_final
         File share_atac_qc_hist_plot = atac.share_atac_qc_hist_plot

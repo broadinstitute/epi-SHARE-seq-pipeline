@@ -48,7 +48,7 @@ task qc_library {
     output {
         File lib_size_counts = glob('*.libsize.counts.csv')[0]
         File lib_size_log = glob('*.dups.log')[0]
-        Array[File] plots = glob('*.pdf')
+        File plot = glob('*.jpg')
     }
 
     runtime {

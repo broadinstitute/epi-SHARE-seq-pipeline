@@ -114,7 +114,7 @@ workflow wf_atac {
 
         File share_atac_qc_library_counts = qc_library.lib_size_counts
         File share_atac_qc_library_duplicates = qc_library.lib_size_log
-        Array[File] share_atac_qc_library_plots = qc_library.plots
+        File share_atac_qc_library_plot = qc_library.plot
 
         File share_atac_qc_final = qc_atac.atac_final_stats
         File share_atac_qc_hist_plot = qc_atac.atac_final_hist_pdf
