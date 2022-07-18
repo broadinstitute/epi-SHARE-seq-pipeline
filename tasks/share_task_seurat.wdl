@@ -103,7 +103,7 @@ task seurat {
         File? seurat_raw_qc_scatter_plot = raw_qc_scatter_plot
         File? seurat_filtered_qc_scatter_plot = filtered_qc_scatter_plot
         File? seurat_variable_genes_plot = variable_genes_plot
-        File? seurat_PCA_dim_loadings = PCA_dim_loadings_plot
+        File? seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
         File? seurat_PCA_plot = PCA_plot
         File? seurat_heatmap_plot = heatmap_plot
         File? seurat_jackstraw_plot = jackstraw_plot
