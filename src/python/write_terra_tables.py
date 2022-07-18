@@ -126,7 +126,7 @@ for record in csv_reader:
 	genome = record['Genome']
 	notes = record['Notes']
 	for i in range(len(r1)):
-		key = make_sub_key(lib, r1[i], args.name) #put args.name back in
+		key = make_sub_key(lib, r1[i], args.name)
 		update_sub_dict(key, pkr, lib, r1[i], fq1[i], fq2[i], typ, genome, notes)
 
 with open('atac.tsv', 'wt') as outfile:
@@ -173,6 +173,8 @@ with open('rna_no.tsv', 'wt') as outfile:
 for key in list(main.keys()):
 	pkr = main[key].pkr
 	r1 = list(main[key].r1)
+	if len(r1) == 1:
+		continue
 	rna_lib = list(main[key].rna_lib)
 	rna_fq1 = list(main[key].rna_fq1)
 	rna_fq2 = list(main[key].rna_fq2)
