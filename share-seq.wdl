@@ -283,7 +283,7 @@ workflow ShareSeq {
         File? dorcs_genes_summary = dorcs.dorcs_genes_summary
         File? dorcs_regions_summary = dorcs.dorcs_regions_summary
 
-        File html_summary = html_report.output_file
+        File html_summary = html_report.html_report_file
     }
 
 }
