@@ -24,7 +24,7 @@ task html_report {
         Int atac_duplicate_reads 
         Int rna_total_reads
         Int rna_aligned_uniquely 
-	Int rna_aligned_multimap 
+        Int rna_aligned_multimap 
         Int rna_unaligned 
         Int rna_feature_reads 
         Int rna_duplicate_reads 
@@ -75,12 +75,12 @@ task html_report {
     }
 
     command <<<
-	fnames=$(ls *jpg *png)
+        fnames=$(ls *jpg *png)
         fnames=$(echo $fnames | tr " " ",")
-	lognames=$(ls *txt *log)
-	lognames=$(echo $lognames | tr " " ",")
+        lognames=$(ls *txt *log)
+        lognames=$(echo $lognames | tr " " ",")
         echo "<html><body><h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.html
-	echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.html
+        echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.html
         echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.html
         echo "<tr><td>Filtered Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.html
         echo "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>" >> output.html
@@ -94,10 +94,10 @@ task html_report {
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.html
         percent=$(( ~{rna_duplicate_reads}*100/~{rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" ~{percent} "</td></tr>" >> output.html       
-        python3 $(which write_html.py) $fnames $lognames	
+        python3 $(which write_html.py) $fnames $lognames  
     >>>
     output {
-	File html_report_file = glob('*.html')[0]
+        File html_report_file = glob('*.html')[0]
     }
 
     runtime {
