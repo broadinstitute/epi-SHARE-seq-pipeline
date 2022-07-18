@@ -59,8 +59,8 @@ task seurat {
     String jackstraw_plot = '${plots_filepath}/${prefix}.rna.seurat.jackstraw.${genome_name}.png'
     String elbow_plot = '${plots_filepath}/${prefix}.rna.seurat.elbow.${genome_name}.png'
     String umap_cluster_plot = '${plots_filepath}/${prefix}.rna.seurat.umap.${genome_name}.png'
-    String umap_rna_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_count_rna.${genome_name}.png'
-    String umap_gene_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_count_gene.${genome_name}.png'
+    String umap_rna_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_rna_count.${genome_name}.png'
+    String umap_gene_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_gene_count.${genome_name}.png'
     String umap_mito_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_mito.${genome_name}.png'
 
     #Other filepaths
