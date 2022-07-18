@@ -148,15 +148,15 @@ workflow ShareSeq {
             # RNA plots
             share_rna_qc_library_plot = rna.share_rna_qc_library_plot,
             share_rna_umi_qc_plots = rna.share_rna_umi_qc_plots,
-            share_rna_seurat_violin_plot = rna.share_rna_seurat_violin_plot,
-            share_rna_seurat_mitochondria_qc_plot = rna.share_rna_seurat_mitochondria_qc_plot,
-            share_rna_seurat_features_plot = rna.share_rna_seurat_features_plot,
+            share_rna_seurat_violin_plot = rna.share_rna_seurat_filtered_violin_plot,
+            share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot,
+            share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot,
             share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot,
             share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot,
             share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot,
             share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot,
             share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot,
-            share_rna_seurat_umap_plot = rna.share_rna_seurat_umap_plot,
+            share_rna_seurat_umap_cluster_plot = rna.share_rna_seurat_umap_cluster_plot,
 
             # ATAC plots
             share_atac_qc_library_plot = atac.share_atac_qc_library_plot,
