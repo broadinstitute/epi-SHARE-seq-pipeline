@@ -28,7 +28,7 @@ def main(image_files, log_files):
         f.write('<pre>')
 	f1 = open(log, 'r')
         f.write(f1.read())
-        f.write('</pre>)
+        f.write('</pre>')
     f.write('</body></html>')
 
 if __name__ == '__main__':
