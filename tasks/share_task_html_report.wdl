@@ -58,46 +58,49 @@ task html_report {
 
         ## Raw text logs to append to end of html
         # RNA logs
-#        File share_rna_alignment_log
-#        File share_rna_featurecount_exon_txt
-#        File? share_rna_featurecount_intron_txt
-#        File share_rna_qc_reads_distribution
-#        File share_rna_qc_reads_distribution2
-#        File share_rna_umi_rm_dup_log 
-#        File share_rna_seurat_notebook_log
+        File share_rna_alignment_log
+        File share_rna_featurecount_exon_txt
+        File? share_rna_featurecount_intron_txt
+        File share_rna_qc_reads_distribution
+        File share_rna_qc_reads_distribution2
+        File share_rna_umi_rm_dup_log 
+        File share_rna_seurat_notebook_log
         # ATAC logs
-#        File share_atac_alignment_log
-#        File share_atac_archr_notebook_output 
-#        File share_atac_archr_notebook_log 
-#        File share_atac_archr_papermill_log 
+        File share_atac_alignment_log
+        File share_atac_archr_notebook_output 
+        File share_atac_archr_notebook_log 
+        File share_atac_archr_papermill_log 
         # DORCs logs
-#        File dorcs_notebook_log 
+        File dorcs_notebook_log 
     }
 
     command <<<
-	fnames=$(ls -m *jpg)
-        text=$(echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>")
-	text=$(echo $text "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>")
-        text=$(echo $text "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>")
-        text=$(echo $text "<tr><td>Filtered Reads</td><td>" ~{atac_feature_reads} "</td></tr>")
-        text=$(echo $text "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>")
+	fnames=$(ls *jpg *png)
+        fnames=$(echo $fnames | tr " " ",")
+	lognames=$(ls *txt *log)
+	lognames=$(echo $lognames | tr " " ",")
+        echo "<html><body><h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.html
+	echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.html
+        echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.html
+        echo "<tr><td>Filtered Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.html
+        echo "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>" >> output.html
         percent=$(( ~{atac_duplicate_reads}*100/~{atac_feature_reads} ))
-        text=$(echo $text "<tr><td>Percent Duplicates</td><td>" ~{percent} "</td></tr>")
-        text=$(echo $text "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>")
-        text=$(echo $text "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>")
-        text=$(echo $text "<tr><td>Aligned multimap</td><td>" ~{rna_aligned_multimap} "</td></tr>")
-        text=$(echo $text "<tr><td>Unaligned</td><td>" ~{rna_unaligned} "</td></tr>")
-        text=$(echo $text "<tr><td>Filtered (feature) Reads</td><td>" ~{rna_feature_reads} "</td></tr>")
-        text=$(echo $text "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>")
+        echo "<tr><td>Percent Duplicates</td><td>" ~{percent} "</td></tr>" >> output.html
+        echo "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>" >> output.html
+        echo "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>" >> output.html
+        echo "<tr><td>Aligned multimap</td><td>" ~{rna_aligned_multimap} "</td></tr>" >> output.html
+        echo "<tr><td>Unaligned</td><td>" ~{rna_unaligned} "</td></tr>" >> output.html
+        echo "<tr><td>Filtered (feature) Reads</td><td>" ~{rna_feature_reads} "</td></tr>" >> output.html
+        echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.html
         percent=$(( ~{rna_duplicate_reads}*100/~{rna_feature_reads} ))
-        text=$(echo $text "<tr><td>Percent Duplicates</td><td>" ~{percent} "</td></tr>")       
-        python3 $(which write_html.py) $fnames $text	
+        echo "<tr><td>Percent Duplicates</td><td>" ~{percent} "</td></tr>" >> output.html       
+        python3 $(which write_html.py) $fnames $lognames	
     >>>
     output {
 	File html_report_file = glob('*.html')[0]
     }
 
     runtime {
-        docker: 'nchernia/share_task_preprocess:9'
+        docker: 'nchernia/share_task_html_report:2'
     }
 }

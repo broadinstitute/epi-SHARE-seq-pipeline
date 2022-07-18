@@ -171,6 +171,23 @@ workflow ShareSeq {
         # DORC plots
         File? seurat_violin_plot = dorcs.seurat_violin_plot 
         File? j_plot = dorcs.j_plot
+
+        ## Raw text logs to append to end of html
+        # RNA logs
+        File share_rna_alignment_log = rna.share_rna_alignment_log
+        File share_rna_featurecount_exon_txt = rna.share_rna_featurecount_exon_txt
+        File? share_rna_featurecount_intron_txt = rna.share_rna_featurecount_intron_txt
+        File share_rna_qc_reads_distribution = rna.share_rna_qc_reads_distribution
+        File share_rna_qc_reads_distribution2 = rna.share_rna_qc_reads_distribution2
+        File share_rna_umi_rm_dup_log = rna.share_rna_umi_rm_dup_log
+        File share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
+        # ATAC logs
+        File share_atac_alignment_log = atac.share_atac_alignment_log
+        File share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
+        File share_atac_archr_notebook_log = atac.share_atac_archr_notebook_log
+        File share_atac_archr_papermill_log = atac.share_atac_archr_papermill_log
+        # DORCs logs
+        File dorcs_notebook_log = dorcs.dorcs_notebook_log
     }
 
     output{
