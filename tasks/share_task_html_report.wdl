@@ -84,7 +84,8 @@ task html_report {
         if [ -n "~{share_rna_seurat_PCA_dim_loadings_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_PCA_dim_loadings_plot}); fi
         if [ -n "~{share_rna_seurat_PCA_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_PCA_plot}); fi
         if [ -n "~{share_rna_seurat_heatmap_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_heatmap_plot}); fi
-        if [ -n "~{share_rna_seurat_jackstraw_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_jackstraw_plot}); fi             if [ -n "~{share_rna_seurat_elbow_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_elbow_plot}); fi
+        if [ -n "~{share_rna_seurat_jackstraw_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_jackstraw_plot}); fi
+        if [ -n "~{share_rna_seurat_elbow_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_elbow_plot}); fi
         if [ -n "~{share_rna_seurat_umap_cluster_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_umap_cluster_plot}); fi
         if [ -n "~{share_atac_qc_library_plot}" ]; then fnames=$fnames","$(basename ~{share_atac_qc_library_plot}); fi
         if [ -n "~{share_atac_qc_hist_plot}" ]; then fnames=$fnames","$(basename ~{share_atac_qc_hist_plot}); fi
