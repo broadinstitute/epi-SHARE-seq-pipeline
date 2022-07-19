@@ -33,15 +33,16 @@ task html_report {
         # RNA plots
         File share_rna_qc_library_plot
         Array[File] share_rna_umi_qc_plots
-        File? share_rna_seurat_violin_plot 
-        File? share_rna_seurat_mitochondria_qc_plot 
-        File? share_rna_seurat_features_plot 
+        File? share_rna_seurat_violin_plot
+        File? share_rna_seurat_filtered_qc_scatter_plot
+        File? share_rna_seurat_variable_genes_plot 
         File? share_rna_seurat_PCA_dim_loadings_plot 
         File? share_rna_seurat_PCA_plot 
         File? share_rna_seurat_heatmap_plot 
         File? share_rna_seurat_jackstraw_plot 
         File? share_rna_seurat_elbow_plot 
-        File? share_rna_seurat_umap_plot 
+        File? share_rna_seurat_umap_cluster_plot 
+
         # ATAC plots
         File share_atac_qc_library_plot
         File share_atac_qc_hist_plot
