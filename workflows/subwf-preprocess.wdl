@@ -36,7 +36,7 @@ workflow wf_preprocess {
 		'gsutil -m -o GSUtil:parallel_thread_count=1' +
 		' -o GSUtil:sliced_object_download_max_components=8' +
 		' cp "~{bcl}" . && ' +
-		'tar "~{tar_flags}" SampleSheet.csv'
+		'tar "~{tar_flags}" "~{basename(bcl)}" SampleSheet.csv'
 	
 
 	call BarcodeMap {
