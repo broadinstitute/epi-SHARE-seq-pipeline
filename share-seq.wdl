@@ -226,7 +226,6 @@ workflow ShareSeq {
 
         File share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
         File share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
-        File share_rna_seurat_papermill_log = rna.share_rna_seurat_papermill_log
         File? share_rna_seurat_filtered_violin_plot = rna.share_rna_seurat_filtered_violin_plot
         File? share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot
         File? share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot
