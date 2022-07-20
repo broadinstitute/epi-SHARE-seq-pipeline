@@ -27,7 +27,7 @@ def main(image_file_list, log_file_list):
         f.write(log)
         f.write('</h3>')
         f.write('<pre>')
-        f1 = open(log, 'r')
+        f1 = open(log, 'r',encoding="utf-8")
         f.write(f1.read())
         f.write('</pre>')
     f.write('</body></html>')
