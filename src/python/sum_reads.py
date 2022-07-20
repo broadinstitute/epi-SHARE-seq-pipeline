@@ -1,57 +1,71 @@
 #!/usr/bin/env python3
 
 """
-Generates a matrix containing read frequency of all barcode combinations
+Generates a csv containing read frequencies of all possible barcode combinations
 """
 
 import argparse
-import pandas as pd
 
-# Get arguments
-desc = "Generates a matrix containing read frequency of all barcode combinations"
-parser = argparse.ArgumentParser(description=desc)
-parser.add_argument("-b", help="name of barcode combination file (set of sorted barcodes)")
-parser.add_argument("-r", help="name of read frequency file (frequency, barcode)")
-parser.add_argument("-o", help="name of output file (R1, R2, R3, PKR, fragments)")
+parser = argparse.ArgumentParser(description="Generates a csv containing read frequencies of all possible barcode combinations")
+parser.add_argument("-b", "--barcode_file", help="File containing unique observed barcodes")
+parser.add_argument("-r", "--read_freq_file", help="File containing read frequencies of observed barcodes")
+parser.add_argument("-o", "--output_file", help="Name of output file")
 
 args = parser.parse_args()
-observed_barcodes_file = args.b
-read_freq_file = args.r
-output_file = args.o
 
-# Read in barcodes file
-observed_barcodes = pd.read_csv(observed_barcodes_file, header=None, names=["R1","R2","R3","PKR"])
-# Get unique values of R1, R2, R3, PKR
-R1_set = list(set(observed_barcodes["R1"]))
-R2_set = list(set(observed_barcodes["R2"]))
-R3_set = list(set(observed_barcodes["R3"]))
-PKR_set = list(set(observed_barcodes["PKR"]))
+if getattr(args, "barcode_file") is None:
+    print("ERROR: Barcode file not provided\n")
+    parser.parse_args(["-h"])
+    
+if getattr(args, "read_freq_file") is None:
+    print("ERROR: Read frequency file not provided\n")
+    parser.parse_args(["-h"])
+    
+barcode_file = getattr(args, "barcode_file")
+read_freq_file = getattr(args, "read_freq_file")
+output_file = getattr(args, "output_file")
+    
+# use generator to split lines rather than reading into memory
+def get_split_lines(file_name, delimiter):
+    with open(file_name, "r") as f:
+        for line in f:
+            yield line.rstrip().split(sep=delimiter)
 
-print(f"{len(R1_set)} unique R1 barcodes observed")
-print(f"{len(R2_set)} unique R2 barcodes observed")
-print(f"{len(R3_set)} unique R3 barcodes observed")
-print(f"{len(PKR_set)} unique PKRs observed")
+# create list of all possible barcode combinations
+def get_barcode_combos(barcode_file):
+    unique_R1 = list({line[0] for line in get_split_lines(barcode_file, delimiter=",")})
+    unique_R2 = list({line[1] for line in get_split_lines(barcode_file, delimiter=",")})
+    unique_R3 = list({line[2] for line in get_split_lines(barcode_file, delimiter=",")})
+    # get unique PKR values only if PKR field exists in barcode file
+    unique_PKR = list({line[3] for line in get_split_lines(barcode_file, ",") if len(line) > 3})
+    
+    if unique_PKR:
+        possible_barcodes = [",".join([R1,R2,R3,PKR]) for R1 in unique_R1 for R2 in unique_R2 for R3 in unique_R3 for PKR in unique_PKR]
+    else:
+        possible_barcodes = [",".join([R1,R2,R3]) for R1 in unique_R1 for R2 in unique_R2 for R3 in unique_R3]
+        
+    return possible_barcodes    
 
-# Generate all combinations of R1, R2, R3, PKR
-combos = [(R1,R2,R3,PKR) for R1 in R1_set for R2 in R2_set for R3 in R3_set for PKR in PKR_set]
-possible_barcodes = [','.join(x) for x in combos] 
+# create dictionary of read frequencies of all possible barcode combinations               
+def get_read_freqs(barcode_file, read_freq_file):
+    # make dictionary of observed barcodes and associated read counts
+    read_freq_dict = {line[1]:line[0] for line in get_split_lines(read_freq_file, delimiter="\t")}
+    
+    # initialize dictionary with read counts of 0 for each possible barcode combination
+    init_dict = {barcode:0 for barcode in get_barcode_combos(barcode_file)}
+    
+    # update with counts of observed barcodes
+    init_dict.update(read_freq_dict)
+    
+    return init_dict
 
-# Make dataframe of R1, R2, R3, PKR, barcodes
-bar_freq_df = pd.DataFrame(combos, columns=("R1","R2","R3","PKR"))
-bar_freq_df["barcode"] = possible_barcodes
+read_freqs = get_read_freqs(barcode_file, read_freq_file)
 
-# Read in read frequency file
-read_freq = pd.read_csv(read_freq_file, header=None, names=["fragments","barcode"], sep="\t")
+print(f"Writing table of barcode read counts to {output_file}\n")
 
-# Match possible barcode combinations to observed combinations and get read frequency of matches
-bar_freq_df = pd.merge(bar_freq_df, read_freq, how="left", on="barcode")
+# write dictionary to csv file    
+with open((output_file), "w") as f:
+    for key in read_freqs.keys():
+        f.write("%s, %s\n" % (key, read_freqs[key]))
 
-# Drop barcode column, replace NAs with 0s
-bar_freq_df = bar_freq_df.drop("barcode", axis=1)
-bar_freq_df = bar_freq_df.fillna(0)
-
-print(bar_freq_df.head())
-
-# Write output file
-bar_freq_df.to_csv(output_file, index=False)
-
+print("Finished writing csv file\n")
