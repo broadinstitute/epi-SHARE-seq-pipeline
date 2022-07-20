@@ -71,8 +71,8 @@ workflow ShareSeq {
         String docker_image_dorcs = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
         Int? mem_gb_dorcs
 
-        String? human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/GRCh38/genome_files_hg38.tsv"
-        String? mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/genome_files_mm10.tsv"
+        File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/GRCh38/genome_files_hg38.tsv"
+        File mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/genome_files_mm10.tsv"
     }
 
     String genome_name = if genome_name_input == "GRCh38" then "hg38" else genome_name_input
