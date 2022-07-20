@@ -11,16 +11,16 @@ workflow wf_dorcs {
         author: 'Siddarth Wekhande (swekhand@broadinstitute.org)'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Sub-workflow to find DORCs from SHARE-seq data.'
     }
-    
+
     input {
         File rna_matrix
         File atac_fragments
-        File peak_file
+        File? peak_file
 
         String genome
         Int n_cores = 4
         String save_plots_to_dir = "TRUE"
-        String? output_filename 
+        String? output_filename
 
         Int minFeature_RNA = 200
         Int maxFeature_RNA = 2500
@@ -32,15 +32,15 @@ workflow wf_dorcs {
         Float corrPVal = 0.05
         Int topNGene = 20
         Int windowPadSize = 50000
-        
+
         Int numNearestNeighbor = 30
         Float numBackgroundPairs = 100000
         Float chunkSize = 50000
-        
-        String? prefix 
+
+        String? prefix
         Int mem_gb = 64
         Int disk_gb = 100
-        String? docker 
+        String? docker
     }
 
     call find_dorcs.find_dorcs as find_dorcs{
