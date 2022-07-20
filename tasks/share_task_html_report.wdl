@@ -127,7 +127,7 @@ task html_report {
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.html
         percent=$(( ~{rna_duplicate_reads}*100/~{rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr>" >> output.html       
-        python3 $(which write_html.py) $fnames $lognames  
+        python3 $(which write_html.py) "$fnames" "$lognames"  
     >>>
     output {
         File html_report_file = glob('*.html')[0]
