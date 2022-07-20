@@ -12,44 +12,45 @@ workflow ShareSeq {
     input {
         # Common inputs
         String prefix = "shareseq-project"
-        String genome_name
+        String genome_name_input
         Int? cpus = 16
 
 
         # ATAC specific inputs
-        File chrom_sizes
+        File? chrom_sizes
         Array[File] read1_atac
         Array[File] read2_atac
-        File idx_tar_atac
-        File tss_bed
+        File? idx_tar_atac
+        File? tss_bed
         Int? cpus_atac
-        Int cutoff_atac
+
+        Int? cutoff_atac = 100
 
         # RNA specific inputs
         Boolean multimappers = false
         Boolean include_multimappers = false
-        Boolean include_introns = false
+        Boolean include_introns = true
         Array[File] read1_rna
-        File genes_annotation_bed
-        File gtf
-        File idx_tar_rna
+        File? genes_annotation_bed
+        File? gtf
+        File? idx_tar_rna
         Int? cpus_rna
         String? gene_naming = "gene_name"
 
         # Group UMI
-        Boolean remove_single_umi = true
-        String mode = "fast"
-        Int cutoff_rna = 100
+        Boolean? remove_single_umi = false
+        String? mode = "fast"
+        Int? cutoff_rna = 100
 
         # Lib_size QC
         Boolean qc = false
 
 
         # DORCs specific inputs
-        File peak_set
-        Int? cpus_dorcs 
+        File? peak_set
+        Int? cpus_dorcs
         String save_plots_to_dir = "TRUE"
-        String? dorcs_output_filename 
+        String? dorcs_output_filename
 
         # Seurat filters
         Int minFeature_RNA = 200
@@ -68,13 +69,20 @@ workflow ShareSeq {
         #Int bootstraps = 100
 
         String docker_image_dorcs = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
-        Int? mem_gb_dorcs 
+        Int? mem_gb_dorcs
+
+        String? human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/GRCh38/genome_files_hg38.tsv"
+        String? mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/genome_files_mm10.tsv"
     }
+
+    String genome_name = if sub(genome_name,[A-Z],[a-z]) == "grch38" then "hg38" else genome_name_input
+
+    Map[String, String] annotations = if genome_name == "mm10" then read_map(mouse_genome_tsv) else read_map(human_genome_tsv)
 
     call share_rna.wf_rna as rna{
         input:
             read1 = read1_rna,
-            idx_tar = idx_tar_rna,
+            idx_tar = if idx_tar_rna then idx_tar_rna else annotations["star_idx_tar"],
             prefix = prefix,
             genome_name = genome_name,
             cpus = cpus_rna,
@@ -83,7 +91,7 @@ workflow ShareSeq {
             # Assign features
             include_multimappers = include_multimappers,
             include_introns = include_introns,
-            gtf = gtf,
+            gtf = if gtf then gtf else annotations["genegtf"],
             gene_naming = gene_naming,
             # Group UMI
             remove_single_umi = remove_single_umi,
@@ -91,15 +99,15 @@ workflow ShareSeq {
             cutoff = cutoff_rna,
             # Lib_size QC
             qc = qc,
-            genes_annotation_bed = genes_annotation_bed
+            genes_annotation_bed = if genes_annotation_bed then genes_annotation_bed else annotations["genebed"]
     }
     call share_atac.wf_atac as atac{
         input:
             read1 = read1_atac,
             read2 = read2_atac,
-            chrom_sizes = chrom_sizes,
-            idx_tar = idx_tar_atac,
-            tss_bed = tss_bed,
+            chrom_sizes = if chrom_sizes then chrom_sizes else annotations["chrsz"],
+            idx_tar = if idx_tar_atac then idx_tar_atac else annotations["bowtie2_idx_tar"],
+            tss_bed = if tss_bed then tss_bed else annotations["tss"],
             prefix = prefix,
             genome_name = genome_name,
             cutoff = cutoff_atac,
@@ -109,7 +117,7 @@ workflow ShareSeq {
         input:
             rna_matrix = rna.share_rna_h5_matrix,
             atac_fragments = atac.share_atac_fragments_filtered,
-            peak_file = peak_set,
+            peak_file = if peak_set then peak_set else annotations["ccre"],
 
             genome = genome_name,
             n_cores = cpus_dorcs,
