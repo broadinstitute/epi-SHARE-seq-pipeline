@@ -12,11 +12,10 @@ def main(image_file_list, log_file_list):
         images = fname.read().splitlines() 
     html = '<br>'
     for image in images:
-        print(image)
         data = open(image, 'rb').read() # read bytes from file
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
-        data_base64 = data_base64.decode()    # convert bytes to string
-        html = html + '<img src="data:image/jpeg;base64,' + data_base64 + '"><br>' # embed in html
+        data_base64 = data_base64.decode('ascii')    # convert bytes to string
+        html = html + '<img src="data:image/png;base64,' + data_base64 + '"><br>' # embed in html
     f = open('output.html', 'a+')
     f.write(html)
 
