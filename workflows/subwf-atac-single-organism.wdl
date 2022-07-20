@@ -25,7 +25,7 @@ workflow wf_atac {
         File? tss_bed
         String prefix = "shareseq-project"
         String genome_name
-        Int cutoff
+        Int? cutoff
         Int? cpus = 4
         String? docker
     }
