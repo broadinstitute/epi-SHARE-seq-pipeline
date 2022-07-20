@@ -89,8 +89,8 @@ write.table(out, fileout, quote=F, row.names=F, col.names=T, sep="\t")
 
 # Plot lib size
 Size2 <-Df[, ncol+2];  Size2 <- Size2[Size2 >0]; # plot(Size)
-file6 <- paste(basename(filt), 'libSize.jpg', sep=".")
-jpeg(file6, width = 8, height = 8, units = 'in', res = 300)
+file6 <- paste(basename(filt), 'libSize.png', sep=".")
+png(file6, width = 8, height = 8, units = 'in', res = 300)
 par(mfrow = c(2,1))
 Size2 <- sort(Size2, decreasing = T)
 elbow <- elbow_finder(1:length(Size2), log10(Size2))
