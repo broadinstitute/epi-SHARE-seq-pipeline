@@ -131,6 +131,7 @@ task html_report {
     >>>
     output {
         File html_report_file = glob('*.html')[0]
+        Array[File] tmp_files = glob('*_list.txt')
     }
 
     runtime {
