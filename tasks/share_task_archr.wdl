@@ -50,11 +50,11 @@ task archr {
     }
 
     #Plot filepaths
-    String plots_filepath = '${prefix}.atac.archr.plots.${genome_name}'
-    String raw_tss_by_uniq_frags_plot = '${plots_filepath}/${prefix}.atac.archr.prefiltered_tss_by_uniq_frags.${genome_name}.png'
-    String raw_frag_size_dist_plot = '${plots_filepath}/${prefix}.atac.archr.prefiltered_frag_size_dist.${genome_name}.png'
-    String filtered_tss_by_uniq_frags_plot = '${plots_filepath}/${prefix}.atac.archr.postfiltered_tss_by_uniq_frags.${genome_name}.png'
-    String filtered_frag_size_dist_plot = '${plots_filepath}/${prefix}.atac.archr.postfiltered_frag_size_dist.${genome_name}.png'
+    String plots_filepath = '${prefix}.atac.archr.plots.${genome}'
+    String raw_tss_by_uniq_frags_plot = '${plots_filepath}/${prefix}.atac.archr.prefiltered_tss_by_uniq_frags.${genome}.png'
+    String raw_frag_size_dist_plot = '${plots_filepath}/${prefix}.atac.archr.prefiltered_frag_size_dist.${genome}.png'
+    String filtered_tss_by_uniq_frags_plot = '${plots_filepath}/${prefix}.atac.archr.postfiltered_tss_by_uniq_frags.${genome}.png'
+    String filtered_frag_size_dist_plot = '${plots_filepath}/${prefix}.atac.archr.postfiltered_frag_size_dist.${genome}.png'
     String umap_cluster_plot = '${plots_filepath}/${prefix}.atac.archr.umap_clusters.${genome}.png'
     String umap_num_frags_plot = '${plots_filepath}/${prefix}.atac.archr.umap_num_frags.${genome}.png'
     String umap_tss_score_plot = '${plots_filepath}/${prefix}.atac.archr.umap_tss_score.${genome}.png'
