@@ -77,40 +77,40 @@ task html_report {
 
 
     command <<<
-        fnames=$(basename ~{share_rna_qc_library_plot})
-        if [ -n "~{share_rna_seurat_violin_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_violin_plot}); fi;
-        if [ -n "~{share_rna_seurat_filtered_qc_scatter_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_filtered_qc_scatter_plot}); fi;
-        if [ -n "~{share_rna_seurat_variable_genes_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_variable_genes_plot}); fi;
-        if [ -n "~{share_rna_seurat_PCA_dim_loadings_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_PCA_dim_loadings_plot}); fi;
-        if [ -n "~{share_rna_seurat_PCA_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_PCA_plot}); fi;
-        if [ -n "~{share_rna_seurat_heatmap_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_heatmap_plot}); fi;
-        if [ -n "~{share_rna_seurat_jackstraw_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_jackstraw_plot}); fi;
-        if [ -n "~{share_rna_seurat_elbow_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_elbow_plot}); fi;
-        if [ -n "~{share_rna_seurat_umap_cluster_plot}" ]; then fnames=$fnames","$(basename ~{share_rna_seurat_umap_cluster_plot}); fi;
-        if [ -n "~{share_atac_qc_library_plot}" ]; then fnames=$fnames","$(basename ~{share_atac_qc_library_plot}); fi;
-        if [ -n "~{share_atac_qc_hist_plot}" ]; then fnames=$fnames","$(basename ~{share_atac_qc_hist_plot}); fi;
-        if [ -n "~{share_atac_qc_tss_enrichment}" ]; then fnames=$fnames","$(basename ~{share_atac_qc_tss_enrichment}); fi;
-        if [ -n "~{share_atac_archr_gene_heatmap_plot}" ]; then fnames=$fnames","$(basename ~{share_atac_archr_gene_heatmap_plot}); fi;
-        if [ -n "~{share_atac_archr_tss_enrichment_raw}" ]; then fnames=$fnames","$(basename ~{share_atac_archr_tss_enrichment_raw}); fi;
-        if [ -n "~{share_atac_archr_tss_enrichment_filtered}" ]; then fnames=$fnames","$(basename ~{share_atac_archr_tss_enrichment_filtered}); fi;
-        if [ -n "~{share_atac_archr_fragment_size_plot}" ]; then fnames=$fnames","$(basename ~{share_atac_archr_fragment_size_plot}); fi;
-        if [ -n "~{share_atac_archr_doublet_plot}" ]; then fnames=$fnames","$(basename ~{share_atac_archr_doublet_plot}); fi;
-        if [ -n "~{share_atac_archr_umap_plot}" ]; then fnames=$fnames","$(basename ~{share_atac_archr_umap_plot}); fi;
-        if [ -n "~{seurat_violin_plot}" ]; then fnames=$fnames","$(basename ~{seurat_violin_plot}); fi;
-        if [ -n "~{j_plot}" ]; then fnames=$fnames","$(basename ~{j_plot}); fi;
+        echo $(basename ~{share_rna_qc_library_plot}) > image_list.txt
+        if [ -n "~{share_rna_seurat_violin_plot}" ]; then echo $(basename ~{share_rna_seurat_violin_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_filtered_qc_scatter_plot}" ]; then echo $(basename ~{share_rna_seurat_filtered_qc_scatter_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_variable_genes_plot}" ]; then echo $(basename ~{share_rna_seurat_variable_genes_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_PCA_dim_loadings_plot}" ]; then echo $(basename ~{share_rna_seurat_PCA_dim_loadings_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_PCA_plot}" ]; then echo $(basename ~{share_rna_seurat_PCA_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_heatmap_plot}" ]; then echo $(basename ~{share_rna_seurat_heatmap_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_jackstraw_plot}" ]; then echo $(basename ~{share_rna_seurat_jackstraw_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_elbow_plot}" ]; then echo $(basename ~{share_rna_seurat_elbow_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_umap_cluster_plot}" ]; then echo $(basename ~{share_rna_seurat_umap_cluster_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_qc_library_plot}" ]; then echo $(basename ~{share_atac_qc_library_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_qc_hist_plot}" ]; then echo $(basename ~{share_atac_qc_hist_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_qc_tss_enrichment}" ]; then echo $(basename ~{share_atac_qc_tss_enrichment}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_gene_heatmap_plot}" ]; then echo $(basename ~{share_atac_archr_gene_heatmap_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_tss_enrichment_raw}" ]; then echo $(basename ~{share_atac_archr_tss_enrichment_raw}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_tss_enrichment_filtered}" ]; then echo $(basename ~{share_atac_archr_tss_enrichment_filtered}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_fragment_size_plot}" ]; then echo $(basename ~{share_atac_archr_fragment_size_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_doublet_plot}" ]; then echo $(basename ~{share_atac_archr_doublet_plot}) >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_umap_plot}" ]; then echo $(basename ~{share_atac_archr_umap_plot}) >> image_list.txt; fi;
+        if [ -n "~{seurat_violin_plot}" ]; then echo $(basename ~{seurat_violin_plot}) >> image_list.txt; fi;
+        if [ -n "~{j_plot}" ]; then echo $(basename ~{j_plot}) >> image_list.txt; fi;
 
-        lognames=$(basename ~{share_rna_alignment_log})
-        if [ -n "~{share_rna_featurecount_exon_txt}" ]; then lognames=$lognames","$(basename ~{share_rna_featurecount_exon_txt}); fi;
-        if [ -n "~{share_rna_featurecount_intron_txt}" ]; then lognames=$lognames","$(basename ~{share_rna_featurecount_intron_txt}); fi;
-        if [ -n "~{share_rna_qc_reads_distribution}" ]; then lognames=$lognames","$(basename ~{share_rna_qc_reads_distribution}); fi;
-        if [ -n "~{share_rna_qc_reads_distribution2}" ]; then lognames=$lognames","$(basename ~{share_rna_qc_reads_distribution2}); fi;
-        if [ -n "~{share_rna_umi_rm_dup_log}" ]; then lognames=$lognames","$(basename ~{share_rna_umi_rm_dup_log}); fi;
-        if [ -n "~{share_rna_seurat_notebook_log}" ]; then lognames=$lognames","$(basename ~{share_rna_seurat_notebook_log}); fi;
-        if [ -n "~{share_atac_alignment_log}" ]; then lognames=$lognames","$(basename ~{share_atac_alignment_log}); fi;
-        if [ -n "~{share_atac_archr_notebook_output}" ]; then lognames=$lognames","$(basename ~{share_atac_archr_notebook_output}); fi;
-        if [ -n "~{share_atac_archr_notebook_log}" ]; then lognames=$lognames","$(basename ~{share_atac_archr_notebook_log}); fi;
-        if [ -n "~{share_atac_archr_papermill_log}" ]; then lognames=$lognames","$(basename ~{share_atac_archr_papermill_log}); fi;
-        if [ -n "~{dorcs_notebook_log}" ]; then lognames=$lognames","$(basename ~{dorcs_notebook_log}); fi;
+        echo $(basename ~{share_rna_alignment_log}) > log_list.txt
+        if [ -n "~{share_rna_featurecount_exon_txt}" ]; then echo $(basename ~{share_rna_featurecount_exon_txt}) >> log_list.txt; fi;
+        if [ -n "~{share_rna_featurecount_intron_txt}" ]; then echo $(basename ~{share_rna_featurecount_intron_txt}) >> log_list.txt; fi;
+        if [ -n "~{share_rna_qc_reads_distribution}" ]; then echo $(basename ~{share_rna_qc_reads_distribution}) >> log_list.txt; fi;
+        if [ -n "~{share_rna_qc_reads_distribution2}" ]; then echo $(basename ~{share_rna_qc_reads_distribution2}) >> log_list.txt; fi;
+        if [ -n "~{share_rna_umi_rm_dup_log}" ]; then echo $(basename ~{share_rna_umi_rm_dup_log}) >> log_list.txt; fi;
+        if [ -n "~{share_rna_seurat_notebook_log}" ]; then echo $(basename ~{share_rna_seurat_notebook_log}) >> log_list.txt; fi;
+        if [ -n "~{share_atac_alignment_log}" ]; then echo $(basename ~{share_atac_alignment_log}) >> log_list.txt; fi;
+        if [ -n "~{share_atac_archr_notebook_output}" ]; then echo $(basename ~{share_atac_archr_notebook_output}) >> log_list.txt; fi;
+        if [ -n "~{share_atac_archr_notebook_log}" ]; then echo $(basename ~{share_atac_archr_notebook_log}) >> log_list.txt; fi;
+        if [ -n "~{share_atac_archr_papermill_log}" ]; then echo $(basename ~{share_atac_archr_papermill_log}) >> log_list.txt; fi;
+        if [ -n "~{dorcs_notebook_log}" ]; then echo $(basename ~{dorcs_notebook_log}) >> log_list.txt; fi;
 
         echo "<html><body><h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.html
         echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.html
@@ -127,13 +127,13 @@ task html_report {
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.html
         percent=$(( ~{rna_duplicate_reads}*100/~{rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr>" >> output.html       
-        python3 $(which write_html.py) "$fnames" "$lognames"  
+        python3 $(which write_html.py) image_list.txt log_list.txt  
     >>>
     output {
         File html_report_file = glob('*.html')[0]
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:2'
+        docker: 'nchernia/share_task_html_report:3'
     }
 }
