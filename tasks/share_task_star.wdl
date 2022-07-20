@@ -16,7 +16,7 @@ task share_rna_align {
 
         Array[File] fastq_R1
         Array[File]? fastq_R2
-        File genome_index_tar
+        File? genome_index_tar
         String genome_name
         String? prefix
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_star"

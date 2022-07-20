@@ -20,9 +20,9 @@ workflow wf_atac {
         # ATAC Sub-worflow inputs
         Array[File] read1
         Array[File] read2
-        File chrom_sizes
-        File idx_tar
-        File tss_bed
+        File? chrom_sizes
+        File? idx_tar
+        File? tss_bed
         String prefix = "shareseq-project"
         String genome_name
         Int cutoff

@@ -16,7 +16,7 @@ task share_atac_align {
         Int? memory_gb = 64
         Array[File] fastq_R1
         Array[File] fastq_R2
-        File genome_index       # This is a tar.gz folder with all the index files.
+        File? genome_index       # This is a tar.gz folder with all the index files.
         String genome_name      # GRCh38, mm10
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
         String? prefix

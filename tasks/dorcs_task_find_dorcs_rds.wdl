@@ -12,7 +12,7 @@ task find_dorcs {
 
         File rna_rds
         File atac_fragments
-        File peak_file
+        File? peak_file
 
         String genome = "hg38"
         Int n_cores = 4

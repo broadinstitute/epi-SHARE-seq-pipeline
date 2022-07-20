@@ -20,7 +20,7 @@ task qc_atac {
         File raw_bam_index
         File filtered_bam
         File filtered_bam_index
-        File tss
+        File? tss
         String genome_name
         String? prefix
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"

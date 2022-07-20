@@ -18,7 +18,7 @@ task feature_counts_rna {
         Boolean multimapper
         Boolean intron
         File bam
-        File gtf
+        File? gtf
         String gene_naming = "gene_name"
         String genome_name
         String? prefix
