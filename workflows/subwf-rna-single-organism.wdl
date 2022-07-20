@@ -22,7 +22,7 @@ workflow wf_rna {
         # RNA Sub-worflow inputs
 
         # Align
-        File read1
+        Array[File] read1
         File idx_tar
         String prefix = "shareseq-project"
         String genome_name
@@ -130,14 +130,16 @@ workflow wf_rna {
         File share_rna_featurecount_alignment = count.rna_featurecount_alignment
         File share_rna_featurecount_alignment_index = count.rna_featurecount_alignment_index
         #File share_rna_featurecount_log = count.rna_featurecount_log
-        File share_rna_featurecount_txt = count.rna_featurecount_txt
-        File share_rna_featurecount_summary = count.rna_featurecount_summary
+        File share_rna_featurecount_exon_txt = count.rna_featurecount_exon_txt
+        File? share_rna_featurecount_intron_txt = count.rna_featurecount_intron_txt
+        #File share_rna_featurecount_summary = count.rna_featurecount_summary
 
         File share_rna_umi_barcodes = group_umi.rna_umi_barcodes_filtered
         File share_rna_umi_bed_filtered = group_umi.rna_umi_bed_filtered
         File share_rna_umi_bed_unfiltered = group_umi.rna_umi_bed_unfiltered
         File share_rna_umi_counts_filtered = group_umi.rna_umi_counts_filtered
         File share_rna_umi_counts_unfiltered = group_umi.rna_umi_counts_unfiltered
+        File share_rna_umi_rm_dup_log = group_umi.rna_umi_rm_dup_log
 
         File share_rna_qc_reads_distribution = qc_rna.rna_qc_reads_distribution
         File share_rna_qc_reads_distribution2 = qc_rna.rna_qc_reads_distribution2
@@ -150,17 +152,19 @@ workflow wf_rna {
         File share_rna_h5_matrix = generate_h5.h5_matrix
         Array[File] share_rna_umi_qc_plots = generate_h5.umi_qc_plots
 
-        File share_rna_notebook_output = seurat.notebook_output
-        File share_rna_seurat_violin_plot = seurat.seurat_violin_plot
-        File share_rna_seurat_mitochondria_qc_plot = seurat.seurat_mitochondria_qc_plot
-        File share_rna_seurat_features_plot = seurat.seurat_features_plot
-        File share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
-        File share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
-        File share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
-        File share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
-        File share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
-        File share_rna_seurat_umap_plot = seurat.seurat_umap_plot
-        File share_rna_seurat_obj = seurat.seurat_obj
-        File share_rna_plots_zip = seurat.plots_zip
+        File share_rna_seurat_notebook_output = seurat.notebook_output
+        File share_rna_seurat_notebook_log = seurat.notebook_log
+        #File share_rna_seurat_papermill_log = seurat.papermill_log
+        File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
+        File? share_rna_seurat_filtered_qc_scatter_plot = seurat.seurat_filtered_qc_scatter_plot
+        File? share_rna_seurat_variable_genes_plot = seurat.seurat_variable_genes_plot
+        File? share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
+        File? share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
+        File? share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
+        File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
+        File? share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
+        File? share_rna_seurat_umap_cluster_plot = seurat.seurat_umap_cluster_plot
+        File? share_rna_seurat_obj = seurat.seurat_obj
+        File? share_rna_plots_zip = seurat.plots_zip
     }
 }

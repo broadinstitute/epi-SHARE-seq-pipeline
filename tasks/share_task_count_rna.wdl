@@ -23,12 +23,12 @@ task feature_counts_rna {
         String genome_name
         String? prefix
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_count_rna"
-        Int cpus= 4
+        Int cpus= 6
     }
 
     #Float input_file_size_gb = size(input[0], "G")
-    Int mem_gb = 16
-    Int disk_gb = 50
+    Int mem_gb = 64
+    Int disk_gb = 200
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
 
@@ -54,6 +54,8 @@ task feature_counts_rna {
             -R BAM \
             temp_input.bam >> ${featurecount_log}
 
+            mv *.featurecount.txt.summary summary.exon.featurecount.txt
+
         temp_filename="temp_input.bam.featureCounts.bam"
 
         # Extract reads that assigned to genes
@@ -67,10 +69,12 @@ task feature_counts_rna {
             -R BAM \
             $temp_filename >> ${featurecount_log}
 
+            mv *.featurecount.txt.summary summary.intron.featurecount.txt
+
             temp_filename="$temp_filename.featureCounts.bam"
         fi
 
-        samtools sort -@ ${cpus} -m 2G -o ${out_bam} $temp_filename
+        samtools sort -@ ${cpus} -m 8G -o ${out_bam} $temp_filename
         samtools index -@ ${cpus} ${out_bam}
 
     }
@@ -79,8 +83,9 @@ task feature_counts_rna {
         File rna_featurecount_alignment = out_bam
         File rna_featurecount_alignment_index = out_bai
         #File rna_featurecount_log = "featureCount.log"
-        File rna_featurecount_txt = glob("*.featurecount.txt")[0]
-        File rna_featurecount_summary = glob("*.featurecount.txt.summary")[0]
+        File rna_featurecount_exon_txt = glob("*intron.featurecount.txt")[0]
+        File? rna_featurecount_intron_txt = glob("*exon.featurecount.txt")[0]
+        #File rna_featurecount_summary = glob("*.featurecount.txt.summary")[0]
     }
 
     runtime {

@@ -10,7 +10,7 @@ task find_dorcs {
     input {
         #This task takes in the RNA and ATAC files and finds the DORCs based on the cut-off criteria provided
 
-        File rna_matrix
+        File rna_rds
         File atac_fragments
         File peak_file
 
@@ -37,7 +37,8 @@ task find_dorcs {
         Float numBackgroundPairs = 100000
         Float chunkSize = 50000
 
-        String docker_image = "polumechanos/dorcs_task_find_dorcs"
+        String docker_image = "swekhande/dorcs:epi-dorcs-rds"
+        String prefix = "prefix"
         Int mem_gb = 16
         Int disk_gb = 100
     }
@@ -45,7 +46,7 @@ task find_dorcs {
     command {
 
         papermill /usr/local/bin/dorcs_notebook_rds.ipynb ${output_filename} \
-        -p rnaRDS ${rna_matrix} \
+        -p rnaRDS ${rna_rds} \
         -p atacFragFile ${atac_fragments} \
         -p peakFile ${peak_file} \
         -p savePlotsToDir ${save_plots_to_dir} \
@@ -69,8 +70,8 @@ task find_dorcs {
     output {
         File notebook_output = output_filename
         File? seurat_violin_plot = "plots/RNAViolinPlot.png"
-        File j_plot = "plots/JPlot.png"
-        File plots_zip = "plots.zip"
+        File? j_plot = "plots/JPlot.png"
+        File? plots_zip = "plots.zip"
         File? dorcs_genes_summary = "dorc_genes_summary.csv"
         File? dorcs_regions_summary = "dorc_regions_summary.csv"
     }

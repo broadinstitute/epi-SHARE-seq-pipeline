@@ -23,15 +23,15 @@ task group_umi_rna {
         String mode
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_group_umi"
         String? prefix
-        Int? memory_gb = 16
+        Int? memory_gb = 32
 
 
     }
 
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = memory_gb
-    Int disk_gb = 50
-    Int mem_sort = 16
+    Int disk_gb = 200
+    Int mem_sort = 4
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     String umi_groups_table = "${default="share-seq" prefix}.rna.umi.groups.wdup.${genome_name}.tsv"
@@ -69,7 +69,7 @@ task group_umi_rna {
             python3 $(which rm_dup_barcode_UMI_v3.py) \
                     -i ~{prefix + "."}rna.~{genome_name}.wdup.bed \
                     -o ~{umi_groups_table} \
-                    --m 1
+                    --m 1 > ~{prefix}.rm_dup_barcode.log.txt
         fi
 
         cut -f1 ~{umi_groups_table} | sort -u > observed_barcodes_combinations
@@ -125,6 +125,7 @@ task group_umi_rna {
         File rna_umi_bed_unfiltered = "${umi_groups_bed_unfiltered}"
         File rna_umi_counts_filtered = "${umi_counts_filtered}"
         File rna_umi_counts_unfiltered = "${umi_counts_unfiltered}"
+        File rna_umi_rm_dup_log = "${prefix}.rm_dup_barcode.log.txt"
     }
 
     runtime {
