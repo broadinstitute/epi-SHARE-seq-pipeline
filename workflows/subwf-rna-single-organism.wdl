@@ -23,7 +23,7 @@ workflow wf_rna {
 
         # Align
         Array[File] read1
-        File idx_tar
+        File? idx_tar
         String prefix = "shareseq-project"
         String genome_name
         Int? cpus = 16
@@ -33,7 +33,7 @@ workflow wf_rna {
         # Assign features
         Boolean include_multimappers = false
         Boolean include_introns = false
-        File gtf
+        File? gtf
         String gene_naming = "gene_name"
         # Group UMI
         Boolean remove_single_umi = true
@@ -41,7 +41,7 @@ workflow wf_rna {
         Int cutoff = 100
         # Lib_size QC
         Boolean qc = false
-        File genes_annotation_bed
+        File? genes_annotation_bed
         # Seurat
         Int umap_dim = 10
         Float umap_resolution = 0.5
