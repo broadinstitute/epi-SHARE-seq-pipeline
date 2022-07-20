@@ -22,6 +22,7 @@ task archr {
         String add_gene_score_mat = "TRUE"
 
         #ArchR Doublet paramaters
+        String find_doublets = "FALSE"
         Int doublet_k = 10
         String doublet_knn_method = "UMAP"
         Int lsi_method = 1
@@ -85,6 +86,7 @@ task archr {
         -p min_frags ${min_frags} \
         -p add_tile_mat ${add_tile_mat} \
         -p add_gene_score_mat ${add_gene_score_mat} \
+        -p find_doublets ${find_doublets} \
         -p doublet_k ${doublet_k} \
         -p doublet_knn_method ${doublet_knn_method} \
         -p lsi_method ${lsi_method} \
