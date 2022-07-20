@@ -12,7 +12,7 @@ task generate_h5 {
     }
 
     input {
-        # This task computs the the gene by barcode matrix.
+        # This task computes the the gene by barcode matrix.
 
         File filtered_bed
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
@@ -28,13 +28,11 @@ task generate_h5 {
 
     command {
         set -e
-        Rscript $(which UMI_gene_perCell_plot_v2.R) ${filtered_bed} --save
-
+        python3 $(generate_h5_RNA.py) -i ${filtered_bed} -o out.detected.genes.pdf --save
     }
 
     output {
         File h5_matrix = glob('*.h5')[0]
-        Array[File] umi_qc_plots = glob('*.pdf')
     }
 
     runtime {
