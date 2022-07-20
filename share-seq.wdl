@@ -82,7 +82,7 @@ workflow ShareSeq {
     call share_rna.wf_rna as rna{
         input:
             read1 = read1_rna,
-            idx_tar = if idx_tar_rna then idx_tar_rna else annotations["star_idx_tar"],
+            idx_tar = if defined(idx_tar_rna) then idx_tar_rna else annotations["star_idx_tar"],
             prefix = prefix,
             genome_name = genome_name,
             cpus = cpus_rna,
@@ -91,7 +91,7 @@ workflow ShareSeq {
             # Assign features
             include_multimappers = include_multimappers,
             include_introns = include_introns,
-            gtf = if gtf then gtf else annotations["genegtf"],
+            gtf = if defined(gtf) then gtf else annotations["genegtf"],
             gene_naming = gene_naming,
             # Group UMI
             remove_single_umi = remove_single_umi,
@@ -99,15 +99,15 @@ workflow ShareSeq {
             cutoff = cutoff_rna,
             # Lib_size QC
             qc = qc,
-            genes_annotation_bed = if genes_annotation_bed then genes_annotation_bed else annotations["genebed"]
+            genes_annotation_bed = if defined(genes_annotation_bed) then genes_annotation_bed else annotations["genebed"]
     }
     call share_atac.wf_atac as atac{
         input:
             read1 = read1_atac,
             read2 = read2_atac,
-            chrom_sizes = if chrom_sizes then chrom_sizes else annotations["chrsz"],
-            idx_tar = if idx_tar_atac then idx_tar_atac else annotations["bowtie2_idx_tar"],
-            tss_bed = if tss_bed then tss_bed else annotations["tss"],
+            chrom_sizes = if defined(chrom_sizes) then chrom_sizes else annotations["chrsz"],
+            idx_tar = if defined(idx_tar_atac) then idx_tar_atac else annotations["bowtie2_idx_tar"],
+            tss_bed = if defined(tss_bed) then tss_bed else annotations["tss"],
             prefix = prefix,
             genome_name = genome_name,
             cutoff = cutoff_atac,
@@ -117,7 +117,7 @@ workflow ShareSeq {
         input:
             rna_matrix = rna.share_rna_h5_matrix,
             atac_fragments = atac.share_atac_fragments_filtered,
-            peak_file = if peak_set then peak_set else annotations["ccre"],
+            peak_file = if defined(peak_set) then peak_set else annotations["ccre"],
 
             genome = genome_name,
             n_cores = cpus_dorcs,
