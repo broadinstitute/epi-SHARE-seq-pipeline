@@ -104,7 +104,7 @@ task archr {
         #File papermill_log = papermill_log_filename
         
         File? archr_raw_tss_by_uniq_frags_plot = raw_tss_by_uniq_frags_plot
-        File? archr_frag_size_dist_plot = frag_size_dist_plot
+        File? archr_frag_size_dist_plot = raw_frag_size_dist_plot
         File? archr_filtered_tss_by_uniq_frags_plot = filtered_tss_by_uniq_frags_plot
         File? archr_filtered_frag_size_dist_plot = filtered_frag_size_dist_plot
         File? archr_umap_cluster_plot = umap_cluster_plot
