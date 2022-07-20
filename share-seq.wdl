@@ -75,7 +75,7 @@ workflow ShareSeq {
         String? mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/genome_files_mm10.tsv"
     }
 
-    String genome_name = if sub(genome_name,"[A-Z]","[a-z]") == "grch38" then "hg38" else genome_name_input
+    String genome_name = if genone_name == "GRCh38" then "hg38" else genome_name_input
 
     Map[String, String] annotations = if genome_name == "mm10" then read_map(mouse_genome_tsv) else read_map(human_genome_tsv)
 
