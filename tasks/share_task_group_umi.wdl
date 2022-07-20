@@ -23,15 +23,15 @@ task group_umi_rna {
         String mode
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_group_umi"
         String? prefix
-        Int? memory_gb = 16
+        Int? memory_gb = 32
 
 
     }
 
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = memory_gb
-    Int disk_gb = 50
-    Int mem_sort = 16
+    Int disk_gb = 200
+    Int mem_sort = 4
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     String umi_groups_table = "${default="share-seq" prefix}.rna.umi.groups.wdup.${genome_name}.tsv"
