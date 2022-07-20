@@ -13,7 +13,7 @@ task archr {
         #ArchR parameters
         File atac_frag
         String genome
-        File peak_seat
+        File peak_set
 
         #ArchR QC
         Int min_tss = 4
