@@ -28,7 +28,7 @@ task generate_h5 {
 
     command {
         set -e
-        python3 $(generate_h5_RNA.py) -i ${filtered_bed} -o out.detected.genes.pdf --save
+        python3 $(generate_h5_RNA.py) -i ${filtered_bed} -o out.gene.bc.matrices --save
     }
 
     output {
