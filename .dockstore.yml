@@ -8,6 +8,8 @@ workflows:
              - main
              - dev
              - neva
+             - minimal-inputs
+             - knudson
          tags:
              - /.*/
 
@@ -31,6 +33,7 @@ workflows:
              - main
              - dev
              - neva
+             - kudson
          tags:
              - /.*/
 

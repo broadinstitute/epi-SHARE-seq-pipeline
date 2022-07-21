@@ -7,7 +7,7 @@ import "../tasks/share_task_count_atac.wdl" as share_task_count
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_qc_library.wdl" as share_task_qc_library
 import "../tasks/share_task_archr.wdl" as share_task_archr
-import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
+
 
 workflow wf_atac {
     meta {
@@ -23,6 +23,7 @@ workflow wf_atac {
         File chrom_sizes
         File idx_tar
         File tss_bed
+        File peak_set
         String prefix = "shareseq-project"
         String genome_name
         Int cutoff
@@ -78,22 +79,12 @@ workflow wf_atac {
             prefix = prefix,
             cpus = cpus
     }
-  
-    call share_task_log_atac.log_atac as log_atac {
-       input:
-           alignment_log = align.atac_alignment_log,
-           dups_log = qc_library.lib_size_log
-    }
 
     call share_task_archr.archr as archr{
         input:
             atac_frag = count.atac_fragments_filtered,
             genome = genome_name,
-            #min_tss = 4,
-            #min_frags = 1000,
-            #doublet_k = 10,
-            #doublet_knn_method = "UMAP",
-            #lsi_method = 1,
+            peak_set = peak_set,
             prefix = prefix
     }
 
@@ -114,7 +105,7 @@ workflow wf_atac {
 
         File share_atac_qc_library_counts = qc_library.lib_size_counts
         File share_atac_qc_library_duplicates = qc_library.lib_size_log
-        File share_atac_qc_library_plot = qc_library.plot
+        Array[File] share_atac_qc_library_plots = qc_library.plots
 
         File share_atac_qc_final = qc_atac.atac_final_stats
         File share_atac_qc_hist_plot = qc_atac.atac_final_hist_pdf
@@ -123,21 +114,20 @@ workflow wf_atac {
 
         File share_atac_archr_notebook_output = archr.notebook_output
         File share_atac_archr_notebook_log = archr.notebook_log
-        File share_atac_archr_papermill_log = archr.papermill_log
+        #File share_atac_archr_papermill_log = archr.papermill_log
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
-        File? share_atac_archr_tss_enrichment_raw = archr.archr_TSS_uniq_frags_plot
-        File? share_atac_archr_tss_enrichment_filtered = archr.archr_TSS_uniq_frags_filtered_plot
-        File? share_atac_archr_fragment_size_plot = archr.archr_fragment_size_dist_plot
-        File? share_atac_archr_doublet_plot = archr.archr_doublet_plot
-        File? share_atac_archr_umap_plot = archr.archr_umap_plot
+        File? share_atac_archr_tss_enrichment_raw = archr.archr_raw_tss_by_uniq_frags_plot
+        File? share_atac_archr_tss_enrichment_filtered = archr.archr_filtered_tss_by_uniq_frags_plot
+        File? share_atac_archr_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
+        File? share_atac_archr_doublet_plot = archr.archr_umap_doublets
+        File? share_atac_archr_umap_plot = archr.archr_umap_cluster_plot
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
-
         Int atac_total_reads = log_atac.atac_total_reads
         Int atac_aligned_uniquely = log_atac.atac_aligned_uniquely
         Int atac_unaligned = log_atac.atac_unaligned
         Int atac_feature_reads = log_atac.atac_feature_reads
-        Int atac_duplicate_reads = log_atac.atac_duplicate_reads
+        Int atac_duplicate_reads = log_atac.atac_duplicate_reads        
     }
 }
