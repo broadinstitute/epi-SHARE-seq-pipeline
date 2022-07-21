@@ -6,6 +6,8 @@ Write output HTML file from list of images and text
 """
 import argparse
 import base64
+import io
+import os.path
 
 def main(image_file_list, log_file_list):
     with open(image_file_list) as fname:
@@ -16,7 +18,7 @@ def main(image_file_list, log_file_list):
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
         data_base64 = data_base64.decode('utf-8')    # convert bytes to string
         html = html + '<img src="data:image/png;base64,' + data_base64 + '"><br>' # embed in html
-    f = open('output.html', 'a+')
+    f = io.open('output.html', 'a+', encoding='utf8')
     f.write(html)
 
     f.write('<pre>')
@@ -24,11 +26,12 @@ def main(image_file_list, log_file_list):
         logs = fname.read().splitlines()
     for log in logs:
         f.write('<h3>')
-        f.write(log)
+        f.write(os.path.basename(log))
         f.write('</h3>')
         f.write('<pre>')
-        f1 = open(log, 'r')
-        f.write(f1.read())
+        with io.open(log, 'r', encoding='utf8') as f1:
+           text = f1.read()
+        f.write(text)
         f.write('</pre>')
     f.write('</body></html>')
 
