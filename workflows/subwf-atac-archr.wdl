@@ -15,6 +15,7 @@ workflow wf_atac {
         # ATAC Sub-worflow inputs
         File atac_fragments_filtered
         String genome_name
+        String peak_set
         Int? cpus = 4
         String? docker
         String? prefix
@@ -24,6 +25,7 @@ workflow wf_atac {
         input:
             atac_frag = atac_fragments_filtered,
             genome = genome_name,
+            peak_set = peak_set,
             min_tss = 4,
             min_frags = 100,
             doublet_k = 10,
@@ -36,13 +38,13 @@ workflow wf_atac {
     output {
         File share_atac_archr_notebook_output = archr.notebook_output
         File share_atac_archr_notebook_log = archr.notebook_log
-        File share_atac_archr_papermill_log = archr.papermill_log
+        #File share_atac_archr_papermill_log = archr.papermill_log
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
-        File? share_atac_archr_tss_enrichment_raw = archr.archr_TSS_uniq_frags_plot
-        File? share_atac_archr_tss_enrichment_filtered = archr.archr_TSS_uniq_frags_filtered_plot
-        File? share_atac_archr_fragment_size_plot = archr.archr_fragment_size_dist_plot
-        File? share_atac_archr_doublet_plot = archr.archr_doublet_plot
-        File? share_atac_archr_umap_plot = archr.archr_umap_plot
+        File? share_atac_archr_tss_enrichment_raw = archr.archr_raw_tss_by_uniq_frags_plot
+        File? share_atac_archr_tss_enrichment_filtered = archr.archr_filtered_tss_by_uniq_frags_plot
+        File? share_atac_archr_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
+        File? share_atac_archr_doublet_plot = archr.archr_umap_doublets
+        File? share_atac_archr_umap_plot = archr.archr_umap_cluster_plot
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_obj
         File? share_atac_archr_plots_zip = archr.plots_zip

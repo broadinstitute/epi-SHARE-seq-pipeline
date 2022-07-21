@@ -100,6 +100,7 @@ workflow ShareSeq {
             chrom_sizes = chrom_sizes,
             idx_tar = idx_tar_atac,
             tss_bed = tss_bed,
+            peak_set = peak_set,
             prefix = prefix,
             genome_name = genome_name,
             cutoff = cutoff_atac,
@@ -202,7 +203,6 @@ workflow ShareSeq {
 
         File share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
         File share_atac_archr_notebook_log = atac.share_atac_archr_notebook_log
-        File share_atac_archr_papermill_log = atac.share_atac_archr_papermill_log
         File? share_atac_archr_gene_heatmap_plot = atac.share_atac_archr_gene_heatmap_plot
         File? share_atac_archr_tss_enrichment_raw = atac.share_atac_archr_tss_enrichment_raw
         File? share_atac_archr_tss_enrichment_filtered = atac.share_atac_archr_tss_enrichment_filtered
