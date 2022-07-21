@@ -49,7 +49,7 @@ def get_barcode_combos(barcode_file):
 # create dictionary of read frequencies of all possible barcode combinations               
 def get_read_freqs(barcode_file, read_freq_file):
     # make dictionary of observed barcodes and associated read counts
-    read_freq_dict = {line[1]:line[0] for line in get_split_lines(read_freq_file, delimiter="\t")}
+    read_freq_dict = {line[1]:int(line[0]) for line in get_split_lines(read_freq_file, delimiter="\t")}
     
     # initialize dictionary with read counts of 0 for each possible barcode combination
     init_dict = {barcode:0 for barcode in get_barcode_combos(barcode_file)}
@@ -65,7 +65,13 @@ print(f"Writing table of barcode read counts to {output_file}\n")
 
 # write dictionary to csv file    
 with open((output_file), "w") as f:
+    # write header based on presence/absence of PKR field
+    if len(list(read_freqs.keys())[0].split(",")) == 4:        
+        f.write("R1,R2,R3,PKR,fragments\n")
+    else:
+        f.write("R1,R2,R3,fragments\n")
+        
     for key in read_freqs.keys():
-        f.write("%s, %s\n" % (key, read_freqs[key]))
+        f.write("%s,%d\n" % (key, read_freqs[key]))
 
 print("Finished writing csv file\n")
