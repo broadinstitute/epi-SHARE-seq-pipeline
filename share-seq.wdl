@@ -169,7 +169,7 @@ workflow ShareSeq {
             share_atac_archr_fragment_size_plot = atac.share_atac_archr_fragment_size_plot,
             share_atac_archr_doublet_plot = atac.share_atac_archr_doublet_plot,
             share_atac_archr_umap_plot = atac.share_atac_archr_umap_plot,
-        
+
             # DORC plots
             seurat_violin_plot = dorcs.seurat_violin_plot, 
             j_plot = dorcs.j_plot,
@@ -187,7 +187,6 @@ workflow ShareSeq {
             share_atac_alignment_log = atac.share_atac_alignment_log,
             share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output,
             share_atac_archr_notebook_log = atac.share_atac_archr_notebook_log,
-            share_atac_archr_papermill_log = atac.share_atac_archr_papermill_log,
             # DORCs logs
             dorcs_notebook_log = dorcs.dorcs_notebook_log
     }

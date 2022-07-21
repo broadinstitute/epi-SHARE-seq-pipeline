@@ -69,7 +69,6 @@ task html_report {
         File share_atac_alignment_log
         File share_atac_archr_notebook_output 
         File share_atac_archr_notebook_log 
-        File share_atac_archr_papermill_log 
         # DORCs logs
         File dorcs_notebook_log 
     }
