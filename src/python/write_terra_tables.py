@@ -185,7 +185,7 @@ for key in list(main.keys()):
 
 with open('run.tsv', 'wt') as outfile:
 	tsv_writer = csv.writer(outfile, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)
-	tsv_writer.writerow(['entity:' + args.name + '_id', 'PKR', 'R1_Subset', 'ATAC_Lib', 'ATAC_fastq_R1', 'ATAC_fastq_R2', 'RNA_Lib', 'RNA_fastq_R1', 'RNA_fastq_R2'])
+	tsv_writer.writerow(['entity:' + args.name + '_id', 'PKR', 'Genome', 'R1_Subset', 'ATAC_Lib', 'ATAC_fastq_R1', 'ATAC_fastq_R2', 'RNA_Lib', 'RNA_fastq_R1', 'RNA_fastq_R2'])
 	for key in sorted(main.keys()):
 		print(key)
 		pkr = main[key].pkr
