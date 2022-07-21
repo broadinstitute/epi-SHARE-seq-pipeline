@@ -204,11 +204,11 @@ workflow ShareSeq {
         File share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
         File share_atac_archr_notebook_log = atac.share_atac_archr_notebook_log
         File? share_atac_archr_gene_heatmap_plot = atac.share_atac_archr_gene_heatmap_plot
-        File? share_atac_archr_tss_enrichment_raw = atac.share_atac_archr_tss_enrichment_raw
-        File? share_atac_archr_tss_enrichment_filtered = atac.share_atac_archr_tss_enrichment_filtered
-        File? share_atac_archr_fragment_size_plot = atac.share_atac_archr_fragment_size_plot
-        File? share_atac_archr_doublet_plot = atac.share_atac_archr_doublet_plot
-        File? share_atac_archr_umap_plot = atac.share_atac_archr_umap_plot
+        File? share_atac_archr_raw_tss_enrichment = atac.share_atac_archr_raw_tss_enrichment
+        File? share_atac_archr_filtered_tss_enrichment = atac.share_atac_archr_filtered_tss_enrichment
+        File? share_atac_archr_filtered_fragment_size_plot = atac.share_atac_archr_filtered_fragment_size_plot
+        File? share_atac_archr_umap_doublets = atac.share_atac_archr_umap_doublets
+        File? share_atac_archr_umap_cluster_plot = atac.share_atac_archr_umap_plot
         File? share_atac_archr_arrow = atac.share_atac_archr_arrow
         File? share_atac_archr_obj = atac.share_atac_archr_obj
         File? share_atac_archr_plots_zip = atac.share_atac_archr_plots_zip
