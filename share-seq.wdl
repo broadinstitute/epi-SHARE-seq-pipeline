@@ -148,7 +148,6 @@ workflow ShareSeq {
             ## JPEG files to be encoded and appended to html
             # RNA plots
             share_rna_qc_library_plot = rna.share_rna_qc_library_plot,
-            share_rna_umi_qc_plots = rna.share_rna_umi_qc_plots,
             share_rna_seurat_violin_plot = rna.share_rna_seurat_filtered_violin_plot,
             share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot,
             share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot,
@@ -220,9 +219,6 @@ workflow ShareSeq {
         File share_rna_qc_library_counts = rna.share_rna_qc_library_counts
         File share_rna_qc_library_duplicates = rna.share_rna_qc_library_duplicates
         File share_rna_qc_library_plot = rna.share_rna_qc_library_plot
-
-        File share_rna_h5_matrix = rna.share_rna_h5_matrix
-        Array[File] share_rna_umi_qc_plots = rna.share_rna_umi_qc_plots
 
         File share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
         File share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
