@@ -107,7 +107,6 @@ task html_report {
         if [ -n "~{share_atac_alignment_log}" ]; then echo  ~{share_atac_alignment_log} >> log_list.txt; fi;
         if [ -n "~{share_atac_archr_notebook_output}" ]; then echo  ~{share_atac_archr_notebook_output} >> log_list.txt; fi;
         if [ -n "~{share_atac_archr_notebook_log}" ]; then echo  ~{share_atac_archr_notebook_log} >> log_list.txt; fi;
-        if [ -n "~{share_atac_archr_papermill_log}" ]; then echo  ~{share_atac_archr_papermill_log} >> log_list.txt; fi;
         if [ -n "~{dorcs_notebook_log}" ]; then echo  ~{dorcs_notebook_log} >> log_list.txt; fi;
 
         echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
