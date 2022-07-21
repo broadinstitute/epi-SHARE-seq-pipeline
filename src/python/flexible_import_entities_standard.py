@@ -29,10 +29,10 @@ def call_flexible_import_entities(workspace_name, project, tsv):
     status_code = response.status_code
 
     if status_code != 200:  # entities upsert fail
-        print(f"WARNING: Failed to upload entities.")
+        print(f"ERROR: Code {status_code} returned.")
         print(response.text)
-        return
-
+        print(response.raise_for_status())
+        
     # entities upsert success
     print(f"Successfully uploaded entities." + "\n")
 

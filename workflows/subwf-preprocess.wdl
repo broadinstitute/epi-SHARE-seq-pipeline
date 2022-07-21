@@ -5,6 +5,7 @@ struct Fastq {
 	String library
 	String R1
 	String sampleType
+	String genome
 	String notes
 	Array[File] read1
 	Array[File] read2
@@ -14,42 +15,50 @@ workflow wf_preprocess {
 	input {
 		# Preprocess inputs
 		File bcl
+		Boolean zipped = true
+		Array[Int]? lanes
 		File metaCsv
-		File barcodesCsv = "gs://broad-buenrostro-bcl-outputs/library_barcodes.csv"
 		String terra_project # set to none or make optional
-		# TODO read length variable
-		# TODO array of ints for lane number
 		String workspace_name
-		String dockerImage = "nchernia/share_task_preprocess:7"
+		String dockerImage = "nchernia/share_task_preprocess:11"
 	}
 
-	String readStructure = "50T14S10M28S10M28S9M8B50T"
+	String barcodeStructure = "14S10M28S10M28S9M8B"
 	String sequencingCenter = "BI"
-
+	String tar_flags = if zipped then 'xzf' else 'xf'
 	String untarBcl =
 		'gsutil -m -o GSUtil:parallel_thread_count=1' +
 		' -o GSUtil:sliced_object_download_max_components=8' +
 		' cp "~{bcl}" . && ' +
-		'tar xf "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images && ' +
+		'tar "~{tar_flags}" "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images && ' +
 		'rm "~{basename(bcl)}"'
+	String getSampleSheet =
+		'gsutil -m -o GSUtil:parallel_thread_count=1' +
+		' -o GSUtil:sliced_object_download_max_components=8' +
+		' cp "~{bcl}" . && ' +
+		'tar "~{tar_flags}" "~{basename(bcl)}" SampleSheet.csv'
+	
 
 	call BarcodeMap {
 		input:
 			metaCsv = metaCsv,
-			barcodesCsv = barcodesCsv
 	}
 
-	call GetLanes { 
-		input: bcl = bcl, untarBcl = untarBcl
+	if (!defined(lanes)){
+		call GetLanes { 
+			input: 
+				bcl = bcl, 
+				untarBcl = getSampleSheet
+		}
 	}
-
-	scatter (lane in GetLanes.lanes) {
+	
+	scatter (lane in select_first([lanes, GetLanes.lanes])) {
 		call ExtractBarcodes {
 			input:
 				bcl = bcl,
 				untarBcl = untarBcl,
 				libraryBarcodes = BarcodeMap.out,
-				readStructure = readStructure,
+				barcodeStructure = barcodeStructure,
 				lane = lane,
 				dockerImage = dockerImage
 		}
@@ -60,7 +69,7 @@ workflow wf_preprocess {
 				untarBcl = untarBcl,
 				barcodes = ExtractBarcodes.barcodes,
 				libraryBarcodes = BarcodeMap.out,
-				readStructure = readStructure,
+				readStructure = ExtractBarcodes.readStructure,
 				lane = lane,
 				sequencingCenter = sequencingCenter,
 				dockerImage = dockerImage
@@ -76,13 +85,13 @@ workflow wf_preprocess {
 					metaCsv = metaCsv,
 			}
 
-			# TODO: Add flag to skip splitting by set for Buenrostro lab use
 			call BamToFastq { 
 				input: 
 					bam=bam,
 					pkrId = BamLookUp.pkrId,
 					library = BamLookUp.library,
 					sampleType = BamLookUp.sampleType, 
+					genome = BamLookUp.genome,
 					notes = BamLookUp.notes,
 					R1barcodeSet = BamLookUp.R1barcodeSet, 
 					dockerImage = dockerImage
@@ -103,13 +112,15 @@ workflow wf_preprocess {
 	call GatherOutputs {
 		input:
 			rows = flatten(WriteTsvRow.row),
-			name = basename(bcl, ".tar"), 
+			name =  if zipped then basename(bcl, ".tar.gz") else basename(bcl, ".tar"),
+			metaCsv = metaCsv, 
 			dockerImage = dockerImage
 	}
 
 	call TerraUpsert {
 		input:
 			rna_tsv = GatherOutputs.rna_tsv,
+			rna_no_tsv = GatherOutputs.rna_no_tsv,
 			atac_tsv = GatherOutputs.atac_tsv,
 			run_tsv = GatherOutputs.run_tsv,
 			terra_project = terra_project,
@@ -119,7 +130,7 @@ workflow wf_preprocess {
 
 	output {
 		Array[String] percentMismatch = QC.percentMismatch
-		String terraResponse = TerraUpsert.upsert_response
+		Array[String] terraResponse = TerraUpsert.upsert_response
 		# Array[Fastq] fastqs = flatten(BamToFastq.out)
 		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
 	}
@@ -128,12 +139,10 @@ workflow wf_preprocess {
 task BarcodeMap {
 	input {
 		File metaCsv
-		File barcodesCsv
 	}
 
 	command <<<
-		tail -n +6 ~{metaCsv} | cut -d, -f2 |  sed 's/$/,/' | \
-		xargs -I {} grep {} ~{barcodesCsv} | sed 's/,/\t/g' > barcodes.tsv
+		tail -n +6 ~{metaCsv} | cut -d, -f2 |  sed 's/ /\t/' > barcodes.tsv
 	>>>
 
 	output {
@@ -158,7 +167,7 @@ task GetLanes {
 	}
 	
 	Float bclSize = size(bcl, 'G')
-	Int diskSize = ceil(2 * bclSize + 5)
+	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 	# Float memory = ceil(5.4 * bclSize + 147) * 0.25
 
@@ -187,7 +196,7 @@ task ExtractBarcodes {
 		File bcl
 		String untarBcl
 		Map[String,String] libraryBarcodes
-		String readStructure 
+		String barcodeStructure 
 		Int lane 
 		String dockerImage
 	}
@@ -206,7 +215,7 @@ task ExtractBarcodes {
 
 	Float bclSize = size(bcl, 'G')
 
-	Int diskSize = ceil(2 * bclSize + 5)
+	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
 	Float memory = ceil(0.8 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
@@ -217,6 +226,10 @@ task ExtractBarcodes {
 
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
+
+		readLength=$(xmlstarlet sel -t -v "/RunInfo/Run/Reads/Read/@NumCycles" RunInfo.xml | head -n 1)T
+		readStructure=${readLength}"~{barcodeStructure}"${readLength}
+		echo ${readStructure} > readStructure.txt
 
 		printf "barcode_name\tbarcode_sequence1" | tee "~{barcodeParamsFile}"
 		while read -r params; do	
@@ -232,7 +245,7 @@ task ExtractBarcodes {
 			-OUTPUT_DIR . \
 			-BARCODE_FILE "~{barcodeParamsFile}" \
 			-METRICS_FILE "~{barcodeMetricsFile}" \
-			-READ_STRUCTURE "~{readStructure}" \
+			-READ_STRUCTURE "${readStructure}" \
 			-LANE "~{lane}" \
 			-NUM_PROCESSORS 0 \
 			-COMPRESSION_LEVEL 1 \
@@ -247,6 +260,7 @@ task ExtractBarcodes {
 	}
 
 	output {
+		String readStructure = read_string("readStructure.txt")
 		File barcodeMetrics = barcodeMetricsFile
 		File barcodes = write_lines(glob("*_barcode.txt.gz"))
 	}
@@ -278,7 +292,7 @@ task BasecallsToBams {
 
 	Float bclSize = size(bcl, 'G')
 
-	Int diskSize = ceil(2 * bclSize + 5)
+	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
 	Float memory = ceil(5.4 * bclSize + 147) * 0.25
@@ -352,13 +366,14 @@ task BamLookUp {
 	command <<<
 		bucket="gs://broad-buenrostro-bcl-outputs/"
 		file=~{bam}
-		lib="${file%_*},"
+		lib="${file%_*} "
 		grep $lib ~{metaCsv} | cut -d, -f1 | sed 's/ /-/' > pkrId.txt
-		echo $lib > library.txt
+		echo ${file%_*} > library.txt
 		barcode1=$(grep $lib ~{metaCsv} | cut -d, -f3)
 		echo ${bucket}${barcode1}.txt > R1barcodeSet.txt
 		grep $lib ~{metaCsv} | cut -d, -f4 > sampleType.txt
-		grep $lib ~{metaCsv} | cut -d, -f4 > notes.txt
+		grep $lib ~{metaCsv} | cut -d, -f5 > genome.txt
+		grep $lib ~{metaCsv} | cut -d, -f6 > notes.txt
 	>>>
 
 	output {
@@ -366,6 +381,7 @@ task BamLookUp {
 		String library = read_string("library.txt")
 		String R1barcodeSet = read_string("R1barcodeSet.txt")
 		String sampleType = read_string("sampleType.txt")
+		String genome = read_string("genome.txt")
 		String notes = read_string("notes.txt")
 	}
 
@@ -385,6 +401,7 @@ task BamToFastq {
 		String pkrId
 		String library
 		String sampleType
+		String genome
 		String notes
 		# Array[Array[String]] R1barcodeSet
 		# Array[Array[String]]? R2barcodes
@@ -431,6 +448,7 @@ task BamToFastq {
 			library: library,
 			R1: R1barcodeSet,
 			sampleType: sampleType,
+			genome: genome,
 			notes: notes,
 			read1: glob("*R1.fastq.gz"),
 			read2: glob("*R2.fastq.gz")
@@ -478,8 +496,8 @@ task WriteTsvRow {
 	Array[String] read2 = fastq.read2
 
 	command <<<
-		# echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tNotes" > fastq.tsv
-		echo -e "~{fastq.library}\t~{fastq.pkrId}\t~{fastq.R1}\t~{fastq.sampleType}\t~{sep=',' read1}\t~{sep=',' read2}\t~{fastq.notes}" > row.tsv
+		# echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tGenome\tNotes" > fastq.tsv
+		echo -e "~{fastq.library}\t~{fastq.pkrId}\t~{fastq.R1}\t~{fastq.sampleType}\t~{sep=',' read1}\t~{sep=',' read2}\t~{fastq.genome}\t~{fastq.notes}" > row.tsv
 	>>>
 
 	output {
@@ -494,15 +512,16 @@ task WriteTsvRow {
 task GatherOutputs {
 	input {
 		Array[File] rows
-		String name       
+		String name
+		File metaCsv
 		String dockerImage
 	}
 
 	command <<<
-		echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tNotes" > fastq.tsv
+		echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tGenome\tNotes" > fastq.tsv
 		cat ~{sep=' ' rows} >> fastq.tsv
 
-		python3 /software/write_terra_tables.py --input 'fastq.tsv' --name ~{name}
+		python3 /software/write_terra_tables.py --input 'fastq.tsv' --name ~{name} --meta ~{metaCsv}
 	>>>
 
 	runtime {
@@ -510,6 +529,7 @@ task GatherOutputs {
 	}
 	output {
 		File rna_tsv = "rna.tsv"
+		File rna_no_tsv = "rna_no.tsv"
 		File atac_tsv = "atac.tsv"
 		File run_tsv = "run.tsv"
 	}
@@ -518,6 +538,7 @@ task GatherOutputs {
 task TerraUpsert {
 	input {
 		File rna_tsv
+		File rna_no_tsv
 		File atac_tsv
 		File run_tsv
 		String terra_project
@@ -529,6 +550,11 @@ task TerraUpsert {
 		set -e
 		python3 /software/flexible_import_entities_standard.py \
 			-t "~{rna_tsv}" \
+			-p "~{terra_project}" \
+			-w "~{workspace_name}"
+		
+		python3 /software/flexible_import_entities_standard.py \
+			-t "~{rna_no_tsv}" \
 			-p "~{terra_project}" \
 			-w "~{workspace_name}"
 
@@ -550,6 +576,6 @@ task TerraUpsert {
 	}
 	
 	output {
-		String upsert_response = stdout()
+		Array[String] upsert_response = read_lines(stdout())
 	}
 }
