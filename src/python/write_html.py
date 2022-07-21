@@ -19,7 +19,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     Log files separated by their title and encoded via pre tag
     """
     # Open output file, write input if exists
-    output_file = io.open(output_file_name, 'w')
+    output_file = io.open(output_file_name, 'w', encoding='utf8')
     output_file.write('<!DOCTYPE html><html lang="en"><head><title>Results summary</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><body>')
     if input_file_name is not None:
         with open(input_file_name) as input_file:
