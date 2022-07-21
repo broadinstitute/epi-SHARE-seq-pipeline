@@ -20,7 +20,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     """
     # Open output file, write input if exists
     output_file = io.open(output_file_name, 'w')
-    output_file.write('<!DOCTYPE html><html><head><title>Results summary</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></title><body>')
+    output_file.write('<!DOCTYPE html><html lang="en"><head><title>Results summary</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><body>')
     if input_file_name is not None:
         with open(input_file_name) as input_file:
            output_file.write(input_file.read())
@@ -34,13 +34,12 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
         data = open(image, 'rb').read() # read bytes from file
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
         data_base64 = data_base64.decode('utf-8')    # convert bytes to string
-        output_file.write('<img src="data:image/png;base64,' + data_base64 + '"><br>') # embed in html
+        output_file.write('<img src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
 
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
 
     # loop through log files in log list and write
-    output_file.write('<pre>')
     for log in logs:
         output_file.write('<h3>')
         output_file.write(os.path.basename(log))
