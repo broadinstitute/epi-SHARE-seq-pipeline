@@ -24,3 +24,4 @@ ENV PATH="/software:${PATH}"
 
 # Copy the external scripts inside
 COPY src/python /software
+export PYTHONIOENCODING=utf8
