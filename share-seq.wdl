@@ -219,7 +219,7 @@ workflow ShareSeq {
         File share_rna_qc_library_counts = rna.share_rna_qc_library_counts
         File share_rna_qc_library_duplicates = rna.share_rna_qc_library_duplicates
         File share_rna_qc_library_plot = rna.share_rna_qc_library_plot
-
+        File share_rna_h5_matrix = rna.share_rna_h5_matrix
         File share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
         File share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
         File? share_rna_seurat_filtered_violin_plot = rna.share_rna_seurat_filtered_violin_plot
