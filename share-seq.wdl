@@ -208,7 +208,7 @@ workflow ShareSeq {
         File? share_atac_archr_filtered_tss_enrichment = atac.share_atac_archr_filtered_tss_enrichment
         File? share_atac_archr_filtered_fragment_size_plot = atac.share_atac_archr_filtered_fragment_size_plot
         File? share_atac_archr_umap_doublets = atac.share_atac_archr_umap_doublets
-        File? share_atac_archr_umap_cluster_plot = atac.share_atac_archr_umap_plot
+        File? share_atac_archr_umap_cluster_plot = atac.share_atac_archr_umap_cluster_plot
         File? share_atac_archr_arrow = atac.share_atac_archr_arrow
         File? share_atac_archr_obj = atac.share_atac_archr_obj
         File? share_atac_archr_plots_zip = atac.share_atac_archr_plots_zip
