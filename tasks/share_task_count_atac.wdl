@@ -38,7 +38,7 @@ task count_reads_atac {
     command <<<
         set -e
 
-        zcat ~{fragments_raw} | cut -f4 | sort --paralle=3 -S ~{mem_sort}G -u > observed_barcodes_combinations
+        zcat ~{fragments_raw} | cut -f4 | sort --parallel=3 -S ~{mem_sort}G -u > observed_barcodes_combinations
 
         # Count unfiltered reads
         zcat ~{fragments_raw} | awk -v OFS='\t' '{a[$4] += $5} END{for (i in a) print a[i], i}' | awk -v CUT=~{cutoff} -v OFS='\t' '{if($1 >= CUT ) print }'> ~{read_groups_freq}
