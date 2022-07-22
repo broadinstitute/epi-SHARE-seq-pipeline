@@ -59,5 +59,6 @@ ENV R_LIBS_USER=/usr/local/lib/R
 COPY --chown=$USER:$USER src/R/sum_reads.R /usr/local/bin
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER ${R_LIBS_USER} ${R_LIBS_USER}
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 USER ${USER}
