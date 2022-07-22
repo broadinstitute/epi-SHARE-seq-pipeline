@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a TEMP=$(mktemp /temp_monitoring.XXXXXXXX)
+declare -a TEMP=$(mktemp temp_monitoring.XXXXXXXX)
 
 if [[ -z "${BACKEND}" ]]; then
         backend=""
@@ -130,9 +130,9 @@ function main() {
         # sleep b/w getting usage and intially storing the cpu_previous usage values
         # this is b/c cpu usage values are time dependent
         # to calculate cpu usage, values must be determined from 2 diff time stamps
-       	if [ -z "$MONITOR_SCRIPT_SLEEP" ]; then
-			MONITOR_SCRIPT_SLEEP=30
-		fi
+        if [ -z "$MONITOR_SCRIPT_SLEEP" ]; then
+            MONITOR_SCRIPT_SLEEP=30
+        fi
         # get usage of disk, cpu and mem every MONITOR_SCRIPT_SLEEP sec
         echo
         echo --- Runtime Information ---
