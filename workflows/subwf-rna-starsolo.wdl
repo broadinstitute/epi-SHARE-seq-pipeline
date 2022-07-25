@@ -45,23 +45,23 @@ workflow wf_rna {
 
 
     output {
-        File share_task_starsolo_output_bam = output_bam
-        File share_task_starsolo_log_final_out = log_final_out
-        File share_task_starsolo_log_out = log_out
-        File share_task_starsolo_log_progress_out = progress_out
-        File share_task_starsolo_output_sj = output_sj
-        File share_task_starsolo_barcodes_stats = barcodes_stats
-        File share_task_starsolo_features_stats = features_stats
-        File share_task_starsolo_summary_csv = summary_csv
-        File share_task_starsolo_umi_per_cell = umi_per_cell
-        File share_task_starsolo_gene_h5_filtered = gene_h5_filtered
-        File share_task_starsolo_barcodes_filtered = barcodes_filtered
-        File share_task_starsolo_features_fitlered = features_fitlered
-        File share_task_starsolo_matrix_filtered = matrix_filtered
-        File share_task_starsolo_gene_h5_raw = gene_h5_raw
-        File share_task_starsolo_barcodes_raw = barcodes_raw
-        File share_task_starsolo_features_raw = features_raw
-        File share_task_starsolo_matrix_raw = matrix_raw
+        File share_task_starsolo_output_bam = align.output_bam
+        File share_task_starsolo_log_final_out = align.log_final_out
+        File share_task_starsolo_log_out = align.log_out
+        File share_task_starsolo_log_progress_out = align.progress_out
+        File share_task_starsolo_output_sj = align.output_sj
+        File share_task_starsolo_barcodes_stats = align.barcodes_stats
+        File share_task_starsolo_features_stats = align.features_stats
+        File share_task_starsolo_summary_csv = align.summary_csv
+        File share_task_starsolo_umi_per_cell = align.umi_per_cell
+        File share_task_starsolo_gene_h5_filtered = align.gene_h5_filtered
+        File share_task_starsolo_barcodes_filtered = align.barcodes_filtered
+        File share_task_starsolo_features_fitlered = align.features_fitlered
+        File share_task_starsolo_matrix_filtered = align.matrix_filtered
+        File share_task_starsolo_gene_h5_raw = align.gene_h5_raw
+        File share_task_starsolo_barcodes_raw = align.barcodes_raw
+        File share_task_starsolo_features_raw = align.features_raw
+        File share_task_starsolo_matrix_raw = align.matrix_raw
     }
 }
 
