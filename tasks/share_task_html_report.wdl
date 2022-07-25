@@ -149,6 +149,6 @@ task html_report {
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:10'
+        docker: 'nchernia/share_task_html_report:11'
     }
 }
