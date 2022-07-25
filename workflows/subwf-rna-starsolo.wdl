@@ -52,7 +52,7 @@ workflow wf_rna {
         File share_task_starsolo_output_sj = output_sj
         File share_task_starsolo_barcodes_stats = barcodes_stats
         File share_task_starsolo_features_stats = features_stats
-        File share_task_starsolo_summary_csv = summary.csv
+        File share_task_starsolo_summary_csv = summary_csv
         File share_task_starsolo_umi_per_cell = umi_per_cell
         File share_task_starsolo_gene_h5_filtered = gene_h5_filtered
         File share_task_starsolo_barcodes_filtered = barcodes_filtered
