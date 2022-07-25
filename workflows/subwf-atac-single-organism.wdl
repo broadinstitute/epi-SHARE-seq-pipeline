@@ -114,13 +114,19 @@ workflow wf_atac {
 
         File share_atac_archr_notebook_output = archr.notebook_output
         File share_atac_archr_notebook_log = archr.notebook_log
-        #File share_atac_archr_papermill_log = archr.papermill_log
+        
+        File? share_atac_archr_raw_tss_enrichment = archr.archr_raw_tss_by_uniq_frags_plot
+        File? share_atac_archr_filtered_tss_enrichment = archr.archr_filtered_tss_by_uniq_frags_plot
+        File? share_atac_archr_raw_fragment_size_plot = archr.archr_raw_frag_size_dist_plot
+        File? share_atac_archr_filtered_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
+        
+        File? share_atac_archr_umap_doublets = archr.archr_umap_doublets
+        File? share_atac_archr_umap_cluster_plot = archr.archr_umap_cluster_plot
+        File? share_atac_archr_umap_num_frags_plot = archr.archr_umap_num_frags_plot
+        File? share_atac_archr_umap_tss_score_plot = archr.archr_umap_tss_score_plot
+        File? share_atac_archr_umap_frip_plot = archr.archr_umap_frip_plot
+        
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
-        File? share_atac_archr_tss_enrichment_raw = archr.archr_raw_tss_by_uniq_frags_plot
-        File? share_atac_archr_tss_enrichment_filtered = archr.archr_filtered_tss_by_uniq_frags_plot
-        File? share_atac_archr_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
-        File? share_atac_archr_doublet_plot = archr.archr_umap_doublets
-        File? share_atac_archr_umap_plot = archr.archr_umap_cluster_plot
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
