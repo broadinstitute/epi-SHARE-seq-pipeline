@@ -84,7 +84,7 @@ out = data.frame(LIBRARY="Unknown",
          READ_PAIR_OPTICAL_DUPLICATES=0,
          PERCENT_DUPLICATION=duprate,
          ESTIMATED_LIBRARY_SIZE=alllibeize)
-fileout <- paste(basename(filt), 'dups.log', sep=".")
+fileout <- paste(basename(filt), 'dups.log.txt', sep=".")
 write.table(out, fileout, quote=F, row.names=F, col.names=T, sep="\t")
 
 # Plot lib size
@@ -94,10 +94,10 @@ png(file6, width = 8, height = 8, units = 'in', res = 300)
 par(mfrow = c(2,1))
 Size2 <- sort(Size2, decreasing = T)
 elbow <- elbow_finder(1:length(Size2), log10(Size2))
-plot(Size2, log="y", xlab=paste0("Barcode rank (", length(Size2)-elbow[1], " low quality cells)"), ylab = "Reads per barcode", main = "Estimated Lib Sizes per Cell", col="darkblue", pch=16)
+plot(Size2, log="y", xlab=paste0(" Barcode rank (", length(Size2)-elbow[1], " low quality cells)"), ylab = "Reads per barcode", main = paste0(libtype, " Reads per barcode"), col="darkblue", pch=16,ylim=c(0,10000))
 abline(v = elbow[1])
 axis(1, at=elbow[1], labels=elbow[1])
-plot(Size2[1:elbow[1]], log="y", xlab="Barcode rank", ylab = "Reads per barcode", main = "Estimated Lib Sizes per high quality cell", col="darkblue", pch=16)
+plot(Size2[1:elbow[1]], log="y", xlab="Barcode rank", ylab = "Reads per barcode", main = paste0(libtype, " Reads per (top ranked) barcode", col="darkblue", pch=16, ylim=c(0,10000))
 elbow <- elbow_finder(1:elbow[1], log10(Size2[1:elbow[1]]))
 abline(v = elbow[1])
 abline(h = 10^(elbow[2]))
