@@ -85,6 +85,8 @@ task html_report {
 
     command <<<
         echo  ~{share_rna_qc_library_plot} > image_list.txt
+        if [ -n "~{share_rna_seurat_raw_violin_plot}" ]; then echo  ~{share_rna_seurat_raw_violin_plot} >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_raw_qc_scatter_plot}" ]; then echo  ~{share_rna_seurat_raw_qc_scatter_plot} >> image_list.txt; fi;
         if [ -n "~{share_rna_seurat_violin_plot}" ]; then echo  ~{share_rna_seurat_violin_plot} >> image_list.txt; fi;
         if [ -n "~{share_rna_seurat_filtered_qc_scatter_plot}" ]; then echo  ~{share_rna_seurat_filtered_qc_scatter_plot} >> image_list.txt; fi;
         if [ -n "~{share_rna_seurat_variable_genes_plot}" ]; then echo  ~{share_rna_seurat_variable_genes_plot} >> image_list.txt; fi;
@@ -94,16 +96,24 @@ task html_report {
         if [ -n "~{share_rna_seurat_jackstraw_plot}" ]; then echo  ~{share_rna_seurat_jackstraw_plot} >> image_list.txt; fi;
         if [ -n "~{share_rna_seurat_elbow_plot}" ]; then echo  ~{share_rna_seurat_elbow_plot} >> image_list.txt; fi;
         if [ -n "~{share_rna_seurat_umap_cluster_plot}" ]; then echo  ~{share_rna_seurat_umap_cluster_plot} >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_umap_rna_count_plot}" ]; then echo  ~{share_rna_seurat_umap_rna_count_plot} >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_umap_gene_count_plot}" ]; then echo  ~{share_rna_seurat_umap_gene_count_plot} >> image_list.txt; fi;
+        if [ -n "~{share_rna_seurat_umap_mito_plot}" ]; then echo  ~{share_rna_seurat_umap_mito_plot} >> image_list.txt; fi;
+
         if [ -n "~{share_atac_qc_library_plot}" ]; then echo  ~{share_atac_qc_library_plot} >> image_list.txt; fi;
         if [ -n "~{share_atac_qc_hist_plot}" ]; then echo  ~{share_atac_qc_hist_plot} >> image_list.txt; fi;
         if [ -n "~{share_atac_qc_tss_enrichment}" ]; then echo  ~{share_atac_qc_tss_enrichment} >> image_list.txt; fi;
         if [ -n "~{share_atac_archr_gene_heatmap_plot}" ]; then echo  ~{share_atac_archr_gene_heatmap_plot} >> image_list.txt; fi;
         if [ -n "~{share_atac_archr_tss_enrichment_raw}" ]; then echo  ~{share_atac_archr_tss_enrichment_raw} >> image_list.txt; fi;
         if [ -n "~{share_atac_archr_tss_enrichment_filtered}" ]; then echo  ~{share_atac_archr_tss_enrichment_filtered} >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_raw_fragment_size_plot}" ]; then echo  ~{share_atac_archr_raw_fragment_size_plot} >> image_list.txt; fi;
         if [ -n "~{share_atac_archr_fragment_size_plot}" ]; then echo  ~{share_atac_archr_fragment_size_plot} >> image_list.txt; fi;
         if [ -n "~{share_atac_archr_doublet_plot}" ]; then echo  ~{share_atac_archr_doublet_plot} >> image_list.txt; fi;
         if [ -n "~{share_atac_archr_umap_plot}" ]; then echo  ~{share_atac_archr_umap_plot} >> image_list.txt; fi;
-        if [ -n "~{seurat_violin_plot}" ]; then echo  ~{seurat_violin_plot} >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_umap_doublets}" ]; then echo  ~{share_atac_archr_umap_doublets} >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_umap_num_frags_plot}" ]; then echo  ~{share_atac_archr_umap_num_frags_plot} >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_umap_tss_score_plot}" ]; then echo  ~{share_atac_archr_umap_tss_score_plot} >> image_list.txt; fi;
+        if [ -n "~{share_atac_archr_umap_frip_plot}" ]; then echo  ~{share_atac_archr_umap_frip_plot} >> image_list.txt; fi;
         if [ -n "~{j_plot}" ]; then echo  ~{j_plot} >> image_list.txt; fi;
 
         echo  ~{share_rna_alignment_log} > log_list.txt
@@ -114,7 +124,6 @@ task html_report {
         if [ -n "~{share_rna_umi_rm_dup_log}" ]; then echo  ~{share_rna_umi_rm_dup_log} >> log_list.txt; fi;
         if [ -n "~{share_rna_seurat_notebook_log}" ]; then echo  ~{share_rna_seurat_notebook_log} >> log_list.txt; fi;
         if [ -n "~{share_atac_alignment_log}" ]; then echo  ~{share_atac_alignment_log} >> log_list.txt; fi;
-        if [ -n "~{share_atac_archr_notebook_output}" ]; then echo  ~{share_atac_archr_notebook_output} >> log_list.txt; fi;
         if [ -n "~{share_atac_archr_notebook_log}" ]; then echo  ~{share_atac_archr_notebook_log} >> log_list.txt; fi;
         if [ -n "~{dorcs_notebook_log}" ]; then echo  ~{dorcs_notebook_log} >> log_list.txt; fi;
 
