@@ -51,7 +51,7 @@ workflow wf_rna {
         File share_task_starsolo_log_progress_out = progress_out
         File share_task_starsolo_output_sj = output_sj
         File share_task_starsolo_barcodes_stats = barcodes_stats
-        File share_task_starsolo_features.stats = features.stats
+        File share_task_starsolo_features_stats = features_stats
         File share_task_starsolo_summary.csv = summary.csv
         File share_task_starsolo_umi_per_cell = umi_per_cell
         File share_task_starsolo_gene_h5_filtered = gene_h5_filtered
@@ -119,7 +119,7 @@ task share_task_align_starsolo {
         File log_progress_out = "result/Log.progress.out"
         File output_sj = "result/SJ.out.tab"
         File barcodes_stats = "result/Solo.out/Barcodes.stats"
-        File features.stats = "result/Solo.out/Gene/Features.stats"
+        File features_stats = "result/Solo.out/Gene/Features.stats"
         File summary.csv = "result/Solo.out/Gene/Summary.csv"
         File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
         File gene_h5_filtered = "result/Solo.out/Gene/filtered/Gene.h5"
