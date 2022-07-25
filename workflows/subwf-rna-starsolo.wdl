@@ -45,8 +45,23 @@ workflow wf_rna {
 
 
     output {
-        Array[File] share_rna_starsolo_ouputs = align.total_outputs
-        Array[File]? share_rna_starsolo_logs = align.total_logs
+        File share_task_starsolo_output_bam = output_bam
+        File share_task_starsolo_log_final_out = log_final_out
+        File share_task_starsolo_log_out = log_out
+        File share_task_starsolo_log_progress_out = progress_out
+        File share_task_starsolo_output_sj = output_sj
+        File share_task_starsolo_barcodes_stats = barcodes_stats
+        File share_task_starsolo_features.stats = features.stats
+        File share_task_starsolo_summary.csv = summary.csv
+        File share_task_starsolo_umi_per_cell = umi_per_cell
+        File share_task_starsolo_gene_h5_filtered = gene_h5_filtered
+        File share_task_starsolo_barcodes_filtered = barcodes_filtered
+        File share_task_starsolo_features_fitlered = features_fitlered
+        File share_task_starsolo_matrix_filtered = matrix_filtered
+        File share_task_starsolo_gene_h5_raw = gene_h5_raw
+        File share_task_starsolo_barcodes_raw = barcodes_raw
+        File share_task_starsolo_features_raw = features_raw
+        File share_task_starsolo_matrix_raw = matrix_raw
     }
 }
 
@@ -89,7 +104,7 @@ task share_task_align_starsolo {
         --runThreadN ${cpus} \
         --chimOutType WithinBAM \
         --genomeDir ./ \
-        --outFileNamePrefix out/${default="share-seq" prefix}.rna.align.${genome_name}. \
+        --outFileNamePrefix result/ \
         --outFilterMultimapNmax 20 \
         --outFilterScoreMinOverLread 0.3 \
         --outFilterMatchNminOverLread 0.3 \
@@ -98,8 +113,23 @@ task share_task_align_starsolo {
         --readFilesCommand zcat
     }
     output{
-        Array[File] total_outputs = glob("out/*")
-        Array[File]? total_logs = glob("*log*")
+        File output_bam = "result/Aligned.sortedByCoord.out.bam"
+        File log_final_out = "result/Log.final.out"
+        File log_out = "result/Log.out"
+        File log_progress_out = "result/Log.progress.out"
+        File output_sj = "result/SJ.out.tab"
+        File barcodes_stats = "result/Solo.out/Barcodes.stats"
+        File features.stats = "result/Solo.out/Gene/Features.stats"
+        File summary.csv = "result/Solo.out/Gene/Summary.csv"
+        File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
+        File gene_h5_filtered = "result/Solo.out/Gene/filtered/Gene.h5"
+        File barcodes_filtered = "result/Solo.out/Gene/filtered/barcodes.tsv"
+        File features_fitlered = "result/Solo.out/Gene/filtered/features.tsv"
+        File matrix_filtered = "result/Solo.out/Gene/filtered/matrix.mtx"
+        File gene_h5_raw = "result/Solo.out/Gene/raw/Gene.h5"
+        File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv"
+        File features_raw = "result/Solo.out/Gene/raw/features.tsv"
+        File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx"
     }
     runtime{
         cpu : cpus
