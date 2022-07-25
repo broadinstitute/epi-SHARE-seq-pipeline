@@ -148,6 +148,8 @@ workflow ShareSeq {
             ## JPEG files to be encoded and appended to html
             # RNA plots
             share_rna_qc_library_plot = rna.share_rna_qc_library_plot,
+            share_rna_seurat_raw_violin_plot = rna.share_rna_seurat_raw_violin_plot,
+            share_rna_seurat_raw_qc_scatter_plot = rna.share_rna_seurat_raw_qc_scatter_plot,
             share_rna_seurat_violin_plot = rna.share_rna_seurat_filtered_violin_plot,
             share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot,
             share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot,
@@ -157,20 +159,27 @@ workflow ShareSeq {
             share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot,
             share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot,
             share_rna_seurat_umap_cluster_plot = rna.share_rna_seurat_umap_cluster_plot,
+            share_rna_seurat_umap_rna_count_plot = rna.share_rna_seurat_umap_rna_count_plot,
+            share_rna_seurat_umap_gene_count_plot = rna.share_rna_seurat_umap_gene_count_plot,
+            share_rna_seurat_umap_mito_plot = rna.share_rna_seurat_umap_mito_plot,
 
             # ATAC plots
             share_atac_qc_library_plot = atac.share_atac_qc_library_plot,
             share_atac_qc_hist_plot = atac.share_atac_qc_hist_plot,
             share_atac_qc_tss_enrichment = atac.share_atac_qc_tss_enrichment,
             share_atac_archr_gene_heatmap_plot = atac.share_atac_archr_gene_heatmap_plot,
-            share_atac_archr_tss_enrichment_raw = atac.share_atac_archr_tss_enrichment_raw,
-            share_atac_archr_tss_enrichment_filtered = atac.share_atac_archr_tss_enrichment_filtered,
-            share_atac_archr_fragment_size_plot = atac.share_atac_archr_fragment_size_plot,
-            share_atac_archr_doublet_plot = atac.share_atac_archr_doublet_plot,
-            share_atac_archr_umap_plot = atac.share_atac_archr_umap_plot,
+            share_atac_archr_tss_enrichment_raw = atac.share_atac_archr_raw_tss_enrichment,
+            share_atac_archr_tss_enrichment_filtered = atac.share_atac_archr_filtered_tss_enrichment,
+            share_atac_archr_raw_fragment_size_plot = atac.share_atac_archr_raw_fragment_size_plot,            
+            share_atac_archr_fragment_size_plot = atac.share_atac_archr_filtered_fragment_size_plot,
+            share_atac_archr_doublet_plot = atac.share_atac_archr_umap_doublets,
+            share_atac_archr_umap_plot = atac.share_atac_archr_umap_cluster_plot,
+            share_atac_archr_umap_doublets = atac.share_atac_archr_umap_doublets,
+            share_atac_archr_umap_num_frags_plot = atac.share_atac_archr_umap_num_frags_plot,
+            share_atac_archr_umap_tss_score_plot = atac.share_atac_archr_umap_tss_score_plot,
+            share_atac_archr_umap_frip_plot = atac.share_atac_archr_umap_frip_plot,
 
             # DORC plots
-            seurat_violin_plot = dorcs.seurat_violin_plot, 
             j_plot = dorcs.j_plot,
 
             ## Raw text logs to append to end of html
@@ -184,7 +193,6 @@ workflow ShareSeq {
             share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log,
             # ATAC logs
             share_atac_alignment_log = atac.share_atac_alignment_log,
-            share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output,
             share_atac_archr_notebook_log = atac.share_atac_archr_notebook_log,
             # DORCs logs
             dorcs_notebook_log = dorcs.dorcs_notebook_log

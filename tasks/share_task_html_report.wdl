@@ -32,6 +32,8 @@ task html_report {
         ## JPEG files to be encoded and appended to html
         # RNA plots
         File share_rna_qc_library_plot
+        File? share_rna_seurat_raw_violin_plot
+        File? share_rna_seurat_raw_qc_scatter_plot
         File? share_rna_seurat_violin_plot
         File? share_rna_seurat_filtered_qc_scatter_plot
         File? share_rna_seurat_variable_genes_plot 
@@ -41,6 +43,9 @@ task html_report {
         File? share_rna_seurat_jackstraw_plot 
         File? share_rna_seurat_elbow_plot 
         File? share_rna_seurat_umap_cluster_plot 
+        File? share_rna_seurat_umap_rna_count_plot
+        File? share_rna_seurat_umap_gene_count_plot
+        File? share_rna_seurat_umap_mito_plot
 
         # ATAC plots
         File share_atac_qc_library_plot
@@ -48,12 +53,17 @@ task html_report {
         File share_atac_qc_tss_enrichment
         File? share_atac_archr_gene_heatmap_plot 
         File? share_atac_archr_tss_enrichment_raw 
-        File? share_atac_archr_tss_enrichment_filtered 
+        File? share_atac_archr_tss_enrichment_filtered
+        File? share_atac_archr_raw_fragment_size_plot 
         File? share_atac_archr_fragment_size_plot 
         File? share_atac_archr_doublet_plot 
         File? share_atac_archr_umap_plot 
+        File? share_atac_archr_umap_doublets
+        File? share_atac_archr_umap_num_frags_plot
+        File? share_atac_archr_umap_tss_score_plot
+        File? share_atac_archr_umap_frip_plot
+    
         # DORC plots
-        File? seurat_violin_plot 
         File? j_plot 
 
         ## Raw text logs to append to end of html
@@ -67,7 +77,6 @@ task html_report {
         File share_rna_seurat_notebook_log
         # ATAC logs
         File share_atac_alignment_log
-        File share_atac_archr_notebook_output 
         File share_atac_archr_notebook_log 
         # DORCs logs
         File dorcs_notebook_log 
