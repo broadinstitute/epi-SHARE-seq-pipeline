@@ -34,7 +34,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
         data = open(image, 'rb').read() # read bytes from file
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
         data_base64 = data_base64.decode('utf-8')    # convert bytes to string
-        output_file.write('<img width="400" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
+        output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
 
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
