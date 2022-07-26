@@ -21,7 +21,7 @@ task qc_library {
         String genome_name
         String? prefix
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_library"
-        String docker_image = "nchernia/share_task_qc_library:4"        
+        String docker_image = "nchernia/share_task_qc_library:5"        
         String assay
     }
 
