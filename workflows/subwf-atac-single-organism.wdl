@@ -134,10 +134,10 @@ workflow wf_atac {
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
-        Int atac_total_reads = log_atac.atac_total_reads
-        Int atac_aligned_uniquely = log_atac.atac_aligned_uniquely
-        Int atac_unaligned = log_atac.atac_unaligned
-        Int atac_feature_reads = log_atac.atac_feature_reads
-        Int atac_duplicate_reads = log_atac.atac_duplicate_reads        
+        Int share_atac_total_reads = log_atac.atac_total_reads
+        Int share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely
+        Int share_atac_unaligned = log_atac.atac_unaligned
+        Int share_atac_feature_reads = log_atac.atac_feature_reads
+        Int share_atac_duplicate_reads = log_atac.atac_duplicate_reads        
     }
 }

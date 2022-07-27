@@ -133,17 +133,17 @@ workflow ShareSeq {
     }
     call html_report.html_report as html_report {
         input:
-            atac_total_reads = atac.atac_total_reads,
-            atac_aligned_uniquely = atac.atac_aligned_uniquely,
-            atac_unaligned = atac.atac_unaligned,
-            atac_feature_reads = atac.atac_feature_reads,
-            atac_duplicate_reads = atac.atac_duplicate_reads,
-            rna_total_reads = rna.rna_total_reads,
-            rna_aligned_uniquely = rna.rna_aligned_uniquely,
-	    rna_aligned_multimap = rna.rna_aligned_multimap,
-            rna_unaligned = rna.rna_unaligned,
-            rna_feature_reads = rna.rna_feature_reads,
-            rna_duplicate_reads = rna.rna_duplicate_reads,   
+            atac_total_reads = atac.share_atac_total_reads,
+            atac_aligned_uniquely = atac.share_atac_aligned_uniquely,
+            atac_unaligned = atac.share_atac_unaligned,
+            atac_feature_reads = atac.share_atac_feature_reads,
+            atac_duplicate_reads = atac.share_atac_duplicate_reads,
+            rna_total_reads = rna.share_rna_total_reads,
+            rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
+	    rna_aligned_multimap = rna.share_rna_aligned_multimap,
+            rna_unaligned = rna.share_rna_unaligned,
+            rna_feature_reads = rna.share_rna_feature_reads,
+            rna_duplicate_reads = rna.share_rna_duplicate_reads,   
 
             ## JPEG files to be encoded and appended to html
             # RNA plots

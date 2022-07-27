@@ -177,11 +177,11 @@ workflow wf_rna {
         File? share_rna_seurat_obj = seurat.seurat_obj
         File? share_rna_plots_zip = seurat.plots_zip
 
-        Int rna_total_reads = log_rna.rna_total_reads
-        Int rna_aligned_uniquely = log_rna.rna_aligned_uniquely
-	Int rna_aligned_multimap = log_rna.rna_aligned_multimap
-        Int rna_unaligned = log_rna.rna_unaligned
-        Int rna_feature_reads = log_rna.rna_feature_reads
-        Int rna_duplicate_reads = log_rna.rna_duplicate_reads
+        Int share_rna_total_reads = log_rna.rna_total_reads
+        Int share_rna_aligned_uniquely = log_rna.rna_aligned_uniquely
+        Int share_rna_aligned_multimap = log_rna.rna_aligned_multimap
+        Int share_rna_unaligned = log_rna.rna_unaligned
+        Int share_rna_feature_reads = log_rna.rna_feature_reads
+        Int share_rna_duplicate_reads = log_rna.rna_duplicate_reads
     }
 }

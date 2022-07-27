@@ -7,7 +7,7 @@
 #FROM ubuntu:focal
 FROM ubuntu@sha256:d1d454df0f579c6be4d8161d227462d69e163a8ff9d20a847533989cf0c94d90
 
-MAINTAINER Neva Durand
+LABEL maintainer="Neva Durand"
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -23,4 +23,4 @@ WORKDIR /software
 ENV PATH="/software:${PATH}"
 
 # Copy the external scripts inside
-COPY src/python /software
+COPY src/python/write_html.py /software
