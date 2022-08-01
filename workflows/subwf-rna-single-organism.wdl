@@ -43,7 +43,7 @@ workflow wf_rna {
         Boolean qc = false
         File genes_annotation_bed
         # Seurat
-        Int umap_dim = 10
+        Int umap_dim = 30
         Float umap_resolution = 0.5
     }
 
@@ -162,7 +162,7 @@ workflow wf_rna {
         File? share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
         File? share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
         File? share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
-        File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
+        #File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
         File? share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
         File? share_rna_seurat_umap_cluster_plot = seurat.seurat_umap_cluster_plot
         File? share_rna_seurat_umap_rna_count_plot = seurat.seurat_umap_rna_count_plot

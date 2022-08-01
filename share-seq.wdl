@@ -172,7 +172,7 @@ workflow ShareSeq {
         File? share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot
         File? share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot
         File? share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot
-        File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
+        #File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
         File? share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot
         File? share_rna_seurat_umap_cluster_plot = rna.share_rna_seurat_umap_cluster_plot
         File? share_rna_seurat_obj = rna.share_rna_seurat_obj

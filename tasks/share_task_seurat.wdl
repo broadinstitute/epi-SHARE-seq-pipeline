@@ -16,23 +16,23 @@ task seurat {
         Float percent_MT = 5.0
         Int min_cells = 3
 
-        String normalization_method = "LogNormalize"
-        Float normalization_scale_factor = 10000
+        #String normalization_method = "LogNormalize"
+        #Float normalization_scale_factor = 10000
 
-        String variable_features_method = "vst"
-        Int variable_features_num = 2000
+        #String variable_features_method = "vst"
+        #Int variable_features_num = 2000
 
         Int dim_loadings_dim = 2
 
-        Int jackstraw_replicates = 100
-        Int jackstraw_score_dim = 20
-        Int jackstraw_plot_dim = 15
+        #Int jackstraw_replicates = 100
+        #Int jackstraw_score_dim = 20
+        #Int jackstraw_plot_dim = 15
 
         Int heatmap_dim = 1
         Int heatmap_cells = 500
         String heatmap_balanced = "TRUE"
 
-        Int umap_dim = 10
+        Int umap_dim = 30
         Float umap_resolution = 0.5
 
         String prefix = "prefix"
@@ -76,14 +76,14 @@ task seurat {
         -p min_features ${min_features} \
         -p percent_MT ${percent_MT} \
         -p min_cells ${min_cells} \
-        -p normalization_method ${normalization_method} \
-        -p normalization_scale_factor ${normalization_scale_factor} \
-        -p variable_features_method ${variable_features_method} \
-        -p variable_features_num ${variable_features_num} \
+        #-p normalization_method ${normalization_method} \
+        #-p normalization_scale_factor ${normalization_scale_factor} \
+        #-p variable_features_method ${variable_features_method} \
+        #-p variable_features_num ${variable_features_num} \
         -p dim_loadings_dim ${dim_loadings_dim} \
-        -p jackstraw_replicates ${jackstraw_replicates} \
-        -p jackstraw_score_dim ${jackstraw_score_dim} \
-        -p jackstraw_plot_dim ${jackstraw_plot_dim} \
+        #-p jackstraw_replicates ${jackstraw_replicates} \
+        #-p jackstraw_score_dim ${jackstraw_score_dim} \
+        #-p jackstraw_plot_dim ${jackstraw_plot_dim} \
         -p heatmap_dim ${heatmap_dim} \
         -p heatmap_cells ${heatmap_cells} \
         -p heatmap_balanced ${heatmap_balanced} \
@@ -106,7 +106,7 @@ task seurat {
         File? seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
         File? seurat_PCA_plot = PCA_plot
         File? seurat_heatmap_plot = heatmap_plot
-        File? seurat_jackstraw_plot = jackstraw_plot
+        #File? seurat_jackstraw_plot = jackstraw_plot
         File? seurat_elbow_plot = elbow_plot
         File? seurat_umap_cluster_plot = umap_cluster_plot
         File? seurat_umap_rna_count_plot = umap_rna_count_plot
