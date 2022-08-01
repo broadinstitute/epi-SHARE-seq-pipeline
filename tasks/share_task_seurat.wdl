@@ -159,29 +159,29 @@ task seurat {
             example: 3
         }
 
-        normalization_method: {
-            description: 'Normalization method used in Seurat',
-            help: 'Seurat normalization method used in Seurat::NormalizeData()',
-            examples: ["LogNormalize","CLR","RC"]
-        }
+        #normalization_method: {
+           # description: 'Normalization method used in Seurat',
+          #  help: 'Seurat normalization method used in Seurat::NormalizeData()',
+         #   examples: ["LogNormalize","CLR","RC"]
+        #}
 
-        normalization_scale_factor: {
-            description: 'Scaling factor used in Seurat normalization',
-            help: 'Scaling factor parameter used in Seurat::NormalizeData()',
-            example: 10000
-        }
+        #normalization_scale_factor: {
+         #   description: 'Scaling factor used in Seurat normalization',
+          #  help: 'Scaling factor parameter used in Seurat::NormalizeData()',
+           # example: 10000
+        #}
 
-        variable_features_method: {
-            description: 'Method used to select variable features',
-            help: 'Parameter used in Seurat::FindVariableFeatures()',
-            example: "vst"
-        }
+        #variable_features_method: {
+           # description: 'Method used to select variable features',
+          #  help: 'Parameter used in Seurat::FindVariableFeatures()',
+         #   example: "vst"
+        #}
 
-        variable_features_num: {
-            description: 'Number of variable features used to find',
-            help: 'Parameter used in Seurat::FindVariableFeatures()',
-            example: 2000
-        }
+        #variable_features_num: {
+           # description: 'Number of variable features used to find',
+          #  help: 'Parameter used in Seurat::FindVariableFeatures()',
+         #   example: 2000
+        #}
 
         dim_loadings_dim: {
             description: 'Number of dimensions to display in PCA',
@@ -189,23 +189,23 @@ task seurat {
             example: 2
         }
 
-        jackstraw_replicates: {
-            description: 'Number of replicate samplings to perform',
-            help: 'Parameter used in Seurat::JackStraw()',
-            example: 100
-        }
+        #jackstraw_replicates: {
+           # description: 'Number of replicate samplings to perform',
+          #  help: 'Parameter used in Seurat::JackStraw()',
+         #   example: 100
+        #}
 
-        jackstraw_score_dim: {
-            description: 'Number of dimensions to examine in JackStraw Plot',
-            help: 'Parameter used in Seurat::ScoreJackStraw(), in default case, 1:20',
-            example: 20
-        }
+        #jackstraw_score_dim: {
+           # description: 'Number of dimensions to examine in JackStraw Plot',
+          #  help: 'Parameter used in Seurat::ScoreJackStraw(), in default case, 1:20',
+         #   example: 20
+        #}
 
-        jackstraw_plot_dim: {
-            description: 'Number of dimensions to plot in JackStraw Plot',
-            help: 'Parameter used in Seurat::JackStrawPlot(), in default case, 1:15',
-            example: 15
-        }
+       # jackstraw_plot_dim: {
+        #    description: 'Number of dimensions to plot in JackStraw Plot',
+         #   help: 'Parameter used in Seurat::JackStrawPlot(), in default case, 1:15',
+          #  example: 15
+        #}
 
         heatmap_dim: {
             description: 'Number of dimensions to use for heatmap',
