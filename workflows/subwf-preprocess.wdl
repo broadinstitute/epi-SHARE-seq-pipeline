@@ -223,7 +223,7 @@ task ExtractBarcodes {
 
         String laneUntarBcl = untarBcl + 'RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00"~{lane}"  && rm "~{basename(bcl)}"'
 	command <<<
-		~{untarBcl}
+		~{laneUntarBcl}
 
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
