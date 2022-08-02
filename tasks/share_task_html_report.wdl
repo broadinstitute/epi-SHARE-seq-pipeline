@@ -30,16 +30,19 @@ task html_report {
         Int rna_duplicate_reads 
 
         ## JPEG files to be encoded and appended to html
-        Array[File] image_files
+        Array[File?] image_files
 
         ## Raw text logs to append to end of html
-        Array[File] log_files
+        Array[File?] log_files
     }
-
+    # need to select from valid files since some are optional
+    Array[File] valid_image_files = select_all(image_files)
+    Array[File] valid_log_files = select_all(log_files)
 
     command <<<
-        echo "~{sep="\n" image_files}" > image_list.txt
-        echo "~{sep="\n" log_files} > log_list.txt
+
+        echo "~{sep="\n" valid_image_files}" > image_list.txt
+        echo "~{sep="\n" valid_log_files} > log_list.txt
 
         echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
