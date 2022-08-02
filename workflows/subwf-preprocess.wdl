@@ -30,8 +30,8 @@ workflow wf_preprocess {
 		'gsutil -m -o GSUtil:parallel_thread_count=1' +
 		' -o GSUtil:sliced_object_download_max_components=8' +
 		' cp "~{bcl}" . && ' +
-		'tar "~{tar_flags}" "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images' 
-	
+		'tar "~{tar_flags}" "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images && ' +
+		'rm "~{basename(bcl)}"'
 	String getSampleSheet =
 		'gsutil -m -o GSUtil:parallel_thread_count=1' +
 		' -o GSUtil:sliced_object_download_max_components=8' +
@@ -221,9 +221,8 @@ task ExtractBarcodes {
 	Float memory = ceil(0.8 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
 	Int javaMemory = ceil((memory - 0.5) * 1000)
 
-        String laneUntarBcl = untarBcl + 'RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00"~{lane}"  && rm "~{basename(bcl)}"'
 	command <<<
-		~{laneUntarBcl}
+		~{untarBcl}
 
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
