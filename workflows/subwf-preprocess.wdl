@@ -218,7 +218,7 @@ task ExtractBarcodes {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
-	Float memory = ceil(0.8 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
+	Float memory = ceil(0.2 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
 	Int javaMemory = ceil((memory - 0.5) * 1000)
 
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
@@ -296,7 +296,7 @@ task BasecallsToBams {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
-	Float memory = ceil(5.4 * bclSize + 147) * 0.25
+	Float memory = ceil(1.4 * bclSize + 147) * 0.25
 	Int javaMemory = ceil((memory - 0.5) * 1000)
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
