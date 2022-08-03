@@ -48,7 +48,7 @@ workflow wf_rna {
         File share_task_starsolo_output_bam = align.output_bam
         File share_task_starsolo_log_final_out = align.log_final_out
         File share_task_starsolo_log_out = align.log_out
-        File share_task_starsolo_log_progress_out = align.progress_out
+        File share_task_starsolo_log_progress_out = align.log_progress_out
         File share_task_starsolo_output_sj = align.output_sj
         File share_task_starsolo_barcodes_stats = align.barcodes_stats
         File share_task_starsolo_features_stats = align.features_stats
