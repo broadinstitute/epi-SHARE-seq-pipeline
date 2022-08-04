@@ -30,8 +30,8 @@ workflow wf_preprocess {
 		'gsutil -m -o GSUtil:parallel_thread_count=1' +
 		' -o GSUtil:sliced_object_download_max_components=8' +
 		' cp "~{bcl}" . && ' +
-		'tar "~{tar_flags}" "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images && ' +
-		'rm "~{basename(bcl)}"'
+		'tar "~{tar_flags}" "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images' 
+	
 	String getSampleSheet =
 		'gsutil -m -o GSUtil:parallel_thread_count=1' +
 		' -o GSUtil:sliced_object_download_max_components=8' +
@@ -218,11 +218,12 @@ task ExtractBarcodes {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
-	Float memory = ceil(0.8 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
+	Float memory = ceil(0.2 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
 	Int javaMemory = ceil((memory - 0.5) * 1000)
 
+        String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
-		~{untarBcl}
+		~{laneUntarBcl}
 
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
@@ -295,13 +296,13 @@ task BasecallsToBams {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
-	Float memory = ceil(5.4 * bclSize + 147) * 0.25
+	Float memory = ceil(1.4 * bclSize + 147) * 0.25
 	Int javaMemory = ceil((memory - 0.5) * 1000)
-
+        String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
 		set -e
 
-		~{untarBcl}
+		~{laneUntarBcl}
 		time gsutil -m cp -I . < "~{barcodes}"
 		
 		# append terminating line feed
