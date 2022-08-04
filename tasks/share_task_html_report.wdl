@@ -42,7 +42,7 @@ task html_report {
     command <<<
 
         echo "~{sep="\n" valid_image_files}" > image_list.txt
-        echo "~{sep="\n" valid_log_files} > log_list.txt
+        echo "~{sep="\n" valid_log_files}" > log_list.txt
 
         echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
