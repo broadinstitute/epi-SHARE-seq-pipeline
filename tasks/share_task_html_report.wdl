@@ -33,11 +33,12 @@ task html_report {
         Array[File?] image_files
 
         ## Raw text logs to append to end of html
-        Array[File?] log_files
+        Array[String?] log_files
+       
     }
     # need to select from valid files since some are optional
     Array[File] valid_image_files = select_all(image_files)
-    Array[File] valid_log_files = select_all(log_files)
+    Array[String] valid_log_files = select_all(log_files)
 
     command <<<
 
@@ -66,6 +67,6 @@ task html_report {
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:13'
+        docker: 'nchernia/share_task_html_report:14'
     }
 }
