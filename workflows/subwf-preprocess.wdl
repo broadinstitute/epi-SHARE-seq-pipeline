@@ -338,7 +338,7 @@ task BasecallsToBams {
 		done < "~{barcodesMap}"
 
 		# generate BAMs
-		java -jar /software/picard.jar -Xmx "${MEM_SIZE} $MEM_UNIT" IlluminaBasecallsToSam \
+		java -Xmx "${MEM_SIZE} $MEM_UNIT" -jar /software/picard.jar IlluminaBasecallsToSam \
 			BASECALLS_DIR="Data/Intensities/BaseCalls" \
 			BARCODES_DIR=. \
 			TMP_DIR=. \
