@@ -334,7 +334,7 @@ task BasecallsToBams {
 		done < "~{barcodesMap}"
 
 		# generate BAMs
-		java -Xmx~{javaMemory}m -jar /software/picard.jar IlluminaBasecallsToSam \
+		java -jar /software/picard.jar -mem "${MEM_SIZE} $MEM_UNIT" IlluminaBasecallsToSam \
 			BASECALLS_DIR="Data/Intensities/BaseCalls" \
 			BARCODES_DIR=. \
 			TMP_DIR=. \
@@ -354,6 +354,7 @@ task BasecallsToBams {
 		disks: "local-disk ~{diskSize} ~{diskType}"
 		memory: memory + 'G'
 		cpu: 14
+		maxRetries: 3
 	}
 
 	output {
