@@ -131,8 +131,8 @@ workflow wf_preprocess {
 	output {
 		Array[String] percentMismatch = QC.percentMismatch
 		Array[String] terraResponse = TerraUpsert.upsert_response
-                Array[File] monitoringLogsExtract = flatten(ExtractBarcodes.monitoringLog)
-                Array[File] monitoringLogsExtract = flatten(BasecallsToBam.monitoringLog)		
+                Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
+                Array[File] monitoringLogsExtract = BasecallsToBam.monitoringLog		
                 # Array[Fastq] fastqs = flatten(BamToFastq.out)
 		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
 	}
