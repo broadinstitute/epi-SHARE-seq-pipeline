@@ -37,8 +37,6 @@ workflow wf_preprocess {
 		' -o GSUtil:sliced_object_download_max_components=8' +
 		' cp "~{bcl}" . && ' +
 		'tar "~{tar_flags}" "~{basename(bcl)}" SampleSheet.csv'
-	Float bclSize = size(bcl, 'G')
-	Float memory = ceil(1.4 * bclSize + 147) / length(lanes)
 
 	call BarcodeMap {
 		input:
@@ -52,7 +50,12 @@ workflow wf_preprocess {
 				untarBcl = getSampleSheet
 		}
 	}
-	
+
+	Int lengthLanes = if (defined(lanes)) then length(lanes) else length(GetLanes.lanes)
+	# memory estimate for BasecallsToBam depends on estimated size of one lane of data
+	Float bclSize = size(bcl, 'G')
+        Float memory = ceil(1.4 * bclSize + 147) / lengthLanes
+		
 	scatter (lane in select_first([lanes, GetLanes.lanes])) {
 		call ExtractBarcodes {
 			input:
