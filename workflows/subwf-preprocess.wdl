@@ -306,7 +306,7 @@ task BasecallsToBams {
 
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
-
+	Int javaMemory = ceil((memory - 0.5) * 1000)
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
 		set -e
@@ -318,27 +318,26 @@ task BasecallsToBams {
 		sed -i -e '$a\' ~{barcodesMap}
 
 		# extract run parameters
-		get_param () {
-			param=$(xmlstarlet sel -t -v "/RunInfo/Run/$1" RunInfo.xml)
-			echo "${param}" | tee "$2"
-		}
-		RUN_ID=$(get_param "@Number" "~{runIdFile}")
-		FLOWCELL_ID=$(get_param "Flowcell" "~{flowcellIdFile}")
-		INSTRUMENT_ID=$(get_param "Instrument" "~{instrumentIdFile}")
+	get_param () {
+		param=$(xmlstarlet sel -t -v "/RunInfo/Run/$1" RunInfo.xml)
+		echo "${param}" | tee "$2"
+	}
+	RUN_ID=$(get_param "@Number" "~{runIdFile}")
+	FLOWCELL_ID=$(get_param "Flowcell" "~{flowcellIdFile}")
+	INSTRUMENT_ID=$(get_param "Instrument" "~{instrumentIdFile}")
 
-		# prepare library parameter files
-		LIBRARY_PARAMS="library_params.tsv"
-		printf "SAMPLE_ALIAS\tLIBRARY_NAME\tOUTPUT\tBARCODE_1\n" | tee "${LIBRARY_PARAMS}"
-		while read -r params; do	
-			name=$(echo "${params}" | cut -d$'\t' -f1)
-			barcodes=$(echo "${params}" | cut -d$'\t' -f2-)
-			printf "\n%s\t%s\t%s_L%d.bam\t%s" \
-				"${name}" "${name}" "${name// /_}" "~{lane}" "${barcodes}" \
-				| tee -a "${LIBRARY_PARAMS}"
-		done < "~{barcodesMap}"
-
-		# generate BAMs
-		java -Xmx "${MEM_SIZE} $MEM_UNIT" -jar /software/picard.jar IlluminaBasecallsToSam \
+	# prepare library parameter files
+	LIBRARY_PARAMS="library_params.tsv"
+	printf "SAMPLE_ALIAS\tLIBRARY_NAME\tOUTPUT\tBARCODE_1\n" | tee "${LIBRARY_PARAMS}"
+	while read -r params; do	
+		name=$(echo "${params}" | cut -d$'\t' -f1)
+		barcodes=$(echo "${params}" | cut -d$'\t' -f2-)
+		printf "\n%s\t%s\t%s_L%d.bam\t%s" \
+			"${name}" "${name}" "${name// /_}" "~{lane}" "${barcodes}" \
+			| tee -a "${LIBRARY_PARAMS}"
+	done < "~{barcodesMap}"
+	# generate BAMs
+	java -Xmx~{javaMemory}m -jar /software/picard.jar IlluminaBasecallsToSam \
 			BASECALLS_DIR="Data/Intensities/BaseCalls" \
 			BARCODES_DIR=. \
 			TMP_DIR=. \
