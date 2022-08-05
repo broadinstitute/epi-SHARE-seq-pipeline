@@ -20,7 +20,7 @@ workflow wf_preprocess {
 		File metaCsv
 		String terra_project # set to none or make optional
 		String workspace_name
-		String dockerImage = "nchernia/share_task_preprocess:11"
+		String dockerImage = "nchernia/share_task_preprocess:12"
 	}
 
 	String barcodeStructure = "14S10M28S10M28S9M8B"
@@ -131,7 +131,9 @@ workflow wf_preprocess {
 	output {
 		Array[String] percentMismatch = QC.percentMismatch
 		Array[String] terraResponse = TerraUpsert.upsert_response
-		# Array[Fastq] fastqs = flatten(BamToFastq.out)
+                Array[File] monitoringLogsExtract = flatten(ExtractBarcodes.monitoringLog)
+                Array[File] monitoringLogsExtract = flatten(BasecallsToBam.monitoringLog)		
+                # Array[Fastq] fastqs = flatten(BamToFastq.out)
 		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
 	}
 }
@@ -223,6 +225,8 @@ task ExtractBarcodes {
 
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
+                set -e
+                bash software/monitor_script.sh > monitoring.log &
 		~{laneUntarBcl}
 
 		# append terminating line feed
@@ -264,6 +268,7 @@ task ExtractBarcodes {
 		String readStructure = read_string("readStructure.txt")
 		File barcodeMetrics = barcodeMetricsFile
 		File barcodes = write_lines(glob("*_barcode.txt.gz"))
+                File monitoringLog = "monitoring.log"
 	}
 }
 
@@ -301,7 +306,7 @@ task BasecallsToBams {
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
 		set -e
-
+                bash software/monitor_script.sh > monitoring.log &
 		~{laneUntarBcl}
 		time gsutil -m cp -I . < "~{barcodes}"
 		
@@ -353,6 +358,7 @@ task BasecallsToBams {
 
 	output {
 		Array[File] bams = glob("*.bam")
+                File monitoringLog = "monitoring.log"
 	}
 }
 

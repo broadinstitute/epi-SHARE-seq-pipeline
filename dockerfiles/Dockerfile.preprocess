@@ -52,3 +52,4 @@ ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 
 # Copy the external scripts inside
 COPY src/python /software
+COPY src/bash/monitor_script.sh /software
