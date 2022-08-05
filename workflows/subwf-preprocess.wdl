@@ -225,8 +225,8 @@ task ExtractBarcodes {
 
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
-                set -e
-                bash software/monitor_script.sh > monitoring.log &
+		set -e
+		bash software/monitor_script.sh > monitoring.log &
 		~{laneUntarBcl}
 
 		# append terminating line feed
@@ -268,7 +268,7 @@ task ExtractBarcodes {
 		String readStructure = read_string("readStructure.txt")
 		File barcodeMetrics = barcodeMetricsFile
 		File barcodes = write_lines(glob("*_barcode.txt.gz"))
-                File monitoringLog = "monitoring.log"
+		File monitoringLog = "monitoring.log"
 	}
 }
 
@@ -305,8 +305,8 @@ task BasecallsToBams {
 	Int javaMemory = ceil((memory - 0.5) * 1000)
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
-                set -e
-                bash software/monitor_script.sh > monitoring.log &
+		set -e
+		bash software/monitor_script.sh > monitoring.log &
 		~{laneUntarBcl}
 		time gsutil -m cp -I . < "~{barcodes}"
 		
