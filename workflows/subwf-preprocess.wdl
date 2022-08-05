@@ -131,8 +131,8 @@ workflow wf_preprocess {
 	output {
 		Array[String] percentMismatch = QC.percentMismatch
 		Array[String] terraResponse = TerraUpsert.upsert_response
-                Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
-                Array[File] monitoringLogsBasecalls = BasecallsToBam.monitoringLog		
+                Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLogExtract
+                Array[File] monitoringLogsBasecalls = BasecallsToBam.monitoringLogBasecalls		
                 # Array[Fastq] fastqs = flatten(BamToFastq.out)
 		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
 	}
@@ -268,7 +268,7 @@ task ExtractBarcodes {
 		String readStructure = read_string("readStructure.txt")
 		File barcodeMetrics = barcodeMetricsFile
 		File barcodes = write_lines(glob("*_barcode.txt.gz"))
-		File monitoringLog = "monitoring.log"
+		File monitoringLogExtract = "monitoring.log"
 	}
 }
 
@@ -358,7 +358,7 @@ task BasecallsToBams {
 
 	output {
 		Array[File] bams = glob("*.bam")
-                File monitoringLog = "monitoring.log"
+                File monitoringLogBasecalls = "monitoring.log"
 	}
 }
 
