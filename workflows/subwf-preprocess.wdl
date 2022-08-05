@@ -37,7 +37,8 @@ workflow wf_preprocess {
 		' -o GSUtil:sliced_object_download_max_components=8' +
 		' cp "~{bcl}" . && ' +
 		'tar "~{tar_flags}" "~{basename(bcl)}" SampleSheet.csv'
-	
+	Float bclSize = size(bcl, 'G')
+	Float memory = ceil(1.4 * bclSize + 147) / length(lanes)
 
 	call BarcodeMap {
 		input:
@@ -72,7 +73,8 @@ workflow wf_preprocess {
 				readStructure = ExtractBarcodes.readStructure,
 				lane = lane,
 				sequencingCenter = sequencingCenter,
-				dockerImage = dockerImage
+				dockerImage = dockerImage,
+				memory = memory
 		}
 
 		scatter(bam in BasecallsToBams.bams){
@@ -283,6 +285,7 @@ task BasecallsToBams {
 		Int lane
 		String sequencingCenter
 		String dockerImage
+		Float memory
 	}
 
 	parameter_meta {
@@ -301,8 +304,6 @@ task BasecallsToBams {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
-	Float memory = ceil(1.4 * bclSize + 147) * 0.25
-	Int javaMemory = ceil((memory - 0.5) * 1000)
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
 		set -e
