@@ -502,7 +502,9 @@ task WriteTsvRow {
 	input {
 		Fastq fastq
 	}
-
+	Float fastqSize = size(fastq.read1[0], 'G')
+        Int diskSize = ceil(2.2 * length(fastq.read1)*fastqSize)
+        String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 	Array[String] read1 = fastq.read1
 	Array[String] read2 = fastq.read2
 
@@ -517,6 +519,7 @@ task WriteTsvRow {
 
 	runtime {
 		docker: "ubuntu:latest"
+		disks: "local-disk ~{diskSize} ~{diskType}"
 	}
 }
 
