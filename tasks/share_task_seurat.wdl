@@ -64,7 +64,11 @@ task seurat {
     String umap_mito_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_mito.${genome_name}.png'
 
     #Other filepaths
-    String seurat_rds = '${prefix}.rna.seurat.rds.${genome_name}.rds'
+    String raw_seurat_rds = '${prefix}.rna.seurat.raw_rds.${genome_name}.rds'
+    String filtered_seurat_rds = '${prefix}.rna.seurat.filtered_rds.${genome_name}.rds'
+    String raw_seurat_h5 = '${prefix}.rna.seurat.raw_matrix.${genome_name}.h5'
+    String filtered_seurat_h5 = '${prefix}.rna.seurat.filtered_matrix.${genome_name}.h5'
+    String barcode_metadata = '${prefix}.rna.seurat.barcode_metadata.${genome_name}.tsv'
     String plots_zip_dir = '${plots_filepath}.zip'
     #String papermill_log_filename = 'papermill.logfile.txt'
 
@@ -112,7 +116,11 @@ task seurat {
         File? seurat_umap_rna_count_plot = umap_rna_count_plot
         File? seurat_umap_gene_count_plot = umap_gene_count_plot
         File? seurat_umap_mito_plot = umap_mito_plot
-        File? seurat_obj = seurat_rds
+        File? seurat_barcode_metadata = barcode_metadata
+        File? seurat_raw_obj = raw_seurat_rds
+        File? seurat_filtered_obj = filtered_seurat_rds
+        File? seurat_raw_matrix = raw_seurat_h5
+        File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
     }
 
