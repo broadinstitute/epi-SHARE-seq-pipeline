@@ -43,7 +43,7 @@ task seurat {
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
         
         String docker_image = "swekhande/shareseq-prod:share-task-seurat"
-        Int mem_gb = 16
+        Int mem_gb = 128
     }
 
     #Plot filepaths
