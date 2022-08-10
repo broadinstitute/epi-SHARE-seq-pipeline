@@ -64,7 +64,11 @@ task seurat {
     String umap_mito_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_mito.${genome_name}.png'
 
     #Other filepaths
-    String seurat_rds = '${prefix}.rna.seurat.rds.${genome_name}.rds'
+    String raw_seurat_rds = '${prefix}.rna.seurat.raw_rds.${genome_name}.rds'
+    String filtered_seurat_rds = '${prefix}.rna.seurat.filtered_rds.${genome_name}.rds'
+    String raw_seurat_h5 = '${prefix}.rna.seurat.raw_matrix.${genome_name}.h5'
+    String filtered_seurat_h5 = '${prefix}.rna.seurat.filtered_matrix.${genome_name}.h5'
+    String barcode_metadata = '${prefix}.rna.seurat.barcode_metadata.${genome_name}.tsv'
     String plots_zip_dir = '${plots_filepath}.zip'
     #String papermill_log_filename = 'papermill.logfile.txt'
 
@@ -112,7 +116,11 @@ task seurat {
         File? seurat_umap_rna_count_plot = umap_rna_count_plot
         File? seurat_umap_gene_count_plot = umap_gene_count_plot
         File? seurat_umap_mito_plot = umap_mito_plot
-        File? seurat_obj = seurat_rds
+        File? seurat_barcode_metadata = barcode_metadata
+        File? seurat_raw_obj = raw_seurat_rds
+        File? seurat_filtered_obj = filtered_seurat_rds
+        File? seurat_raw_matrix = raw_seurat_h5
+        File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
     }
 
@@ -159,29 +167,29 @@ task seurat {
             example: 3
         }
 
-        normalization_method: {
-            description: 'Normalization method used in Seurat',
-            help: 'Seurat normalization method used in Seurat::NormalizeData()',
-            examples: ["LogNormalize","CLR","RC"]
-        }
+        #normalization_method: {
+           # description: 'Normalization method used in Seurat',
+          #  help: 'Seurat normalization method used in Seurat::NormalizeData()',
+         #   examples: ["LogNormalize","CLR","RC"]
+        #}
 
-        normalization_scale_factor: {
-            description: 'Scaling factor used in Seurat normalization',
-            help: 'Scaling factor parameter used in Seurat::NormalizeData()',
-            example: 10000
-        }
+        #normalization_scale_factor: {
+         #   description: 'Scaling factor used in Seurat normalization',
+          #  help: 'Scaling factor parameter used in Seurat::NormalizeData()',
+           # example: 10000
+        #}
 
-        variable_features_method: {
-            description: 'Method used to select variable features',
-            help: 'Parameter used in Seurat::FindVariableFeatures()',
-            example: "vst"
-        }
+        #variable_features_method: {
+           # description: 'Method used to select variable features',
+          #  help: 'Parameter used in Seurat::FindVariableFeatures()',
+         #   example: "vst"
+        #}
 
-        variable_features_num: {
-            description: 'Number of variable features used to find',
-            help: 'Parameter used in Seurat::FindVariableFeatures()',
-            example: 2000
-        }
+        #variable_features_num: {
+           # description: 'Number of variable features used to find',
+          #  help: 'Parameter used in Seurat::FindVariableFeatures()',
+         #   example: 2000
+        #}
 
         dim_loadings_dim: {
             description: 'Number of dimensions to display in PCA',
@@ -189,23 +197,23 @@ task seurat {
             example: 2
         }
 
-        jackstraw_replicates: {
-            description: 'Number of replicate samplings to perform',
-            help: 'Parameter used in Seurat::JackStraw()',
-            example: 100
-        }
+        #jackstraw_replicates: {
+           # description: 'Number of replicate samplings to perform',
+          #  help: 'Parameter used in Seurat::JackStraw()',
+         #   example: 100
+        #}
 
-        jackstraw_score_dim: {
-            description: 'Number of dimensions to examine in JackStraw Plot',
-            help: 'Parameter used in Seurat::ScoreJackStraw(), in default case, 1:20',
-            example: 20
-        }
+        #jackstraw_score_dim: {
+           # description: 'Number of dimensions to examine in JackStraw Plot',
+          #  help: 'Parameter used in Seurat::ScoreJackStraw(), in default case, 1:20',
+         #   example: 20
+        #}
 
-        jackstraw_plot_dim: {
-            description: 'Number of dimensions to plot in JackStraw Plot',
-            help: 'Parameter used in Seurat::JackStrawPlot(), in default case, 1:15',
-            example: 15
-        }
+       # jackstraw_plot_dim: {
+        #    description: 'Number of dimensions to plot in JackStraw Plot',
+         #   help: 'Parameter used in Seurat::JackStrawPlot(), in default case, 1:15',
+          #  example: 15
+        #}
 
         heatmap_dim: {
             description: 'Number of dimensions to use for heatmap',

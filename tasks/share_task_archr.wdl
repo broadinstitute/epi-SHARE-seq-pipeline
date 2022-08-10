@@ -70,7 +70,11 @@ task archr {
 
     #Other filepaths
     String arrow_file = '${prefix}.arrow'
-    String archr_rds = '${prefix}.atac.archr.rds.${genome}.rds'
+    String raw_archr_rds = '${prefix}.atac.archr.raw_project.${genome}.rds'
+    String filtered_archr_rds = '${prefix}.atac.archr.filtered_project.${genome}.rds'
+    String raw_archr_h5 = '${prefix}.atac.archr.raw_matrix.${genome}.h5'
+    String filtered_archr_h5 = '${prefix}.atac.archr.filtered_matrix.${genome}.h5'
+    String barcode_metadata = '${prefix}.atac.archr.barcode_metadata.${genome}.tsv'
     String plots_zip_dir = '${plots_filepath}.zip'
     #String papermill_log_filename = 'papermill.logfile.txt'
 
@@ -118,7 +122,11 @@ task archr {
 
         File? plots_zip = plots_zip_dir
         File? archr_arrow = arrow_file
-        File? archr_obj = archr_rds
+        File? archr_barcode_metadata = barcode_metadata
+        File? archr_raw_obj = raw_archr_rds
+        File? archr_filtered_obj = filtered_archr_rds
+        File? archr_raw_matrix = raw_archr_h5
+        File? archr_filtered_matrix = filtered_archr_h5
     }
 
     runtime {

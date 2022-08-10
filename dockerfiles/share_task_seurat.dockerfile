@@ -41,9 +41,11 @@ RUN apt-get update -qq && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
         
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','IRkernel','logr'))"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','IRkernel','logr','BiocManager'))"
 
 RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
+
+RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('rhdf5'), update=F, ask=F)"
 
 RUN python3 -m pip install jupyter papermill
 
