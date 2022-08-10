@@ -20,7 +20,7 @@ workflow wf_preprocess {
 		File metaCsv
 		String terra_project # set to none or make optional
 		String workspace_name
-		String dockerImage = "nchernia/share_task_preprocess:11"
+		String dockerImage = "nchernia/share_task_preprocess:13"
 	}
 
 	String barcodeStructure = "14S10M28S10M28S9M8B"
@@ -30,14 +30,13 @@ workflow wf_preprocess {
 		'gsutil -m -o GSUtil:parallel_thread_count=1' +
 		' -o GSUtil:sliced_object_download_max_components=8' +
 		' cp "~{bcl}" . && ' +
-		'tar "~{tar_flags}" "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images && ' +
-		'rm "~{basename(bcl)}"'
+		'tar "~{tar_flags}" "~{basename(bcl)}" --exclude Images --exclude Thumbnail_Images' 
+	
 	String getSampleSheet =
 		'gsutil -m -o GSUtil:parallel_thread_count=1' +
 		' -o GSUtil:sliced_object_download_max_components=8' +
 		' cp "~{bcl}" . && ' +
 		'tar "~{tar_flags}" "~{basename(bcl)}" SampleSheet.csv'
-	
 
 	call BarcodeMap {
 		input:
@@ -51,7 +50,12 @@ workflow wf_preprocess {
 				untarBcl = getSampleSheet
 		}
 	}
-	
+
+	Int lengthLanes = length(select_first([lanes, GetLanes.lanes]))
+	# memory estimate for BasecallsToBam depends on estimated size of one lane of data
+	Float bclSize = size(bcl, 'G')
+        Float memory = ceil(1.4 * bclSize + 147) / lengthLanes
+		
 	scatter (lane in select_first([lanes, GetLanes.lanes])) {
 		call ExtractBarcodes {
 			input:
@@ -72,7 +76,8 @@ workflow wf_preprocess {
 				readStructure = ExtractBarcodes.readStructure,
 				lane = lane,
 				sequencingCenter = sequencingCenter,
-				dockerImage = dockerImage
+				dockerImage = dockerImage,
+				memory = memory
 		}
 
 		scatter(bam in BasecallsToBams.bams){
@@ -131,7 +136,9 @@ workflow wf_preprocess {
 	output {
 		Array[String] percentMismatch = QC.percentMismatch
 		Array[String] terraResponse = TerraUpsert.upsert_response
-		# Array[Fastq] fastqs = flatten(BamToFastq.out)
+                Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
+                Array[File] monitoringLogsBasecalls = BasecallsToBams.monitoringLog		
+                # Array[Fastq] fastqs = flatten(BamToFastq.out)
 		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
 	}
 }
@@ -218,11 +225,14 @@ task ExtractBarcodes {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
-	Float memory = ceil(0.8 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
+	Float memory = ceil(0.2 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
 	Int javaMemory = ceil((memory - 0.5) * 1000)
 
+        String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
-		~{untarBcl}
+		set -e
+		bash /software/monitor_script.sh > monitoring.log &
+		~{laneUntarBcl}
 
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
@@ -263,6 +273,7 @@ task ExtractBarcodes {
 		String readStructure = read_string("readStructure.txt")
 		File barcodeMetrics = barcodeMetricsFile
 		File barcodes = write_lines(glob("*_barcode.txt.gz"))
+		File monitoringLog = "monitoring.log"
 	}
 }
 
@@ -277,6 +288,7 @@ task BasecallsToBams {
 		Int lane
 		String sequencingCenter
 		String dockerImage
+		Float memory
 	}
 
 	parameter_meta {
@@ -294,41 +306,38 @@ task BasecallsToBams {
 
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
-
-	Float memory = ceil(5.4 * bclSize + 147) * 0.25
 	Int javaMemory = ceil((memory - 0.5) * 1000)
-
+        String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	command <<<
 		set -e
-
-		~{untarBcl}
+		bash /software/monitor_script.sh > monitoring.log &
+		~{laneUntarBcl}
 		time gsutil -m cp -I . < "~{barcodes}"
 		
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
 
 		# extract run parameters
-		get_param () {
-			param=$(xmlstarlet sel -t -v "/RunInfo/Run/$1" RunInfo.xml)
-			echo "${param}" | tee "$2"
-		}
-		RUN_ID=$(get_param "@Number" "~{runIdFile}")
-		FLOWCELL_ID=$(get_param "Flowcell" "~{flowcellIdFile}")
-		INSTRUMENT_ID=$(get_param "Instrument" "~{instrumentIdFile}")
+	get_param () {
+		param=$(xmlstarlet sel -t -v "/RunInfo/Run/$1" RunInfo.xml)
+		echo "${param}" | tee "$2"
+	}
+	RUN_ID=$(get_param "@Number" "~{runIdFile}")
+	FLOWCELL_ID=$(get_param "Flowcell" "~{flowcellIdFile}")
+	INSTRUMENT_ID=$(get_param "Instrument" "~{instrumentIdFile}")
 
-		# prepare library parameter files
-		LIBRARY_PARAMS="library_params.tsv"
-		printf "SAMPLE_ALIAS\tLIBRARY_NAME\tOUTPUT\tBARCODE_1\n" | tee "${LIBRARY_PARAMS}"
-		while read -r params; do	
-			name=$(echo "${params}" | cut -d$'\t' -f1)
-			barcodes=$(echo "${params}" | cut -d$'\t' -f2-)
-			printf "\n%s\t%s\t%s_L%d.bam\t%s" \
-				"${name}" "${name}" "${name// /_}" "~{lane}" "${barcodes}" \
-				| tee -a "${LIBRARY_PARAMS}"
-		done < "~{barcodesMap}"
-
-		# generate BAMs
-		java -Xmx~{javaMemory}m -jar /software/picard.jar IlluminaBasecallsToSam \
+	# prepare library parameter files
+	LIBRARY_PARAMS="library_params.tsv"
+	printf "SAMPLE_ALIAS\tLIBRARY_NAME\tOUTPUT\tBARCODE_1\n" | tee "${LIBRARY_PARAMS}"
+	while read -r params; do	
+		name=$(echo "${params}" | cut -d$'\t' -f1)
+		barcodes=$(echo "${params}" | cut -d$'\t' -f2-)
+		printf "\n%s\t%s\t%s_L%d.bam\t%s" \
+			"${name}" "${name}" "${name// /_}" "~{lane}" "${barcodes}" \
+			| tee -a "${LIBRARY_PARAMS}"
+	done < "~{barcodesMap}"
+	# generate BAMs
+	java -Xmx~{javaMemory}m -jar /software/picard.jar IlluminaBasecallsToSam \
 			BASECALLS_DIR="Data/Intensities/BaseCalls" \
 			BARCODES_DIR=. \
 			TMP_DIR=. \
@@ -348,10 +357,12 @@ task BasecallsToBams {
 		disks: "local-disk ~{diskSize} ~{diskType}"
 		memory: memory + 'G'
 		cpu: 14
+		maxRetries: 3
 	}
 
 	output {
 		Array[File] bams = glob("*.bam")
+                File monitoringLog = "monitoring.log"
 	}
 }
 
@@ -491,7 +502,9 @@ task WriteTsvRow {
 	input {
 		Fastq fastq
 	}
-
+	Float fastqSize = size(fastq.read1[0], 'G')
+        Int diskSize = ceil(2.2 * length(fastq.read1)*fastqSize)
+        String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 	Array[String] read1 = fastq.read1
 	Array[String] read2 = fastq.read2
 
@@ -506,6 +519,7 @@ task WriteTsvRow {
 
 	runtime {
 		docker: "ubuntu:latest"
+		disks: "local-disk ~{diskSize} ~{diskType}"
 	}
 }
 
