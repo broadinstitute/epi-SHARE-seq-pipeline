@@ -57,7 +57,7 @@ workflow wf_rna {
         File share_task_starsolo_summary_csv = align.summary_csv
         File share_task_starsolo_umi_per_cell = align.umi_per_cell
         File share_task_starsolo_barcodes_filtered = align.barcodes_filtered
-        File share_task_starsolo_features_filtered = align.features_fitlered
+        File share_task_starsolo_features_filtered = align.features_filtered
         File share_task_starsolo_matrix_filtered = align.matrix_filtered
         File share_task_starsolo_barcodes_raw = align.barcodes_raw
         File share_task_starsolo_features_raw = align.features_raw
