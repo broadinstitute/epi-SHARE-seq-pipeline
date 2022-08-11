@@ -126,6 +126,9 @@ task share_task_align_starsolo {
         File features_filtered = "result/Solo.out/Gene/filtered/features.tsv"
         File matrix_filtered = "result/Solo.out/Gene/filtered/matrix.mtx"
         File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx"
+        File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv"
+        File features_raw = "result/Solo.out/Gene/raw/features.tsv"
+
     }
     runtime{
         cpu : cpus
