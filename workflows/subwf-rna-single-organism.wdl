@@ -1,6 +1,5 @@
 version 1.0
 
-
 # Import the tasks called by the pipeline
 import "../tasks/share_task_star.wdl" as share_task_align
 import "../tasks/share_task_update_rgid.wdl" as share_task_update_rgid
@@ -10,6 +9,7 @@ import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_qc_library.wdl" as share_task_qc_library
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
+import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
 
 workflow wf_rna {
     meta {
@@ -96,6 +96,12 @@ workflow wf_rna {
             prefix = prefix
     }
 
+    call share_task_log_rna.log_rna as log_rna {
+       input:
+           alignment_log = align.rna_alignment_log,
+           dups_log = group_umi.rna_umi_rm_dup_log
+    }
+
     call share_task_qc_library.qc_library as qc_library {
         input:
             raw_counts = group_umi.rna_umi_counts_unfiltered,
@@ -116,7 +122,8 @@ workflow wf_rna {
             rna_matrix = generate_h5.h5_matrix,
             genome_name = genome_name,
             umap_dim = umap_dim,
-            umap_resolution = umap_resolution
+            umap_resolution = umap_resolution,
+            prefix = prefix
     }
 
     output {
@@ -147,15 +154,16 @@ workflow wf_rna {
 
         File share_rna_qc_library_counts = qc_library.lib_size_counts
         File share_rna_qc_library_duplicates = qc_library.lib_size_log
-        Array[File] share_rna_qc_library_plots = qc_library.plots
+        File share_rna_qc_library_plot = qc_library.plot
 
         File share_rna_h5_matrix = generate_h5.h5_matrix
         Array[File] share_rna_umi_qc_plots = generate_h5.umi_qc_plots
 
         File share_rna_seurat_notebook_output = seurat.notebook_output
         File share_rna_seurat_notebook_log = seurat.notebook_log
-        #File share_rna_seurat_papermill_log = seurat.papermill_log
+        File? share_rna_seurat_raw_violin_plot = seurat.seurat_raw_violin_plot
         File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
+        File? share_rna_seurat_raw_qc_scatter_plot = seurat.seurat_raw_qc_scatter_plot
         File? share_rna_seurat_filtered_qc_scatter_plot = seurat.seurat_filtered_qc_scatter_plot
         File? share_rna_seurat_variable_genes_plot = seurat.seurat_variable_genes_plot
         File? share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
@@ -164,7 +172,17 @@ workflow wf_rna {
         File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
         File? share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
         File? share_rna_seurat_umap_cluster_plot = seurat.seurat_umap_cluster_plot
-        File? share_rna_seurat_obj = seurat.seurat_obj
+        File? share_rna_seurat_umap_rna_count_plot = seurat.seurat_umap_rna_count_plot
+        File? share_rna_seurat_umap_gene_count_plot = seurat.seurat_umap_gene_count_plot
+        File? share_rna_seurat_umap_mito_plot = seurat.seurat_umap_mito_plot
+        File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
+
+        Int share_rna_total_reads = log_rna.rna_total_reads
+        Int share_rna_aligned_uniquely = log_rna.rna_aligned_uniquely
+        Int share_rna_aligned_multimap = log_rna.rna_aligned_multimap
+        Int share_rna_unaligned = log_rna.rna_unaligned
+        Int share_rna_feature_reads = log_rna.rna_feature_reads
+        Int share_rna_duplicate_reads = log_rna.rna_duplicate_reads
     }
 }

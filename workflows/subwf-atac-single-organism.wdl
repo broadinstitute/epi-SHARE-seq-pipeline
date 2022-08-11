@@ -7,7 +7,7 @@ import "../tasks/share_task_count_atac.wdl" as share_task_count
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_qc_library.wdl" as share_task_qc_library
 import "../tasks/share_task_archr.wdl" as share_task_archr
-
+import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
 
 workflow wf_atac {
     meta {
@@ -79,7 +79,11 @@ workflow wf_atac {
             prefix = prefix,
             cpus = cpus
     }
-
+    call share_task_log_atac.log_atac as log_atac {
+       input:
+           alignment_log = align.atac_alignment_log,
+           dups_log = qc_library.lib_size_log
+    }
     call share_task_archr.archr as archr{
         input:
             atac_frag = count.atac_fragments_filtered,
@@ -105,7 +109,7 @@ workflow wf_atac {
 
         File share_atac_qc_library_counts = qc_library.lib_size_counts
         File share_atac_qc_library_duplicates = qc_library.lib_size_log
-        Array[File] share_atac_qc_library_plots = qc_library.plots
+        File share_atac_qc_library_plot = qc_library.plot
 
         File share_atac_qc_final = qc_atac.atac_final_stats
         File share_atac_qc_hist_plot = qc_atac.atac_final_hist_pdf
@@ -114,16 +118,26 @@ workflow wf_atac {
 
         File share_atac_archr_notebook_output = archr.notebook_output
         File share_atac_archr_notebook_log = archr.notebook_log
-        #File share_atac_archr_papermill_log = archr.papermill_log
-        File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
-        File? share_atac_archr_tss_enrichment_raw = archr.archr_raw_tss_by_uniq_frags_plot
-        File? share_atac_archr_tss_enrichment_filtered = archr.archr_filtered_tss_by_uniq_frags_plot
-        File? share_atac_archr_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
-        File? share_atac_archr_doublet_plot = archr.archr_umap_doublets
-        File? share_atac_archr_umap_plot = archr.archr_umap_cluster_plot
-        File? share_atac_archr_arrow = archr.archr_arrow
-        File? share_atac_archr_obj = archr.archr_obj
-        File? share_atac_archr_plots_zip = archr.plots_zip
         
+        File? share_atac_archr_raw_tss_enrichment = archr.archr_raw_tss_by_uniq_frags_plot
+        File? share_atac_archr_filtered_tss_enrichment = archr.archr_filtered_tss_by_uniq_frags_plot
+        File? share_atac_archr_raw_fragment_size_plot = archr.archr_raw_frag_size_dist_plot
+        File? share_atac_archr_filtered_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
+        
+        File? share_atac_archr_umap_doublets = archr.archr_umap_doublets
+        File? share_atac_archr_umap_cluster_plot = archr.archr_umap_cluster_plot
+        File? share_atac_archr_umap_num_frags_plot = archr.archr_umap_num_frags_plot
+        File? share_atac_archr_umap_tss_score_plot = archr.archr_umap_tss_score_plot
+        File? share_atac_archr_umap_frip_plot = archr.archr_umap_frip_plot
+        
+        File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
+        File? share_atac_archr_arrow = archr.archr_arrow
+        File? share_atac_archr_obj = archr.archr_raw_obj
+        File? share_atac_archr_plots_zip = archr.plots_zip
+        Int share_atac_total_reads = log_atac.atac_total_reads
+        Int share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely
+        Int share_atac_unaligned = log_atac.atac_unaligned
+        Int share_atac_feature_reads = log_atac.atac_feature_reads
+        Int share_atac_duplicate_reads = log_atac.atac_duplicate_reads        
     }
 }
