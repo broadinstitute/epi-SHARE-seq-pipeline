@@ -132,7 +132,7 @@ workflow wf_atac {
         
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
         File? share_atac_archr_arrow = archr.archr_arrow
-        File? share_atac_archr_obj = archr.archr_obj
+        File? share_atac_archr_obj = archr.archr_raw_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
         Int share_atac_total_reads = log_atac.atac_total_reads
         Int share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely

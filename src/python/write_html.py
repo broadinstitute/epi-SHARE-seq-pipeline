@@ -13,7 +13,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     """
     Write to the input file
     Image file list is list of png images
-    Log file list is list of text log files
+    Log file list is list of text log files to link to
 
     Separates images by br tag and encodes directly in utf-8
     Log files separated by their title and encoded via pre tag
@@ -41,14 +41,8 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
 
     # loop through log files in log list and write
     for log in logs:
-        output_file.write('<h3>')
-        output_file.write(os.path.basename(log))
-        output_file.write('</h3>')
-        output_file.write('<pre>')
-        with io.open(log, 'r', encoding='utf8') as log_file:
-           text = log_file.read()
-        output_file.write(text)
-        output_file.write('</pre>')
+        output_file.write(log)
+        output_file.write("<br>")
     output_file.write('</body></html>')
     output_file.close()
 

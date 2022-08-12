@@ -30,102 +30,20 @@ task html_report {
         Int rna_duplicate_reads 
 
         ## JPEG files to be encoded and appended to html
-        # RNA plots
-        File share_rna_qc_library_plot
-        File? share_rna_seurat_raw_violin_plot
-        File? share_rna_seurat_raw_qc_scatter_plot
-        File? share_rna_seurat_violin_plot
-        File? share_rna_seurat_filtered_qc_scatter_plot
-        File? share_rna_seurat_variable_genes_plot 
-        File? share_rna_seurat_PCA_dim_loadings_plot 
-        File? share_rna_seurat_PCA_plot 
-        File? share_rna_seurat_heatmap_plot 
-        File? share_rna_seurat_jackstraw_plot 
-        File? share_rna_seurat_elbow_plot 
-        File? share_rna_seurat_umap_cluster_plot 
-        File? share_rna_seurat_umap_rna_count_plot
-        File? share_rna_seurat_umap_gene_count_plot
-        File? share_rna_seurat_umap_mito_plot
-
-        # ATAC plots
-        File share_atac_qc_library_plot
-        File share_atac_qc_hist_plot
-        File share_atac_qc_tss_enrichment
-        File? share_atac_archr_gene_heatmap_plot 
-        File? share_atac_archr_tss_enrichment_raw 
-        File? share_atac_archr_tss_enrichment_filtered
-        File? share_atac_archr_raw_fragment_size_plot 
-        File? share_atac_archr_fragment_size_plot 
-        File? share_atac_archr_doublet_plot 
-        File? share_atac_archr_umap_plot 
-        File? share_atac_archr_umap_doublets
-        File? share_atac_archr_umap_num_frags_plot
-        File? share_atac_archr_umap_tss_score_plot
-        File? share_atac_archr_umap_frip_plot
-    
-        # DORC plots
-        File? j_plot 
+        Array[File?] image_files
 
         ## Raw text logs to append to end of html
-        # RNA logs
-        File share_rna_alignment_log
-        File share_rna_featurecount_exon_txt
-        File? share_rna_featurecount_intron_txt
-        File share_rna_qc_reads_distribution
-        File share_rna_qc_reads_distribution2
-        File share_rna_umi_rm_dup_log 
-        File share_rna_seurat_notebook_log
-        # ATAC logs
-        File share_atac_alignment_log
-        File share_atac_archr_notebook_log 
-        # DORCs logs
-        File dorcs_notebook_log 
+        Array[String?] log_files
+       
     }
-
+    # need to select from valid files since some are optional
+    Array[File] valid_image_files = select_all(image_files)
+    Array[String] valid_log_files = select_all(log_files)
 
     command <<<
-        echo  ~{share_rna_qc_library_plot} > image_list.txt
-        if [ -n "~{share_rna_seurat_raw_violin_plot}" ]; then echo  ~{share_rna_seurat_raw_violin_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_raw_qc_scatter_plot}" ]; then echo  ~{share_rna_seurat_raw_qc_scatter_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_violin_plot}" ]; then echo  ~{share_rna_seurat_violin_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_filtered_qc_scatter_plot}" ]; then echo  ~{share_rna_seurat_filtered_qc_scatter_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_variable_genes_plot}" ]; then echo  ~{share_rna_seurat_variable_genes_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_PCA_dim_loadings_plot}" ]; then echo  ~{share_rna_seurat_PCA_dim_loadings_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_PCA_plot}" ]; then echo  ~{share_rna_seurat_PCA_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_heatmap_plot}" ]; then echo  ~{share_rna_seurat_heatmap_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_jackstraw_plot}" ]; then echo  ~{share_rna_seurat_jackstraw_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_elbow_plot}" ]; then echo  ~{share_rna_seurat_elbow_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_umap_cluster_plot}" ]; then echo  ~{share_rna_seurat_umap_cluster_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_umap_rna_count_plot}" ]; then echo  ~{share_rna_seurat_umap_rna_count_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_umap_gene_count_plot}" ]; then echo  ~{share_rna_seurat_umap_gene_count_plot} >> image_list.txt; fi;
-        if [ -n "~{share_rna_seurat_umap_mito_plot}" ]; then echo  ~{share_rna_seurat_umap_mito_plot} >> image_list.txt; fi;
 
-        if [ -n "~{share_atac_qc_library_plot}" ]; then echo  ~{share_atac_qc_library_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_qc_hist_plot}" ]; then echo  ~{share_atac_qc_hist_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_qc_tss_enrichment}" ]; then echo  ~{share_atac_qc_tss_enrichment} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_gene_heatmap_plot}" ]; then echo  ~{share_atac_archr_gene_heatmap_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_tss_enrichment_raw}" ]; then echo  ~{share_atac_archr_tss_enrichment_raw} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_tss_enrichment_filtered}" ]; then echo  ~{share_atac_archr_tss_enrichment_filtered} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_raw_fragment_size_plot}" ]; then echo  ~{share_atac_archr_raw_fragment_size_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_fragment_size_plot}" ]; then echo  ~{share_atac_archr_fragment_size_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_doublet_plot}" ]; then echo  ~{share_atac_archr_doublet_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_umap_plot}" ]; then echo  ~{share_atac_archr_umap_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_umap_doublets}" ]; then echo  ~{share_atac_archr_umap_doublets} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_umap_num_frags_plot}" ]; then echo  ~{share_atac_archr_umap_num_frags_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_umap_tss_score_plot}" ]; then echo  ~{share_atac_archr_umap_tss_score_plot} >> image_list.txt; fi;
-        if [ -n "~{share_atac_archr_umap_frip_plot}" ]; then echo  ~{share_atac_archr_umap_frip_plot} >> image_list.txt; fi;
-        if [ -n "~{j_plot}" ]; then echo  ~{j_plot} >> image_list.txt; fi;
-
-        echo  ~{share_rna_alignment_log} > log_list.txt
-        if [ -n "~{share_rna_featurecount_exon_txt}" ]; then echo  ~{share_rna_featurecount_exon_txt} >> log_list.txt; fi;
-        if [ -n "~{share_rna_featurecount_intron_txt}" ]; then echo  ~{share_rna_featurecount_intron_txt} >> log_list.txt; fi;
-        if [ -n "~{share_rna_qc_reads_distribution}" ]; then echo  ~{share_rna_qc_reads_distribution} >> log_list.txt; fi;
-        if [ -n "~{share_rna_qc_reads_distribution2}" ]; then echo  ~{share_rna_qc_reads_distribution2} >> log_list.txt; fi;
-        if [ -n "~{share_rna_umi_rm_dup_log}" ]; then echo  ~{share_rna_umi_rm_dup_log} >> log_list.txt; fi;
-        if [ -n "~{share_rna_seurat_notebook_log}" ]; then echo  ~{share_rna_seurat_notebook_log} >> log_list.txt; fi;
-        if [ -n "~{share_atac_alignment_log}" ]; then echo  ~{share_atac_alignment_log} >> log_list.txt; fi;
-        if [ -n "~{share_atac_archr_notebook_log}" ]; then echo  ~{share_atac_archr_notebook_log} >> log_list.txt; fi;
-        if [ -n "~{dorcs_notebook_log}" ]; then echo  ~{dorcs_notebook_log} >> log_list.txt; fi;
+        echo "~{sep="\n" valid_image_files}" > image_list.txt
+        echo "~{sep="\n" valid_log_files}" > log_list.txt
 
         echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
@@ -149,6 +67,6 @@ task html_report {
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:13'
+        docker: 'nchernia/share_task_html_report:14'
     }
 }

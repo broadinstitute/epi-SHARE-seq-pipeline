@@ -52,7 +52,7 @@ workflow wf_rna {
         File? share_rna_seurat_umap_rna_count_plot = seurat.seurat_umap_rna_count_plot
         File? share_rna_seurat_umap_gene_count_plot = seurat.seurat_umap_gene_count_plot
         File? share_rna_seurat_umap_mito_plot = seurat.seurat_umap_mito_plot
-        File? share_rna_seurat_obj = seurat.seurat_obj
+        File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
     }
 }
