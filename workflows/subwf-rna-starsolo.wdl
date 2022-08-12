@@ -92,8 +92,7 @@ task share_task_align_starsolo {
         --soloUMIfiltering MultiGeneUMI_CR \
         --soloUMIdedup 1MM_CR \
         --soloCBwhitelist ${whitelist} \
-        --soloFeatures GeneFull \
-        --soloCellFilter None \
+        --soloFeatures Gene GeneFull \
         --clipAdapterType CellRanger4 \
         --outFilterScoreMin 30 \
         --outSAMtype BAM SortedByCoordinate \
@@ -109,7 +108,8 @@ task share_task_align_starsolo {
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
 
-        ls
+        ls $(pwd)/result/Solo.out/Gene
+        ls $(pwd)/result/Solo.out/GeneFull
         gzip $(pwd)/result/Solo.out/GeneFull/raw/*
     }
     output{
