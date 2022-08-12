@@ -110,7 +110,7 @@ task share_task_align_starsolo {
         --readFilesCommand zcat
 
         ls
-        gzip $(pwd)/result/Solo.out/Gene/raw/*
+        gzip $(pwd)/result/Solo.out/GeneFull/raw/*
     }
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
@@ -119,12 +119,12 @@ task share_task_align_starsolo {
         File log_progress_out = "result/Log.progress.out"
         File output_sj = "result/SJ.out.tab"
         File barcodes_stats = "result/Solo.out/Barcodes.stats"
-        File features_stats = "result/Solo.out/Gene/Features.stats"
-        File summary_csv = "result/Solo.out/Gene/Summary.csv"
-        File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
-        File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx.gz"
-        File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv.gz"
-        File features_raw = "result/Solo.out/Gene/raw/features.tsv.gz"
+        File features_stats = "result/Solo.out/GeneFull/Features.stats"
+        File summary_csv = "result/Solo.out/GeneFull/Summary.csv"
+        File umi_per_cell = "result/Solo.out/GeneFull/UMIperCellSorted.txt"
+        File matrix_raw = "result/Solo.out/GeneFull/raw/matrix.mtx.gz"
+        File barcodes_raw = "result/Solo.out/GeneFull/raw/barcodes.tsv.gz"
+        File features_raw = "result/Solo.out/GeneFull/raw/features.tsv.gz"
 
     }
     runtime{
