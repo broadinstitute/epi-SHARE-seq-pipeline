@@ -77,7 +77,7 @@ task share_task_align_starsolo {
     Int mem_gb = 64
     Int disk_gb = 250
     command{
-         set -e
+        set -e
         # Untar the genome
         tar xvzf ${genome_index_tar} --no-same-owner -C ./
 
@@ -93,6 +93,7 @@ task share_task_align_starsolo {
         --soloUMIdedup 1MM_CR \
         --soloCBwhitelist ${whitelist} \
         --soloFeatures GeneFull \
+        --soloCellFilter None \
         --clipAdapterType CellRanger4 \
         --outFilterScoreMin 30 \
         --outSAMtype BAM SortedByCoordinate \
@@ -108,7 +109,8 @@ task share_task_align_starsolo {
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
 
-        gzip result/Solo.out/Gene/raw/*
+        ls
+        gzip $(pwd)/result/Solo.out/Gene/raw/*
     }
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
