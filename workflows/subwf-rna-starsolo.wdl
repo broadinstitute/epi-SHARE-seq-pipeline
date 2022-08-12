@@ -56,9 +56,6 @@ workflow wf_rna {
         File share_task_starsolo_features_stats = align.features_stats
         File share_task_starsolo_summary_csv = align.summary_csv
         File share_task_starsolo_umi_per_cell = align.umi_per_cell
-        File share_task_starsolo_barcodes_filtered = align.barcodes_filtered
-        File share_task_starsolo_features_filtered = align.features_filtered
-        File share_task_starsolo_matrix_filtered = align.matrix_filtered
         File share_task_starsolo_barcodes_raw = align.barcodes_raw
         File share_task_starsolo_features_raw = align.features_raw
         File share_task_starsolo_matrix_raw = align.matrix_raw
@@ -79,7 +76,6 @@ task share_task_align_starsolo {
 
     Int mem_gb = 64
     Int disk_gb = 250
-#get rid of filtered? we don't use it; there's a flag not to produce
     command{
          set -e
         # Untar the genome
@@ -111,6 +107,8 @@ task share_task_align_starsolo {
         --limitOutSJcollapsed 2000000 \
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
+
+	gzip result/Solo.out/Gene/raw/*
     }
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
@@ -122,12 +120,9 @@ task share_task_align_starsolo {
         File features_stats = "result/Solo.out/Gene/Features.stats"
         File summary_csv = "result/Solo.out/Gene/Summary.csv"
         File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
-        File barcodes_filtered = "result/Solo.out/Gene/filtered/barcodes.tsv"
-        File features_filtered = "result/Solo.out/Gene/filtered/features.tsv"
-        File matrix_filtered = "result/Solo.out/Gene/filtered/matrix.mtx"
-        File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx"
-        File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv"
-        File features_raw = "result/Solo.out/Gene/raw/features.tsv"
+        File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx.gz"
+        File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv.gz"
+        File features_raw = "result/Solo.out/Gene/raw/features.tsv.gz"
 
     }
     runtime{
