@@ -108,7 +108,7 @@ task share_task_align_starsolo {
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
 
-	gzip result/Solo.out/Gene/raw/*
+        gzip result/Solo.out/Gene/raw/*
     }
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
