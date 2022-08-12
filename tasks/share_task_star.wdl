@@ -26,7 +26,7 @@ task share_rna_align {
     Int samtools_cpus = 6
     Int samtools_mem_gb = 8
     Int mem_gb = 64
-    Int disk_gb = 250
+    Int disk_gb = 850
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     # Define the output names
