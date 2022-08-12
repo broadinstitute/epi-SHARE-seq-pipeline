@@ -31,6 +31,7 @@ workflow wf_rna {
         Boolean remove_single_umi = true
         String mode = "fast"
         Int cutoff = 100
+        File whitelist
     }
 
     call share_task_align_starsolo as align {
@@ -40,6 +41,7 @@ workflow wf_rna {
             genome_name = genome_name,
             genome_index_tar = idx_tar,
             prefix = prefix,
+            whitelist = whitelist,
             cpus = cpus
     }
 
@@ -54,11 +56,6 @@ workflow wf_rna {
         File share_task_starsolo_features_stats = align.features_stats
         File share_task_starsolo_summary_csv = align.summary_csv
         File share_task_starsolo_umi_per_cell = align.umi_per_cell
-        File share_task_starsolo_gene_h5_filtered = align.gene_h5_filtered
-        File share_task_starsolo_barcodes_filtered = align.barcodes_filtered
-        File share_task_starsolo_features_fitlered = align.features_fitlered
-        File share_task_starsolo_matrix_filtered = align.matrix_filtered
-        File share_task_starsolo_gene_h5_raw = align.gene_h5_raw
         File share_task_starsolo_barcodes_raw = align.barcodes_raw
         File share_task_starsolo_features_raw = align.features_raw
         File share_task_starsolo_matrix_raw = align.matrix_raw
@@ -73,18 +70,16 @@ task share_task_align_starsolo {
         String genome_name
         String? prefix
         String docker_image = "cumulusprod/starsolo:2.7.10a"
+        File whitelist
         Int cpus = 16
     }
 
     Int mem_gb = 64
     Int disk_gb = 250
-
     command{
-         set -e
+        set -e
         # Untar the genome
         tar xvzf ${genome_index_tar} --no-same-owner -C ./
-
-        mkdir out
 
         $(which STAR) \
         --readFilesIn ${sep=',' fastq_R1} ${sep=',' fastq_R2}  \
@@ -93,10 +88,11 @@ task share_task_align_starsolo {
         --soloCBlen 24 \
         --soloUMIstart 25 \
         --soloUMIlen 10 \
-        --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
+        --soloCBmatchWLtype Exact \
         --soloUMIfiltering MultiGeneUMI_CR \
         --soloUMIdedup 1MM_CR \
-        --soloCBwhitelist None \
+        --soloCBwhitelist ${whitelist} \
+        --soloFeatures Gene GeneFull \
         --clipAdapterType CellRanger4 \
         --outFilterScoreMin 30 \
         --outSAMtype BAM SortedByCoordinate \
@@ -111,6 +107,10 @@ task share_task_align_starsolo {
         --limitOutSJcollapsed 2000000 \
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
+
+        ls $(pwd)/result/Solo.out/Gene
+        ls $(pwd)/result/Solo.out/GeneFull
+        gzip $(pwd)/result/Solo.out/GeneFull/raw/*
     }
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
@@ -119,17 +119,13 @@ task share_task_align_starsolo {
         File log_progress_out = "result/Log.progress.out"
         File output_sj = "result/SJ.out.tab"
         File barcodes_stats = "result/Solo.out/Barcodes.stats"
-        File features_stats = "result/Solo.out/Gene/Features.stats"
-        File summary_csv = "result/Solo.out/Gene/Summary.csv"
-        File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
-        File gene_h5_filtered = "result/Solo.out/Gene/filtered/Gene.h5"
-        File barcodes_filtered = "result/Solo.out/Gene/filtered/barcodes.tsv"
-        File features_fitlered = "result/Solo.out/Gene/filtered/features.tsv"
-        File matrix_filtered = "result/Solo.out/Gene/filtered/matrix.mtx"
-        File gene_h5_raw = "result/Solo.out/Gene/raw/Gene.h5"
-        File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv"
-        File features_raw = "result/Solo.out/Gene/raw/features.tsv"
-        File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx"
+        File features_stats = "result/Solo.out/GeneFull/Features.stats"
+        File summary_csv = "result/Solo.out/GeneFull/Summary.csv"
+        File umi_per_cell = "result/Solo.out/GeneFull/UMIperCellSorted.txt"
+        File matrix_raw = "result/Solo.out/GeneFull/raw/matrix.mtx.gz"
+        File barcodes_raw = "result/Solo.out/GeneFull/raw/barcodes.tsv.gz"
+        File features_raw = "result/Solo.out/GeneFull/raw/features.tsv.gz"
+
     }
     runtime{
         cpu : cpus
