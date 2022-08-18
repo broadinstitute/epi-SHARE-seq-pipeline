@@ -93,7 +93,6 @@ task share_task_align_starsolo {
         --soloUMIdedup 1MM_CR \
         --soloCBwhitelist ${whitelist} \
         --soloFeatures Gene GeneFull \
-        --outFilterScoreMin 30 \
         --outSAMtype BAM SortedByCoordinate \
         --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD \
         --runThreadN ${cpus} \
