@@ -75,7 +75,7 @@ task share_task_align_starsolo {
     }
 
     Int mem_gb = 64
-    Int disk_gb = 250
+    Int disk_gb = 300
     command{
         set -e
         # Untar the genome
