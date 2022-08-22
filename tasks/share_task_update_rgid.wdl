@@ -23,7 +23,7 @@ task share_rna_update_rgid {
 
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = 8
-    Int disk_gb = 50
+    Int disk_gb = 100
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     String updated_bam = "${default="share-seq" prefix}.rna.reheaded.alignment.${if multimapper then "multi" else "unique"}.${genome_name}.bam"
