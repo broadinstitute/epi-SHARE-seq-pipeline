@@ -83,8 +83,8 @@ task feature_counts_rna {
         File rna_featurecount_alignment = out_bam
         File rna_featurecount_alignment_index = out_bai
         #File rna_featurecount_log = "featureCount.log"
-        File rna_featurecount_exon_txt = glob("*intron.featurecount.txt")[0]
-        File? rna_featurecount_intron_txt = glob("*exon.featurecount.txt")[0]
+        File rna_featurecount_exon_txt = glob("*exon.featurecount.txt")[0]
+        File? rna_featurecount_intron_txt = glob("*intron.featurecount.txt")[0]
         #File rna_featurecount_summary = glob("*.featurecount.txt.summary")[0]
     }
 
