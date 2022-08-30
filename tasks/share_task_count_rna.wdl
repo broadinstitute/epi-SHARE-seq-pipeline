@@ -28,7 +28,7 @@ task feature_counts_rna {
 
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = 64
-    Int disk_gb = 200
+    Int disk_gb = 300
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
 
