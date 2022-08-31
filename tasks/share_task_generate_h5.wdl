@@ -24,7 +24,7 @@ task generate_h5 {
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 50
     Float input_file_size_gb = size(filtered_bed, "G")
-    Int mem_gb = 32
+    Int mem_gb = 64
 
 
     command {
