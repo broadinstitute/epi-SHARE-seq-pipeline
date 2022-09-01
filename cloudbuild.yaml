@@ -6,143 +6,143 @@ substitutions:
 
 steps:
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-archr'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest',
           '-f',
           'dockerfiles/share_task_archr.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-archr'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-bam2bed'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bam2bed:latest',
           '-f',
           'dockerfiles/share_task_bam2bed.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-bam2bed'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-bowtie2'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:latest',
           '-f',
           'dockerfiles/share_task_bowtie2.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-bowtie2'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-count-atac'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_atac:latest',
           '-f',
           'dockerfiles/share_task_count_atac.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-count-atac'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-count-rna'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_rna:latest',
           '-f',
           'dockerfiles/share_task_count_rna.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-count-rna'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-generate-h5'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:latest',
           '-f',
           'dockerfiles/share_task_generate_h5.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-generate-h5'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-group-umi'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_group_umi:latest',
           '-f',
           'dockerfiles/share_task_group_umi.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-group-umi'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-qc-atac'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_atac:latest',
           '-f',
           'dockerfiles/share_task_qc_atac.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-qc-atac'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-qc-library'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_library:latest',
           '-f',
           'dockerfiles/share_task_qc_library.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-qc-library'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-qc-rna'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_rna:latest',
           '-f',
           'dockerfiles/share_task_qc_rna.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-qc-rna'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-seurat'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_seurat:latest',
           '-f',
           'dockerfiles/share_task_seurat.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-seurat'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-star'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:latest',
           '-f',
           'dockerfiles/share_task_star.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-star'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-update-rgid'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest',
           '-f',
           'dockerfiles/share_task_update_rgid.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-update-rgid'
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-find-dorcs'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest',
           '-f',
           'dockerfiles/dorcs_task_find_dorcs.dockerfile',
           '.' ]
   waitFor: ['-']
-  id: 'task-find-dorcs'
   timeout: 28800s
 
 # Docker Push
