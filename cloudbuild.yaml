@@ -11,6 +11,7 @@ steps:
           '-f',
           'dockerfiles/share_task_archr.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -19,6 +20,7 @@ steps:
           '-f',
           'dockerfiles/share_task_bam2bed.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -27,6 +29,7 @@ steps:
           '-f',
           'dockerfiles/share_task_bowtie2.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -35,6 +38,7 @@ steps:
           '-f',
           'dockerfiles/share_task_count_atac.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -43,6 +47,7 @@ steps:
           '-f',
           'dockerfiles/share_task_count_rna.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -51,6 +56,7 @@ steps:
           '-f',
           'dockerfiles/share_task_generate_h5.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -59,6 +65,7 @@ steps:
           '-f',
           'dockerfiles/share_task_group_umi.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -67,6 +74,7 @@ steps:
           '-f',
           'dockerfiles/share_task_qc_atac.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -75,6 +83,7 @@ steps:
           '-f',
           'dockerfiles/share_task_qc_library.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -83,6 +92,7 @@ steps:
           '-f',
           'dockerfiles/share_task_qc_rna.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -91,6 +101,7 @@ steps:
           '-f',
           'dockerfiles/share_task_seurat.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -99,13 +110,16 @@ steps:
           '-f',
           'dockerfiles/share_task_star.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
+
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest',
           '-f',
           'dockerfiles/share_task_update_rgid.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -114,6 +128,7 @@ steps:
           '-f',
           'dockerfiles/dorcs_task_find_dorcs.dockerfile',
           '.' ]
+  waitFor: ['-']
   timeout: 28800s
 
 # Docker Push
