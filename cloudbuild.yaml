@@ -150,7 +150,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest']
-  waitFor: ['task-arch']
+  waitFor: ['task-archr']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
