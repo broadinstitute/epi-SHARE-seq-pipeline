@@ -42,6 +42,13 @@ RUN apt-get update -qq && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
+ENV USER=shareseq
+WORKDIR /home/$USER
+
+RUN groupadd -r $USER &&\
+    useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
+    chown $USER:$USER /home/$USER
+
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('devtools','hdf5r','IRkernel','BiocManager','Cairo','magick'))"
 
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('GenomeInfoDbData','GenomicRanges','Rsamtools'), update=F, ask=F)"
