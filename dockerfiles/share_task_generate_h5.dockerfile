@@ -50,5 +50,7 @@ ENV R_LIBS_USER=/usr/local/lib/R
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/R/UMI_gene_perCell_plot_v2.R /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER ${R_LIBS_USER} ${R_LIBS_USER}
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 USER ${USER}

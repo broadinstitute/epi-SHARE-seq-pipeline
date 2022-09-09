@@ -72,5 +72,7 @@ COPY --chown=$USER:$USER src/python/rm_dup_barcode_UMI_v3.py src/R/sum_reads.R /
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER ${R_LIBS_USER} ${R_LIBS_USER}
 COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/libncurses.so.6 /lib/x86_64-linux-gnu/
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 USER ${USER}

@@ -69,6 +69,8 @@ COPY --from=builder --chown=$USER:$USER /software/bowtie2* /software/
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/perl/5.32 /usr/lib/x86_64-linux-gnu/perl/5.32/
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 
 

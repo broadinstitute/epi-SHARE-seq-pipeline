@@ -18,7 +18,7 @@ ENV R_LIBS_USER=/usr/local/lib/R
 ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
-	apt-get install -y -qq --no-install-recommends\
+    apt-get install -y -qq --no-install-recommends\
     gtk-doc-tools \
     libcairo2-dev \
     libcurl4-openssl-dev \
@@ -40,12 +40,15 @@ RUN apt-get update -qq && \
     python3 \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
-        
+
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','IRkernel','logr','BiocManager'))"
 
 RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
 
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('rhdf5'), update=F, ask=F)"
+
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 RUN python3 -m pip install jupyter papermill
 
