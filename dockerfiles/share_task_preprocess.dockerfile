@@ -78,5 +78,7 @@ COPY --from=builder --chown=$USER:$USER /usr/local/python/ /usr/local/python
 COPY --chown=$USER:$USER src/python/bam_fastq.py /software
 COPY --chown=$USER:$USER src/python/write_terra_tables.py /software
 COPY --chown=$USER:$USER src/python/flexible_import_entities_standard.py /software
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 USER ${USER}

@@ -9,6 +9,7 @@ workflows:
              - dev
              - neva
              - minimal-inputs
+             - dynamic-memory
              - knudson
          tags:
              - /.*/

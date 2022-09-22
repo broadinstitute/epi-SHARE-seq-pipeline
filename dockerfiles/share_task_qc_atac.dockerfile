@@ -72,5 +72,7 @@ COPY --from=builder --chown=$USER:$USER /usr/local/python/ /usr/local/python
 #COPY --from=builder --chown=$USER:$USER /usr/lib/x86_64-linux-gnu/libnghttp2.so.14 /usr/lib/x86_64-linux-gnu/libcurl.so.4 /usr/lib/x86_64-linux-gnu/librtmp.so.1 /usr/lib/x86_64-linux-gnu/libpsl.so.5 /usr/lib/x86_64-linux-gnu/libldap_r-2.4.so.2 /usr/lib/x86_64-linux-gnu/liblber-2.4.so.2 /usr/lib/x86_64-linux-gnu/libsasl2.so.2 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder --chown=$USER:$USER /usr/lib/x86_64-linux-gnu/ /usr/lib/
 COPY --chown=$USER:$USER src/python/make-tss-pileup-jbd.py /usr/local/bin
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 USER ${USER}

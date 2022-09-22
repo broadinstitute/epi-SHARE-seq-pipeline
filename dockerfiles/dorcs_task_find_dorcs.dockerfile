@@ -11,7 +11,7 @@ ENV R_LIBS_USER=/usr/local/lib/R
 ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
-	apt-get install -y -qq --no-install-recommends\
+    apt-get install -y -qq --no-install-recommends\
     gtk-doc-tools \
     libssl-dev \
     libcairo2-dev \
@@ -26,14 +26,14 @@ RUN apt-get update -qq && \
     libpng-dev \
     libssl-dev \
     libtiff5-dev \
-    libxml2-dev \ 
+    libxml2-dev \
     libxt-dev \
     libgeos-dev \
     meson \
     pkg-config \
     python3 \
-    python3-pip 
-        
+    python3-pip
+
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('dplyr','patchwork','ggplot2','ggrepel','reshape2','circlize','networkD3','GGally','igraph','network','foreach','iterators','hdf5r','ggrastr','BiocManager','remotes','pbmcapply','doSNOW','Rmpfr', 'glue','magrittr','pillar','RcppArmadillo','reticulate','rlang','yaml','rpart','IRkernel','data.table', 'tidyft','qlcMatrix','logr'))"
 
 RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
@@ -47,7 +47,7 @@ WORKDIR /home/$USER
 RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
-        
+
 RUN python3 -m pip install jupyter papermill
 
 RUN chown $USER:$USER /usr/local/lib/R
@@ -55,6 +55,9 @@ RUN chown $USER:$USER /usr/local/lib/R
 COPY --chown=$USER:$USER src/jupyter_nb/dorcs_jplot_notebook.ipynb /usr/local/bin/
 
 COPY --chown=$USER:$USER src/jupyter_nb/dorcs_notebook_rds.ipynb /usr/local/bin/
+
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 RUN mkdir -p /home/R/
 

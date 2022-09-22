@@ -65,6 +65,8 @@ ENV PATH="/software:${PATH}"
 #COPY --from=builder --chown=$USER:$USER /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /usr/lib/x86_64-linux-gnu/libgomp.so.1 /lib/x86_64-linux-gnu/libncurses.so.6 /lib/x86_64-linux-gnu/
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 
 USER $USER
