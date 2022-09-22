@@ -29,7 +29,7 @@ task qc_atac {
     }
 
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 50
+    Int disk_gb = 100
     Float input_file_size_gb = size(raw_bam, "G")
     Int mem_gb = 16
 

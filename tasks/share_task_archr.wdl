@@ -46,7 +46,7 @@ task archr {
         String docker_image = "swekhande/shareseq-prod:share-task-archr"
         String log_filename = "log/${prefix}.atac.archr.logfile.${genome}.txt"
 
-        Int? mem_gb = 128
+        Int? mem_gb = 32
         Int? disk_gb = 50
     }
 

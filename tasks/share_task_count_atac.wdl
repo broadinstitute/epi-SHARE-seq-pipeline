@@ -25,7 +25,7 @@ task count_reads_atac {
 
     Float input_file_size_gb = size(fragments_raw, "G")
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 100
+    Int disk_gb = 300
     Int mem_gb = memory_gb
     Int mem_sort = 8
 
