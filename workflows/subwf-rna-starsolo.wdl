@@ -107,7 +107,6 @@ task share_task_align_starsolo {
         --readFilesCommand zcat
 
         ls $(pwd)/result/Solo.out/Gene
-        ls $(pwd)/result/Solo.out/GeneFull
         gzip $(pwd)/result/Solo.out/Gene/raw/*
     }
     output{
