@@ -11,6 +11,7 @@ workflows:
              - minimal-inputs
              - dynamic-memory
              - knudson
+             - knudson2
          tags:
              - /.*/
 

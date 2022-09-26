@@ -378,7 +378,7 @@ task BamLookUp {
 		bucket="gs://broad-buenrostro-bcl-outputs/"
 		file=~{bam}
 		lib="${file%_*} "
-		grep $lib ~{metaCsv} | cut -d, -f1 | sed 's/ /-/' > pkrId.txt
+		grep -m 1 $lib ~{metaCsv} | cut -d, -f1 | sed 's/ /-/' > pkrId.txt
 		echo ${file%_*} > library.txt
 		barcode1=$(grep $lib ~{metaCsv} | cut -d, -f3)
 		echo ${bucket}${barcode1}.txt > R1barcodeSet.txt
