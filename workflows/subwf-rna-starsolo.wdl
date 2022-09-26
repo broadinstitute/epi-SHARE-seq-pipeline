@@ -121,7 +121,7 @@ task share_task_align_starsolo {
         File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
         File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx.gz"
         File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv.gz"
-        File features_raw = "result/Solo.out/GeneFull/raw/features.tsv.gz"
+        File features_raw = "result/Solo.out/Gene/raw/features.tsv.gz"
 
     }
     runtime{
