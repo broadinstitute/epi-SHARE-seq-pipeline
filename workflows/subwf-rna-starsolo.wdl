@@ -93,7 +93,7 @@ task share_task_align_starsolo {
         --soloUMIdedup 1MM_CR \
         --soloCBwhitelist ${whitelist} \
         --soloFeatures Gene  \
-        --outSAMtype BAM SortedByCoordinate \
+        --outSAMtype BAM Unsorted \
         --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD \
         --runThreadN ${cpus} \
         --chimOutType WithinBAM \
@@ -106,7 +106,6 @@ task share_task_align_starsolo {
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
 
-        ls $(pwd)/result/Solo.out/Gene
         gzip $(pwd)/result/Solo.out/Gene/raw/*
     }
     output{
