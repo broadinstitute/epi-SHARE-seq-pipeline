@@ -382,9 +382,9 @@ task BamLookUp {
 		echo ${file%_*} > library.txt
 		barcode1=$(grep $lib ~{metaCsv} | cut -d, -f3)
 		echo ${bucket}${barcode1}.txt > R1barcodeSet.txt
-		grep $lib ~{metaCsv} | cut -d, -f4 > sampleType.txt
-		grep $lib ~{metaCsv} | cut -d, -f5 > genome.txt
-		grep $lib ~{metaCsv} | cut -d, -f6 > notes.txt
+		grep -m 1 $lib ~{metaCsv} | cut -d, -f4 > sampleType.txt
+		grep -m 1 $lib ~{metaCsv} | cut -d, -f5 > genome.txt
+		grep -m 1 $lib ~{metaCsv} | cut -d, -f6 > notes.txt
 	>>>
 
 	output {
