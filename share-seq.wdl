@@ -117,6 +117,7 @@ workflow ShareSeq {
             n_cores = cpus_dorcs,
             save_plots_to_dir = save_plots_to_dir,
             output_filename = dorcs_output_filename,
+            prefix = prefix,
 
             minFeature_RNA = minFeature_RNA,
             maxFeature_RNA = maxFeature_RNA,

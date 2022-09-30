@@ -17,5 +17,7 @@ RUN groupadd -r $USER &&\
 ENV R_LIBS_USER=/usr/local/lib/R
 
 COPY --chown=$USER:$USER src/R/lib_size_sc_V5_single_species.R /usr/local/bin
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 USER ${USER}

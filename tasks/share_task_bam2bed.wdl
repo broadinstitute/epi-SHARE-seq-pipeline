@@ -31,7 +31,7 @@ task share_atac_bam2bed {
     Int samtools_cpu = 6
     Int samtools_mem_gb = 8
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 200
+    Int disk_gb = 300
 
     String filtered_chr_bam = '${default="share-seq" prefix}.filtered_chr.bam'
     String bedpe = 'tmp.bedpe'
