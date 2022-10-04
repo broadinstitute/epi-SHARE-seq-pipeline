@@ -36,6 +36,7 @@ task seurat {
         Float umap_resolution = 0.5
 
         String prefix = "prefix"
+        Int threads = 8
 
         String papermill = "TRUE"
         
@@ -94,6 +95,7 @@ task seurat {
         -p umap_dim ${umap_dim} \
         -p umap_resolution ${umap_resolution} \
         -p prefix ${prefix} \
+        -p threads ${threads} \
         -p papermill ${papermill}
     }
 
