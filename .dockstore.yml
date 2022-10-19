@@ -36,6 +36,7 @@ workflows:
              - dev
              - neva
              - knudson
+             - starsolo
          tags:
              - /.*/
 
