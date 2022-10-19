@@ -54,8 +54,9 @@ workflow wf_preprocess {
 	Int lengthLanes = length(select_first([lanes, GetLanes.lanes]))
 	# memory estimate for BasecallsToBam depends on estimated size of one lane of data
 	Float bclSize = size(bcl, 'G')
-        Float memory = ceil(1.4 * bclSize + 147) / lengthLanes
-		
+	Float memory = ceil(1.4 * bclSize + 147) / lengthLanes
+	Float memory2 = (ceil(0.8 * bclSize) * 1.25) / lengthLanes # an unusual increase from 0.25 x for black swan
+	
 	scatter (lane in select_first([lanes, GetLanes.lanes])) {
 		call ExtractBarcodes {
 			input:
@@ -64,7 +65,8 @@ workflow wf_preprocess {
 				libraryBarcodes = BarcodeMap.out,
 				barcodeStructure = barcodeStructure,
 				lane = lane,
-				dockerImage = dockerImage
+				dockerImage = dockerImage,
+				memory = memory2
 		}
 
 		call BasecallsToBams {
@@ -206,6 +208,7 @@ task ExtractBarcodes {
 		String barcodeStructure 
 		Int lane 
 		String dockerImage
+		Float memory
 	}
 	
 	parameter_meta {
@@ -225,7 +228,6 @@ task ExtractBarcodes {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
-	Float memory = ceil(0.2 * bclSize) * 1.25# an unusual increase from 0.25 x for black swan
 	Int javaMemory = ceil((memory - 0.5) * 1000)
 
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
@@ -378,13 +380,13 @@ task BamLookUp {
 		bucket="gs://broad-buenrostro-bcl-outputs/"
 		file=~{bam}
 		lib="${file%_*} "
-		grep $lib ~{metaCsv} | cut -d, -f1 | sed 's/ /-/' > pkrId.txt
+		grep -w $lib ~{metaCsv} | cut -d, -f1 | sed 's/ /-/' > pkrId.txt
 		echo ${file%_*} > library.txt
-		barcode1=$(grep $lib ~{metaCsv} | cut -d, -f3)
+		barcode1=$(grep -w $lib ~{metaCsv} | cut -d, -f3)
 		echo ${bucket}${barcode1}.txt > R1barcodeSet.txt
-		grep $lib ~{metaCsv} | cut -d, -f4 > sampleType.txt
-		grep $lib ~{metaCsv} | cut -d, -f5 > genome.txt
-		grep $lib ~{metaCsv} | cut -d, -f6 > notes.txt
+		grep -w $lib ~{metaCsv} | cut -d, -f4 > sampleType.txt
+		grep -w $lib ~{metaCsv} | cut -d, -f5 > genome.txt
+		grep -w $lib ~{metaCsv} | cut -d, -f6 > notes.txt
 	>>>
 
 	output {
