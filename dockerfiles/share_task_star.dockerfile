@@ -32,7 +32,7 @@ ENV PATH="/software:${PATH}"
 
 # Install STAR 2.7.10a
 RUN wget https://github.com/alexdobin/STAR/archive/refs/tags/${STAR_VERSION}.tar.gz && tar -xzf ${STAR_VERSION}.tar.gz
-RUN cd STAR-${STAR_VERSION} && make STAR && rm ../${STAR_VERSION}.tar.gz && mv /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
+RUN cd STAR-${STAR_VERSION}/source && make STAR && rm ../../${STAR_VERSION}.tar.gz && mv /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
 
 # Install samtools 1.9
 RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
