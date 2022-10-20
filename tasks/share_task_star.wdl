@@ -19,7 +19,7 @@ task share_rna_align {
         File genome_index_tar
         String genome_name
         String? prefix
-        String docker_image = "docker.io/nchernia/share_task_star"
+        String docker_image = "docker.io/nchernia/share_task_star:1"
         Int cpus = 16
     }
     #Float input_file_size_gb = size(input[0], "G")
