@@ -88,7 +88,7 @@ task share_task_align_starsolo {
         --soloUMIstart 25 \
         --soloUMIlen 10 \
         --soloCBmatchWLtype Exact \
-	--soloStrand Forward
+        --soloStrand Forward
         --soloUMIfiltering MultiGeneUMI_CR \
         --soloUMIdedup 1MM_CR \
         --soloCBwhitelist ${whitelist} \
