@@ -1,6 +1,5 @@
 version 1.0
 
-
 # Import the tasks called by the pipeline
 workflow wf_rna {
     meta {
@@ -69,7 +68,7 @@ task share_task_align_starsolo {
         File genome_index_tar
         String genome_name
         String? prefix
-        String docker_image = "cumulusprod/starsolo:2.7.10a"
+        String docker_image = "docker.io/nchernia/share_task_star:1"
         File whitelist
         Int cpus = 16
     }
