@@ -17,17 +17,17 @@ task html_report {
         # and the metrics and writes out an html file
 
         # Stats for ATAC and RNA, will go at top of html
-        Int atac_total_reads
-        Int atac_aligned_uniquely 
-        Int atac_unaligned 
-        Int atac_feature_reads
-        Int atac_duplicate_reads 
-        Int rna_total_reads
-        Int rna_aligned_uniquely 
-        Int rna_aligned_multimap 
-        Int rna_unaligned 
-        Int rna_feature_reads 
-        Int rna_duplicate_reads 
+        Int? atac_total_reads
+        Int? atac_aligned_uniquely 
+        Int? atac_unaligned 
+        Int? atac_feature_reads
+        Int? atac_duplicate_reads 
+        Int? rna_total_reads
+        Int? rna_aligned_uniquely 
+        Int? rna_aligned_multimap 
+        Int? rna_unaligned 
+        Int? rna_feature_reads 
+        Int? rna_duplicate_reads 
 
         ## JPEG files to be encoded and appended to html
         Array[File?] image_files

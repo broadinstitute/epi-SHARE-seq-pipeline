@@ -13,8 +13,8 @@ workflow wf_dorcs {
     }
 
     input {
-        File rna_matrix
-        File atac_fragments
+        File? rna_matrix
+        File? atac_fragments
         File peak_file
 
         String genome
@@ -42,11 +42,21 @@ workflow wf_dorcs {
         Int disk_gb = 100
         String? docker
     }
+  
+    File rna_matrix_ = select_first([rna_matrix])
+    File atac_fragments_ = select_first([atac_fragments])
+
+    if ( !defined(rna_matrix) || !defined(atac_fragments) ){
+        call raise_exception as missing_input {
+            input:
+                  msg = "The genes-by-cell matrix or the dna fragments file are missing."
+        }
+    }
 
     call find_dorcs.find_dorcs as find_dorcs{
         input:
-            rna_matrix = rna_matrix,
-            atac_fragments = atac_fragments,
+            rna_matrix = rna_matrix_,
+            atac_fragments = atac_fragments_,
             peak_file = peak_file,
             genome = genome,
             n_cores = n_cores,
@@ -80,4 +90,28 @@ workflow wf_dorcs {
         File? dorcs_regions_summary = find_dorcs.dorcs_regions_summary
     }
 
+}
+
+# Task to report errors to user.
+# From https://github.com/ENCODE-DCC/chip-seq-pipeline2/blob/master/chip.wdl
+task raise_exception {
+  input {
+    String msg
+    Array[String]? vals
+  }
+  command {
+    echo -e "\n* Error: ${msg}\n" >&2
+    echo -e "* Vals: ${sep=',' vals}\n" >&2
+    exit 2
+  }
+  output {
+    String error_msg = '${msg}'
+  }
+  runtime {
+    maxRetries : 0
+    cpu : 1
+    memory : '2 GB'
+    time : 1
+    disks : 'local-disk 10 SSD'
+  }
 }
