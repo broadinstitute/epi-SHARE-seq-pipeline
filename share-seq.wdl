@@ -88,8 +88,8 @@ workflow ShareSeq {
     
     Array[File] read1_rna_ = select_all(read1_rna)
     File idx_tar_rna_ = select_first([idx_tar_rna, annotations["star_idx_tar"]])
-    File gtf_ = select_first([gtf, annotations["genegtf"]])
-    File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genebed"]])
+    File gtf_ = select_first([gtf, annotations["genesgtf"]])
+    File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
 
     Boolean process_atac = if defined(read1_atac) then true else false
     Boolean process_rna = if defined(read1_rna) then true else false
