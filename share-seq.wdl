@@ -278,26 +278,6 @@ workflow ShareSeq {
 }
 
 
-task merge_fastqs{
-    input{
-        Array[File] atac_read1
-        Array[File] atac_read2
-        Array[File] rna_read1
-        String? prefix
-    }
-    command{
-        cat ${sep=' ' atac_read1} > ${prefix + "."}merged.atac.R1.fq.gz
-        cat ${sep=' ' atac_read2} > ${prefix + "."}merged.atac.R2.fq.gz
-        cat ${sep=' ' rna_read1} > ${prefix + "."}merged.rna.R1.fq.gz
-    }
-    output{
-        File merged_atac_fastq_R1 = glob('*.merged.atac.R1.fq.gz')[0]
-        File merged_atac_fastq_R2 = glob('*.merged.atac.R2.fq.gz')[0]
-        File merged_rna_fastq_R1 = glob('*.merged.rna.R1.fq.gz')[0]
-    }
-}
-
-
 # Task to report errors to user.
 # From https://github.com/ENCODE-DCC/chip-seq-pipeline2/blob/master/chip.wdl
 task raise_exception {
