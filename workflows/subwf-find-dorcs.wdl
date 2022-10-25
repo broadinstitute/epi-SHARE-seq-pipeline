@@ -15,7 +15,7 @@ workflow wf_dorcs {
     input {
         File rna_matrix
         File atac_fragments
-        File? peak_file
+        File peak_file
 
         String genome
         Int n_cores = 4

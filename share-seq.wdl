@@ -18,9 +18,9 @@ workflow ShareSeq {
 
 
         # ATAC specific inputs
+        Array[File?] read1_atac
+        Array[File?] read2_atac
         File? chrom_sizes
-        Array[File] read1_atac
-        Array[File] read2_atac
         File? idx_tar_atac
         File? tss_bed
         Int? cpus_atac
@@ -31,7 +31,7 @@ workflow ShareSeq {
         Boolean multimappers = false
         Boolean include_multimappers = false
         Boolean include_introns = true
-        Array[File] read1_rna
+        Array[File?] read1_rna
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -78,12 +78,23 @@ workflow ShareSeq {
 
     String genome_name = if genome_name_input == "GRCh38" then "hg38" else genome_name_input
 
-    Map[String, String] annotations = if genome_name == "mm10" then read_map(mouse_genome_tsv) else read_map(human_genome_tsv)
+    Map[String, File] annotations = if genome_name == "mm10" then read_map(mouse_genome_tsv) else read_map(human_genome_tsv)
+    Array[File] read1_atac_ = select_all(read1_atac)
+    Array[File] read2_atac_ = select_all(read2_atac)
+    File peak_set_ = select_first([peak_set, annotations["ccre"]])
+    File idx_tar_atac_ = select_first([idx_tar_atac, annotations["bowtie2_idx_tar"]])
+    File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
+    File tss_bed_ = select_first([tss_bed, annotations["tss"]])
+    
+    Array[File] read1_rna_ = select_all(read1_rna)
+    File idx_tar_rna_ = select_first([idx_tar_rna, annotations["star_idx_tar"]])
+    File gtf_ = select_first([gtf, annotations["genegtf"]])
+    File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genebed"]])
 
     call share_rna.wf_rna as rna{
         input:
-            read1 = read1_rna,
-            idx_tar = if defined(idx_tar_rna) then idx_tar_rna else annotations["star_idx_tar"],
+            read1 = read1_rna_,
+            idx_tar = idx_tar_rna_,
             prefix = prefix,
             genome_name = genome_name,
             cpus = cpus_rna,
@@ -92,7 +103,7 @@ workflow ShareSeq {
             # Assign features
             include_multimappers = include_multimappers,
             include_introns = include_introns,
-            gtf = if defined(gtf) then gtf else annotations["genegtf"],
+            gtf = gtf_,
             gene_naming = gene_naming,
             # Group UMI
             remove_single_umi = remove_single_umi,
@@ -100,16 +111,17 @@ workflow ShareSeq {
             cutoff = cutoff_rna,
             # Lib_size QC
             qc = qc,
-            genes_annotation_bed = if defined(genes_annotation_bed) then genes_annotation_bed else annotations["genebed"]
+            genes_annotation_bed = genes_annotation_bed_
     }
+
     call share_atac.wf_atac as atac{
         input:
-            read1 = read1_atac,
-            read2 = read2_atac,
-            chrom_sizes = if defined(chrom_sizes) then chrom_sizes else annotations["chrsz"],
-            idx_tar = if defined(idx_tar_atac) then idx_tar_atac else annotations["bowtie2_idx_tar"],
-            tss_bed = if defined(tss_bed) then tss_bed else annotations["tss"],
-            peak_set = peak_set,
+            read1 = read1_atac_,
+            read2 = read2_atac_,
+            chrom_sizes = chrom_sizes_,
+            idx_tar = idx_tar_atac_,
+            tss_bed = tss_bed_,
+            peak_set = peak_set_,
             prefix = prefix,
             genome_name = genome_name,
             cutoff = cutoff_atac,
@@ -120,7 +132,7 @@ workflow ShareSeq {
         input:
             rna_matrix = rna.share_rna_h5_matrix,
             atac_fragments = atac.share_atac_fragments_filtered,
-            peak_file = if defined(peak_set) then peak_set else annotations["ccre"],
+            peak_file = peak_set_,
 
             genome = genome_name,
             n_cores = cpus_dorcs,
@@ -141,6 +153,7 @@ workflow ShareSeq {
             windowPadSize = windowPadSize,
             mem_gb = mem_gb_dorcs
     }
+
     call html_report.html_report as html_report {
         input:
             atac_total_reads = atac.share_atac_total_reads,
@@ -150,7 +163,7 @@ workflow ShareSeq {
             atac_duplicate_reads = atac.share_atac_duplicate_reads,
             rna_total_reads = rna.share_rna_total_reads,
             rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
-	    rna_aligned_multimap = rna.share_rna_aligned_multimap,
+	          rna_aligned_multimap = rna.share_rna_aligned_multimap,
             rna_unaligned = rna.share_rna_unaligned,
             rna_feature_reads = rna.share_rna_feature_reads,
             rna_duplicate_reads = rna.share_rna_duplicate_reads,   

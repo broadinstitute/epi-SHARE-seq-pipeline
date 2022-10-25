@@ -21,9 +21,9 @@ workflow wf_atac {
         Array[File] read1
         Array[File] read2
 
-        File? chrom_sizes
-        File? idx_tar
-        File? tss_bed
+        File chrom_sizes
+        File idx_tar
+        File tss_bed
         File peak_set
 
         String prefix = "shareseq-project"
