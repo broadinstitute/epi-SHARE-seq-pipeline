@@ -24,7 +24,7 @@ task qc_rna {
 
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = 8
-    Int disk_gb = 50
+    Int disk_gb = 100
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     String reads_distribution = "${default="share-seq" prefix}.rna.qc.${genome_name}.reads_distribution.txt"

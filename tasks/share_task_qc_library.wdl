@@ -20,10 +20,9 @@ task qc_library {
         Int? memory_gb = 16
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_library"
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_library"
+        String docker_image = "nchernia/share_task_qc_library:5"        
         String assay
-
-
     }
 
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
@@ -47,8 +46,8 @@ task qc_library {
 
     output {
         File lib_size_counts = glob('*.libsize.counts.csv')[0]
-        File lib_size_log = glob('*.dups.log')[0]
-        Array[File] plots = glob('*.pdf')
+        File lib_size_log = glob('*.dups.log.txt')[0]
+        File plot = glob('*.png')[0]
     }
 
     runtime {

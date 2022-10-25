@@ -11,14 +11,14 @@ LABEL software.version="0.0.1"
 LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
 LABEL software.task="archr"
-    
-RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-save -e "cat(Sys.getenv('R_HOME'))")/etc/Rprofile.site 
+
+RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-save -e "cat(Sys.getenv('R_HOME'))")/etc/Rprofile.site
 
 ENV R_LIBS_USER=/usr/local/lib/R
 ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
-	apt-get install -y -qq --no-install-recommends\
+    apt-get install -y -qq --no-install-recommends\
     gtk-doc-tools \
     libcairo2-dev \
     libcurl4-openssl-dev \
@@ -42,6 +42,13 @@ RUN apt-get update -qq && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
+ENV USER=shareseq
+WORKDIR /home/$USER
+
+RUN groupadd -r $USER &&\
+    useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
+    chown $USER:$USER /home/$USER
+
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('devtools','hdf5r','IRkernel','BiocManager','Cairo','magick'))"
 
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('GenomeInfoDbData','GenomicRanges','Rsamtools'), update=F, ask=F)"
@@ -52,8 +59,13 @@ RUN R --no-echo --no-restore --no-save -e "devtools::install_github('immunogenom
 
 RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
 
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('logr','hexbin'))"
+
 RUN python3 -m pip install jupyter papermill
 
 COPY src/jupyter_nb/archr_notebook.ipynb /usr/local/bin/
+
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 RUN R -e "IRkernel::installspec()"

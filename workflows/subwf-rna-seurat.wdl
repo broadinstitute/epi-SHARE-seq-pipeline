@@ -38,8 +38,9 @@ workflow wf_rna {
     output {
         File share_rna_seurat_notebook_output = seurat.notebook_output
         File share_rna_seurat_notebook_log = seurat.notebook_log
-        #File share_rna_seurat_papermill_log = seurat.papermill_log
+        File? share_rna_seurat_raw_violin_plot = seurat.seurat_raw_violin_plot
         File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
+        File? share_rna_seurat_raw_qc_scatter_plot = seurat.seurat_raw_qc_scatter_plot
         File? share_rna_seurat_filtered_qc_scatter_plot = seurat.seurat_filtered_qc_scatter_plot
         File? share_rna_seurat_variable_genes_plot = seurat.seurat_variable_genes_plot
         File? share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
@@ -48,7 +49,10 @@ workflow wf_rna {
         File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
         File? share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
         File? share_rna_seurat_umap_cluster_plot = seurat.seurat_umap_cluster_plot
-        File? share_rna_seurat_obj = seurat.seurat_obj
+        File? share_rna_seurat_umap_rna_count_plot = seurat.seurat_umap_rna_count_plot
+        File? share_rna_seurat_umap_gene_count_plot = seurat.seurat_umap_gene_count_plot
+        File? share_rna_seurat_umap_mito_plot = seurat.seurat_umap_mito_plot
+        File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
     }
 }

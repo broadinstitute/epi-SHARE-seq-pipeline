@@ -28,7 +28,7 @@ task feature_counts_rna {
 
     #Float input_file_size_gb = size(input[0], "G")
     Int mem_gb = 64
-    Int disk_gb = 200
+    Int disk_gb = 300
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
 
@@ -83,8 +83,8 @@ task feature_counts_rna {
         File rna_featurecount_alignment = out_bam
         File rna_featurecount_alignment_index = out_bai
         #File rna_featurecount_log = "featureCount.log"
-        File rna_featurecount_exon_txt = glob("*intron.featurecount.txt")[0]
-        File? rna_featurecount_intron_txt = glob("*exon.featurecount.txt")[0]
+        File rna_featurecount_exon_txt = glob("*exon.featurecount.txt")[0]
+        File? rna_featurecount_intron_txt = glob("*intron.featurecount.txt")[0]
         #File rna_featurecount_summary = glob("*.featurecount.txt.summary")[0]
     }
 

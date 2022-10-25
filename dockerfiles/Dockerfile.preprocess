@@ -31,7 +31,7 @@ RUN git clone --branch 1.9 --single-branch https://github.com/samtools/samtools.
     cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
 # Install system/math python packages (python3)
-RUN pip3 install --no-cache-dir python-Levenshtein==0.12.2 pysam
+RUN pip3 install --no-cache-dir python-Levenshtein==0.12.2 pysam requests oauth2client
 
 # Install Picard 2.26.11
 RUN wget https://github.com/broadinstitute/picard/releases/download/2.26.11/picard.jar && chmod +x picard.jar
@@ -51,4 +51,7 @@ RUN mkdir -p /usr/local/gcloud \
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 
 # Copy the external scripts inside
-COPY src/python /software
+COPY src/python/bam_fastq.py /software
+COPY src/python/flexible_import_entities_standard.py /software
+COPY src/python/write_terra_tables.py /software
+COPY src/bash/monitor_script.sh /software
