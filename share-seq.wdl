@@ -18,8 +18,8 @@ workflow ShareSeq {
 
 
         # ATAC specific inputs
-        Array[File?] read1_atac
-        Array[File?] read2_atac
+        Array[File]? read1_atac
+        Array[File]? read2_atac
         File? chrom_sizes
         File? idx_tar_atac
         File? tss_bed
@@ -31,7 +31,7 @@ workflow ShareSeq {
         Boolean multimappers = false
         Boolean include_multimappers = false
         Boolean include_introns = true
-        Array[File?] read1_rna
+        Array[File]? read1_rna
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -79,14 +79,14 @@ workflow ShareSeq {
     String genome_name = if genome_name_input == "GRCh38" then "hg38" else genome_name_input
 
     Map[String, File] annotations = if genome_name == "mm10" then read_map(mouse_genome_tsv) else read_map(human_genome_tsv)
-    Array[File] read1_atac_ = select_all(read1_atac)
-    Array[File] read2_atac_ = select_all(read2_atac)
+    Array[File] read1_atac_ = select_first([read1_atac])
+    Array[File] read2_atac_ = select_first([read2_atac])
     File peak_set_ = select_first([peak_set, annotations["ccre"]])
     File idx_tar_atac_ = select_first([idx_tar_atac, annotations["bowtie2_idx_tar"]])
     File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
     File tss_bed_ = select_first([tss_bed, annotations["tss"]])
     
-    Array[File] read1_rna_ = select_all(read1_rna)
+    Array[File] read1_rna_ = select_first([read1_rna])
     File idx_tar_rna_ = select_first([idx_tar_rna, annotations["star_idx_tar"]])
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
