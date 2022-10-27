@@ -50,7 +50,7 @@ task html_report {
         echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.txt
         echo "<tr><td>Filtered Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>" >> output.txt
-        percent=$(( ~{atac_duplicate_reads}*100/~{atac_feature_reads} ))
+        percent=$(( ~{default=0 atac_duplicate_reads}*100/~{default=1 atac_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr>" >> output.txt
         echo "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>" >> output.txt
@@ -58,7 +58,7 @@ task html_report {
         echo "<tr><td>Unaligned</td><td>" ~{rna_unaligned} "</td></tr>" >> output.txt
         echo "<tr><td>Filtered (feature) Reads</td><td>" ~{rna_feature_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
-        percent=$(( ~{rna_duplicate_reads}*100/~{rna_feature_reads} ))
+        percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt       
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py output.html image_list.txt log_list.txt --input_file_name output.txt  
     >>>
