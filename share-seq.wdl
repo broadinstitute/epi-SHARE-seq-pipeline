@@ -137,30 +137,32 @@ workflow ShareSeq {
     }
     
     if ( process_atac && process_rna ) {
-        call find_dorcs.wf_dorcs as dorcs{
-            input:
-                rna_matrix = rna.share_rna_h5_matrix,
-                atac_fragments = atac.share_atac_fragments_filtered,
-                peak_file = peak_set_,
+        if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
+            call find_dorcs.wf_dorcs as dorcs{
+                input:
+                    rna_matrix = rna.share_rna_h5_matrix,
+                    atac_fragments = atac.share_atac_fragments_filtered,
+                    peak_file = peak_set_,
 
-                genome = genome_name,
-                n_cores = cpus_dorcs,
-                save_plots_to_dir = save_plots_to_dir,
-                output_filename = dorcs_output_filename,
-                prefix = prefix,
+                    genome = genome_name,
+                    n_cores = cpus_dorcs,
+                    save_plots_to_dir = save_plots_to_dir,
+                    output_filename = dorcs_output_filename,
+                    prefix = prefix,
 
-                minFeature_RNA = minFeature_RNA,
-                maxFeature_RNA = maxFeature_RNA,
-                percentMT_RNA = percentMT_RNA,
-                minCells_RNA = minCells_RNA,
+                    minFeature_RNA = minFeature_RNA,
+                    maxFeature_RNA = maxFeature_RNA,
+                    percentMT_RNA = percentMT_RNA,
+                    minCells_RNA = minCells_RNA,
 
-                dorcGeneCutOff = dorcGeneCutOff,
-                fripCutOff = fripCutOff,
-                corrPVal = corrPVal,
-                topNGene = topNGene,
+                    dorcGeneCutOff = dorcGeneCutOff,
+                    fripCutOff = fripCutOff,
+                    corrPVal = corrPVal,
+                    topNGene = topNGene,
 
-                windowPadSize = windowPadSize,
-                mem_gb = mem_gb_dorcs
+                    windowPadSize = windowPadSize,
+                    mem_gb = mem_gb_dorcs
+            }
         }
     }
 
