@@ -16,7 +16,7 @@ task qc_library {
 
         File raw_counts
         File filtered_counts
-        Int cutoff
+        Int? cutoff
         Int? memory_gb = 16
         String genome_name
         String? prefix

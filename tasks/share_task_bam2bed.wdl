@@ -18,7 +18,7 @@ task share_atac_bam2bed {
         Int? memory_gb = 64
         File bam
         File bam_index
-        File chrom_sizes
+        File? chrom_sizes
         String genome_name
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bam2bed"
         String? prefix

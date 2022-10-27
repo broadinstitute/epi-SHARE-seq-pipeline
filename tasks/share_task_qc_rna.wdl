@@ -16,7 +16,7 @@ task qc_rna {
         # aligner and group UMI reads whilst filtering duplicates.
         Boolean qc = false
         File bam
-        File genes_annotations_bed
+        File? genes_annotations_bed
         String genome_name
         String? prefix
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"

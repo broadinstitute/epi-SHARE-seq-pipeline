@@ -9,44 +9,44 @@ task find_dorcs {
 
     input {
         #This task takes in the RNA and ATAC files and finds the DORCs based on the cut-off criteria provided
-        
+
         #DORCs parameters
         File rna_matrix
         File atac_fragments
-        File peak_file
+        File? peak_file
         String genome
         Int n_cores = 4
         String save_plots_to_dir = "TRUE"
         String prefix = "prefix"
-        
+
         #RNA QC parameters
         Int minFeature_RNA = 200
         Int maxFeature_RNA = 2500
         Float percentMT_RNA = 5
         Int minCells_RNA = 3
-        
+
         #ATAC QC parameter
         Float fripCutOff = 0.3
         Float chunkSize = 50000
-        
+
         #Background correlation parameters
         Int numNearestNeighbor = 100
         Float numBackgroundPairs = 100000
-        
+
         #DORC genes parameter
         Int windowPadSize = 50000
         Int dorcGeneCutOff = 10
         Float corrPVal = 0.05
         Int topNGene = 20
-        
+
         String output_filename = "${prefix}.dorcs.notebook.${genome}.ipynb"
         String docker_image = "swekhande/shareseq-prod:share-task-dorcs"
         Int mem_gb = 64
         Int disk_gb = 100
     }
-    
+
     #Output filepaths
-    
+
     String violin_plot = '${prefix}.dorcs.plots.${genome}/${prefix}.dorcs.rna_violin_plot.${genome}.png'
     String jplot = '${prefix}.dorcs.plots.${genome}/${prefix}.dorcs.jplot.${genome}.png'
     String dorc_genes_summ = '${prefix}.dorcs.dorc_genes_summary.${genome}.csv'
@@ -84,15 +84,15 @@ task find_dorcs {
         File notebook_output = output_filename
         File notebook_log = log_filename
         #File papermill_log = papermill_log_filename
-        
+
         File? seurat_violin_plot = violin_plot
         File? j_plot = jplot
         File? plots_zip = plots_zip_dir
-        
+
         File? dorcs_genes_summary = dorc_genes_summ
         File? dorcs_regions_summary = all_regions_summ
-        
-        
+
+
     }
 
     runtime {
