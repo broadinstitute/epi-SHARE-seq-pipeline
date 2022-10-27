@@ -18,8 +18,8 @@ workflow ShareSeq {
 
 
         # ATAC specific inputs
-        Array[File]? read1_atac
-        Array[File]? read2_atac
+        Array[File] read1_atac
+        Array[File] read2_atac
         File? chrom_sizes
         File? idx_tar_atac
         File? tss_bed
@@ -31,7 +31,7 @@ workflow ShareSeq {
         Boolean multimappers = false
         Boolean include_multimappers = false
         Boolean include_introns = true
-        Array[File]? read1_rna
+        Array[File] read1_rna
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -91,8 +91,10 @@ workflow ShareSeq {
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
 
-    Boolean process_atac = if defined(read1_atac) then true else false
-    Boolean process_rna = if defined(read1_rna) then true else false
+#Boolean process_atac = if defined(read1_atac) then true else false
+    #Boolean process_rna = if defined(read1_rna) then true else false
+    Boolean process_atac = if length(read1_atac)>0 then true else false
+    Boolean process_rna = if length(read1_rna)>0 then true else false
 
     if ( process_rna ) {
         call share_rna.wf_rna as rna{
