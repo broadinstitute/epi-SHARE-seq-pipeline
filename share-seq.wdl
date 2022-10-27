@@ -79,61 +79,60 @@ workflow ShareSeq {
     String genome_name = if genome_name_input == "GRCh38" then "hg38" else genome_name_input
 
     Map[String, File] annotations = if genome_name == "mm10" then read_map(mouse_genome_tsv) else read_map(human_genome_tsv)
-    Array[File] read1_atac_ = select_first([read1_atac, ["placeholder"]])
-    Array[File] read2_atac_ = select_first([read2_atac, ["placeholder"]])
     File peak_set_ = select_first([peak_set, annotations["ccre"]])
     File idx_tar_atac_ = select_first([idx_tar_atac, annotations["bowtie2_idx_tar"]])
     File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
     File tss_bed_ = select_first([tss_bed, annotations["tss"]])
     
-    Array[File] read1_rna_ = select_first([read1_rna, ["placeholder"]])
     File idx_tar_rna_ = select_first([idx_tar_rna, annotations["star_idx_tar"]])
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
 
-#Boolean process_atac = if defined(read1_atac) then true else false
-    #Boolean process_rna = if defined(read1_rna) then true else false
     Boolean process_atac = if length(read1_atac)>0 then true else false
     Boolean process_rna = if length(read1_rna)>0 then true else false
 
     if ( process_rna ) {
-        call share_rna.wf_rna as rna{
-            input:
-                read1 = read1_rna_,
-                idx_tar = idx_tar_rna_,
-                prefix = prefix,
-                genome_name = genome_name,
-                cpus = cpus_rna,
-                # Update RGID
-                multimappers = multimappers,
-                # Assign features
-                include_multimappers = include_multimappers,
-                include_introns = include_introns,
-                gtf = gtf_,
-                gene_naming = gene_naming,
-                # Group UMI
-                remove_single_umi = remove_single_umi,
-                mode = mode,
-                cutoff = cutoff_rna,
-                # Lib_size QC
-                qc = qc,
-                genes_annotation_bed = genes_annotation_bed_
+        if ( read1_rna[0] != "" ) {
+            call share_rna.wf_rna as rna{
+                input:
+                    read1 = read1_rna,
+                    idx_tar = idx_tar_rna_,
+                    prefix = prefix,
+                    genome_name = genome_name,
+                    cpus = cpus_rna,
+                    # Update RGID
+                    multimappers = multimappers,
+                    # Assign features
+                    include_multimappers = include_multimappers,
+                    include_introns = include_introns,
+                    gtf = gtf_,
+                    gene_naming = gene_naming,
+                    # Group UMI
+                    remove_single_umi = remove_single_umi,
+                    mode = mode,
+                    cutoff = cutoff_rna,
+                    # Lib_size QC
+                    qc = qc,
+                    genes_annotation_bed = genes_annotation_bed_
+            }
         }
     }
 
     if ( process_atac ) {
-        call share_atac.wf_atac as atac{
-            input:
-                read1 = read1_atac_,
-                read2 = read2_atac_,
-                chrom_sizes = chrom_sizes_,
-                idx_tar = idx_tar_atac_,
-                tss_bed = tss_bed_,
-                peak_set = peak_set_,
-                prefix = prefix,
-                genome_name = genome_name,
-                cutoff = cutoff_atac,
-                cpus = cpus_atac
+        if ( read1_atac[0] != "" ) {
+            call share_atac.wf_atac as atac{
+                input:
+                    read1 = read1_atac,
+                    read2 = read2_atac,
+                    chrom_sizes = chrom_sizes_,
+                    idx_tar = idx_tar_atac_,
+                    tss_bed = tss_bed_,
+                    peak_set = peak_set_,
+                    prefix = prefix,
+                    genome_name = genome_name,
+                    cutoff = cutoff_atac,
+                    cpus = cpus_atac
+            }
         }
     }
     
