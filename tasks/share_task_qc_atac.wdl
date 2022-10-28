@@ -33,6 +33,7 @@ task qc_atac {
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
+    # pdf string needed as required input to Picard CollectInsertSizeMetrics
     String hist_log_pdf = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.pdf'
     String hist_log_png = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.png'
     String tss_pileup_prefix = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log'
