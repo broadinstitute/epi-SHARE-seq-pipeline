@@ -12,7 +12,7 @@ from plotnine import *
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Plot insert size histogram")
     parser.add_argument("histogram_file", help="Histogram txt file name")
-    parser.add_argument("PKR", help="PKR ID")
+    parser.add_argument("pkr", help="PKR ID")
     parser.add_argument("out_file", help="Name of output png file")
     
     return parser.parse_args()
@@ -38,11 +38,11 @@ def get_hist_vals(histogram_file):
 def label_func(breaks):
     return ["{:.0e}".format(x) for x in breaks]
 
-def plot_hist(df, PKR, out_file):
+def plot_hist(df, pkr, out_file):
     plot = (ggplot(df, aes(x="insert_size", y="count")) +
             geom_line(color="red") +
             geom_area(fill="red") +
-            labs(title = f"Insert Size Histogram ({PKR})",
+            labs(title = f"Insert Size Histogram ({pkr})",
                  x = "Insert size",
                  y = "Count") + 
             scale_y_continuous(labels = label_func) +
@@ -54,12 +54,12 @@ def main():
     print("Starting histogram plotting script")
     args = parse_arguments() 
     histogram_file = getattr(args, "histogram_file")
-    PKR = getattr(args, "PKR")
+    pkr = getattr(args, "pkr")
     out_file = getattr(args, "out_file")
     
     df = get_hist_vals(histogram_file)
     
-    plot_hist(df, PKR, out_file)
+    plot_hist(df, pkr, out_file)
     print("Finished plotting")
 
 if __name__ == "__main__":
