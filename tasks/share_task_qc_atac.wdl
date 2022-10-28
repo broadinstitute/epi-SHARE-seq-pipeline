@@ -23,8 +23,7 @@ task qc_atac {
         File tss
         String genome_name
         String? prefix
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
-        String docker_image = "mknudson/share_task_qc_atac:test"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
 
     }
 
@@ -35,7 +34,6 @@ task qc_atac {
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
-    String hist_log_pdf = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.pdf'
     String hist_log_png = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.png'
     String tss_pileup_prefix = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log'
     String tss_pileup_out = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log.png'
@@ -80,7 +78,6 @@ task qc_atac {
 
     output {
         File atac_final_stats = stats_log
-        #File atac_final_hist_pdf = hist_log_pdf
         File atac_final_hist_png = hist_log_png
         File atac_final_hist = stats_log
         File atac_tss_pileup_png = tss_pileup_out
