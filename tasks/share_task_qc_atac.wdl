@@ -20,12 +20,10 @@ task qc_atac {
         File raw_bam_index
         File filtered_bam
         File filtered_bam_index
-        File? tss
+        File tss
         String genome_name
         String? prefix
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
-
-
     }
 
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
@@ -35,7 +33,9 @@ task qc_atac {
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
+    # pdf string needed as required input to Picard CollectInsertSizeMetrics
     String hist_log_pdf = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.pdf'
+    String hist_log_png = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.png'
     String tss_pileup_prefix = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log'
     String tss_pileup_out = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log.png'
 
@@ -47,7 +47,6 @@ task qc_atac {
         ln -s ${raw_bam_index} in.raw.bam.bai
         ln -s ${filtered_bam} in.filtered.bam
         ln -s ${filtered_bam_index} in.filtered.bam.bai
-
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
         samtools idxstats in.raw.bam >> ${stats_log}
@@ -63,9 +62,11 @@ task qc_atac {
             H=${hist_log_pdf} \
             W=1000  2>> picard_run.log
 
+        python3 $(which plot_insert_size_hist.py) ${hist_log} ${prefix} ${hist_log_png}
+
         # make TSS pileup fig # original code has a 'set +e' why?
         # the pyMakeVplot is missing
-        python $(which make-tss-pileup-jbd.py) \
+        python2 $(which make-tss-pileup-jbd.py) \
             -a in.filtered.bam \
             -b ${tss} \
             -e 2000 \
@@ -78,9 +79,10 @@ task qc_atac {
 
     output {
         File atac_final_stats = stats_log
-        File atac_final_hist_pdf = hist_log_pdf
+        File atac_final_hist_png = hist_log_png
         File atac_final_hist = stats_log
         File atac_tss_pileup_png = tss_pileup_out
+        File atac_hist_log = hist_log
     }
 
     runtime {

@@ -11,7 +11,7 @@ workflows:
              - minimal-inputs
              - dynamic-memory
              - knudson
-             - knudson2
+             - insert_size_hist
          tags:
              - /.*/
 
