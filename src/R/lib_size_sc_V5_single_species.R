@@ -95,13 +95,17 @@ par(mfrow = c(2,1))
 Size2 <- sort(Size2, decreasing = T)
 elbow <- elbow_finder(1:length(Size2), log10(Size2))
 plot(Size2, log="y", xlab=paste0(" Barcode rank (", length(Size2)-elbow[1], " low quality cells)"), ylab = "Reads per barcode", main = paste0(libtype, " Reads per barcode"), col="darkblue", pch=16,ylim=c(1,10000))
-abline(v = elbow[1])
-axis(1, at=elbow[1], labels=elbow[1])
+abline(v=elbow[1], h=10^(elbow[2]))
+text(elbow[1], 10^(elbow[2]),
+     paste("(", elbow[1], ", ", 10^(elbow[2]), ")", sep=""),
+     adj=c(-0.1,-0.5))
+
 plot(Size2[1:elbow[1]], log="y", xlab="Barcode rank", ylab = "Reads per barcode", main = paste0(libtype, " Reads per (top ranked) barcode"), col="darkblue", pch=16, ylim=c(1,10000))
 elbow <- elbow_finder(1:elbow[1], log10(Size2[1:elbow[1]]))
-abline(v = elbow[1])
-abline(h = 10^(elbow[2]))
-axis(1, at=elbow[1], labels=elbow[1])
+abline(v=elbow[1], h=10^(elbow[2]))
+text(elbow[1], 10^(elbow[2]),
+     paste("(", elbow[1], ", ", 10^(elbow[2]), ")", sep=""),
+     adj=c(-0.1,-0.5))
 garbage <- dev.off()
 
 ## Removing for now as we've been told it's hard to interpret

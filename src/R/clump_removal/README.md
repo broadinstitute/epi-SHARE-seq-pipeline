@@ -1,0 +1,5 @@
+1 - "Refiltering": take the output of the SHARE pipeline and refilter the cell barcodes to exclude low library size and do a little reformatting of the data (scripts refliter_barcodes)
+2 - RNA things: i do the RNA before the ATAC because the doublet tools are designed for RNA. the general workflow is more or less remove clumps, remove doublets and then run PCA / UMAP / clustering (script getSinglet_cluster)
+the basic idea behind the clump calling is that we see often that "clumps" will have larger library size but the lower end of that distribution often can overlap the upper end of normal cell library sizes. so by smoothing over KNN, the clumps become much more prominent
+3 - ATAC things: basically call clumps on the ATAC data then match the RNA-ATAC barcodes so we can remove the clumps and doublets called from the RNA pipeline. then remaining barcodes go through cisTopics, UMAP, clustering, chromVAR motif scores etc.
+4 - all of the above scripts call functions from barcode_filtering, singlet_clustering 
