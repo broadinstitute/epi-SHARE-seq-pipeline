@@ -89,7 +89,7 @@ task share_task_align_starsolo {
         --soloUMIlen 10 \
         --soloCBmatchWLtype Exact \
         --soloStrand Forward \
-        --soloUMIdedup Exact \
+        --soloUMIdedup 1MM_All \
         --soloCBwhitelist ${whitelist} \
         --soloFeatures Gene  \
         --outSAMtype BAM SortedByCoordinate \
