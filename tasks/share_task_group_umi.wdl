@@ -57,7 +57,7 @@ task group_umi_rna {
                 -I bam.bam \
                 --output-bam -S ~{prefix + "."}rna.~{genome_name}.grouped.bam \
                 --group-out= ~{umi_groups_table} \
-                --skip-tags-regex=Unassigned >>./Run.log
+                --skip-tags-regex=Unassigned 
         else
             # Custom UMI dedup by matching bc-umi-align position
             samtools view -@ ~{cpus} ~{bam} | \
