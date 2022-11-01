@@ -28,16 +28,16 @@ task joint_cell_calling {
 
     Int dsk_gb = disk_gb
     Int memory_gb = 64
-    String barcode_metadata = '~{default="share-seq" prefix}.joint.barcode.metadata.~{genome_name}.csv'
+    String barcode_metadata = '${default="share-seq" prefix}.joint.barcode.metadata.${genome_name}.csv'
 
     command {
         set -e
 
         bash $(which monitor_script.sh) > monitoring.log &
 
-        python3 $(which joint_cell_plotting.py) ~{prefix} ~{rna_barcode_metadata} ~{atac_barcode_metadata} ~{min_UMIs} ~{min_genes} ~{min_TSS} ~{min_frags} ~{barcode_metadata}
+        python3 $(which joint_cell_plotting.py) ${prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${min_UMIs} ${min_genes} ${min_TSS} ${min_frags} ${barcode_metadata}
 
-        Rscript $(which joint_cell_plotting_density.R) ~{prefix} ~{barcode_metadata} ~{min_UMIs} ~{min_genes} ~{min_TSS} ~{min_frags}
+        Rscript $(which joint_cell_plotting_density.R) ${prefix} ${barcode_metadata} ${min_UMIs} ${min_genes} ${min_TSS} ${min_frags}
     }
 
     output {
