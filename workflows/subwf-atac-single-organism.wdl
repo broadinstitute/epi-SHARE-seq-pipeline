@@ -20,13 +20,15 @@ workflow wf_atac {
         # ATAC Sub-worflow inputs
         Array[File] read1
         Array[File] read2
+
         File chrom_sizes
         File idx_tar
         File tss_bed
         File peak_set
+
         String prefix = "shareseq-project"
         String genome_name
-        Int cutoff
+        Int? cutoff
         Int? cpus = 4
         String? docker
     }
@@ -121,7 +123,7 @@ workflow wf_atac {
         File share_atac_qc_library_plot = qc_library.plot
 
         File share_atac_qc_final = qc_atac.atac_final_stats
-        File share_atac_qc_hist_plot = qc_atac.atac_final_hist_pdf
+        File share_atac_qc_hist_plot = qc_atac.atac_final_hist_png
         File share_atac_qc_hist_txt = qc_atac.atac_final_hist
         File share_atac_qc_tss_enrichment = qc_atac.atac_tss_pileup_png
 
