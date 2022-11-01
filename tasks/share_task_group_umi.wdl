@@ -47,13 +47,14 @@ task group_umi_rna {
 
         if [[ '~{mode}' == 'regular' ]]; then
             # Seems to get more slant and fewer UMIs, but get accurate lib size estimation. Slow.
-            samtools index  -@ ~{cpus} ~{bam}
+            ln -s ~{bam} ./bam.bam            
+            samtools index  -@ ~{cpus} ./bam.bam
             umi_tools group \
                 --extract-umi-method=read_id \
                 --per-gene \
                 --gene-tag=XT \
                 --per-cell \
-                -I ~{bam} \
+                -I bam.bam \
                 --output-bam -S ~{prefix + "."}rna.~{genome_name}.grouped.bam \
                 --group-out= ~{umi_groups_table} \
                 --skip-tags-regex=Unassigned >>./Run.log
