@@ -47,6 +47,7 @@ task group_umi_rna {
 
         if [[ '~{mode}' == 'regular' ]]; then
             # Seems to get more slant and fewer UMIs, but get accurate lib size estimation. Slow.
+            samtools index  -@ ~{cpus} ~{bam}
             umi_tools group \
                 --extract-umi-method=read_id \
                 --per-gene \
