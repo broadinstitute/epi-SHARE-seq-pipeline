@@ -128,8 +128,8 @@ workflow wf_atac {
         File share_atac_qc_tss_enrichment = qc_atac.atac_tss_pileup_png
 
         File share_atac_archr_notebook_output = archr.notebook_output
-        File share_atac_archr_notebook_log = archr.notebook_log
-        
+        File share_atac_archr_notebook_log = archr.notebook_log        
+        File share_atac_archr_barcode_metadata = archr.archr_barcode_metadata
         File? share_atac_archr_raw_tss_enrichment = archr.archr_raw_tss_by_uniq_frags_plot
         File? share_atac_archr_filtered_tss_enrichment = archr.archr_filtered_tss_by_uniq_frags_plot
         File? share_atac_archr_raw_fragment_size_plot = archr.archr_raw_frag_size_dist_plot
