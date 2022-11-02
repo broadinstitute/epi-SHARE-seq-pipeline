@@ -57,8 +57,9 @@ task group_umi_rna {
                 -I bam.bam \
                 --output-bam -S ~{prefix + "."}rna.~{genome_name}.grouped.bam \
                 --group-out=~{umi_groups_table} \
-                --skip-tags-regex=Unassigned
+                --skip-tags-regex=Unassigned >> ./Run.log
             awk '{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations 
+            head observed_barcodes_combinations
         else
             # Custom UMI dedup by matching bc-umi-align position
             samtools view -@ ~{cpus} ~{bam} | \
@@ -78,7 +79,6 @@ task group_umi_rna {
 
         # convert groupped UMI to bed file
         if [[ '~{mode}' == 'regular' ]]; then
-
             ## 3rd column is umi, 4th column is read
             ## note: difference between these two versions of groups.tsv
             ## 1) umitools output keep all the barcode-UMI and don't collapse them
