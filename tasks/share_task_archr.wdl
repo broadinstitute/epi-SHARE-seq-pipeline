@@ -107,6 +107,7 @@ task archr {
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
+        File archr_barcode_metadata = barcode_metadata
         #File papermill_log = papermill_log_filename
         
         File? archr_raw_tss_by_uniq_frags_plot = raw_tss_by_uniq_frags_plot
@@ -122,7 +123,6 @@ task archr {
 
         File? plots_zip = plots_zip_dir
         File? archr_arrow = arrow_file
-        File? archr_barcode_metadata = barcode_metadata
         File? archr_raw_obj = raw_archr_rds
         File? archr_filtered_obj = filtered_archr_rds
         File? archr_raw_matrix = raw_archr_h5
