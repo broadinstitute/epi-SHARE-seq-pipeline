@@ -58,7 +58,7 @@ task group_umi_rna {
                 --output-bam -S ~{prefix + "."}rna.~{genome_name}.grouped.bam \
                 --group-out=~{umi_groups_table} \
                 --skip-tags-regex=Unassigned
-            ls 
+            awk '{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations 
         else
             # Custom UMI dedup by matching bc-umi-align position
             samtools view -@ ~{cpus} ~{bam} | \
@@ -73,9 +73,8 @@ task group_umi_rna {
                     -i ~{prefix + "."}rna.~{genome_name}.wdup.bed \
                     -o ~{umi_groups_table} \
                     --m 1 > ~{prefix}.rm_dup_barcode.log.txt
+            cut -f1 ~{umi_groups_table} | sort -u > observed_barcodes_combinations
         fi
-
-        cut -f1 ~{umi_groups_table} | sort -u > observed_barcodes_combinations
 
         # convert groupped UMI to bed file
         if [[ '~{mode}' == 'regular' ]]; then
