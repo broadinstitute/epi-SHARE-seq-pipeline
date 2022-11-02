@@ -100,23 +100,26 @@ def plot_cells(df, pkr, min_UMIs, min_genes, min_TSS, min_frags):
     xy_lim = round_to_power_10(max(max_x, max_y))
     
     plot = (ggplot(df, aes("frags", "UMIs", color="QC_count"))
-     + geom_point(size=0.5)
-     + labs(title = f"Joint Cell Calling ({pkr})",
-            caption = f"ATAC cutoffs: TSS ≥ {min_TSS}, frags ≥ {min_frags}. RNA cutoffs: UMIs ≥ {min_UMIs}, genes ≥ {min_genes}",
-            x = "ATAC Unique Fragments per Barcode",
-            y = "RNA UMIs per Barcode",
-            color = "QC")
-     + theme_light()
-     + theme(figure_size = (8,6),
-             legend_box_margin = 0,
-             legend_title = element_text(size=10),
-             legend_text = element_text(size=8),
-             legend_key = element_blank(),
-             plot_caption=element_text(size=10, ha="center", margin={"r": 3, "t": -0.1, "units": "in"}),
-             panel_grid_minor = element_blank())
-     + scale_x_log10(limits=(10,xy_lim), labels=label_func)
-     + scale_y_log10(limits=(10,xy_lim), labels=label_func)
-     )
+             + geom_point(size=0.5)
+             + labs(title = f"Joint Cell Calling ({pkr})",
+                    caption = f"ATAC cutoffs: TSS ≥ {min_TSS}, frags ≥ {min_frags}. RNA cutoffs: UMIs ≥ {min_UMIs}, genes ≥ {min_genes}",
+                    x = "ATAC Unique Fragments per Barcode",
+                    y = "RNA UMIs per Barcode",
+                    color = "QC")
+             + theme_light()
+             + theme(figure_size = (8,6),
+                     title = element_text(size=12),
+                     axis_title = element_text(size=10),
+                     axis_text = element_text(size=8),
+                     legend_box_margin = 0,
+                     legend_title = element_text(size=8),
+                     legend_text = element_text(size=6),
+                     legend_key = element_blank(),
+                     plot_caption=element_text(size=8, ha="center", margin={"r": 3.2, "t": -0.2, "units": "in"}),
+                     panel_grid_minor = element_blank())
+             + scale_x_log10(limits=(10,xy_lim), labels=label_func)
+             + scale_y_log10(limits=(10,xy_lim), labels=label_func)
+             )
     
     plot.save(filename = f"{pkr}_joint_cell_plot.png", dpi=1000)
     
