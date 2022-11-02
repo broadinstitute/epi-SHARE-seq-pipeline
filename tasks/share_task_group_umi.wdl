@@ -123,12 +123,14 @@ task group_umi_rna {
 
     output {
 	File umi_groups_table = "${umi_groups_table}"
-        File rna_umi_barcodes_filtered = "${umi_barcodes}"
-        File rna_umi_bed_filtered = "${umi_groups_bed_filtered}"
         File rna_umi_bed_unfiltered = "${umi_groups_bed_unfiltered}"
-        File rna_umi_counts_filtered = "${umi_counts_filtered}"
+        File observed_barcodes = "observed_barcodes_combinations"
+        File rna_umi_bed_unfiltered = "${umi_groups_bed_unfiltered}"
         File rna_umi_counts_unfiltered = "${umi_counts_unfiltered}"
         File rna_umi_rm_dup_log = "${prefix}.rm_dup_barcode.log.txt"
+        File rna_umi_barcodes_filtered = "${umi_barcodes}"
+        File rna_umi_bed_filtered = "${umi_groups_bed_filtered}"
+        File rna_umi_counts_filtered = "${umi_counts_filtered}"
     }
 
     runtime {
