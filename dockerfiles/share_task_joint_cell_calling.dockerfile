@@ -49,5 +49,6 @@ ENV R_LIBS_USER=/usr/local/lib/R
 
 COPY --chown=$USER:$USER src/python/joint_cell_plotting.py /usr/local/bin
 COPY --chown=$USER:$USER src/R/joint_cell_plotting_density.R /usr/local/bin
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 USER ${USER}
