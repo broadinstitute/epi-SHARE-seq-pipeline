@@ -4,10 +4,6 @@ library(ggpointdensity)
 args <- commandArgs()
 pkr <- args[6]
 barcode_metadata_file <- args[7]
-min_UMIs <- args[8]
-min_genes <- args[9]
-min_TSS <- args[10]
-min_frags <- args[11]
 
 options(scipen=999)
 
@@ -19,13 +15,13 @@ round_to_power_10 <- function(x){
   return(10^ceiling(log10(x)))
 }
 max_x <- max(passing_df$frags)
-max_y <- max(passing_df$UMIs)
+max_y <- max(passing_df$umis)
 xy_lim <- round_to_power_10(max(max_x, max_y))
 
 # palette from https://rdrr.io/github/GreenleafLab/ArchR/src/R/ColorPalettes.R
 sambaNight <- c("6"='#1873CC',"2"='#1798E5',"8"='#00BFFF',"5"='#4AC596',"1"='#00CC00',"4"='#A2E700',"9"='#FFFF00',"7"='#FFD200',"3"='#FFA500')
 
-density_plot <- ggplot(passing_df, aes(x=frags, y=UMIs)) + 
+density_plot <- ggplot(passing_df, aes(x=frags, y=umis)) + 
                         geom_pointdensity(size=0.7) +
                         scale_color_gradientn(colors=sambaNight) + 
                         labs(title=paste0("Joint Cell Calling (", pkr, "): Density Plot", sep=""),
