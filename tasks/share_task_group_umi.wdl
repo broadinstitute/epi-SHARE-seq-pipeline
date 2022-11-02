@@ -36,10 +36,10 @@ task group_umi_rna {
 
     String umi_groups_table = "${default="share-seq" prefix}.rna.umi.groups.wdup.${genome_name}.tsv"
     String umi_groups_bed_unfiltered = "${default="share-seq" prefix}.rna.umi.groups.unfiltered.wdup.${genome_name}.bed.gz"
-    String umi_groups_bed_filtered = "${default="share-seq" prefix}.rna.umi.groups.filtered.wdup.${genome_name}.bed.gz"
+    String umi_groups_bed_filtered = "${default="share-seq" prefix}.rna.umi.groups.zfiltered.wdup.${genome_name}.bed.gz"
     String umi_counts_unfiltered = "${default="share-seq" prefix}.rna.umi.counts.unfiltered.wdup.${genome_name}.csv"
-    String umi_counts_filtered = "${default="share-seq" prefix}.rna.umi.counts.filtered.wdup.${genome_name}.csv"
-    String umi_barcodes = "${default="share-seq" prefix}.rna.umi.barcodes.filtered.wdup.${genome_name}.txt"
+    String umi_counts_filtered = "${default="share-seq" prefix}.rna.umi.counts.zfiltered.wdup.${genome_name}.csv"
+    String umi_barcodes = "${default="share-seq" prefix}.rna.umi.barcodes.zfiltered.wdup.${genome_name}.txt"
 
 
     command <<<
