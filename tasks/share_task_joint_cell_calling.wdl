@@ -16,9 +16,10 @@ task joint_cell_calling {
         String prefix
         File? atac_barcode_metadata
         File? rna_barcode_metadata
-	Int min_UMIs = 100
+        Int umi_metrics_cutoff = 10
+	Int min_umis = 100
         Int min_genes = 200
-        Int min_TSS = 4
+        Int min_tss = 4
         Int min_frags = 100
         Int disk_gb = 50
         Int mem_gb = 64
@@ -27,7 +28,7 @@ task joint_cell_calling {
     }
 
     Int dsk_gb = disk_gb
-    Int memory_gb = 64
+    Int memory_gb = mem_gb
     String barcode_metadata = '${default="share-seq" prefix}.joint.barcode.metadata.${genome_name}.csv'
 
     command {
@@ -35,9 +36,9 @@ task joint_cell_calling {
 
         bash $(which monitor_script.sh) > monitoring.log &
 
-        python3 $(which joint_cell_plotting.py) ${prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${min_UMIs} ${min_genes} ${min_TSS} ${min_frags} ${barcode_metadata}
+        python3 $(which joint_cell_plotting.py) ${prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${umi_metrics_cutoff} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${barcode_metadata}
 
-        Rscript $(which joint_cell_plotting_density.R) ${prefix} ${barcode_metadata} ${min_UMIs} ${min_genes} ${min_TSS} ${min_frags}
+        Rscript $(which joint_cell_plotting_density.R) ${prefix} ${barcode_metadata}
     }
 
     output {
