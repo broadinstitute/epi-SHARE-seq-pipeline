@@ -36,10 +36,10 @@ task group_umi_rna {
 
     String umi_groups_table = "${default="share-seq" prefix}.rna.umi.groups.wdup.${genome_name}.tsv"
     String umi_groups_bed_unfiltered = "${default="share-seq" prefix}.rna.umi.groups.unfiltered.wdup.${genome_name}.bed.gz"
-    String umi_groups_bed_filtered = "${default="share-seq" prefix}.rna.umi.groups.zfiltered.wdup.${genome_name}.bed.gz"
+    String umi_groups_bed_filtered = "${default="share-seq" prefix}.rna.umi.groups.filtered.wdup.${genome_name}.bed.gz"
     String umi_counts_unfiltered = "${default="share-seq" prefix}.rna.umi.counts.unfiltered.wdup.${genome_name}.csv"
-    String umi_counts_filtered = "${default="share-seq" prefix}.rna.umi.counts.zfiltered.wdup.${genome_name}.csv"
-    String umi_barcodes = "${default="share-seq" prefix}.rna.umi.barcodes.zfiltered.wdup.${genome_name}.txt"
+    String umi_counts_filtered = "${default="share-seq" prefix}.rna.umi.counts.filtered.wdup.${genome_name}.csv"
+    String umi_barcodes = "${default="share-seq" prefix}.rna.umi.barcodes.filtered.wdup.${genome_name}.txt"
 
 
     command <<<
@@ -59,6 +59,7 @@ task group_umi_rna {
                 --group-out=~{umi_groups_table} \
                 --skip-tags-regex=Unassigned >> ./Run.log
             awk 'NR>1{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations 
+            touch ~{prefix}.rm_dup_barcode.log.txt
         else
             # Custom UMI dedup by matching bc-umi-align position
             samtools view -@ ~{cpus} ~{bam} | \
@@ -94,7 +95,6 @@ task group_umi_rna {
                     else {print t1, t2, umisum, readsum; t1=$1;t2=$2;umisum=1;readsum=$3}}' | \
                 pigz --fast -p ~{cpus} > ~{umi_groups_bed_unfiltered}
         else
-
             less ~{umi_groups_table} | \
                 sort --parallel=~{cpus} -S ~{mem_sort}G -k1,1 -k2,2 | \
                 awk -v thr=~{if remove_single_umi then 1 else 0} -v OFS='\t' '{if($3 > thr){print}}' | \
@@ -125,9 +125,6 @@ task group_umi_rna {
     >>>
 
     output {
-	File umi_groups_table = "${umi_groups_table}"
-        File rna_umi_bed_unfiltered = "${umi_groups_bed_unfiltered}"
-        File observed_barcodes = "observed_barcodes_combinations"
         File rna_umi_bed_unfiltered = "${umi_groups_bed_unfiltered}"
         File rna_umi_counts_unfiltered = "${umi_counts_unfiltered}"
         File rna_umi_rm_dup_log = "${prefix}.rm_dup_barcode.log.txt"
