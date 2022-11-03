@@ -58,8 +58,7 @@ task group_umi_rna {
                 --output-bam -S ~{prefix + "."}rna.~{genome_name}.grouped.bam \
                 --group-out=~{umi_groups_table} \
                 --skip-tags-regex=Unassigned >> ./Run.log
-            awk '{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations 
-            head observed_barcodes_combinations
+            awk 'NR>1{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations 
         else
             # Custom UMI dedup by matching bc-umi-align position
             samtools view -@ ~{cpus} ~{bam} | \
@@ -83,7 +82,11 @@ task group_umi_rna {
             ## note: difference between these two versions of groups.tsv
             ## 1) umitools output keep all the barcode-UMI and don't collapse them
             ## 2) my script already collpsed them at alignment position level
-            less ~{umi_groups_table} | \
+            # - split so that cell barcode is in second column
+            # - remove homopolymer G umis, optionally remove single umi 
+            # - for each group, print cell barcode, umi, count
+            # - then for each barcode, print cell barcode, umi, # umis, # total reads incl dups
+           less ~{umi_groups_table} | \
                 sed 's/_/\t/g' | \
                 awk -v thr=~{if remove_single_umi then 1 else 0} 'FNR > 1 {if($10 > thr){if($9 != "GGGGGGGGGG"){print}}}' | \
                 awk 'NR==1{ id="N"} {if(id != $11 ) {id = $11; print $2, $6, $10}}' | \
