@@ -14,6 +14,7 @@ workflows:
              - insert_size_hist
              - joint_cell_calling
              - barcode_plot_annotations
+             - knee-plot
          tags:
              - /.*/
 
