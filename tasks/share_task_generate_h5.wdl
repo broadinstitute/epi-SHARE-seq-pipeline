@@ -22,7 +22,6 @@ task generate_h5 {
     Int disk_gb = 50
     Float input_file_size_gb = size(filtered_bed, "G")
     Int mem_gb = 64
-    Boolean from_bed = defined(filtered_bed)
 
     command {
         set -e
