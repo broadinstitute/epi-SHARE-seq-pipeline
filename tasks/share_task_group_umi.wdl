@@ -59,8 +59,7 @@ task group_umi_rna {
                 --group-out=~{umi_groups_table} \
                 --skip-tags-regex=Unassigned >> ./Run.log
             awk 'NR>1{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations 
-            echo "total reads: 1" >> ~{prefix}.rm_dup_barcode.log.txt
-            echo "total dup reads: 0" >> ~{prefix}.rm_dup_barcode.log.txt
+            awk 'NR>1{sum++}END{print "total reads:",sum; print "unique reads:", $NF; print "total dup reads:", sum-$NF}' ~{umi_groups_table} >> ~{prefix}.rm_dup_barcode.log.txt
         else
             # Custom UMI dedup by matching bc-umi-align position
             samtools view -@ ~{cpus} ~{bam} | \
