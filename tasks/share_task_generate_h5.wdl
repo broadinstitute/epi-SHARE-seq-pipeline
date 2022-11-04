@@ -30,7 +30,7 @@ task generate_h5 {
 
     command <<<
         set -e
-        ~{if binary_vcf then "Rscript $(which UMI_gene_perCell_plot_v2.R) filtered_bed --save" else ""}
+        ~{if from_bed then "Rscript $(which UMI_gene_perCell_plot_v2.R) filtered_bed --save" else ""}
 
     >>>
 
