@@ -14,7 +14,8 @@ task generate_h5 {
     input {
         # This task computs the the gene by barcode matrix.
 
-        File filtered_bed
+        File? filtered_bed
+        String? data_dir
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
         String docker_image = "swekhande/shareseq-prod:share-task-generate-h5"
 
@@ -25,13 +26,13 @@ task generate_h5 {
     Int disk_gb = 50
     Float input_file_size_gb = size(filtered_bed, "G")
     Int mem_gb = 64
+    Boolean from_bed = defined(filtered_bed)
 
-
-    command {
+    command <<<
         set -e
-        Rscript $(which UMI_gene_perCell_plot_v2.R) ${filtered_bed} --save
+        ~{if binary_vcf then "Rscript $(which UMI_gene_perCell_plot_v2.R) filtered_bed --save" else ""}
 
-    }
+    >>>
 
     output {
         File h5_matrix = glob('*.h5')[0]
