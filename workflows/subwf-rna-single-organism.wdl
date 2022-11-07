@@ -161,6 +161,7 @@ workflow wf_rna {
 
         File share_rna_seurat_notebook_output = seurat.notebook_output
         File share_rna_seurat_notebook_log = seurat.notebook_log
+        File share_rna_seurat_barcode_metadata = seurat.seurat_barcode_metadata
         File? share_rna_seurat_raw_violin_plot = seurat.seurat_raw_violin_plot
         File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
         File? share_rna_seurat_raw_qc_scatter_plot = seurat.seurat_raw_qc_scatter_plot

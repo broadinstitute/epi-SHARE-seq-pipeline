@@ -103,6 +103,7 @@ task seurat {
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
+        File seurat_barcode_metadata = barcode_metadata
         #File papermill_log = papermill_log_filename
         File? seurat_raw_violin_plot = raw_violin_plot
         File? seurat_filtered_violin_plot = filtered_violin_plot
@@ -118,7 +119,6 @@ task seurat {
         File? seurat_umap_rna_count_plot = umap_rna_count_plot
         File? seurat_umap_gene_count_plot = umap_gene_count_plot
         File? seurat_umap_mito_plot = umap_mito_plot
-        File? seurat_barcode_metadata = barcode_metadata
         File? seurat_raw_obj = raw_seurat_rds
         File? seurat_filtered_obj = filtered_seurat_rds
         File? seurat_raw_matrix = raw_seurat_h5
