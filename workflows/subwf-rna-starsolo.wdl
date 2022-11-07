@@ -19,19 +19,11 @@ workflow wf_rna {
         String genome_name
         Int? cpus = 16
         String? docker
-        # Update RGID
-        Boolean multimappers = false
-        # Assign features
-        Boolean include_multimappers = false
-        Boolean include_introns = false
-        File gtf
-        String gene_naming = "gene_name"
-        # Group UMI
-        Boolean remove_single_umi = true
-        String mode = "fast"
-        Int cutoff = 100
         File whitelist
-    }
+        # Seurat
+        Int umap_dim = 10
+        Float umap_resolution = 0.5 
+   }
 
     call share_task_align_starsolo as align {
         input:
@@ -44,6 +36,14 @@ workflow wf_rna {
             cpus = cpus
     }
 
+    call share_task_seurat.seurat as seurat{
+        input:
+            rna_matrix = align.data_dir,
+            genome_name = genome_name,
+            umap_dim = umap_dim,
+            umap_resolution = umap_resolution,
+            prefix = prefix
+    }
 
     output {
         File share_task_starsolo_output_bam = align.output_bam
@@ -58,6 +58,25 @@ workflow wf_rna {
         File share_task_starsolo_barcodes_raw = align.barcodes_raw
         File share_task_starsolo_features_raw = align.features_raw
         File share_task_starsolo_matrix_raw = align.matrix_raw
+
+        File share_rna_seurat_notebook_output = seurat.notebook_output
+        File share_rna_seurat_notebook_log = seurat.notebook_log
+        File? share_rna_seurat_raw_violin_plot = seurat.seurat_raw_violin_plot
+        File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
+        File? share_rna_seurat_raw_qc_scatter_plot = seurat.seurat_raw_qc_scatter_plot
+        File? share_rna_seurat_filtered_qc_scatter_plot = seurat.seurat_filtered_qc_scatter_plot
+        File? share_rna_seurat_variable_genes_plot = seurat.seurat_variable_genes_plot
+        File? share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
+        File? share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
+        File? share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
+        File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
+        File? share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
+        File? share_rna_seurat_umap_cluster_plot = seurat.seurat_umap_cluster_plot
+        File? share_rna_seurat_umap_rna_count_plot = seurat.seurat_umap_rna_count_plot
+        File? share_rna_seurat_umap_gene_count_plot = seurat.seurat_umap_gene_count_plot
+        File? share_rna_seurat_umap_mito_plot = seurat.seurat_umap_mito_plot
+        File? share_rna_seurat_obj = seurat.seurat_filtered_obj
+        File? share_rna_plots_zip = seurat.plots_zip
     }
 }
 
