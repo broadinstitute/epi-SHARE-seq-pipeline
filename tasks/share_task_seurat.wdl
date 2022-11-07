@@ -74,7 +74,11 @@ task seurat {
     #String papermill_log_filename = 'papermill.logfile.txt'
 
     command {
-
+        if [[ ${rna_matrix} == *.tar.gz ]]
+        then
+           tar -xvzf ${rna_matrix} 
+           rna_matrix="./"
+        fi
         papermill $(which seurat_notebook.ipynb) ${output_filename} \
         -p rna_matrix ${rna_matrix} \
         -p genome ${genome_name} \

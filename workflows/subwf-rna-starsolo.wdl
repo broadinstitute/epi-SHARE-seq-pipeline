@@ -38,7 +38,7 @@ workflow wf_rna {
 
     call share_task_seurat.seurat as seurat{
         input:
-            rna_matrix = align.data_dir,
+            rna_matrix = align.raw_tar,
             genome_name = genome_name,
             umap_dim = umap_dim,
             umap_resolution = umap_resolution,
@@ -124,7 +124,9 @@ task share_task_align_starsolo {
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
 
-        gzip $(pwd)/result/Solo.out/Gene/raw/*
+        cd $(pwd)/result/Solo.out/Gene/raw/
+        tar -cvf $(pwd)/raw.tar
+        gzip $(pwd)/raw.tar
     }
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
@@ -136,10 +138,7 @@ task share_task_align_starsolo {
         File features_stats = "result/Solo.out/Gene/Features.stats"
         File summary_csv = "result/Solo.out/Gene/Summary.csv"
         File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
-        File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx.gz"
-        File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv.gz"
-        File features_raw = "result/Solo.out/Gene/raw/features.tsv.gz"
-
+        File raw_tar = "raw.tar.gz"
     }
     runtime{
         cpu : cpus
