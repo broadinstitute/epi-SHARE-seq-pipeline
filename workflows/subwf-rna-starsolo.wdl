@@ -125,8 +125,11 @@ task share_task_align_starsolo {
         --readFilesCommand zcat
 
         cd $(pwd)/result/Solo.out/Gene/raw/
-        tar -cvf $(pwd)/raw.tar *
-        gzip $(pwd)/raw.tar
+        gzip *
+        tar -cvf raw.tar *.gz
+        gzip raw.tar
+        ls
+        pwd
     }
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
@@ -138,7 +141,7 @@ task share_task_align_starsolo {
         File features_stats = "result/Solo.out/Gene/Features.stats"
         File summary_csv = "result/Solo.out/Gene/Summary.csv"
         File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
-        File raw_tar = "raw.tar.gz"
+        File raw_tar = "result/Solo.out/Gene/raw/raw.tar.gz"
     }
     runtime{
         cpu : cpus
