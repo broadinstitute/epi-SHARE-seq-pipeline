@@ -57,9 +57,7 @@ workflow wf_rna {
         File share_task_starsolo_features_stats = align.features_stats
         File share_task_starsolo_summary_csv = align.summary_csv
         File share_task_starsolo_umi_per_cell = align.umi_per_cell
-        File share_task_starsolo_barcodes_raw = align.barcodes_raw
-        File share_task_starsolo_features_raw = align.features_raw
-        File share_task_starsolo_matrix_raw = align.matrix_raw
+        File share_task_starsolo_raw_tar = align.raw_tar
 
         File share_rna_seurat_notebook_output = seurat.notebook_output
         File share_rna_seurat_notebook_log = seurat.notebook_log
