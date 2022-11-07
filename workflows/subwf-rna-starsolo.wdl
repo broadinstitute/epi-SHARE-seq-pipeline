@@ -125,7 +125,7 @@ task share_task_align_starsolo {
         --readFilesCommand zcat
 
         cd $(pwd)/result/Solo.out/Gene/raw/
-        tar -cvf $(pwd)/raw.tar
+        tar -cvf $(pwd)/raw.tar *
         gzip $(pwd)/raw.tar
     }
     output{
