@@ -1,5 +1,7 @@
 version 1.0
 
+import "../tasks/share_task_seurat.wdl" as share_task_seurat
+
 # Import the tasks called by the pipeline
 workflow wf_rna {
     meta {
