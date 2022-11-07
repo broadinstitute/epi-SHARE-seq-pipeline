@@ -92,8 +92,8 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
             count_choices.append(f"{outcome} ({outcome_counts[outcome]})")
         else:
             count_choices.append(f"{outcome} (0)")
-            
-    #count_choices = [f"{outcome} ({outcome_counts[outcome]})" for outcome in qc_choices]
+    count_choices.sort()
+        
     df["QC_count"] = np.select(outcome_conditions, count_choices)
     
     return(df)
