@@ -47,15 +47,19 @@ task group_umi_rna {
 
         if [[ '~{mode}' == 'regular' ]]; then
             # Seems to get more slant and fewer UMIs, but get accurate lib size estimation. Slow.
+            ln -s ~{bam} ./bam.bam            
+            samtools index  -@ ~{cpus} ./bam.bam
             umi_tools group \
                 --extract-umi-method=read_id \
                 --per-gene \
                 --gene-tag=XT \
                 --per-cell \
-                -I ~{bam} \
+                -I bam.bam \
                 --output-bam -S ~{prefix + "."}rna.~{genome_name}.grouped.bam \
-                --group-out= ~{umi_groups_table} \
-                --skip-tags-regex=Unassigned >>./Run.log
+                --group-out=~{umi_groups_table} \
+                --skip-tags-regex=Unassigned >> ./Run.log
+            awk 'NR>1{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations 
+            awk 'NR>1{sum++}END{print "total reads:",sum; print "unique reads:", $NF; print "total dup reads:", sum-$NF}' ~{umi_groups_table} >> ~{prefix}.rm_dup_barcode.log.txt
         else
             # Custom UMI dedup by matching bc-umi-align position
             samtools view -@ ~{cpus} ~{bam} | \
@@ -70,18 +74,20 @@ task group_umi_rna {
                     -i ~{prefix + "."}rna.~{genome_name}.wdup.bed \
                     -o ~{umi_groups_table} \
                     --m 1 > ~{prefix}.rm_dup_barcode.log.txt
+            cut -f1 ~{umi_groups_table} | sort -u > observed_barcodes_combinations
         fi
-
-        cut -f1 ~{umi_groups_table} | sort -u > observed_barcodes_combinations
 
         # convert groupped UMI to bed file
         if [[ '~{mode}' == 'regular' ]]; then
-
             ## 3rd column is umi, 4th column is read
             ## note: difference between these two versions of groups.tsv
             ## 1) umitools output keep all the barcode-UMI and don't collapse them
             ## 2) my script already collpsed them at alignment position level
-            less ~{umi_groups_table} | \
+            # - split so that cell barcode is in second column
+            # - remove homopolymer G umis, optionally remove single umi 
+            # - for each group, print cell barcode, umi, count
+            # - then for each barcode, print cell barcode, umi, # umis, # total reads incl dups
+           less ~{umi_groups_table} | \
                 sed 's/_/\t/g' | \
                 awk -v thr=~{if remove_single_umi then 1 else 0} 'FNR > 1 {if($10 > thr){if($9 != "GGGGGGGGGG"){print}}}' | \
                 awk 'NR==1{ id="N"} {if(id != $11 ) {id = $11; print $2, $6, $10}}' | \
@@ -89,7 +95,6 @@ task group_umi_rna {
                     else {print t1, t2, umisum, readsum; t1=$1;t2=$2;umisum=1;readsum=$3}}' | \
                 pigz --fast -p ~{cpus} > ~{umi_groups_bed_unfiltered}
         else
-
             less ~{umi_groups_table} | \
                 sort --parallel=~{cpus} -S ~{mem_sort}G -k1,1 -k2,2 | \
                 awk -v thr=~{if remove_single_umi then 1 else 0} -v OFS='\t' '{if($3 > thr){print}}' | \
@@ -120,12 +125,12 @@ task group_umi_rna {
     >>>
 
     output {
-        File rna_umi_barcodes_filtered = "${umi_barcodes}"
-        File rna_umi_bed_filtered = "${umi_groups_bed_filtered}"
         File rna_umi_bed_unfiltered = "${umi_groups_bed_unfiltered}"
-        File rna_umi_counts_filtered = "${umi_counts_filtered}"
         File rna_umi_counts_unfiltered = "${umi_counts_unfiltered}"
         File rna_umi_rm_dup_log = "${prefix}.rm_dup_barcode.log.txt"
+        File rna_umi_barcodes_filtered = "${umi_barcodes}"
+        File rna_umi_bed_filtered = "${umi_groups_bed_filtered}"
+        File rna_umi_counts_filtered = "${umi_counts_filtered}"
     }
 
     runtime {

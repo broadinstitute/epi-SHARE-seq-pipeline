@@ -61,36 +61,34 @@ if __name__ == "__main__":
         umi = read[3]
         gene = read[4]
 
-#        print(line)
         ## same starting pos and barcode
         if umi != "GGGGGGGG":
             if ((start_site == pre_site) and (chrom_num == pre_chrom)):
                 newposition = False
-                # print("old position")
                 if barcode in umiset.keys():
                     value = umiset[barcode]
                     eachumi = value[0]
                     num = value[1]
                     if distance(umi, eachumi) <= mismatch:
-                        # print("found umi")
                         num += 1
                         umiset[barcode] = [umi, num]
                         dups += 1
                     else:
-                        # print("new UMI")
+                        countset[barcode] = gene
                         umiset[barcode] = [umi, 1]
                 else:
                     umiset[barcode] = [umi, 1]
-                    # print("new bc")
+                    countset[barcode] = gene
             else:
                 newposition = True
                 for key, value in umiset.items():
-                    newline = key + '\t' + gene + '\t' + str(value[1]) + '\t' + value[0] + '\n'
-                    # print(newline)
+                    newline = key + '\t' + countset[key] + '\t' + str(value[1]) + '\t' + value[0] + '\n'
                     fileout.write(str.encode(newline))
 
                 umiset = dict()
+                countset = dict()
                 umiset[barcode] = [umi, 1]
+                countset[barcode] = gene
                 pre_site = start_site
                 pre_chrom = chrom_num
 
