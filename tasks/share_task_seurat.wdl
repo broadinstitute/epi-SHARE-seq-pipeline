@@ -107,7 +107,7 @@ task seurat {
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
-        File seurat_barcode_metadata = barcode_metadata
+        File? seurat_barcode_metadata = barcode_metadata
         #File papermill_log = papermill_log_filename
         File? seurat_raw_violin_plot = raw_violin_plot
         File? seurat_filtered_violin_plot = filtered_violin_plot
