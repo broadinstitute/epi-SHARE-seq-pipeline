@@ -43,7 +43,7 @@ task seurat {
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
         
-        String docker_image = "docker.io/nchernia/share_task_seurat:2"
+        String docker_image = "docker.io/nchernia/share_task_seurat:3"
         Int mem_gb = 128
     }
 
