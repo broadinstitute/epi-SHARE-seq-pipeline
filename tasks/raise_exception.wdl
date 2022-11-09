@@ -20,5 +20,6 @@ task raise_exception {
         memory : '2 GB'
         time : 1
         disks : 'local-disk 10 SSD'
+    	docker : 'encodedcc/chip-seq-pipeline:v2.2.1'
     }
 }
