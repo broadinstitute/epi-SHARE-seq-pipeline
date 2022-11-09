@@ -79,13 +79,21 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
     
     # add df column with QC outcome
     qc_conditions  = [(pass_umis & pass_genes & pass_tss & pass_frags), (pass_umis & pass_genes), (pass_tss & pass_frags)]
-    qc_choices = ["both", "RNA only", "ATAC only"]
-    df["QC"] = np.select(qc_conditions, qc_choices, default="neither")
+    qc_choices = ["both", "RNA only", "ATAC only", "neither"]
+    df["QC"] = np.select(qc_conditions, qc_choices[0:3], default="neither")
     
     # get counts of each outcome type (used in plot legend)
     outcome_counts = df["QC"].value_counts().sort_index() # sort to avoid ordering by count value
     outcome_conditions = [df["QC"]=="ATAC only", df["QC"]=="RNA only", df["QC"]=="both", df["QC"]=="neither"]
-    count_choices = [f"{outcome} ({outcome_counts[outcome]})" for outcome in outcome_counts.index]
+    
+    count_choices = []
+    for outcome in qc_choices:
+        if outcome in outcome_counts.index:
+            count_choices.append(f"{outcome} ({outcome_counts[outcome]})")
+        else:
+            count_choices.append(f"{outcome} (0)")
+    count_choices.sort()
+        
     df["QC_count"] = np.select(outcome_conditions, count_choices)
     
     return(df)

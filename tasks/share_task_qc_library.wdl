@@ -20,9 +20,7 @@ task qc_library {
         Int? memory_gb = 16
         String genome_name
         String? prefix
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_library"
-        #String docker_image = "nchernia/share_task_qc_library:5"        
-        String docker_image = "mknudson/share_task_qc_library:test" 
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_library"
         String assay
     }
 
