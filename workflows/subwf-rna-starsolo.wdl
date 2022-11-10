@@ -110,7 +110,7 @@ task share_task_align_starsolo {
         --soloStrand Forward \
         --soloUMIdedup 1MM_All \
         --soloCBwhitelist ${whitelist} \
-        --soloFeatures Gene  \
+        --soloFeatures GeneFull  \
         --outSAMtype BAM SortedByCoordinate \
         --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD \
         --runThreadN ${cpus} \
@@ -124,12 +124,10 @@ task share_task_align_starsolo {
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
 
-        cd $(pwd)/result/Solo.out/Gene/raw/
+        cd $(pwd)/result/Solo.out/GeneFull/raw/
         gzip *
         tar -cvf raw.tar *.gz
         gzip raw.tar
-        ls
-        pwd
     }
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
@@ -138,10 +136,10 @@ task share_task_align_starsolo {
         File log_progress_out = "result/Log.progress.out"
         File output_sj = "result/SJ.out.tab"
         File barcodes_stats = "result/Solo.out/Barcodes.stats"
-        File features_stats = "result/Solo.out/Gene/Features.stats"
-        File summary_csv = "result/Solo.out/Gene/Summary.csv"
-        File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
-        File raw_tar = "result/Solo.out/Gene/raw/raw.tar.gz"
+        File features_stats = "result/Solo.out/GeneFull/Features.stats"
+        File summary_csv = "result/Solo.out/GeneFull/Summary.csv"
+        File umi_per_cell = "result/Solo.out/GeneFull/UMIperCellSorted.txt"
+        File raw_tar = "result/Solo.out/GeneFull/raw/raw.tar.gz"
     }
     runtime{
         cpu : cpus
