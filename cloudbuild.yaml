@@ -219,7 +219,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_join_cell_calling:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_cell_calling:latest']
   waitFor: ['task-joint-cell-calling']
 
 - name: 'gcr.io/cloud-builders/docker'
