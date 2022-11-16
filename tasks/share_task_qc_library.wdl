@@ -33,6 +33,8 @@ task qc_library {
     command {
         set -e
 
+        bash $(which monitor_script.sh) > monitoring.log &
+
         # TODO remove the hard coded file paths from R scripts
         # TODO create only one R script that uses the parameters to discriminate
         # Estimate lib size
@@ -44,6 +46,7 @@ task qc_library {
     }
 
     output {
+        File lib_size_monitor = "monitoring.log"
         File lib_size_counts = glob('*.libsize.counts.csv')[0]
         File lib_size_log = glob('*.dups.log.txt')[0]
         File plot = glob('*.png')[0]
@@ -59,26 +62,29 @@ task qc_library {
 
     parameter_meta {
         raw_counts: {
-                description: 'Barcode count csv',
-                help: 'Barcode counts from raw bam in csv format.',
-                example: 'raw.counts.csv'
-            }
+            description: 'Barcode count csv',
+            help: 'Barcode counts from raw bam in csv format.',
+            example: 'raw.counts.csv'
+        }
         filtered_counts: {
             description: 'Barcode count csv',
             help: 'Barcode counts from filtered bam in csv format.',
             example: 'filtered.counts.csv'
         }
         genome_name: {
-                description: 'Reference name',
-                help: 'The name of the reference genome used by the aligner.',
-                examples: ['hg38', 'mm10', 'both']
-            }
+            description: 'Reference name',
+            help: 'The name of the reference genome used by the aligner.',
+            examples: ['hg38', 'mm10', 'both']
+        }
         docker_image: {
-                description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
-                example: ['put link to gcr or dockerhub']
-            }
+            description: 'Docker image.',
+            help: 'Docker image for library QC step.',
+            example: ['put link to gcr or dockerhub']
+        }
+        assay: {
+            description: 'Assay name.',
+            help: 'The name of the assay being evaluated.',
+            examples: ['RNA', 'ATAC']
+        }
     }
-
-
 }
