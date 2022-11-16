@@ -37,7 +37,6 @@ RUN apt-get update -qq && \
     libmagick++-dev \
     libgeos-dev \
     meson \
-    pkg-config \
     python3 \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
