@@ -20,7 +20,8 @@ task qc_library {
         Int? memory_gb = 16
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_library"
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_library"
+        String docker_image = "mknudson/share_task_qc_library:test"
         String assay
     }
 
@@ -33,6 +34,8 @@ task qc_library {
     command {
         set -e
 
+        bash $(which monitor_script.sh) > monitoring.log &
+
         # TODO remove the hard coded file paths from R scripts
         # TODO create only one R script that uses the parameters to discriminate
         # Estimate lib size
@@ -44,6 +47,7 @@ task qc_library {
     }
 
     output {
+        File lib_size_monitor = "monitoring.log"
         File lib_size_counts = glob('*.libsize.counts.csv')[0]
         File lib_size_log = glob('*.dups.log.txt')[0]
         File plot = glob('*.png')[0]
