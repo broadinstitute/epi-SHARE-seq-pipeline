@@ -214,7 +214,7 @@ workflow ShareSeq {
         File? share_rna_umi_barcodes = rna.share_rna_umi_barcodes
         File? share_rna_umi_bed_filtered = rna.share_rna_umi_bed_filtered
         File? share_rna_umi_bed_unfiltered = rna.share_rna_umi_bed_unfiltered
-        File? share_rna_umi_counts_filtered = rna.share_rna_umi_bed_unfiltered
+        File? share_rna_umi_counts_filtered = rna.share_rna_umi_counts_filtered
         File? share_rna_umi_counts_unfiltered = rna.share_rna_umi_counts_unfiltered
         File? share_rna_umi_rm_dup_log = rna.share_rna_umi_rm_dup_log
 
