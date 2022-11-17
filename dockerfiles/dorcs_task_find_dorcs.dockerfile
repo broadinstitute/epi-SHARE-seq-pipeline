@@ -54,7 +54,7 @@ RUN chown $USER:$USER /usr/local/lib/R
 
 COPY --chown=$USER:$USER src/jupyter_nb/dorcs_jplot_notebook.ipynb /usr/local/bin/
 
-COPY --chown=$USER:$USER src/jupyter_nb/dorcs_notebook_rds.ipynb /usr/local/bin/
+#COPY --chown=$USER:$USER src/jupyter_nb/dorcs_notebook_rds.ipynb /usr/local/bin/
 
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
