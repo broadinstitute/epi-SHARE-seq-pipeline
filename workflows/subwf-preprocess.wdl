@@ -306,7 +306,7 @@ task BasecallsToBams {
 
 	Float bclSize = size(bcl, 'G')
 
-	Int diskSize = ceil(2.1 * bclSize)
+	Int diskSize = ceil(3 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 	Int javaMemory = ceil((memory - 0.5) * 1000)
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
