@@ -112,7 +112,7 @@ task share_task_align_starsolo {
         --soloCBwhitelist ${whitelist} \
         --soloFeatures GeneFull  \
         --outSAMtype BAM SortedByCoordinate \
-        --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD \
+        --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
         --runThreadN ${cpus} \
         --chimOutType WithinBAM \
         --genomeDir ./ \
