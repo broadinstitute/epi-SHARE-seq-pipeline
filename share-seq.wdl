@@ -2,7 +2,7 @@ version 1.0
 
 # Import the sub-workflow for preprocessing the fastqs.
 import "workflows/subwf-atac-single-organism.wdl" as share_atac
-import "workflows/subwf-rna-single-organism.wdl" as share_rna
+import "workflows/subwf-rna-starsolo.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/share_task_joint_cell_calling.wdl" as joint_cell_calling
 import "tasks/share_task_html_report.wdl" as html_report
