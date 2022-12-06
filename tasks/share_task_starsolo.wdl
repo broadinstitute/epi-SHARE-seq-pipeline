@@ -2,7 +2,7 @@ version 1.0
 
 # TASK
 # SHARE-atac-STAR
-task share_task_align_starsolo {
+task share_task_starsolo {
     meta {
         version: 'v0.1'
         author: 'Neva Durand (neva@broadinstitute.org) at Broad Institute of MIT and Harvard'
