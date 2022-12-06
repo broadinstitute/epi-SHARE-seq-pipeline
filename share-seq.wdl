@@ -218,16 +218,16 @@ workflow ShareSeq {
         File? share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot 
         File? share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot
         File? share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot
-        File? share_rna_seurat_heatmap_plot = rna.seurat_heatmap_plot
-        File? share_rna_seurat_jackstraw_plot = rna.seurat_jackstraw_plot
-        File? share_rna_seurat_elbow_plot = rna.seurat_elbow_plot
-        File? share_rna_seurat_umap_cluster_plot = rna.seurat_umap_cluster_plot
-        File? share_rna_seurat_umap_rna_count_plot = rna.seurat_umap_rna_count_plot
-        File? share_rna_seurat_umap_gene_count_plot = rna.seurat_umap_gene_count_plot
-        File? share_rna_seurat_umap_mito_plot = rna.seurat_umap_mito_plot
-        File? share_rna_seurat_obj = rna.seurat_filtered_obj
-        File? share_rna_plots_zip = rna.plots_zip
-        File? share_rna_seurat_raw_h5 = rna.raw_seurat_h5
+        File? share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot
+        File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
+        File? share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot
+        File? share_rna_seurat_umap_cluster_plot = rna.share_rna_seurat_umap_cluster_plot
+        File? share_rna_seurat_umap_rna_count_plot = rna.share_rna_seurat_umap_rna_count_plot 
+        File? share_rna_seurat_umap_gene_count_plot = rna.share_rna_seurat_umap_gene_count_plot
+        File? share_rna_seurat_umap_mito_plot = rna.share_rna_seurat_umap_mito_plot
+        File? share_rna_seurat_obj = rna.share_rna_seurat_obj 
+        File? share_rna_plots_zip = rna.share_rna_plots_zip 
+        File? share_rna_seurat_raw_h5 = rna.share_rna_seurat_raw_h5
         File? share_rna_seurat_barcode_metadata = rna.seurat_barcode_metadata 
         
         File? share_atac_alignment_raw_index = atac.share_atac_alignment_raw_index
