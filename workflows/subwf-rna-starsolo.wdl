@@ -79,6 +79,6 @@ workflow wf_rna {
         File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
         File? share_rna_seurat_raw_h5 = seurat.seurat_raw_matrix
-        File? share_rna_seurat_seurat_barcode_metadata = seurat.seurat_barcode_metadata 
+        File? share_rna_seurat_barcode_metadata = seurat.seurat_barcode_metadata 
     }
 }
