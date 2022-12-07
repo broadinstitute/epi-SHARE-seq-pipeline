@@ -33,20 +33,13 @@ workflow ShareSeq {
         Boolean include_multimappers = false
         Boolean include_introns = true
         Array[File] read1_rna
+	Array[File] read2_rna
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
         Int? cpus_rna
         String? gene_naming = "gene_name"
-
-        # Group UMI
-        Boolean? remove_single_umi = false
-        String? mode = "fast"
-        Int? cutoff_rna = 100
-
-        # Lib_size QC
-        Boolean qc = false
-
+	File? whitelist
 
         # DORCs specific inputs
         File? peak_set
@@ -96,25 +89,13 @@ workflow ShareSeq {
         if ( read1_rna[0] != "" ) {
             call share_rna.wf_rna as rna{
                 input:
-                    read1 = read1_rna,
-                    idx_tar = idx_tar_rna_,
+                    fastq_R1 = read1_rna,
+                    fastq_R2 = read2_rna,
+                    genome_index_tar = idx_tar_rna_,
                     prefix = prefix,
                     genome_name = genome_name,
                     cpus = cpus_rna,
-                    # Update RGID
-                    multimappers = multimappers,
-                    # Assign features
-                    include_multimappers = include_multimappers,
-                    include_introns = include_introns,
-                    gtf = gtf_,
-                    gene_naming = gene_naming,
-                    # Group UMI
-                    remove_single_umi = remove_single_umi,
-                    mode = mode,
-                    cutoff = cutoff_rna,
-                    # Lib_size QC
-                    qc = qc,
-                    genes_annotation_bed = genes_annotation_bed_
+                    whitelist = whitelist,
             }
         }
     }
