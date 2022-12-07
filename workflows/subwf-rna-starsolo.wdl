@@ -12,7 +12,7 @@ workflow wf_rna {
     }
 
     input {
-        # RNA Sub-worflow inputs
+        # RNA Sub-workflow inputs
 
         # Align
         Array[File] read1
@@ -50,7 +50,7 @@ workflow wf_rna {
 
     output {
         File share_task_starsolo_output_bam = align.output_bam
-        File share_task_starsolo_log_final_out = align.log_final_out
+        File share_rna_alignment_log = align.log_final_out
         File share_task_starsolo_log_out = align.log_out
         File share_task_starsolo_log_progress_out = align.log_progress_out
         File share_task_starsolo_output_sj = align.output_sj
@@ -78,5 +78,7 @@ workflow wf_rna {
         File? share_rna_seurat_umap_mito_plot = seurat.seurat_umap_mito_plot
         File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
+        File? share_rna_seurat_raw_h5 = seurat.seurat_raw_matrix
+        File? share_rna_seurat_seurat_barcode_metadata = seurat.seurat_barcode_metadata 
     }
 }

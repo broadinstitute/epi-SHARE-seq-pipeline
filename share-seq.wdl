@@ -192,23 +192,21 @@ workflow ShareSeq {
 
             ## JPEG files to be encoded and appended to html
             # RNA plots
-            image_files = [joint.joint_cell_plot, joint.joint_cell_density_plot, rna.share_rna_qc_library_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_library_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment, atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_strict_raw_tss_enrichment, atac.share_atac_archr_strict_filtered_tss_enrichment, atac.share_atac_archr_strict_raw_fragment_size_plot, atac.share_atac_archr_strict_filtered_fragment_size_plot, atac.share_atac_archr_strict_umap_doublets, atac.share_atac_archr_strict_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_strict_umap_num_frags_plot, atac.share_atac_archr_strict_umap_tss_score_plot, atac.share_atac_archr_strict_umap_frip_plot,atac.share_atac_archr_strict_gene_heatmap_plot, dorcs.j_plot],
+            image_files = [joint.joint_cell_plot, joint.joint_cell_density_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_library_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment, atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_strict_raw_tss_enrichment, atac.share_atac_archr_strict_filtered_tss_enrichment, atac.share_atac_archr_strict_raw_fragment_size_plot, atac.share_atac_archr_strict_filtered_fragment_size_plot, atac.share_atac_archr_strict_umap_doublets, atac.share_atac_archr_strict_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_strict_umap_num_frags_plot, atac.share_atac_archr_strict_umap_tss_score_plot, atac.share_atac_archr_strict_umap_frip_plot,atac.share_atac_archr_strict_gene_heatmap_plot, dorcs.j_plot],
 
             ## Links to files and logs to append to end of html
-            log_files = [rna.share_rna_alignment_log, rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
+            log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
     }
 
     output{
-        File? share_task_starsolo_output_bam = rna.share_task_starsolo_output_bam
-        File? share_task_starsolo_log_final_out = rna.share_task_starsolo_log_final_out
-        File? share_task_starsolo_log_out = rna.share_task_starsolo_log_out
-        File? share_task_starsolo_log_progress_out = rna.share_task_starsolo_log_progress_out
-        File? share_task_starsolo_output_sj = rna.share_task_starsolo_output_sj
-        File? share_task_starsolo_barcodes_stats = rna.share_task_starsolo_barcodes_stats
-        File? share_task_starsolo_features_stats = rna.share_task_starsolo_features_stats
-        File? share_task_starsolo_summary_csv = rna.share_task_starsolo_summary_csv
-        File? share_task_starsolo_umi_per_cell = rna.share_task_starsolo_umi_per_cell 
-        File? share_task_starsolo_raw_tar = rna.share_task_starsolo_raw_tar
+        File? share_rna_output_bam = rna.share_task_starsolo_output_bam
+        File? share_rna_alignment_log = rna.share_task_starsolo_log_out
+        File? share_rna_summary_stats = rna.share_task_starsolo_summary_csv
+        File? share_rna_barcodes_stats = rna.share_task_starsolo_barcodes_stats
+        File? share_rna_features_stats = rna.share_task_starsolo_features_stats
+        File? share_rna_summary_csv = rna.share_task_starsolo_summary_csv
+        File? share_rna_umi_per_cell = rna.share_task_starsolo_umi_per_cell 
+        File? share_rna_raw_tar = rna.share_task_starsolo_raw_tar
 
         File? share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
         File? share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
