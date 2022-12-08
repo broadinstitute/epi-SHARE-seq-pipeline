@@ -39,7 +39,6 @@ workflow ShareSeq {
         File? idx_tar_rna
         Int? cpus_rna
         String? gene_naming = "gene_name"
-	File? whitelist
 
         # DORCs specific inputs
         File? peak_set
@@ -89,13 +88,12 @@ workflow ShareSeq {
         if ( read1_rna[0] != "" ) {
             call share_rna.wf_rna as rna{
                 input:
-                    fastq_R1 = read1_rna,
-                    fastq_R2 = read2_rna,
-                    genome_index_tar = idx_tar_rna_,
+                    read1 = read1_rna,
+                    read2 = read2_rna,
+                    idx_tar = idx_tar_rna_,
                     prefix = prefix,
                     genome_name = genome_name,
                     cpus = cpus_rna,
-                    whitelist = whitelist,
             }
         }
     }
