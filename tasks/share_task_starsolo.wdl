@@ -34,7 +34,7 @@ task share_rna_align {
           gunzip -c "${fq}" | awk 'NR%4==2{dict[substr($1,1,24)]}END{for (i in dict){print i}}' >> whitelist.txt
         done
         $(which STAR) \
-        --readFilesIn ${sep=',' fastq_R1} ${sep=',' fastq_R2}  \
+        --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
         --soloType CB_UMI_Simple \
         --soloCBstart 1 \
         --soloCBlen 24 \
@@ -47,7 +47,7 @@ task share_rna_align {
         --soloFeatures GeneFull  \
         --outSAMtype BAM SortedByCoordinate \
         --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
-        --runThreadN ${cpus} \
+        --runThreadN ~{cpus} \
         --chimOutType WithinBAM \
         --genomeDir ./ \
         --outFileNamePrefix result/ \
