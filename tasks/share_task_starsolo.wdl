@@ -25,7 +25,7 @@ task share_rna_align {
 
     Int mem_gb = 64
     Int disk_gb = 300
-    command{
+    command <<<
         set -e
         # Untar the genome
         tar xvzf ${genome_index_tar} --no-same-owner -C ./
@@ -62,7 +62,7 @@ task share_rna_align {
         gzip *
         tar -cvf raw.tar *.gz
         gzip raw.tar
-    }
+    >>>
     output{
         File output_bam = "result/Aligned.sortedByCoord.out.bam"
         File log_final_out = "result/Log.final.out"
