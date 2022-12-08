@@ -28,7 +28,7 @@ task share_rna_align {
     command <<<
         set -e
         # Untar the genome
-        tar xvzf ${genome_index_tar} --no-same-owner -C ./
+        tar xvzf ~{genome_index_tar} --no-same-owner -C ./
         for fq in ~{sep=' ' fastq_R2}
         do
           gunzip -c "${fq}" | awk 'NR%4==2{dict[substr($1,1,24)]}END{for (i in dict){print i}}' >> whitelist.txt
