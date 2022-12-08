@@ -22,7 +22,6 @@ workflow wf_rna {
         String genome_name
         Int? cpus = 16
         String? docker
-        File whitelist
         # Seurat
         Int umap_dim = 10
         Float umap_resolution = 0.5 
@@ -35,7 +34,6 @@ workflow wf_rna {
             genome_name = genome_name,
             genome_index_tar = idx_tar,
             prefix = prefix,
-            whitelist = whitelist,
             cpus = cpus
     }
 

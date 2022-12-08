@@ -19,7 +19,6 @@ task share_rna_align {
         String genome_name
         String? prefix
         String docker_image = "docker.io/nchernia/share_task_star:1"
-        File whitelist
         Int cpus = 16
     }
 
