@@ -12,6 +12,7 @@ workflows:
              - knudson
              - insert_size_hist
              - barcode_plot_annotations
+             - mei-starsolo
          tags:
              - /.*/
 
@@ -93,5 +94,6 @@ workflows:
              - main
              - dev
              - starsolo
+             - mei-starsolo
          tags:
              - /.*/
