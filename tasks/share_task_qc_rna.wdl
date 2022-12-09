@@ -28,11 +28,14 @@ task qc_rna {
     # Determine the size of the input
     Float input_file_size_gb = size(bam, "G")
 
-    # Determining memory size base on the size of the input files.
+    # Determining memory size based on the size of the input files.
     Float mem_gb = 5.0 + memory_factor * input_file_size_gb
 
-    # Determining disk size base on the size of the input files.
+    # Determining disk size based on the size of the input files.
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
+
+    # Determining disk type based on the size of disk.
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     String assay = "RNA"
     String bai = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.bam.bai"
@@ -40,7 +43,7 @@ task qc_rna {
     String duplicates_log = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.duplicates.log.txt"
     String barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.rank.plot.png"
 
-    command {
+    command <<<
         set -e
 
         bash $(which monitor_script.sh) > monitoring.log &
@@ -58,7 +61,7 @@ task qc_rna {
         cut -f4 ~{barcode_metadata} | tail -n +2 | sort -rn > umis_per_barcode
         # Make barcode rank plot 
         Rscript $(which barcode_rank_plot.R) umis_per_barcode ~{cutoff} ~{genome_name} ~{assay} ~{barcode_rank_plot}
-    }
+    >>>
 
     output {
         File monitor_log = "monitoring.log"
