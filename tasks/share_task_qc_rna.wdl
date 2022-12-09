@@ -35,10 +35,10 @@ task qc_rna {
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
 
     String assay = "RNA"
-    String bai = "${default="share-seq" prefix}.qc.rna.${genome_name}.bam.bai"
-    String barcode_metadata = "${default="share-seq" prefix}.qc.rna.${genome_name}.barcode.metadata.txt"
-    String duplicates_log = "${default="share-seq" prefix}.qc.rna.${genome_name}.duplicates.log.txt"
-    String barcode_rank_plot = "${default="share-seq" prefix}.qc.rna.${genome_name}.barcode.rank.plot.png"
+    String bai = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.bam.bai"
+    String barcode_metadata = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.metadata.txt"
+    String duplicates_log = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.duplicates.log.txt"
+    String barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.rank.plot.png"
 
     command {
         set -e
@@ -46,18 +46,18 @@ task qc_rna {
         bash $(which monitor_script.sh) > monitoring.log &
 
         # Index bam file
-        samtools index -@ ${cpus} ${bam} ${bai} 
+        samtools index -@ ~{cpus} ~{bam} ~{bai} 
          
         # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
-        python3 $(which rna_barcode_metadata.py) ${bam} ${bai} ${default="share-seq" prefix} ${barcode_metadata}
+        python3 $(which rna_barcode_metadata.py) ~{bam} ~{bai} ~{default="share-seq" prefix} ~{barcode_metadata}
     
         # Make duplicates log from barcode metadata file
-        awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ${barcode_metadata} > ${duplicates_log}
+        awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Get UMI column of barcode_metadata file, remove header, sort
-        cut -f4 ${barcode_metadata} | tail -n +2 | sort -rn > umis_per_barcode
+        cut -f4 ~{barcode_metadata} | tail -n +2 | sort -rn > umis_per_barcode
         # Make barcode rank plot 
-        Rscript $(which barcode_rank_plot.R) umis_per_barcode ${cutoff} ${genome_name} ${assay} ${barcode_rank_plot}
+        Rscript $(which barcode_rank_plot.R) umis_per_barcode ~{cutoff} ~{genome_name} ~{assay} ~{barcode_rank_plot}
     }
 
     output {
@@ -68,11 +68,12 @@ task qc_rna {
     }
 
     runtime {
-        #cpu : cpus
-        memory : mem_gb+'G'
-        disks : 'local-disk ${disk_gb} SSD'
-        maxRetries : 0
-        docker: docker_image
+        cpu : cpus
+        memory : "~{mem_gb} GB"
+        memory_retry_multiplier: 2
+        disks: "local-disk ~{disk_gb} ~{disk_type}"
+        docker : docker_image
+        maxRetries:1
     }
 
     parameter_meta {
