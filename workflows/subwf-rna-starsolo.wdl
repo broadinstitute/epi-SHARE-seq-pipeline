@@ -45,7 +45,6 @@ workflow wf_rna {
     call share_task_qc_rna.qc_rna as qc_rna {
         input:
             bam = align.output_bam,
-            umi_per_cell = align.umi_per_cell
             cutoff = cutoff,
             genome_name = genome_name,
             prefix = prefix
@@ -54,7 +53,7 @@ workflow wf_rna {
     call share_task_log_rna.log_rna as log_rna {
        input:
            alignment_log = align.log_final_out,
-           duplicates_log = qc_rna.duplicates_log
+           dups_log = qc_rna.rna_duplicates_log
     }
 
     call share_task_seurat.seurat as seurat {
