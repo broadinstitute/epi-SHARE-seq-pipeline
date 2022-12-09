@@ -1,70 +1,70 @@
 version 1.0
 
 # TASK
-# SHARE-rna-qc
-
+# SHARE-qc-rna
 
 task qc_rna {
     meta {
         version: 'v0.1'
-        author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: group umi rna task'
+        author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: QC RNA task'
     }
 
     input {
-        # This function takes in input the bam file produced by the STAR
-        # aligner and group UMI reads whilst filtering duplicates.
-        Boolean qc = false
+        # This function takes in input the sorted bam file produced by STARsolo
         File bam
-        File? genes_annotations_bed
+        Int? cutoff
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
+        
+        Int? cpus = 16
+        Float? disk_factor = 8.0
+        Float? memory_factor = 0.15
+
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
+        String docker_image = "mknudson/share_task_qc_rna:test"
     }
 
-    #Float input_file_size_gb = size(input[0], "G")
-    Int mem_gb = 8
-    Int disk_gb = 100
-    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    # Determine the size of the input
+    Float input_file_size_gb = size(bam, "G")
 
-    String reads_distribution = "${default="share-seq" prefix}.rna.qc.${genome_name}.reads_distribution.txt"
-    # Generated automatically inside the R scripts
-    String reads_distribution2 = "${default="share-seq" prefix}.rna.qc.${genome_name}.reads_distribution.txt"
-    String reads_distribution_plot = "${default="share-seq" prefix}.rna.qc.${genome_name}.reads_distribution.pdf"
+    # Determining memory size base on the size of the input files.
+    Float mem_gb = 5.0 + memory_factor * input_file_size_gb
+
+    # Determining disk size base on the size of the input files.
+    Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
+
+    String assay = "RNA"
+    String bai = "${default="share-seq" prefix}.qc.rna.${genome_name}.bam.bai"
+    String barcode_metadata = "${default="share-seq" prefix}.qc.rna.${genome_name}.barcode.metadata.txt"
+    String duplicates_log = "${default="share-seq" prefix}.qc.rna.${genome_name}.duplicates.log.txt"
+    String barcode_rank_plot = "${default="share-seq" prefix}.qc.rna.${genome_name}.barcode.rank.plot.png"
 
     command {
         set -e
-        # Calculate gene body coverage and reads distribution
-        ln -s ${bam} in.bam
-        INPUT=in.bam
 
-        gzip -dc ${genes_annotations_bed} > gene.bed
+        bash $(which monitor_script.sh) > monitoring.log &
 
-        samtools index in.bam
+        # Index bam file
+        samtools index -@ ${cpus} ${bam} ${bai} 
+         
+        # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
+        python3 $(which rna_barcode_metadata.py) ${bam} ${bai} ${default="share-seq" prefix} ${barcode_metadata}
+    
+        # Make duplicates log from barcode metadata file
+        awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ${barcode_metadata} > ${duplicates_log}
 
-        if [[ '${qc}' == 'true' ]]; then
-            $(which samtools) view -s 0.01 -o temp.1pct.bam ${bam}
-            INPUT="temp.1pct.bam"
-        fi
-
-        ## TODO: Where is this python script?
-        # Calculate read distribution
-        python3 $(which read_distribution.py) -i $INPUT -r gene.bed > ${reads_distribution} 2>>./Run.log
-
-        # The two files created here are necessary for the
-        # Read_distribution.R script.
-        tail -n +5 ${reads_distribution} | head -n -1 > temp1.txt
-        head -n 3  ${reads_distribution} | grep Assigned | sed 's/Total Assigned Tags//g' | sed 's/ //g' > temp2.txt
-
-        # Plot reads distribution
-        Rscript $(which Read_distribution.R) . ${default="share-seq" prefix}.rna.qc.${genome_name} --save
-
+        # Get UMI column of barcode_metadata file, remove header, sort
+        cut -f4 ${barcode_metadata} | tail -n +2 | sort -rn > umis_per_barcode
+        # Make barcode rank plot 
+        Rscript $(which barcode_rank_plot.R) umis_per_barcode ${cutoff} ${genome_name} ${assay} ${barcode_rank_plot}
     }
 
     output {
-        File rna_qc_reads_distribution = reads_distribution
-        File rna_qc_reads_distribution2 = reads_distribution2
-        File rna_qc_reads_distribution_plot = reads_distribution_plot
+        File monitor_log = "monitoring.log"
+        File rna_barcode_metadata = "${barcode_metadata}"
+        File rna_duplicates_log = "${duplicates_log}"
+        File rna_barcode_rank_plot = "${barcode_rank_plot}"   
     }
 
     runtime {
@@ -81,16 +81,10 @@ task qc_rna {
                 help: 'Aligned reads in bam format.',
                 example: 'hg38.aligned.bam'
             }
-        qc: {
-                description: 'QC run flag',
-                help: 'Flag to set if you are doing a qc run.',
-                default: false,
-                example: [true, false]
-            }
-        genes_annotations_bed: {
-                description: 'Genes annotations in bed format',
-                help: 'The genes annotations to use when calculating the reads distributions.',
-                example: 'hg38.UCSC_RefSeq.bed'
+        cutoff: {
+                description: 'UMI cutoff',
+                help: 'Cutoff for number of UMIs required when plotting barcode statistics.',
+                example: 100
             }
         genome_name: {
                 description: 'Reference name',
