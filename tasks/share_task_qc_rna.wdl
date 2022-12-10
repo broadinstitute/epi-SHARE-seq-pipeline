@@ -13,7 +13,8 @@ task qc_rna {
     input {
         # This function takes in input the sorted bam file produced by STARsolo
         File bam
-        Int? cutoff
+        Int? umi_cutoff = 10
+        Int? gene_cutoff = 10
         String genome_name
         String? prefix
         
@@ -41,7 +42,9 @@ task qc_rna {
     String bai = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.bam.bai"
     String barcode_metadata = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.metadata.tsv"
     String duplicates_log = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.duplicates.log.txt"
-    String barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.rank.plot.png"
+    String umi_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.umi.barcode.rank.plot.png"
+    String gene_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.barcode.rank.plot.png"
+    String gene_umi_scatter_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.umi.scatter.plot.png"
 
     command <<<
         set -e
@@ -57,17 +60,17 @@ task qc_rna {
         # Make duplicates log from barcode metadata file
         awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
 
-        # Get UMI column of barcode_metadata file, remove header, sort
-        cut -f4 ~{barcode_metadata} | tail -n +2 | sort -rn > umis_per_barcode
-        # Make barcode rank plot 
-        Rscript $(which barcode_rank_plot.R) umis_per_barcode ~{cutoff} ~{genome_name} ~{assay} ~{barcode_rank_plot}
+        # Make QC plots
+        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_cutoff} ~{gene_cutoff} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot} 
     >>>
 
     output {
         File monitor_log = "monitoring.log"
-        File rna_barcode_metadata = "${barcode_metadata}"
-        File rna_duplicates_log = "${duplicates_log}"
-        File rna_barcode_rank_plot = "${barcode_rank_plot}"   
+        File rna_barcode_metadata = "~{barcode_metadata}"
+        File rna_duplicates_log = "~{duplicates_log}"
+        File rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
+        File rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
+        File rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"   
     }
 
     runtime {
@@ -85,10 +88,15 @@ task qc_rna {
                 help: 'Aligned reads in bam format.',
                 example: 'hg38.aligned.bam'
             }
-        cutoff: {
+        umi_cutoff: {
                 description: 'UMI cutoff',
-                help: 'Cutoff for number of UMIs required when plotting barcode statistics.',
-                example: 100
+                help: 'Cutoff for number of UMIs required when making UMI barcode rank plot.',
+                example: 10
+            }
+        gene_cutoff: {
+                description: 'Gene cutoff',
+                help: 'Cutoff for number of genes required when making gene barcode rank plot.',
+                example: 10
             }
         genome_name: {
                 description: 'Reference name',

@@ -56,7 +56,7 @@ ENV R_LIBS_USER=/usr/local/lib/R
 
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/python/rna_barcode_metadata.py /usr/local/bin/
-COPY --chown=$USER:$USER src/R/barcode_rank_plot.R /usr/local/bin/
+COPY --chown=$USER:$USER src/R/rna_qc_plots.R /usr/local/bin/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 USER ${USER}

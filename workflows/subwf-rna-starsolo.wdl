@@ -27,7 +27,8 @@ workflow wf_rna {
         String? docker
         File whitelist
         # QC
-        Int? cutoff
+        Int? umi_cutoff
+        Int? gene_cutoff
         # Seurat
         Int umap_dim = 10
         Float umap_resolution = 0.5 
@@ -53,7 +54,8 @@ workflow wf_rna {
     call share_task_qc_rna.qc_rna as qc_rna {
         input:
             bam = align.output_bam,
-            cutoff = cutoff,
+            umi_cutoff = umi_cutoff,
+            gene_cutoff = gene_cutoff,
             genome_name = genome_name,
             prefix = prefix
     }
@@ -89,7 +91,9 @@ workflow wf_rna {
 
         File share_rna_barcode_metadata  = qc_rna.rna_barcode_metadata
         File share_rna_duplicates_log = qc_rna.rna_duplicates_log
-        File share_rna_barcode_rank_plot  = qc_rna.rna_barcode_rank_plot
+        File share_rna_umi_barcode_rank_plot  = qc_rna.rna_umi_barcode_rank_plot
+        File share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
+        File share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
 
         File share_rna_seurat_notebook_output = seurat.notebook_output
         File share_rna_seurat_notebook_log = seurat.notebook_log
