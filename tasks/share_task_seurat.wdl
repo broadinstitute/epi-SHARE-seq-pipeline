@@ -125,7 +125,6 @@ task seurat {
         File? seurat_umap_mito_plot = umap_mito_plot
         File? seurat_raw_obj = raw_seurat_rds
         File? seurat_filtered_obj = filtered_seurat_rds
-        File? seurat_raw_matrix = raw_seurat_h5
         File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
     }

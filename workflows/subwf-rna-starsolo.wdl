@@ -2,6 +2,7 @@ version 1.0
 
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
+import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
 import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 
@@ -42,6 +43,13 @@ workflow wf_rna {
             cpus = cpus
     }
 
+    call share_task_generate_h5.generate_h5 as generate_h5 {
+        input:
+            tar = align.raw_tar,
+            genome_name = genome_name,
+            prefix = prefix
+    }
+
     call share_task_qc_rna.qc_rna as qc_rna {
         input:
             bam = align.output_bam,
@@ -58,7 +66,7 @@ workflow wf_rna {
 
     call share_task_seurat.seurat as seurat {
         input:
-            rna_matrix = align.raw_tar,
+            rna_matrix = generate_h5.h5_matrix,
             genome_name = genome_name,
             umap_dim = umap_dim,
             umap_resolution = umap_resolution,
@@ -76,6 +84,8 @@ workflow wf_rna {
         File share_task_starsolo_summary_csv = align.summary_csv
         File share_task_starsolo_umi_per_cell = align.umi_per_cell
         File share_task_starsolo_raw_tar = align.raw_tar
+
+        File share_rna_h5 = generate_h5.h5_matrix
 
         File share_rna_barcode_metadata  = qc_rna.rna_barcode_metadata
         File share_rna_duplicates_log = qc_rna.rna_duplicates_log
