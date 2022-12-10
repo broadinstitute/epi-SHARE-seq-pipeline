@@ -39,7 +39,7 @@ task qc_rna {
 
     String assay = "RNA"
     String bai = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.bam.bai"
-    String barcode_metadata = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.metadata.txt"
+    String barcode_metadata = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.metadata.tsv"
     String duplicates_log = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.duplicates.log.txt"
     String barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.rank.plot.png"
 
