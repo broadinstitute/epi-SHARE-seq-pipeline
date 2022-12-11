@@ -4,6 +4,7 @@ library(ggpointdensity)
 args <- commandArgs()
 pkr <- args[6]
 barcode_metadata_file <- args[7]
+plot_file <- args[8]
 
 options(scipen=999)
 
@@ -40,7 +41,6 @@ density_plot <- ggplot(passing_df, aes(x=frags, y=umis)) +
                         scale_y_continuous(trans="log10",
                                            limits=c(10,xy_lim))
                         
-out_file <- paste0(pkr, "_joint_cell_density_plot.png", sep="")
-png(out_file, width=8.75, height=6, units="in", res=300)
+png(plot_file, width=8.75, height=6, units="in", res=300)
 density_plot
 dev.off()

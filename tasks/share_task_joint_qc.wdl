@@ -56,7 +56,7 @@ task joint_qc_plotting {
         python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${umi_cutoff} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata}
 
         # Make joint density plot
-        Rscript $(which joint_cell_plotting_density.R) ${joint_barcode_metadata} ${joint_density_plot}
+        Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}
     }
 
     output {
