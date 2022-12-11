@@ -110,7 +110,7 @@ task share_atac_align {
         memory : "${mem_gb} GB"
         memory_retry_multiplier: 2
         disks: "local-disk ${disk_gb} ${disk_type}"
-        docker : docker_image
+        docker : "${docker_image}"
         maxRetries:1
     }
 
