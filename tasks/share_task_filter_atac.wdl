@@ -107,11 +107,11 @@ task share_atac_filter {
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n /dev/stdin -o ~{tmp_filtered_bam}
 
         # Assign multimappers if necessary
-        if [ ~{multimappers} -eq 0]; then
+        if [ ~{multimappers} -eq 0 ]; then
             samtools fixmate -@ ~{samtools_threads} -r ~{tmp_filtered_bam} ~{tmp_fixmate_bam}
         else
             samtools view -h ~{tmp_filtered_bam} | \
-            assign_multimappers.py -k ~{multimappers} --paired-end | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
+            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
         fi
 
         # Remove orphan reads (pair was removed)

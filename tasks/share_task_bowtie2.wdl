@@ -79,7 +79,7 @@ task share_atac_align {
             -x $genome_prefix \
             -1 ~{sep="," fastq_R1} \
             -2 ~{sep="," fastq_R2} 2> ~{alignment_log} | \
-            awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2] "," a[3] "," a[4] "\tXC:Z:" a[2] "," a[3] "," a[4] "," a[5]);}}' | \
+            awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4] "," a[5]);}}' | \
             samtools view \
                 -b \
                 -@ ~{samtools_threads} \

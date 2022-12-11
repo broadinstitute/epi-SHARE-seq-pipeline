@@ -7,6 +7,7 @@ FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e94141
 
 ENV SAMTOOLS_VERSION 1.9
 ENV BEDTOOLS_VERSION v2.29.0
+ENV PICARD_VERSION 2.27.5
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -44,7 +45,7 @@ RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/sa
     cd htslib && autoreconf -i && make && make install && cd ../ && rm -rf htslib*
 
 # Install Picard 2.20.7
-RUN wget https://github.com/broadinstitute/picard/releases/download/2.20.7/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
+RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
 
 
 
