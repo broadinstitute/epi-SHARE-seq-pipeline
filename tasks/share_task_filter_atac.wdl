@@ -134,7 +134,7 @@ task share_atac_filter {
         --VALIDATION_STRINGENCY LENIENT \
         --ASSUME_SORT_ORDER queryname \
         --REMOVE_DUPLICATES false \
-        --BARCODE_TAG ~{barcode_tag} 2 > ~{picard_mark_duplicates_log}
+        --BARCODE_TAG ~{barcode_tag} 2> ~{picard_mark_duplicates_log}
 
         # Create the final bam removing the duplicates
         samtools view -F 1804 -f 2 -b -o ~{final_bam} ~{final_bam_wdup}
