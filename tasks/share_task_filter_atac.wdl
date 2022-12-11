@@ -57,7 +57,7 @@ task share_atac_filter {
 
     # Memory for picard
     Float picard_java_heap_factor = 0.9
-    String picard_java_memory = round(mem_gb * picard_java_heap_factor) + 'G'
+    Int picard_java_memory = round(mem_gb * picard_java_heap_factor)
 
     String filtering_params = if multimappers == 0 then "-q ${mapq_threshold} -F 1804" else "-F 524"
 
