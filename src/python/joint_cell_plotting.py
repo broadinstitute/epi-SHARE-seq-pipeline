@@ -15,7 +15,7 @@ from plotnine import *
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Plot barcodes by RNA and ATAC QC status")
     parser.add_argument("pkr", help="PKR name")
-    parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv matrix")
+    parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv file")
     parser.add_argument("atac_metrics_file", help="Filename for ATAC metrics tsv file")
     parser.add_argument("umi_metrics_cutoff", type=int, help="Cutoff for minimum number of UMIs to be applied to RNA barcode metrics file")
     parser.add_argument("min_umis", type=int, help="Cutoff for minimum number of UMIs")
@@ -49,10 +49,10 @@ def get_metrics(rna_metrics_file, atac_metrics_file, umi_metrics_cutoff):
     # RNA metrics file contains all UMI values, while ATAC metrics file only uses frags ≥ 10;
     # impose UMI cutoff (default=10) to keep plot consistent
     for line in rna_metrics_contents:
-        if int(line[1]) >= umi_metrics_cutoff: 
-            umis.append(int(line[1]))
-            genes.append(int(line[2]))
-            rna_barcodes.append(line[5])
+        if int(line[3]) >= umi_metrics_cutoff: 
+            umis.append(int(line[3]))
+            genes.append(int(line[4]))
+            rna_barcodes.append(line[0])
     rna_metrics = dict(zip(rna_barcodes, zip(umis, genes)))
     
     atac_metrics_contents = get_split_lines(atac_metrics_file, delimiter="\t", skip_header=True)
@@ -78,9 +78,13 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
     pass_frags = df["frags"] >= min_frags
     
     # add df column with QC outcome
-    qc_conditions  = [(pass_umis & pass_genes & pass_tss & pass_frags), (pass_umis & pass_genes), (pass_tss & pass_frags)]
+    qc_conditions  = [(pass_umis & pass_genes & pass_tss & pass_frags), 
+                      (pass_umis & pass_genes), 
+                      (pass_tss & pass_frags),
+                      (~(pass_umis & pass_genes) & (~(pass_tss & pass_frags)))
+                      ]
     qc_choices = ["both", "RNA only", "ATAC only", "neither"]
-    df["QC"] = np.select(qc_conditions, qc_choices[0:3], default="neither")
+    df["QC"] = np.select(qc_conditions, qc_choices)
     
     # get counts of each outcome type (used in plot legend)
     outcome_counts = df["QC"].value_counts().sort_index() # sort to avoid ordering by count value
@@ -92,8 +96,8 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
             count_choices.append(f"{outcome} ({outcome_counts[outcome]})")
         else:
             count_choices.append(f"{outcome} (0)")
-    count_choices.sort()
-        
+            
+    #count_choices = [f"{outcome} ({outcome_counts[outcome]})" for outcome in qc_choices]
     df["QC_count"] = np.select(outcome_conditions, count_choices)
     
     return(df)
