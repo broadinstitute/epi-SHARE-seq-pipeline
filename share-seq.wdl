@@ -31,7 +31,7 @@ workflow ShareSeq {
         Float? atac_align_memory_factor
         Int? atac_align_cpus
         Int? atac_align_multimappers
-        String? atac_align_docker_image
+        String atac_align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
 
         # ATAC - Filter
         Int? atac_filter_cpus = 16
@@ -39,7 +39,7 @@ workflow ShareSeq {
         Float? atac_filter_disk_factor = 8.0
         Float? atac_filter_memory_factor = 0.15
         String? atac_filter_barcode_tag = "CB"
-        String? atac_filter_docker_image
+        String atac_filter_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter"
 
         Int? cutoff_atac = 100
 

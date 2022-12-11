@@ -18,7 +18,7 @@ task share_atac_align {
         Int? multimappers = 0
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
         File genome_index_tar       # This is a tar.gz folder with all the index files.
         String genome_name          # GRCh38, mm10
         String prefix = "sample"

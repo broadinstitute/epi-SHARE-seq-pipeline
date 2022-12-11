@@ -24,7 +24,7 @@ task share_atac_filter {
         Float? memory_factor = 0.15
         Int? multimappers=0
         String? barcode_tag = "CB"
-        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bam2bed"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter"
         String genome_name
         String? prefix = "sample"
 
