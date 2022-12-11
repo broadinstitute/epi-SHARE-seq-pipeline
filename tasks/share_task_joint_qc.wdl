@@ -26,9 +26,9 @@ task joint_qc_plotting {
         Float? memory_factor = 2.0
 
         String? prefix
-        String genome_name
-        # TO DO: update docker image
-        String docker_image = "mknudson/share_task_joint_cell_calling:test"
+        String genome_name 
+
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
     }
 
     # Determine the size of the input
