@@ -12,6 +12,7 @@ workflows:
              - knudson
              - insert_size_hist
              - barcode_plot_annotations
+             - atac-refactoring
          tags:
              - /.*/
 
@@ -22,7 +23,7 @@ workflows:
          branches:
              - main
              - dev
-             - knudson 
+             - knudson
              - neva
          tags:
              - /.*/

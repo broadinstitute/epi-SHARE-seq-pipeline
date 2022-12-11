@@ -22,9 +22,24 @@ workflow ShareSeq {
         Array[File] read1_atac
         Array[File] read2_atac
         File? chrom_sizes
-        File? idx_tar_atac
+        File? atac_genome_index_tar
         File? tss_bed
         Int? cpus_atac
+
+        # ATAC - Align
+        Float? atac_align_disk_factor
+        Float? atac_align_memory_factor
+        Int? atac_align_cpus
+        Int? atac_align_multimappers
+        String? atac_align_docker_image
+
+        # ATAC - Filter
+        Int? atac_filter_cpus = 16
+        Int? atac_filter_mapq_threshold
+        Float? atac_filter_disk_factor = 8.0
+        Float? atac_filter_memory_factor = 0.15
+        String? atac_filter_barcode_tag = "CB"
+        String? atac_filter_docker_image
 
         Int? cutoff_atac = 100
 
@@ -81,10 +96,10 @@ workflow ShareSeq {
 
     Map[String, File] annotations = if genome_name == "mm10" then read_map(mouse_genome_tsv) else read_map(human_genome_tsv)
     File peak_set_ = select_first([peak_set, annotations["ccre"]])
-    File idx_tar_atac_ = select_first([idx_tar_atac, annotations["bowtie2_idx_tar"]])
+    File idx_tar_atac_ = select_first([atac_genome_index_tar, annotations["bowtie2_idx_tar"]])
     File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
     File tss_bed_ = select_first([tss_bed, annotations["tss"]])
-    
+
     File idx_tar_rna_ = select_first([idx_tar_rna, annotations["star_idx_tar"]])
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
@@ -126,75 +141,88 @@ workflow ShareSeq {
                     read1 = read1_atac,
                     read2 = read2_atac,
                     chrom_sizes = chrom_sizes_,
-                    idx_tar = idx_tar_atac_,
+                    genome_index_tar = idx_tar_atac_,
                     tss_bed = tss_bed_,
                     peak_set = peak_set_,
                     prefix = prefix,
                     genome_name = genome_name,
                     cutoff = cutoff_atac,
-                    cpus = cpus_atac
+                    cpus = cpus_atac,
+
+                    align_disk_factor = atac_align_disk_factor,
+                    align_memory_factor = atac_align_memory_factor,
+                    align_cpus = atac_align_cpus,
+                    align_multimappers = atac_align_multimappers,
+                    align_docker_image = atac_align_docker_image,
+
+                    filter_cpus = atac_filter_cpus,
+                    filter_mapq_threshold = atac_filter_mapq_threshold,
+                    filter_disk_factor = atac_filter_disk_factor,
+                    filter_memory_factor = atac_filter_memory_factor,
+                    filter_barcode_tag = atac_filter_barcode_tag,
+                    filter_docker_image = atac_filter_docker_image
             }
         }
     }
-    
-    if ( process_atac && process_rna ) {
-        if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
-            call find_dorcs.wf_dorcs as dorcs{
-                input:
-                    rna_matrix = rna.share_rna_h5_matrix,
-                    atac_fragments = atac.share_atac_fragments_filtered,
-                    peak_file = peak_set_,
 
-                    genome = genome_name,
-                    n_cores = cpus_dorcs,
-                    save_plots_to_dir = save_plots_to_dir,
-                    output_filename = dorcs_output_filename,
-                    prefix = prefix,
+#    if ( process_atac && process_rna ) {
+#        if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
+#            call find_dorcs.wf_dorcs as dorcs{
+#                input:
+#                    rna_matrix = rna.share_rna_h5_matrix,
+#                    atac_fragments = atac.share_atac_fragments_filtered,
+#                    peak_file = peak_set_,
 
-                    minFeature_RNA = minFeature_RNA,
-                    maxFeature_RNA = maxFeature_RNA,
-                    percentMT_RNA = percentMT_RNA,
-                    minCells_RNA = minCells_RNA,
+#                    genome = genome_name,
+#                    n_cores = cpus_dorcs,
+#                    save_plots_to_dir = save_plots_to_dir,
+#                    output_filename = dorcs_output_filename,
+#                    prefix = prefix,
 
-                    dorcGeneCutOff = dorcGeneCutOff,
-                    fripCutOff = fripCutOff,
-                    corrPVal = corrPVal,
-                    topNGene = topNGene,
+#                    minFeature_RNA = minFeature_RNA,
+#                    maxFeature_RNA = maxFeature_RNA,
+#                    percentMT_RNA = percentMT_RNA,
+#                    minCells_RNA = minCells_RNA,
 
-                    windowPadSize = windowPadSize,
-                    mem_gb = mem_gb_dorcs
-            }
-        }
-        call joint_cell_calling.joint_cell_calling as joint {
-            input:
-                atac_barcode_metadata = atac.share_atac_archr_barcode_metadata,
-                rna_barcode_metadata = rna.share_rna_seurat_barcode_metadata,
-                prefix = prefix,
-                genome_name = genome_name
-        }
-    }
+#                    dorcGeneCutOff = dorcGeneCutOff,
+#                    fripCutOff = fripCutOff,
+#                    corrPVal = corrPVal,
+#                    topNGene = topNGene,
 
-    call html_report.html_report as html_report {
-        input:
-            atac_total_reads = atac.share_atac_total_reads,
-            atac_aligned_uniquely = atac.share_atac_aligned_uniquely,
-            atac_unaligned = atac.share_atac_unaligned,
-            atac_feature_reads = atac.share_atac_feature_reads,
-            atac_duplicate_reads = atac.share_atac_duplicate_reads,
-            rna_total_reads = rna.share_rna_total_reads,
-            rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
-	          rna_aligned_multimap = rna.share_rna_aligned_multimap,
-            rna_unaligned = rna.share_rna_unaligned,
-            rna_feature_reads = rna.share_rna_feature_reads,
-            rna_duplicate_reads = rna.share_rna_duplicate_reads,   
+#                    windowPadSize = windowPadSize,
+#                    mem_gb = mem_gb_dorcs
+#            }
+#        }
+#        call joint_cell_calling.joint_cell_calling as joint {
+#            input:
+#                atac_barcode_metadata = atac.share_atac_archr_barcode_metadata,
+#                rna_barcode_metadata = rna.share_rna_seurat_barcode_metadata,
+#                prefix = prefix,
+#                genome_name = genome_name
+#        }
+#    }
+
+#    call html_report.html_report as html_report {
+#        input:
+#            atac_total_reads = atac.share_atac_total_reads,
+#            atac_aligned_uniquely = atac.share_atac_aligned_uniquely,
+#            atac_unaligned = atac.share_atac_unaligned,
+#            atac_feature_reads = atac.share_atac_feature_reads,
+#            atac_duplicate_reads = atac.share_atac_duplicate_reads,
+#            rna_total_reads = rna.share_rna_total_reads,
+#            rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
+#              rna_aligned_multimap = rna.share_rna_aligned_multimap,
+#            rna_unaligned = rna.share_rna_unaligned,
+#            rna_feature_reads = rna.share_rna_feature_reads,
+#            rna_duplicate_reads = rna.share_rna_duplicate_reads,
 
             ## JPEG files to be encoded and appended to html
             # RNA plots
-            image_files = [joint.joint_cell_plot, joint.joint_cell_density_plot, rna.share_rna_qc_library_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_library_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment, atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_strict_raw_tss_enrichment, atac.share_atac_archr_strict_filtered_tss_enrichment, atac.share_atac_archr_strict_raw_fragment_size_plot, atac.share_atac_archr_strict_filtered_fragment_size_plot, atac.share_atac_archr_strict_umap_doublets, atac.share_atac_archr_strict_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_strict_umap_num_frags_plot, atac.share_atac_archr_strict_umap_tss_score_plot, atac.share_atac_archr_strict_umap_frip_plot,atac.share_atac_archr_strict_gene_heatmap_plot, dorcs.j_plot],
+#            image_files = [joint.joint_cell_plot, joint.joint_cell_density_plot, rna.share_rna_qc_library_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_library_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment, atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_strict_raw_tss_enrichment, atac.share_atac_archr_strict_filtered_tss_enrichment, atac.share_atac_archr_strict_raw_fragment_size_plot, atac.share_atac_archr_strict_filtered_fragment_size_plot, atac.share_atac_archr_strict_umap_doublets, atac.share_atac_archr_strict_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_strict_umap_num_frags_plot, atac.share_atac_archr_strict_umap_tss_score_plot, atac.share_atac_archr_strict_umap_frip_plot,atac.share_atac_archr_strict_gene_heatmap_plot, dorcs.j_plot],
 
             ## Links to files and logs to append to end of html
-            log_files = [rna.share_rna_alignment_log, rna.share_rna_featurecount_exon_txt, rna.share_rna_featurecount_intron_txt, rna.share_rna_qc_reads_distribution, rna.share_rna_qc_reads_distribution2, rna.share_rna_umi_rm_dup_log, rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log, rna.share_rna_alignment_raw]
-    }
+#            log_files = [rna.share_rna_alignment_log, rna.share_rna_featurecount_exon_txt, rna.share_rna_featurecount_intron_txt, rna.share_rna_qc_reads_distribution, rna.share_rna_qc_reads_distribution2, rna.share_rna_umi_rm_dup_log, rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log, rna.share_rna_alignment_raw]
+#    }
 
     output{
         File? share_rna_alignment_raw = rna.share_rna_alignment_raw
@@ -240,53 +268,20 @@ workflow ShareSeq {
         File? share_rna_seurat_obj = rna.share_rna_seurat_obj
         File? share_rna_plots_zip = rna.share_rna_plots_zip
 
+        # Align
         File? share_atac_alignment_raw = atac.share_atac_alignment_raw
         File? share_atac_alignment_raw_index = atac.share_atac_alignment_raw_index
         File? share_atac_alignment_log = atac.share_atac_alignment_log
+        File? share_atac_alignment_monitor_log = atac.share_atac_alignment_monitor_log
 
-        File? share_atac_alignment_filtered = atac.share_atac_alignment_filtered
-        File? share_atac_alignment_filtered_index = atac.share_atac_alignment_filtered_index
-        File? share_atac_fragments_raw = atac.share_atac_fragments_raw
+        # Filter
+        File? share_atac_filter_alignment_dedup = atac.share_atac_filter_alignment_dedup
+        File? share_atac_filter_alignment_dedup_index = atac.share_atac_filter_alignment_dedup_index
+        File? share_atac_filter_alignment_wdup = atac.share_atac_filter_alignment_wdup
+        File? share_atac_filter_alignment_wdup_index = atac.share_atac_filter_alignment_wdup_index
+        File? share_atac_filter_fragments = atac.share_atac_filter_fragments
 
 
-        File? share_atac_barcodes = atac.share_atac_barcodes
-        File? share_atac_fragments_filtered = atac.share_atac_fragments_filtered
-        File? share_atac_counts_raw = atac.share_atac_counts_raw
-        File? share_atac_counts_filtered = atac.share_atac_counts_filtered
-
-        File? share_atac_qc_library_counts = atac.share_atac_qc_library_counts
-        File? share_atac_qc_library_duplicates = atac.share_atac_qc_library_duplicates
-        File? share_atac_qc_library_plot = atac.share_atac_qc_library_plot
-
-        File? share_atac_qc_final = atac.share_atac_qc_final
-        File? share_atac_qc_hist_plot = atac.share_atac_qc_hist_plot
-        File? share_atac_qc_hist_txt = atac.share_atac_qc_hist_txt
-        File? share_atac_qc_tss_enrichment = atac.share_atac_qc_tss_enrichment
-
-        File? share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
-        File? share_atac_archr_notebook_log = atac.share_atac_archr_notebook_log
-        File? share_atac_archr_gene_heatmap_plot = atac.share_atac_archr_gene_heatmap_plot
-        File? share_atac_archr_raw_tss_enrichment = atac.share_atac_archr_raw_tss_enrichment
-        File? share_atac_archr_filtered_tss_enrichment = atac.share_atac_archr_filtered_tss_enrichment
-        File? share_atac_archr_filtered_fragment_size_plot = atac.share_atac_archr_filtered_fragment_size_plot
-        File? share_atac_archr_umap_doublets = atac.share_atac_archr_umap_doublets
-        File? share_atac_archr_umap_cluster_plot = atac.share_atac_archr_umap_cluster_plot
-        File? share_atac_archr_arrow = atac.share_atac_archr_arrow
-        File? share_atac_archr_obj = atac.share_atac_archr_obj
-        File? share_atac_archr_plots_zip = atac.share_atac_archr_plots_zip
-
-        File? dorcs_notebook_output = dorcs.dorcs_notebook_output
-        File? dorcs_notebook_log = dorcs.dorcs_notebook_log
-        File? seurat_violin_plot = dorcs.seurat_violin_plot
-        File? j_plot = dorcs.j_plot
-        File? plots_zip = dorcs.plots_zip
-        File? dorcs_genes_summary = dorcs.dorcs_genes_summary
-        File? dorcs_regions_summary = dorcs.dorcs_regions_summary
-
-        File? joint_cell_plot = joint.joint_cell_plot
-        File? joint_cell_density_plot = joint.joint_cell_density_plot
-
-        File? html_summary = html_report.html_report_file
     }
 
 }
