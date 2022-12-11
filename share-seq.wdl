@@ -39,7 +39,7 @@ workflow ShareSeq {
         Float? atac_filter_disk_factor = 8.0
         Float? atac_filter_memory_factor = 0.15
         String? atac_filter_barcode_tag = "CB"
-        String atac_filter_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter"
+        String atac_filter_docker_image = "polumechanos/share_atac_filter"
 
         Int? cutoff_atac = 100
 

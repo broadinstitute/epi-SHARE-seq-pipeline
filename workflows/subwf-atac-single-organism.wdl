@@ -44,7 +44,7 @@ workflow wf_atac {
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
         String? filter_barcode_tag = "CB"
-        String filter_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter"
+        String filter_docker_image = "polumechanos/share_atac_filter"
     }
 
     call share_task_align.share_atac_align as align {
