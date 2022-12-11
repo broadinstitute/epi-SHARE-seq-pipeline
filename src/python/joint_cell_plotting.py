@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument("min_genes", type=int, help="Cutoff for minimum number of genes")
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
+    parser.add_argument("plot_file", help="Filename for plot png file")
     parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
     
     return parser.parse_args()
@@ -108,7 +109,7 @@ def round_to_power_10(x):
 def label_func(breaks):
     return [int(x) for x in breaks]
     
-def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags):
+def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
     # get max x and y coords to set plot limits
     max_x = max(df["frags"])
     max_y = max(df["umis"])
@@ -136,7 +137,7 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags):
              + scale_y_log10(limits=(10,xy_lim), labels=label_func)
              )
     
-    plot.save(filename = f"{pkr}_joint_cell_plot.png", dpi=1000)
+    plot.save(filename=plot_file, dpi=1000)
     
 def main():
     # create log file
@@ -152,6 +153,7 @@ def main():
     min_genes = getattr(args, "min_genes")
     min_tss = getattr(args, "min_tss")
     min_frags = getattr(args, "min_frags")
+    plot_file = getattr(args, "plot_file")
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
     
     # read rna and atac files, get cell metrics
@@ -164,7 +166,7 @@ def main():
     
     # generate plot
     logging.info("Generating joint cell calling plot\n")
-    plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags)
+    plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file)
     
     # save dataframe
     logging.info("Saving dataframe as csv\n")
