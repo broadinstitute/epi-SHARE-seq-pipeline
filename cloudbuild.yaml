@@ -46,11 +46,31 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-count-rna'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_rna:latest',
+          '-f',
+          'dockerfiles/share_task_count_rna.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
   id: 'task-generate-h5'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:latest',
           '-f',
           'dockerfiles/share_task_generate_h5.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'task-group-umi'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_group_umi:latest',
+          '-f',
+          'dockerfiles/share_task_group_umi.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -136,6 +156,16 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-update-rgid'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest',
+          '-f',
+          'dockerfiles/share_task_update_rgid.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
   id: 'task-find-dorcs'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest',
@@ -169,8 +199,18 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_rna:latest']
+  waitFor: ['task-count-rna']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:latest']
   waitFor: ['task-generate-h5']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_group_umi:latest']
+  waitFor: ['task-group-umi']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
@@ -211,6 +251,11 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:latest']
   waitFor: ['task-star']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest']
+  waitFor: ['task-update-rgid']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
