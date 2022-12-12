@@ -137,8 +137,8 @@ task share_atac_filter {
         --BARCODE_TAG ~{barcode_tag} 2> ~{picard_mark_duplicates_log}
 
         # Create the final bam removing the duplicates
-        samtools view -F 1804 -f 2 -u ~{final_bam_wdup} | \
-        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -b /dev/stdin -o ~{final_bam}
+        samtools view -F 1804 -f 2 -b ~{final_bam_wdup} | \
+        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M /dev/stdin -o ~{final_bam}
 
         samtools index ~{final_bam}
 
