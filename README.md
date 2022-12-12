@@ -1,4 +1,4 @@
-# epi-SHARE-seq-pipeline
+# epi-SHARE-seq-pipeline: release branch
 Epigenomics Program pipeline to analyze SHARE-seq data.
 
 - Primary workflow is [share-seq.wdl](share_seq.wdl)
