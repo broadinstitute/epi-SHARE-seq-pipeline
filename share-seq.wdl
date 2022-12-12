@@ -278,7 +278,6 @@ workflow ShareSeq {
         File? share_atac_filter_alignment_dedup = atac.share_atac_filter_alignment_dedup
         File? share_atac_filter_alignment_dedup_index = atac.share_atac_filter_alignment_dedup_index
         File? share_atac_filter_alignment_wdup = atac.share_atac_filter_alignment_wdup
-        File? share_atac_filter_alignment_wdup_index = atac.share_atac_filter_alignment_wdup_index
         File? share_atac_filter_fragments = atac.share_atac_filter_fragments
 
 
