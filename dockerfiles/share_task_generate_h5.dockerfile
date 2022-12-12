@@ -21,6 +21,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     autoconf \
     automake \
+    binutils \
     build-essential \
     libcurl4-openssl-dev \
     liblz4-dev \
