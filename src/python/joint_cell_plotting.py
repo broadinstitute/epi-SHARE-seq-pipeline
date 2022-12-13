@@ -17,7 +17,7 @@ def parse_arguments():
     parser.add_argument("pkr", help="PKR name")
     parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv file")
     parser.add_argument("atac_metrics_file", help="Filename for ATAC metrics tsv file")
-    parser.add_argument("umi_metrics_cutoff", type=int, help="Cutoff for minimum number of UMIs to be applied to RNA barcode metrics file")
+    parser.add_argument("remove_low_yielding_cells", type=int, help="Minimum number of UMIs/fragments required for a cell to be plotted")
     parser.add_argument("min_umis", type=int, help="Cutoff for minimum number of UMIs")
     parser.add_argument("min_genes", type=int, help="Cutoff for minimum number of genes")
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
@@ -41,16 +41,15 @@ def merge_dicts(dict_1, dict_2):
     
     return(merged)
 
-def get_metrics(rna_metrics_file, atac_metrics_file, umi_metrics_cutoff):
+def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     """Read files and aggregate metrics into Pandas dataframe"""
     rna_metrics_contents = get_split_lines(rna_metrics_file, delimiter="\t", skip_header=True)
     umis = []
     genes = []
     rna_barcodes = []
-    # RNA metrics file contains all UMI values, while ATAC metrics file only uses frags ≥ 10;
-    # impose UMI cutoff (default=10) to keep plot consistent
+    # remove cells that have less than 10 UMIs
     for line in rna_metrics_contents:
-        if int(line[3]) >= umi_metrics_cutoff: 
+        if int(line[3]) >= remove_low_yielding_cells: 
             umis.append(int(line[3]))
             genes.append(int(line[4]))
             rna_barcodes.append(line[0])
@@ -60,10 +59,12 @@ def get_metrics(rna_metrics_file, atac_metrics_file, umi_metrics_cutoff):
     tss = []
     frags = []
     atac_barcodes = []
+    # remove cells that have less than 10 fragments
     for line in atac_metrics_contents: 
-        tss.append(float(line[1]))
-        frags.append(int(line[10]))
-        atac_barcodes.append(line[15].split("#")[1]) # get barcode string after library name
+        if int(line[10]) >= remove_low_yielding_cells:
+            tss.append(float(line[1]))
+            frags.append(int(line[10]))
+            atac_barcodes.append(line[15].split("#")[1]) # get barcode string after library name
     atac_metrics = dict(zip(atac_barcodes, zip(tss, frags)))
     
     # merge metrics by barcodes
@@ -138,7 +139,7 @@ def main():
     pkr = getattr(args, "pkr")
     rna_metrics_file = getattr(args, "rna_metrics_file")
     atac_metrics_file = getattr(args, "atac_metrics_file")
-    umi_metrics_cutoff = getattr(args, "umi_metrics_cutoff")
+    remove_low_yielding_cells = getattr(args, "remove_low_yielding_cells")
     min_umis = getattr(args, "min_umis")
     min_genes = getattr(args, "min_genes")
     min_tss = getattr(args, "min_tss")
@@ -148,7 +149,7 @@ def main():
     
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
-    metrics_df = get_metrics(rna_metrics_file, atac_metrics_file, umi_metrics_cutoff)
+    metrics_df = get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells)
     
     # QC cells based on inputted cutoffs
     logging.info("QCing cells\n")

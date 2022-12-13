@@ -60,6 +60,9 @@ workflow ShareSeq {
         Float corrPVal = 0.05
         Int topNGene = 20
 
+        # Joint qc
+        Int remove_low_yielding_cells = 10
+
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
         #Int bootstraps = 100
@@ -152,6 +155,7 @@ workflow ShareSeq {
             input:
                 atac_barcode_metadata = atac.share_atac_archr_barcode_metadata,
                 rna_barcode_metadata = rna.share_rna_barcode_metadata,
+                remove_low_yielding_cells = remove_low_yielding_cells,
                 prefix = prefix,
                 genome_name = genome_name
         }

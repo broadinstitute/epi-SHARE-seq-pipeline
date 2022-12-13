@@ -16,7 +16,7 @@ task joint_qc_plotting {
         # density plot of all barcodes passing at least one filter.
         File? atac_barcode_metadata
         File? rna_barcode_metadata
-        Int umi_cutoff = 10
+        Int remove_low_yielding_cells = 10
 	Int min_umis = 100
         Int min_genes = 200
         Int min_tss = 4
@@ -54,7 +54,7 @@ task joint_qc_plotting {
         bash $(which monitor_script.sh) > monitoring.log &
 
         # Make joint qc plot
-        python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${umi_cutoff} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata}
+        python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata}
 
         # Make joint density plot
         Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}
@@ -87,9 +87,9 @@ task joint_qc_plotting {
                 help: 'tsv file with RNA barcode (R1,R2,R3,PKR), UMIs, genes.',
                 example: 'qc.rna.barcode.metadata.tsv'
            }
-        umi_cutoff: {
-                description: 'UMI cutoff for plotting.',
-                help: 'Minimum number of UMIs required for barcode to be plotted.',
+        remove_low_yielding_cells: {
+                description: 'UMI and fragments cutoff for plotting.',
+                help: 'Minimum number of UMIs/fragments required for barcode to be plotted.',
                 example: 10
            }
         min_umis: {
