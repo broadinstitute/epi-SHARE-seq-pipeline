@@ -55,7 +55,7 @@ task qc_rna {
         samtools index -@ ~{cpus} ~{bam} ~{bai} 
          
         # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
-        python3 $(which rna_barcode_metadata.py) ~{bam} ~{bai} ~{default="share-seq" prefix} ~{barcode_metadata}
+        python3 $(which rna_barcode_metadata.py) ~{bam} ~{bai} ~{barcode_metadata}
     
         # Make duplicates log from barcode metadata file
         awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
