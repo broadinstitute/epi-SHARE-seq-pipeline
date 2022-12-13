@@ -3,7 +3,7 @@
 # Based on Debian slim
 ############################################################
 
-FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79 as builder
+FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
@@ -54,7 +54,7 @@ RUN groupadd -r $USER &&\
 
 ENV R_LIBS_USER=/usr/local/lib/R
 
-# Copy the compiled software from the builder
+# Copy scripts
 COPY --chown=$USER:$USER src/python/rna_barcode_metadata.py /usr/local/bin/
 COPY --chown=$USER:$USER src/R/rna_qc_plots.R /usr/local/bin/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
