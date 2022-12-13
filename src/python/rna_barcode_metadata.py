@@ -95,7 +95,7 @@ def write_metadata_file(barcode_metadata, output_file):
     
     with open(output_file, "w") as f:
         # write header 
-        f.write("#" + "\t".join(fields) + "\n")
+        f.write("\t".join(fields) + "\n")
         # write rows
         for metrics_list in barcode_metadata:
             f.write("\t".join(metrics_list[:]) + "\n")
