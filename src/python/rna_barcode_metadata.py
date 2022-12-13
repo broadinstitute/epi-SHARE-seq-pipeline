@@ -91,7 +91,7 @@ def get_metrics(bam):
     return barcode_metadata
 
 def write_metadata_file(barcode_metadata, output_file):
-    fields = ["barcode", "total_counts", "duplicate_counts", "UMIs", "genes", "percent_mitochondrial"]
+    fields = ["barcode", "total_counts", "duplicate_counts", "umis", "genes", "percent_mitochondrial"]
     
     with open(output_file, "w") as f:
         # write header 
