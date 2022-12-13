@@ -12,7 +12,6 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Get total reads, duplicate reads, UMIs, genes, and percent mitochondrial reads for each barcode from bam file")
     parser.add_argument("bam_file", help="Filename for input bam file")
     parser.add_argument("bai_file", help="Filename for bam index file")
-    parser.add_argument("prefix", help="Experiment prefix")
     parser.add_argument("barcode_metadata_file", help="Filename for output barcode metadata txt file")
 
     return parser.parse_args()
@@ -22,7 +21,7 @@ def add_element(dictionary, key, value):
         dictionary[key] = []
     dictionary[key].append(value)
 
-def get_metrics(bam, prefix):
+def get_metrics(bam):
     """
     Get barcode metrics from bam file; all counts are only for reads overlapping genes.
     Reported metrics are total counts, UMIs (one UMI counted per unique UMI-gene mapping),
@@ -60,8 +59,13 @@ def get_metrics(bam, prefix):
         if read.reference_name == "chrM":
             mitochondrial_counts[barcode] = mitochondrial_counts.get(barcode, 0) + 1
         
-        # format barcode for output (R1,R2,R3,PKR)
-        formatted = barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + prefix
+        # format barcode for output (R1,R2,R3,PKR) using barcode from CB tag;
+        # read id barcode is not error-corrected so should not be used
+        # get PKR from read id rather than workflow "prefix" argmuent to ensure consistency with ATAC
+        read_id = read.query_name
+        read_id_barcode = read_id.split("_")[1]
+        pkr = read_id_barcode.split(",")[3]
+        formatted = barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + pkr
         formatted_barcodes[barcode] = formatted
     
     # count unique genes per barcode
@@ -87,11 +91,11 @@ def get_metrics(bam, prefix):
     return barcode_metadata
 
 def write_metadata_file(barcode_metadata, output_file):
-    fields = ["barcode", "total_counts", "duplicate_counts", "umis", "genes", "percent_mitochondrial"]
+    fields = ["barcode", "total_counts", "duplicate_counts", "UMIs", "genes", "percent_mitochondrial"]
     
     with open(output_file, "w") as f:
         # write header 
-        f.write("\t".join(fields) + "\n")
+        f.write("#" + "\t".join(fields) + "\n")
         # write rows
         for metrics_list in barcode_metadata:
             f.write("\t".join(metrics_list[:]) + "\n")
@@ -101,14 +105,13 @@ def main():
     args = parse_arguments() 
     bam_file = getattr(args, "bam_file")
     bai_file = getattr(args, "bai_file")
-    prefix = getattr(args, "prefix")
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
     
     # load bam file
     bam = pysam.AlignmentFile(bam_file, "rb", index_filename=bai_file)
     
     # get metrics for each barcode
-    barcode_metadata = get_metrics(bam, prefix)
+    barcode_metadata = get_metrics(bam)
     
     # write txt file
     write_metadata_file(barcode_metadata, barcode_metadata_file)
