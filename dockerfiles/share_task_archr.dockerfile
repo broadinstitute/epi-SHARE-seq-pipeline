@@ -19,7 +19,7 @@ ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
     apt-get install -y -qq --no-install-recommends\
-    binutils /
+    binutils \
     gtk-doc-tools \
     libcairo2-dev \
     libcurl4-openssl-dev \
