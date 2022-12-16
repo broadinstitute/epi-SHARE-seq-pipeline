@@ -13,6 +13,7 @@ ENV SAMTOOLS_VERSION 1.9
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
     autoconf \
+    binutils \
     build-essential \
     gcc \
     git \

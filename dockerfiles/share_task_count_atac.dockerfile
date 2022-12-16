@@ -15,6 +15,7 @@ ENV SAMTOOLS_VERSION 1.9
 RUN apt-get update && apt-get install -y \
     autoconf \
     automake \
+    binutils \
     build-essential \
     git \
     libcurl4-openssl-dev \
