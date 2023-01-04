@@ -5,7 +5,7 @@
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
 
-ENV STAR_VERSION 2.5.1b
+ENV STAR_VERSION 2.7.10a
 ENV SAMTOOLS_VERSION 1.9
 
 # To prevent time zone prompt
@@ -30,9 +30,9 @@ RUN mkdir /software
 WORKDIR /software
 ENV PATH="/software:${PATH}"
 
-# Install STAR 2.5.1b
-RUN wget https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz && tar -xzf ${STAR_VERSION}.tar.gz
-RUN cd STAR-${STAR_VERSION} && make STAR && rm ../${STAR_VERSION}.tar.gz && mv /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
+# Install STAR 2.7.10a
+RUN wget https://github.com/alexdobin/STAR/archive/refs/tags/${STAR_VERSION}.tar.gz && tar -xzf ${STAR_VERSION}.tar.gz
+RUN cd STAR-${STAR_VERSION}/source && make STAR && rm ../../${STAR_VERSION}.tar.gz && mv /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
 
 # Install samtools 1.9
 RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
@@ -48,8 +48,6 @@ LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
 LABEL software.task="STAR"
 
-ENV STAR_VERSION 2.5.1b
-
 # Create and setup new user
 ENV USER=shareseq
 WORKDIR /home/$USER
@@ -62,11 +60,8 @@ RUN groupadd -r $USER &&\
 ENV PATH="/software:${PATH}"
 
 # Copy the compiled software from the builder
-#COPY --from=builder --chown=$USER:$USER /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /usr/lib/x86_64-linux-gnu/libgomp.so.1 /lib/x86_64-linux-gnu/libncurses.so.6 /lib/x86_64-linux-gnu/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
-
-
 
 USER $USER
