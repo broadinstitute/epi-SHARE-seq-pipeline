@@ -43,7 +43,7 @@ task seurat {
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
         
-        String docker_image = "swekhande/shareseq-prod:share-task-seurat"
+        String docker_image = "docker.io/nchernia/share_task_seurat:3"
         Int mem_gb = 128
     }
 
@@ -74,7 +74,11 @@ task seurat {
     #String papermill_log_filename = 'papermill.logfile.txt'
 
     command {
-
+        if [[ ${rna_matrix} == *.tar.gz ]]
+        then
+           tar -xvzf ${rna_matrix} 
+           rna_matrix="./"
+        fi
         papermill $(which seurat_notebook.ipynb) ${output_filename} \
         -p rna_matrix ${rna_matrix} \
         -p genome ${genome_name} \
@@ -103,7 +107,7 @@ task seurat {
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
-        File seurat_barcode_metadata = barcode_metadata
+        File? seurat_barcode_metadata = barcode_metadata
         #File papermill_log = papermill_log_filename
         File? seurat_raw_violin_plot = raw_violin_plot
         File? seurat_filtered_violin_plot = filtered_violin_plot
@@ -121,7 +125,6 @@ task seurat {
         File? seurat_umap_mito_plot = umap_mito_plot
         File? seurat_raw_obj = raw_seurat_rds
         File? seurat_filtered_obj = filtered_seurat_rds
-        File? seurat_raw_matrix = raw_seurat_h5
         File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
     }

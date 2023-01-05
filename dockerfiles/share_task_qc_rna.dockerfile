@@ -3,7 +3,14 @@
 # Based on Debian slim
 ############################################################
 
-FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79 as builder
+FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79
+
+LABEL maintainer = "Eugenio Mattei"
+LABEL software = "Share-seq pipeline"
+LABEL software.version="0.0.1"
+LABEL software.organization="Broad Institute of MIT and Harvard"
+LABEL software.version.is-production="No"
+LABEL software.task="qc_rna"
 
 ENV R_VERSION=4.1.2
 
@@ -23,6 +30,9 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     libncurses5-dev \
     libbz2-dev \
+    python3 \
+    python3-dev \
+    python3-pip \ 
     wget \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
@@ -32,15 +42,8 @@ RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/sa
     git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
     cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
-#############################################################
-FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79
-
-LABEL maintainer = "Eugenio Mattei"
-LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
-LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
-LABEL software.task="qc_rna"
+# Install python packages
+RUN pip install --no-cache-dir pysam
 
 # Create and setup new user
 ENV USER=shareseq
@@ -51,22 +54,9 @@ RUN groupadd -r $USER &&\
 
 ENV R_LIBS_USER=/usr/local/lib/R
 
-RUN apt-get update && apt-get install -y \
-    gcc \
-    pigz \
-    python3 \
-    python3-dev \
-    python3-pip &&\
-    rm -rf /var/lib/apt/lists/*
-
-# Install system/math python packages (python3)
-RUN pip install --no-cache-dir common RSeQC
-
-# Copy the compiled software from the builder
-COPY --chown=$USER:$USER src/R/Read_distribution.R /usr/local/bin/
-COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
-COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/libncurses.so.6 /lib/x86_64-linux-gnu/
+# Copy scripts
+COPY --chown=$USER:$USER src/python/rna_barcode_metadata.py /usr/local/bin/
+COPY --chown=$USER:$USER src/R/rna_qc_plots.R /usr/local/bin/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
-
 
 USER ${USER}

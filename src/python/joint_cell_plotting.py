@@ -15,13 +15,14 @@ from plotnine import *
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Plot barcodes by RNA and ATAC QC status")
     parser.add_argument("pkr", help="PKR name")
-    parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv matrix")
+    parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv file")
     parser.add_argument("atac_metrics_file", help="Filename for ATAC metrics tsv file")
-    parser.add_argument("umi_metrics_cutoff", type=int, help="Cutoff for minimum number of UMIs to be applied to RNA barcode metrics file")
+    parser.add_argument("remove_low_yielding_cells", type=int, help="Minimum number of UMIs/fragments required for a cell to be plotted")
     parser.add_argument("min_umis", type=int, help="Cutoff for minimum number of UMIs")
     parser.add_argument("min_genes", type=int, help="Cutoff for minimum number of genes")
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
+    parser.add_argument("plot_file", help="Filename for plot png file")
     parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
     
     return parser.parse_args()
@@ -40,29 +41,30 @@ def merge_dicts(dict_1, dict_2):
     
     return(merged)
 
-def get_metrics(rna_metrics_file, atac_metrics_file, umi_metrics_cutoff):
+def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     """Read files and aggregate metrics into Pandas dataframe"""
     rna_metrics_contents = get_split_lines(rna_metrics_file, delimiter="\t", skip_header=True)
     umis = []
     genes = []
     rna_barcodes = []
-    # RNA metrics file contains all UMI values, while ATAC metrics file only uses frags ≥ 10;
-    # impose UMI cutoff (default=10) to keep plot consistent
+    # remove cells that have less than 10 UMIs
     for line in rna_metrics_contents:
-        if int(line[1]) >= umi_metrics_cutoff: 
-            umis.append(int(line[1]))
-            genes.append(int(line[2]))
-            rna_barcodes.append(line[5])
+        if int(line[3]) >= remove_low_yielding_cells: 
+            umis.append(int(line[3]))
+            genes.append(int(line[4]))
+            rna_barcodes.append(line[0])
     rna_metrics = dict(zip(rna_barcodes, zip(umis, genes)))
     
     atac_metrics_contents = get_split_lines(atac_metrics_file, delimiter="\t", skip_header=True)
     tss = []
     frags = []
     atac_barcodes = []
+    # remove cells that have less than 10 fragments
     for line in atac_metrics_contents: 
-        tss.append(float(line[1]))
-        frags.append(int(line[10]))
-        atac_barcodes.append(line[15].split("#")[1]) # get barcode string after library name
+        if int(line[10]) >= remove_low_yielding_cells:
+            tss.append(float(line[1]))
+            frags.append(int(line[10]))
+            atac_barcodes.append(line[15].split("#")[1]) # get barcode string after library name
     atac_metrics = dict(zip(atac_barcodes, zip(tss, frags)))
     
     # merge metrics by barcodes
@@ -78,23 +80,17 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
     pass_frags = df["frags"] >= min_frags
     
     # add df column with QC outcome
-    qc_conditions  = [(pass_umis & pass_genes & pass_tss & pass_frags), (pass_umis & pass_genes), (pass_tss & pass_frags)]
+    qc_conditions  = [(pass_umis & pass_genes & pass_tss & pass_frags), 
+                      (pass_umis & pass_genes), 
+                      (pass_tss & pass_frags),
+                      (~(pass_umis & pass_genes) & (~(pass_tss & pass_frags)))]
     qc_choices = ["both", "RNA only", "ATAC only", "neither"]
-    df["QC"] = np.select(qc_conditions, qc_choices[0:3], default="neither")
+    df["QC"] = np.select(qc_conditions, qc_choices)
     
     # get counts of each outcome type (used in plot legend)
-    outcome_counts = df["QC"].value_counts().sort_index() # sort to avoid ordering by count value
-    outcome_conditions = [df["QC"]=="ATAC only", df["QC"]=="RNA only", df["QC"]=="both", df["QC"]=="neither"]
+    outcome_counts = df["QC"].value_counts()
     
-    count_choices = []
-    for outcome in qc_choices:
-        if outcome in outcome_counts.index:
-            count_choices.append(f"{outcome} ({outcome_counts[outcome]})")
-        else:
-            count_choices.append(f"{outcome} (0)")
-    count_choices.sort()
-        
-    df["QC_count"] = np.select(outcome_conditions, count_choices)
+    df["QC_count"] = [f"{outcome} ({outcome_counts[outcome]})" for outcome in df["QC"]]
     
     return(df)
 
@@ -104,7 +100,7 @@ def round_to_power_10(x):
 def label_func(breaks):
     return [int(x) for x in breaks]
     
-def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags):
+def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
     # get max x and y coords to set plot limits
     max_x = max(df["frags"])
     max_y = max(df["umis"])
@@ -132,7 +128,7 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags):
              + scale_y_log10(limits=(10,xy_lim), labels=label_func)
              )
     
-    plot.save(filename = f"{pkr}_joint_cell_plot.png", dpi=1000)
+    plot.save(filename=plot_file, dpi=1000)
     
 def main():
     # create log file
@@ -143,16 +139,17 @@ def main():
     pkr = getattr(args, "pkr")
     rna_metrics_file = getattr(args, "rna_metrics_file")
     atac_metrics_file = getattr(args, "atac_metrics_file")
-    umi_metrics_cutoff = getattr(args, "umi_metrics_cutoff")
+    remove_low_yielding_cells = getattr(args, "remove_low_yielding_cells")
     min_umis = getattr(args, "min_umis")
     min_genes = getattr(args, "min_genes")
     min_tss = getattr(args, "min_tss")
     min_frags = getattr(args, "min_frags")
+    plot_file = getattr(args, "plot_file")
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
     
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
-    metrics_df = get_metrics(rna_metrics_file, atac_metrics_file, umi_metrics_cutoff)
+    metrics_df = get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells)
     
     # QC cells based on inputted cutoffs
     logging.info("QCing cells\n")
@@ -160,7 +157,7 @@ def main():
     
     # generate plot
     logging.info("Generating joint cell calling plot\n")
-    plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags)
+    plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file)
     
     # save dataframe
     logging.info("Saving dataframe as csv\n")

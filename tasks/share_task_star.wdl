@@ -19,7 +19,7 @@ task share_rna_align {
         File? genome_index_tar
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_star"
+        String docker_image = "docker.io/nchernia/share_task_star:1"
         Int cpus = 16
     }
     #Float input_file_size_gb = size(input[0], "G")
@@ -53,7 +53,7 @@ task share_rna_align {
             --outSAMattributes NH HI AS nM MD \
             --limitOutSJcollapsed 2000000 \
             --outSAMtype BAM Unsorted \
-            --limitIObufferSize 400000000 \
+            --limitIObufferSize 400000000 400000000 \
             --outReadsUnmapped Fastx \
             --readFilesCommand zcat
 

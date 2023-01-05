@@ -86,11 +86,11 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-joint-cell-calling'
+  id: 'task-joint-qc'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_cell_calling:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_qc:latest',
           '-f',
-          'dockerfiles/share_task_joint_cell_calling.dockerfile',
+          'dockerfiles/share_task_joint_qc.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -219,8 +219,8 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_cell_calling:latest']
-  waitFor: ['task-joint-cell-calling']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_qc:latest']
+  waitFor: ['task-joint-qc']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',

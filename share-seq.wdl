@@ -2,9 +2,9 @@ version 1.0
 
 # Import the sub-workflow for preprocessing the fastqs.
 import "workflows/subwf-atac-single-organism.wdl" as share_atac
-import "workflows/subwf-rna-single-organism.wdl" as share_rna
+import "workflows/subwf-rna-starsolo.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
-import "tasks/share_task_joint_cell_calling.wdl" as joint_cell_calling
+import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report
 
 # WDL workflow for SHARE-seq
@@ -18,7 +18,7 @@ workflow ShareSeq {
         Int? cpus = 16
 
 
-        # ATAC specific inputs
+        # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
         File? chrom_sizes
@@ -28,25 +28,19 @@ workflow ShareSeq {
 
         Int? cutoff_atac = 100
 
-        # RNA specific inputs
+        # RNA-specific inputs
         Boolean multimappers = false
         Boolean include_multimappers = false
         Boolean include_introns = true
         Array[File] read1_rna
+	Array[File] read2_rna
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
+        Int? umi_cutoff = 100
+        Int? gene_cutoff = 100
         Int? cpus_rna
         String? gene_naming = "gene_name"
-
-        # Group UMI
-        Boolean? remove_single_umi = false
-        String? mode = "fast"
-        Int? cutoff_rna = 100
-
-        # Lib_size QC
-        Boolean qc = false
-
 
         # DORCs specific inputs
         File? peak_set
@@ -66,6 +60,9 @@ workflow ShareSeq {
         Float corrPVal = 0.05
         Int topNGene = 20
 
+        # Joint qc
+        Int remove_low_yielding_cells = 10
+
         # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
         #Int bootstraps = 100
@@ -73,8 +70,8 @@ workflow ShareSeq {
         String docker_image_dorcs = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
         Int? mem_gb_dorcs
 
-        File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/GRCh38/genome_files_hg38.tsv"
-        File mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/genome_files_mm10.tsv"
+        File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human/GRCh38_genome_files_hg38.tsv"
+        File mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/mm10_genome_files_STARsolo.tsv"
     }
 
     String genome_name = if genome_name_input == "GRCh38" then "hg38" else genome_name_input
@@ -97,24 +94,13 @@ workflow ShareSeq {
             call share_rna.wf_rna as rna{
                 input:
                     read1 = read1_rna,
+                    read2 = read2_rna,
                     idx_tar = idx_tar_rna_,
+                    umi_cutoff = umi_cutoff,
+                    gene_cutoff = gene_cutoff, 
                     prefix = prefix,
                     genome_name = genome_name,
                     cpus = cpus_rna,
-                    # Update RGID
-                    multimappers = multimappers,
-                    # Assign features
-                    include_multimappers = include_multimappers,
-                    include_introns = include_introns,
-                    gtf = gtf_,
-                    gene_naming = gene_naming,
-                    # Group UMI
-                    remove_single_umi = remove_single_umi,
-                    mode = mode,
-                    cutoff = cutoff_rna,
-                    # Lib_size QC
-                    qc = qc,
-                    genes_annotation_bed = genes_annotation_bed_
             }
         }
     }
@@ -141,7 +127,7 @@ workflow ShareSeq {
         if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
             call find_dorcs.wf_dorcs as dorcs{
                 input:
-                    rna_matrix = rna.share_rna_h5_matrix,
+                    rna_matrix = rna.share_rna_h5,
                     atac_fragments = atac.share_atac_fragments_filtered,
                     peak_file = peak_set_,
 
@@ -165,10 +151,11 @@ workflow ShareSeq {
                     mem_gb = mem_gb_dorcs
             }
         }
-        call joint_cell_calling.joint_cell_calling as joint {
+        call joint_qc.joint_qc_plotting as joint_qc {
             input:
                 atac_barcode_metadata = atac.share_atac_archr_barcode_metadata,
-                rna_barcode_metadata = rna.share_rna_seurat_barcode_metadata,
+                rna_barcode_metadata = rna.share_rna_barcode_metadata,
+                remove_low_yielding_cells = remove_low_yielding_cells,
                 prefix = prefix,
                 genome_name = genome_name
         }
@@ -183,64 +170,56 @@ workflow ShareSeq {
             atac_duplicate_reads = atac.share_atac_duplicate_reads,
             rna_total_reads = rna.share_rna_total_reads,
             rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
-	          rna_aligned_multimap = rna.share_rna_aligned_multimap,
+            rna_aligned_multimap = rna.share_rna_aligned_multimap,
             rna_unaligned = rna.share_rna_unaligned,
             rna_feature_reads = rna.share_rna_feature_reads,
             rna_duplicate_reads = rna.share_rna_duplicate_reads,   
 
             ## JPEG files to be encoded and appended to html
             # RNA plots
-            image_files = [joint.joint_cell_plot, joint.joint_cell_density_plot, rna.share_rna_qc_library_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_library_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment, atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_strict_raw_tss_enrichment, atac.share_atac_archr_strict_filtered_tss_enrichment, atac.share_atac_archr_strict_raw_fragment_size_plot, atac.share_atac_archr_strict_filtered_fragment_size_plot, atac.share_atac_archr_strict_umap_doublets, atac.share_atac_archr_strict_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_strict_umap_num_frags_plot, atac.share_atac_archr_strict_umap_tss_score_plot, atac.share_atac_archr_strict_umap_frip_plot,atac.share_atac_archr_strict_gene_heatmap_plot, dorcs.j_plot],
+            image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, rna.share_rna_umi_barcode_rank_plot, rna.share_rna_gene_barcode_rank_plot, rna.share_rna_gene_umi_scatter_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_library_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment, atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, atac.share_atac_archr_strict_raw_tss_enrichment, atac.share_atac_archr_strict_filtered_tss_enrichment, atac.share_atac_archr_strict_raw_fragment_size_plot, atac.share_atac_archr_strict_filtered_fragment_size_plot, atac.share_atac_archr_strict_umap_doublets, atac.share_atac_archr_strict_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_strict_umap_num_frags_plot, atac.share_atac_archr_strict_umap_tss_score_plot, atac.share_atac_archr_strict_umap_frip_plot,atac.share_atac_archr_strict_gene_heatmap_plot, dorcs.j_plot],
 
             ## Links to files and logs to append to end of html
-            log_files = [rna.share_rna_alignment_log, rna.share_rna_featurecount_exon_txt, rna.share_rna_featurecount_intron_txt, rna.share_rna_qc_reads_distribution, rna.share_rna_qc_reads_distribution2, rna.share_rna_umi_rm_dup_log, rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log, rna.share_rna_alignment_raw]
+            log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
     }
 
     output{
-        File? share_rna_alignment_raw = rna.share_rna_alignment_raw
-        File? share_rna_alignment_index = rna.share_rna_alignment_index
-        File? share_rna_alignment_log = rna.share_rna_alignment_log
+        File? share_rna_output_bam = rna.share_task_starsolo_output_bam
+        File? share_rna_alignment_log = rna.share_task_starsolo_log_out
+        File? share_rna_summary_stats = rna.share_task_starsolo_summary_csv
+        File? share_rna_barcodes_stats = rna.share_task_starsolo_barcodes_stats
+        File? share_rna_features_stats = rna.share_task_starsolo_features_stats
+        File? share_rna_summary_csv = rna.share_task_starsolo_summary_csv
+        File? share_rna_umi_per_cell = rna.share_task_starsolo_umi_per_cell 
+        File? share_rna_raw_tar = rna.share_task_starsolo_raw_tar
 
-        File? share_rna_reheaded_alignment = rna.share_rna_reheaded_alignment
-        File? share_rna_reheaded_alignment_index = rna.share_rna_reheaded_alignment_index
+        File? share_rna_h5 = rna.share_rna_h5
 
-        File? share_rna_featurecount_alignment = rna.share_rna_featurecount_alignment
-        File? share_rna_featurecount_alignment_index = rna.share_rna_featurecount_alignment_index
-        #File? share_rna_featurecount_log = rna.share_rna_featurecount_log
-        File? share_rna_featurecount_exon_txt = rna.share_rna_featurecount_exon_txt
-        File? share_rna_featurecount_intron_txt = rna.share_rna_featurecount_intron_txt
-        #File share_rna_featurecount_summary = rna.share_rna_featurecount_summary
+        File? share_rna_barcode_metadata  = rna.share_rna_barcode_metadata
+        File? share_rna_duplicates_log = rna.share_rna_duplicates_log
+        File? share_rna_umi_barcode_rank_plot  = rna.share_rna_umi_barcode_rank_plot
+        File? share_rna_gene_barcode_rank_plot = rna.share_rna_gene_barcode_rank_plot
+        File? share_rna_gene_umi_scatter_plot = rna.share_rna_gene_umi_scatter_plot
 
-        File? share_rna_umi_barcodes = rna.share_rna_umi_barcodes
-        File? share_rna_umi_bed_filtered = rna.share_rna_umi_bed_filtered
-        File? share_rna_umi_bed_unfiltered = rna.share_rna_umi_bed_unfiltered
-        File? share_rna_umi_counts_filtered = rna.share_rna_umi_counts_filtered
-        File? share_rna_umi_counts_unfiltered = rna.share_rna_umi_counts_unfiltered
-        File? share_rna_umi_rm_dup_log = rna.share_rna_umi_rm_dup_log
-
-        File? share_rna_qc_reads_distribution = rna.share_rna_qc_reads_distribution
-        File? share_rna_qc_reads_distribution2 = rna.share_rna_qc_reads_distribution2
-        File? share_rna_qc_reads_distribution_plot = rna.share_rna_qc_reads_distribution_plot
-
-        File? share_rna_qc_library_counts = rna.share_rna_qc_library_counts
-        File? share_rna_qc_library_duplicates = rna.share_rna_qc_library_duplicates
-        File? share_rna_qc_library_plot = rna.share_rna_qc_library_plot
-        File? share_rna_h5_matrix = rna.share_rna_h5_matrix
         File? share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
         File? share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
+        File? share_rna_seurat_raw_violin_plot = rna.share_rna_seurat_raw_violin_plot
         File? share_rna_seurat_filtered_violin_plot = rna.share_rna_seurat_filtered_violin_plot
-        File? share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot
-        File? share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot
+        File? share_rna_seurat_raw_qc_scatter_plot = rna.share_rna_seurat_raw_qc_scatter_plot
+        File? share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot 
+        File? share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot 
         File? share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot
         File? share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot
         File? share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot
         File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
         File? share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot
         File? share_rna_seurat_umap_cluster_plot = rna.share_rna_seurat_umap_cluster_plot
-        File? share_rna_seurat_obj = rna.share_rna_seurat_obj
-        File? share_rna_plots_zip = rna.share_rna_plots_zip
-
-        File? share_atac_alignment_raw = atac.share_atac_alignment_raw
+        File? share_rna_seurat_umap_rna_count_plot = rna.share_rna_seurat_umap_rna_count_plot 
+        File? share_rna_seurat_umap_gene_count_plot = rna.share_rna_seurat_umap_gene_count_plot
+        File? share_rna_seurat_umap_mito_plot = rna.share_rna_seurat_umap_mito_plot
+        File? share_rna_seurat_obj = rna.share_rna_seurat_obj 
+        File? share_rna_plots_zip = rna.share_rna_plots_zip 
+        
         File? share_atac_alignment_raw_index = atac.share_atac_alignment_raw_index
         File? share_atac_alignment_log = atac.share_atac_alignment_log
 
@@ -283,8 +262,9 @@ workflow ShareSeq {
         File? dorcs_genes_summary = dorcs.dorcs_genes_summary
         File? dorcs_regions_summary = dorcs.dorcs_regions_summary
 
-        File? joint_cell_plot = joint.joint_cell_plot
-        File? joint_cell_density_plot = joint.joint_cell_density_plot
+        File? joint_qc_plot = joint_qc.joint_qc_plot
+        File? joint_density_plot = joint_qc.joint_density_plot
+        File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
 
         File? html_summary = html_report.html_report_file
     }
