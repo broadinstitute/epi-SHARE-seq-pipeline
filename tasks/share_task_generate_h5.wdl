@@ -15,8 +15,8 @@ task generate_h5 {
         # This task computs the the gene by barcode matrix.
 
         File filtered_bed
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
-        String docker_image = "swekhande/shareseq-prod:share-task-generate-h5"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5:release"
+        #String docker_image = "swekhande/shareseq-prod:share-task-generate-h5"
 
 
     }

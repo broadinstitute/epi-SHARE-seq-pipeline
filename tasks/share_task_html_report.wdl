@@ -2,7 +2,7 @@ version 1.0
 
 # TASK
 # SHARE-html-report
-# Gather information from log files 
+# Gather information from log files
 
 
 task html_report {
@@ -18,23 +18,23 @@ task html_report {
 
         # Stats for ATAC and RNA, will go at top of html
         Int? atac_total_reads
-        Int? atac_aligned_uniquely 
-        Int? atac_unaligned 
+        Int? atac_aligned_uniquely
+        Int? atac_unaligned
         Int? atac_feature_reads
-        Int? atac_duplicate_reads 
+        Int? atac_duplicate_reads
         Int? rna_total_reads
-        Int? rna_aligned_uniquely 
-        Int? rna_aligned_multimap 
-        Int? rna_unaligned 
-        Int? rna_feature_reads 
-        Int? rna_duplicate_reads 
+        Int? rna_aligned_uniquely
+        Int? rna_aligned_multimap
+        Int? rna_unaligned
+        Int? rna_feature_reads
+        Int? rna_duplicate_reads
 
         ## JPEG files to be encoded and appended to html
         Array[File?] image_files
 
         ## Raw text logs to append to end of html
         Array[String?] log_files
-       
+
     }
     # need to select from valid files since some are optional
     Array[File] valid_image_files = select_all(image_files)
@@ -59,14 +59,14 @@ task html_report {
         echo "<tr><td>Filtered (feature) Reads</td><td>" ~{rna_feature_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-        echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt       
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py output.html image_list.txt log_list.txt --input_file_name output.txt  
+        echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py output.html image_list.txt log_list.txt --input_file_name output.txt
     >>>
     output {
         File html_report_file = glob('*.html')[0]
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:14'
+        docker: 'us.gcr.io/buenrostro-share-seq/share_task_html_report:release'
     }
 }

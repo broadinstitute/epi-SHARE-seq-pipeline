@@ -20,7 +20,7 @@ task share_atac_bam2bed {
         File bam_index
         File? chrom_sizes
         String genome_name
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bam2bed"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bam2bed:release"
         String? prefix
 
 

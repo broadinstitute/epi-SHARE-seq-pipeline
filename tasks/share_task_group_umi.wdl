@@ -21,7 +21,7 @@ task group_umi_rna {
         Int cutoff
         String genome_name
         String mode
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_group_umi"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_group_umi:release"
         String? prefix
         Int? memory_gb = 32
 
@@ -47,7 +47,7 @@ task group_umi_rna {
 
         if [[ '~{mode}' == 'regular' ]]; then
             # Seems to get more slant and fewer UMIs, but get accurate lib size estimation. Slow.
-            ln -s ~{bam} ./bam.bam            
+            ln -s ~{bam} ./bam.bam
             samtools index  -@ ~{cpus} ./bam.bam
             umi_tools group \
                 --extract-umi-method=read_id \
@@ -58,7 +58,7 @@ task group_umi_rna {
                 --output-bam -S ~{prefix + "."}rna.~{genome_name}.grouped.bam \
                 --group-out=~{umi_groups_table} \
                 --skip-tags-regex=Unassigned >> ./Run.log
-            awk 'NR>1{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations 
+            awk 'NR>1{split($1,a,"_"); print a[2]}' ~{umi_groups_table} | sort -u > observed_barcodes_combinations
             awk 'NR>1{sum++}END{print "total reads:",sum; print "unique reads:", $NF; print "total dup reads:", sum-$NF}' ~{umi_groups_table} >> ~{prefix}.rm_dup_barcode.log.txt
         else
             # Custom UMI dedup by matching bc-umi-align position
@@ -84,7 +84,7 @@ task group_umi_rna {
             ## 1) umitools output keep all the barcode-UMI and don't collapse them
             ## 2) my script already collpsed them at alignment position level
             # - split so that cell barcode is in second column
-            # - remove homopolymer G umis, optionally remove single umi 
+            # - remove homopolymer G umis, optionally remove single umi
             # - for each group, print cell barcode, umi, count
             # - then for each barcode, print cell barcode, umi, # umis, # total reads incl dups
            less ~{umi_groups_table} | \

@@ -17,14 +17,15 @@ task joint_cell_calling {
         File? atac_barcode_metadata
         File? rna_barcode_metadata
         Int umi_metrics_cutoff = 10
-	Int min_umis = 100
+    Int min_umis = 100
         Int min_genes = 200
         Int min_tss = 4
         Int min_frags = 100
         Int disk_gb = 50
         Int mem_gb = 64
         String genome_name
-        String docker_image = "mknudson/share_task_joint_cell_calling:test"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_cell_calling:release"
+        #"mknudson/share_task_joint_cell_calling:test"
     }
 
     Int dsk_gb = disk_gb
