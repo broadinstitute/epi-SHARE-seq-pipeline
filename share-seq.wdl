@@ -140,7 +140,7 @@ workflow ShareSeq {
                     cpus = cpus_atac,
                     bam2bed_cpus = atac_bam2bed_cpus,
                     bam2bed_disk_factor = atac_bam2bed_disk_factor,
-                    bam2bed_disk_factor = atac_bam2bed_memory_factor
+                    bam2bed_memory_factor = atac_bam2bed_memory_factor
             }
         }
     }
