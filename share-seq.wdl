@@ -28,6 +28,11 @@ workflow ShareSeq {
 
         Int? cutoff_atac = 100
 
+        # ATAC - Filter
+        Int? atac_bam2bed_cpus = 16
+        Float? atac_bam2bed_disk_factor = 8.0
+        Float? atac_bam2bed_memory_factor = 0.15
+
         # RNA specific inputs
         Boolean multimappers = false
         Boolean include_multimappers = false
@@ -84,7 +89,7 @@ workflow ShareSeq {
     File idx_tar_atac_ = select_first([idx_tar_atac, annotations["bowtie2_idx_tar"]])
     File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
     File tss_bed_ = select_first([tss_bed, annotations["tss"]])
-    
+
     File idx_tar_rna_ = select_first([idx_tar_rna, annotations["star_idx_tar"]])
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
@@ -132,11 +137,14 @@ workflow ShareSeq {
                     prefix = prefix,
                     genome_name = genome_name,
                     cutoff = cutoff_atac,
-                    cpus = cpus_atac
+                    cpus = cpus_atac,
+                    bam2bed_cpus = atac_bam2bed_cpus,
+                    bam2bed_disk_factor = atac_bam2bed_disk_factor,
+                    bam2bed_disk_factor = atac_bam2bed_memory_factor
             }
         }
     }
-    
+
     if ( process_atac && process_rna ) {
         if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
             call find_dorcs.wf_dorcs as dorcs{
@@ -183,10 +191,10 @@ workflow ShareSeq {
             atac_duplicate_reads = atac.share_atac_duplicate_reads,
             rna_total_reads = rna.share_rna_total_reads,
             rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
-	          rna_aligned_multimap = rna.share_rna_aligned_multimap,
+              rna_aligned_multimap = rna.share_rna_aligned_multimap,
             rna_unaligned = rna.share_rna_unaligned,
             rna_feature_reads = rna.share_rna_feature_reads,
-            rna_duplicate_reads = rna.share_rna_duplicate_reads,   
+            rna_duplicate_reads = rna.share_rna_duplicate_reads,
 
             ## JPEG files to be encoded and appended to html
             # RNA plots
