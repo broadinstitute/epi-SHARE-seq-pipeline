@@ -20,12 +20,27 @@ task share_rna_align {
         String? prefix
         String docker_image = "docker.io/nchernia/share_task_star:1"
         Int cpus = 16
+        Float? disk_factor = 50.0
+        Float? memory_factor = 2.0
     }
 
-    Int mem_gb = 64
-    Int disk_gb = 300
+    # Determine the size of the input
+    Float input_file_size_gb = size(fastq_R1, "G") + size(fastq_R2, "G")
+
+    # Determining memory size based on the size of the input files.
+    Float mem_gb = 5.0 + size(genome_index_tar, "G") + memory_factor * input_file_size_gb
+
+    # Determining disk size based on the size of the input files.
+    Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
+
+    # Determining disk type base on the size of disk.
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
+
     command <<<
         set -e
+     
+        bash $(which monitor_script.sh) > monitoring.log &
+
         # Untar the genome
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
         for fq in ~{sep=' ' fastq_R2}
@@ -73,11 +88,13 @@ task share_rna_align {
         File summary_csv = "result/Solo.out/GeneFull/Summary.csv"
         File umi_per_cell = "result/Solo.out/GeneFull/UMIperCellSorted.txt"
         File raw_tar = "result/Solo.out/GeneFull/raw/raw.tar.gz"
+        File monitor_log = "monitoring.log"
     }
     runtime{
         cpu : cpus
-        memory : mem_gb+'G'
-        disks : 'local-disk ${disk_gb} SSD'
+        memory : "${mem_gb} GB"
+        memory_retry_multiplier: 2
+        disks: "local-disk ${disk_gb} ${disk_type}"
         maxRetries: 0
         docker: docker_image
     }
