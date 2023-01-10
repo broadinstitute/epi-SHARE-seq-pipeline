@@ -147,10 +147,12 @@ task share_atac_filter {
         # tmp_dup_bam and dinal_bam are the two files necessary for computing qc statistics.
 
         # TODO: Add library complexity
+	
+        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{final_bam} -o tmp_final_bam_namesort
 
         # Convert bam to bed.gz and mark duplicates
         # Removing reads that starts and ends at the same position (duplicates)
-        bedtools bamtobed -bedpe -i ~{final_bam} | \
+        bedtools bamtobed -bedpe -i tmp_final_bam_namesort | \
             sed 's/_/\t/g' | \
             awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6-5,$8}else if($10=="-"){print $1,$2-5,$6+4,$8}}' | \
             awk -v OFS="\t" '{print $2, $3, $4, $5, $1}' | \
