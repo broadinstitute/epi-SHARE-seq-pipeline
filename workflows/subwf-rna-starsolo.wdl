@@ -30,6 +30,7 @@ workflow wf_rna {
         Int? umi_cutoff
         Int? gene_cutoff
         # Seurat
+        Boolean count_only = false
         Int umap_dim = 10
         Float umap_resolution = 0.5 
     }
@@ -66,13 +67,15 @@ workflow wf_rna {
            dups_log = qc_rna.rna_duplicates_log
     }
 
-    call share_task_seurat.seurat as seurat {
-        input:
-            rna_matrix = generate_h5.h5_matrix,
-            genome_name = genome_name,
-            umap_dim = umap_dim,
-            umap_resolution = umap_resolution,
-            prefix = prefix
+    if (count_only == false) {
+        call share_task_seurat.seurat as seurat {
+            input:
+                rna_matrix = generate_h5.h5_matrix,
+                genome_name = genome_name,
+                umap_dim = umap_dim,
+                umap_resolution = umap_resolution,
+                prefix = prefix
+        }
     }
 
     output {

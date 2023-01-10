@@ -29,6 +29,7 @@ workflow ShareSeq {
         Int? cutoff_atac = 100
 
         # RNA-specific inputs
+        Boolean count_only = false
         Boolean multimappers = false
         Boolean include_multimappers = false
         Boolean include_introns = true
@@ -101,6 +102,7 @@ workflow ShareSeq {
                     prefix = prefix,
                     genome_name = genome_name,
                     cpus = cpus_rna,
+                    count_only = count_only
             }
         }
     }
