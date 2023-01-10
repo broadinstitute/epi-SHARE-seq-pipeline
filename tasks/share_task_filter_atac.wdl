@@ -148,7 +148,7 @@ task share_atac_filter {
 
         # TODO: Add library complexity
 
-        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{final_bam} -o tmp_final_bam_namesort
+        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n ~{final_bam} -o tmp_final_bam_namesort
 
         # Convert bam to bed.gz and mark duplicates
         # Removing reads that starts and ends at the same position (duplicates)
