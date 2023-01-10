@@ -36,11 +36,12 @@ task generate_h5 {
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     String h5 = "${default="share-seq" prefix}.${genome_name}.rna.h5"
-
+    String monitor_log = "monitor.log"
+    
     command {
         set -e
  
-        bash $(which monitor_script.sh) > monitoring.log &
+        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
         # Untar 
         tar xzvf ${tar} 
@@ -50,7 +51,6 @@ task generate_h5 {
     }
 
     output {
-        File monitor_log = "monitoring.log"
         File h5_matrix = "${h5}"
     }
 

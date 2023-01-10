@@ -36,10 +36,12 @@ task share_rna_align {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
+    String monitor_log = "monitor.log"
+
     command <<<
         set -e
      
-        bash $(which monitor_script.sh) > monitoring.log &
+        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Untar the genome
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
@@ -88,7 +90,6 @@ task share_rna_align {
         File summary_csv = "result/Solo.out/GeneFull/Summary.csv"
         File umi_per_cell = "result/Solo.out/GeneFull/UMIperCellSorted.txt"
         File raw_tar = "result/Solo.out/GeneFull/raw/raw.tar.gz"
-        File monitor_log = "monitoring.log"
     }
     runtime{
         cpu : cpus
