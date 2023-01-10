@@ -56,6 +56,9 @@ task find_dorcs {
     String log_filename = "log/${prefix}.dorcs.logfile.${genome}.txt"
 
     command {
+        
+        bash $(which monitor_script.sh) > monitoring.log &
+            
         gzip -dc ${atac_fragments} > tmp_fragments.bedpe
 
         papermill $(which dorcs_jplot_notebook.ipynb) ${output_filename} \
@@ -91,7 +94,6 @@ task find_dorcs {
 
         File? dorcs_genes_summary = dorc_genes_summ
         File? dorcs_regions_summary = all_regions_summ
-
 
     }
 

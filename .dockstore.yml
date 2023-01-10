@@ -47,7 +47,7 @@ workflows:
          branches:
              - main
              - dev
-             - neva
+             - sw-dorcs-refactor
          tags:
              - /.*/
 
