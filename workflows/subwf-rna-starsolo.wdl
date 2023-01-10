@@ -98,8 +98,8 @@ workflow wf_rna {
         File share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
         File share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
 
-        File share_rna_seurat_notebook_output = seurat.notebook_output
-        File share_rna_seurat_notebook_log = seurat.notebook_log
+        File? share_rna_seurat_notebook_output = seurat.notebook_output
+        File? share_rna_seurat_notebook_log = seurat.notebook_log
         File? share_rna_seurat_raw_violin_plot = seurat.seurat_raw_violin_plot
         File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
         File? share_rna_seurat_raw_qc_scatter_plot = seurat.seurat_raw_qc_scatter_plot
