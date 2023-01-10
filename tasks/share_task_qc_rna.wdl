@@ -44,11 +44,12 @@ task qc_rna {
     String umi_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.umi.barcode.rank.plot.png"
     String gene_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.barcode.rank.plot.png"
     String gene_umi_scatter_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.umi.scatter.plot.png"
+    String monitor_log = "monitor.log"
 
     command <<<
         set -e
 
-        bash $(which monitor_script.sh) > monitoring.log &
+        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Index bam file
         samtools index -@ ~{cpus} ~{bam} ~{bai} 
@@ -64,7 +65,6 @@ task qc_rna {
     >>>
 
     output {
-        File monitor_log = "monitoring.log"
         File rna_barcode_metadata = "~{barcode_metadata}"
         File rna_duplicates_log = "~{duplicates_log}"
         File rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
