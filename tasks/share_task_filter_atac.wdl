@@ -153,8 +153,6 @@ task share_atac_filter {
         bedtools bamtobed -bedpe -i ~{final_bam} | \
             sed 's/_/\t/g' | \
             awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6-5,$8}else if($10=="-"){print $1,$2-5,$6+4,$8}}' | \
-            sort --parallel=~{cpus} -S 2G  -k4,4 -k1,1 -k2,2n -k3,3n | \
-            uniq -c | \
             awk -v OFS="\t" '{print $2, $3, $4, $5, $1}' | \
             sort -k1,1 -k2,2n - | \
             bgzip -c > ~{fragments}
