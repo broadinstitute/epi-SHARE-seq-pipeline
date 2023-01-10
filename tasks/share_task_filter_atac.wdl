@@ -155,7 +155,6 @@ task share_atac_filter {
         bedtools bamtobed -bedpe -i tmp_final_bam_namesort | \
             sed 's/_/\t/g' | \
             awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6-5,$8}else if($10=="-"){print $1,$2-5,$6+4,$8}}' | \
-            awk -v OFS="\t" '{print $2, $3, $4, $5, $1}' | \
             sort -k1,1 -k2,2n - | \
             bgzip -c > ~{fragments}
 
