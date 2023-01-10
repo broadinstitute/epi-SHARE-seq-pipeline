@@ -95,7 +95,7 @@ task share_rna_align {
         memory : "${mem_gb} GB"
         memory_retry_multiplier: 2
         disks: "local-disk ${disk_gb} ${disk_type}"
-        maxRetries: 0
+        maxRetries: 1
         docker: docker_image
     }
 }
