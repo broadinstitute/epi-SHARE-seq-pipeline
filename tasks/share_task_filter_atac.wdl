@@ -147,7 +147,7 @@ task share_atac_filter {
         # tmp_dup_bam and dinal_bam are the two files necessary for computing qc statistics.
 
         # TODO: Add library complexity
-	
+
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{final_bam} -o tmp_final_bam_namesort
 
         # Convert bam to bed.gz and mark duplicates
