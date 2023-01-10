@@ -67,7 +67,7 @@ workflow wf_rna {
            dups_log = qc_rna.rna_duplicates_log
     }
 
-    if (count_only == false) {
+    if (!count_only) {
         call share_task_seurat.seurat as seurat {
             input:
                 rna_matrix = generate_h5.h5_matrix,
