@@ -65,6 +65,8 @@ task share_atac_filter {
     String tmp_filtered_bam = '${prefix}.filtered.tmp.bam'
     String tmp_fixmate_bam = '${prefix}.filtered.fixmate.tmp.bam'
     String filtered_bam = '${prefix}.filtered.fixmate.bam'
+    String queryname_fixmate_bam = '${prefix}.filtered.queryname.bam'
+    String queryname_final_bam = '${prefix}.filtered.queryname.final.bam'
     String tmp_dup_bam_sorted = '${prefix}.filtered.fixmate.dupmarked.tmp.sorted.bam'
     String picard_mark_duplicates_metrics = '${prefix}.picard.marksduplicates.metrics.txt'
     String picard_mark_duplicates_log = '${prefix}.picard.marksduplicates.log'
@@ -117,8 +119,9 @@ task share_atac_filter {
         # Remove orphan reads (pair was removed)
         # and read pairs mapping to different chromosomes
         # Obtain position sorted BAM
-        samtools view -F 1804 -f 2 -u ~{tmp_fixmate_bam} | \
-        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n /dev/stdin -o ~{filtered_bam}
+        samtools view -F 1804 -f 2 -u ~{tmp_fixmate_bam} -o ~{queryname_fixmate_bam}
+
+        #samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n ~{queryname_fixmate_bam} -o ~{filtered_bam}
 
         # Cleaning up bams we don't need anymore
         rm ~{tmp_fixmate_bam}
@@ -129,30 +132,31 @@ task share_atac_filter {
         # =============
 
         java -Xmx~{picard_java_memory}G -jar $(which picard.jar) MarkDuplicates \
-        --INPUT ~{filtered_bam} --OUTPUT ~{final_bam_wdup} \
+        --INPUT ~{queryname_fixmate_bam} --OUTPUT ~{final_bam_wdup} \
         --METRICS_FILE ~{picard_mark_duplicates_metrics} \
         --VALIDATION_STRINGENCY LENIENT \
         --ASSUME_SORT_ORDER queryname \
         --REMOVE_DUPLICATES false \
+        --TAG_DUPLICATE_SET_MEMBERS true \
         --BARCODE_TAG ~{barcode_tag} 2> ~{picard_mark_duplicates_log}
 
         # Create the final bam removing the duplicates
-        samtools view -F 1804 -f 2 -b ~{final_bam_wdup} | \
-        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M /dev/stdin -o ~{final_bam}
+        samtools view -F 1804 -f 2 -b -o ~{queryname_final_bam} ~{final_bam_wdup}
 
+        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{queryname_final_bam} -o ~{final_bam}
         samtools index ~{final_bam}
 
-        rm ~{filtered_bam}
+        #rm ~{filtered_bam}
 
-        # tmp_dup_bam and dinal_bam are the two files necessary for computing qc statistics.
+        # tmp_dup_bam and final_bam are the two files necessary for computing qc statistics.
 
         # TODO: Add library complexity
 
-        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n ~{final_bam} -o tmp_final_bam_namesort
+        #samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n ~{final_bam} -o tmp_final_bam_namesort
 
         # Convert bam to bed.gz and mark duplicates
         # Removing reads that starts and ends at the same position (duplicates)
-        bedtools bamtobed -bedpe -i tmp_final_bam_namesort | \
+        bedtools bamtobed -bedpe -i ~{queryname_final_bam} | \
             sed 's/_/\t/g' | \
             awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6-5,$8}else if($10=="-"){print $1,$2-5,$6+4,$8}}' | \
             sort -k1,1 -k2,2n - | \
