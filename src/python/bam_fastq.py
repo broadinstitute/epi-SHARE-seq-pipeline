@@ -81,6 +81,8 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
     """
     
     qname = read_left = read_right = None
+    good = bad = homop = 0
+    G = 'GGGGGGGG'
 
     for read in bam:
         if read.is_read1:
@@ -101,6 +103,7 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                 R3,Q3 = check_putative_barcode(R3str, r3_barcode_dict, Q3str)
                 
                 if R1 and R2 and R3:
+                    good += 1
                     # add cell barcodes to queryname
                     qname_barcode = ",".join([R1,R2,R3,pkr_id])
                     qname = qname + "_" + qname_barcode
@@ -128,6 +131,13 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                         # write read to correct file based on R1 barcode
                         write_read(left[barcode_set[R1]], read_left)
                         write_read(right[barcode_set[R1]], read_right)
+                elif G in R1str and G in R2str and G in R3str:
+                    homop += 1
+                else:
+                    bad += 1
+    
+    with open("qc.txt", 'w') as f:
+        print("%s\t%s\t%s" % (good, bad, homop), file=f)
 
 def check_putative_barcode(barcode_str, barcode_dict, quality_str):
     '''
