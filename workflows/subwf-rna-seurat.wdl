@@ -20,7 +20,13 @@ workflow wf_rna {
         Int? cpus = 16
         String? docker
         File h5_matrix
-        # Seurat
+        
+        #Seurat filtering parameters
+        Int min_features = 200
+        Float percent_MT = 5.0
+        Int min_cells = 3
+        
+        # Seurat UMAP parameters
         Int umap_dim = 10
         Float umap_resolution = 0.5
     }
@@ -29,6 +35,9 @@ workflow wf_rna {
         input:
             rna_matrix = h5_matrix,
             genome_name = genome_name,
+            min_features = min_features,
+            percent_MT = percent_MT,
+            min_cells = min_cells,
             umap_dim = umap_dim,
             umap_resolution = umap_resolution,
             prefix = prefix,

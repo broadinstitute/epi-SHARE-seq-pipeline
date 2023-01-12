@@ -29,6 +29,10 @@ workflow wf_rna {
         # QC
         Int? umi_cutoff
         Int? gene_cutoff
+        #Seurat filtering parameters
+        Int min_features = 200
+        Float percent_MT = 5.0
+        Int min_cells = 3
         # Seurat
         Boolean count_only = false
         Int umap_dim = 10
@@ -72,6 +76,9 @@ workflow wf_rna {
             input:
                 rna_matrix = generate_h5.h5_matrix,
                 genome_name = genome_name,
+                min_features = min_features,
+                percent_MT = percent_MT,
+                min_cells = min_cells,
                 umap_dim = umap_dim,
                 umap_resolution = umap_resolution,
                 prefix = prefix

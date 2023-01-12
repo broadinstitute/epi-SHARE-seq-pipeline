@@ -17,7 +17,6 @@ workflow ShareSeq {
         String genome_name_input
         Int? cpus = 16
 
-
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
@@ -34,7 +33,7 @@ workflow ShareSeq {
         Boolean include_multimappers = false
         Boolean include_introns = true
         Array[File] read1_rna
-	Array[File] read2_rna
+        Array[File] read2_rna
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -102,7 +101,10 @@ workflow ShareSeq {
                     prefix = prefix,
                     genome_name = genome_name,
                     cpus = cpus_rna,
-                    count_only = count_only
+                    count_only = count_only,
+                    minFeature_RNA = minFeature_RNA,
+                    percentMT_RNA = percentMT_RNA,
+                    minCells_RNA = minCells_RNA
             }
         }
     }
