@@ -102,9 +102,9 @@ workflow ShareSeq {
                     genome_name = genome_name,
                     cpus = cpus_rna,
                     count_only = count_only,
-                    minFeature_RNA = minFeature_RNA,
-                    percentMT_RNA = percentMT_RNA,
-                    minCells_RNA = minCells_RNA
+                    min_features = minFeature_RNA,
+                    percent_MT = percentMT_RNA,
+                    min_cells = minCells_RNA
             }
         }
     }
