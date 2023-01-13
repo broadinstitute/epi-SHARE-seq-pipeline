@@ -109,6 +109,7 @@ workflow ShareSeq {
                     rna_seurat_min_features = rna_seurat_min_features,
                     rna_seurat_percent_mt = rna_seurat_percent_mt,
                     rna_seurat_min_cells = rna_seurat_min_cells,
+                    rna_seurat_umap_dim = rna_seurat_umap_dim,
                     rna_seurat_umap_resolution = rna_seurat_umap_resolution,
                     rna_seurat_disk_factor = rna_seurat_disk_factor,
                     rna_seurat_memory_factor = rna_seurat_memory_factor
