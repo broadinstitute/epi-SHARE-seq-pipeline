@@ -17,7 +17,6 @@ workflow ShareSeq {
         String genome_name_input
         Int? cpus = 16
 
-
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
@@ -34,7 +33,7 @@ workflow ShareSeq {
         Boolean include_multimappers = false
         Boolean include_introns = true
         Array[File] read1_rna
-	Array[File] read2_rna
+        Array[File] read2_rna
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -42,18 +41,22 @@ workflow ShareSeq {
         Int? gene_cutoff = 100
         Int? cpus_rna
         String? gene_naming = "gene_name"
+        
+        # Seurat
+        Int? rna_seurat_min_features = 200
+        Int? rna_seurat_max_features = 2500 #currently not used in Seurat, but used in DORCs
+        Float? rna_seurat_percent_mt = 5
+        Int? rna_seurat_min_cells = 3
+        Int? rna_seurat_umap_dim
+        Float? rna_seurat_umap_resolution
+        Float? rna_seurat_disk_factor 
+        Float? rna_seurat_memory_factor
 
         # DORCs specific inputs
         File? peak_set
         Int? cpus_dorcs
         String save_plots_to_dir = "TRUE"
         String? dorcs_output_filename
-
-        # Seurat filters
-        Int minFeature_RNA = 200
-        Int maxFeature_RNA = 2500
-        Float percentMT_RNA = 5
-        Int minCells_RNA = 3
 
         # DORCs filter
         Int dorcGeneCutOff = 10
@@ -102,7 +105,14 @@ workflow ShareSeq {
                     prefix = prefix,
                     genome_name = genome_name,
                     cpus = cpus_rna,
-                    count_only = count_only
+                    count_only = count_only,
+                    rna_seurat_min_features = rna_seurat_min_features,
+                    rna_seurat_percent_mt = rna_seurat_percent_mt,
+                    rna_seurat_min_cells = rna_seurat_min_cells,
+                    rna_seurat_umap_dim = rna_seurat_umap_dim,
+                    rna_seurat_umap_resolution = rna_seurat_umap_resolution,
+                    rna_seurat_disk_factor = rna_seurat_disk_factor,
+                    rna_seurat_memory_factor = rna_seurat_memory_factor
             }
         }
     }
@@ -139,10 +149,10 @@ workflow ShareSeq {
                     output_filename = dorcs_output_filename,
                     prefix = prefix,
 
-                    minFeature_RNA = minFeature_RNA,
-                    maxFeature_RNA = maxFeature_RNA,
-                    percentMT_RNA = percentMT_RNA,
-                    minCells_RNA = minCells_RNA,
+                    minFeature_RNA = rna_seurat_min_features,
+                    maxFeature_RNA = rna_seurat_max_features,
+                    percentMT_RNA = rna_seurat_percent_mt,
+                    minCells_RNA = rna_seurat_min_cells,
 
                     dorcGeneCutOff = dorcGeneCutOff,
                     fripCutOff = fripCutOff,
