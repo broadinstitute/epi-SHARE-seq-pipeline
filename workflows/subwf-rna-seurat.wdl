@@ -1,6 +1,5 @@
 version 1.0
 
-
 # Import the tasks called by the pipeline
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
 
@@ -12,23 +11,25 @@ workflow wf_rna {
     }
 
     input {
-        # RNA Sub-worflow inputs
+        # RNA Seurat inputs
 
-        # Align
-        String prefix = "shareseq-project"
+        String prefix
         String genome_name
-        Int? cpus = 16
         String? docker
         File h5_matrix
         
         #Seurat filtering parameters
-        Int min_features = 200
-        Float percent_MT = 5.0
-        Int min_cells = 3
+        Int? min_features 
+        Float? percent_mt 
+        Int? min_cells 
         
         # Seurat UMAP parameters
-        Int umap_dim = 10
-        Float umap_resolution = 0.5
+        Int? umap_dim 
+        Float? umap_resolution 
+        
+        #Seurat runtime parameters
+        Float? disk_factor
+        Float? memory_factor
     }
 
     call share_task_seurat.seurat as seurat{
@@ -36,12 +37,14 @@ workflow wf_rna {
             rna_matrix = h5_matrix,
             genome_name = genome_name,
             min_features = min_features,
-            percent_MT = percent_MT,
+            percent_mt = percent_mt,
             min_cells = min_cells,
             umap_dim = umap_dim,
             umap_resolution = umap_resolution,
             prefix = prefix,
-            docker_image = docker
+            docker_image = docker,
+            disk_factor = disk_factor,
+            memory_factor = memory_factor
     }
 
     output {

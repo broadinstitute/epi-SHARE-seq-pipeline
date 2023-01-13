@@ -42,13 +42,19 @@ workflow wf_rna {
         # Lib_size QC
         Boolean qc = false
         File genes_annotation_bed
+        
         #Seurat filtering parameters
-        Int min_features = 200
-        Float percent_MT = 5.0
-        Int min_cells = 3
+        Int? rna_seurat_min_features
+        Float? rna_seurat_percent_mt
+        Int? rna_seurat_min_cells
+        
         # Seurat UMAP
-        Int umap_dim = 10
-        Float umap_resolution = 0.5
+        Int? rna_seurat_umap_dim
+        Float? rna_seurat_umap_resolution
+        
+        # Seurat runtime parameters
+        Float? rna_seurat_disk_factor 
+        Float? rna_seurat_memory_factor
     }
 
     call share_task_align.share_rna_align as align {
@@ -125,12 +131,14 @@ workflow wf_rna {
         input:
             rna_matrix = generate_h5.h5_matrix,
             genome_name = genome_name,
-            min_features = min_features,
-            percent_MT = percent_MT,
-            min_cells = min_cells,
-            umap_dim = umap_dim,
-            umap_resolution = umap_resolution,
-            prefix = prefix
+            min_features = rna_seurat_min_features,
+            percent_mt = rna_seurat_percent_mt,
+            min_cells = rna_seurat_min_cells,
+            umap_dim = rna_seurat_umap_dim,
+            umap_resolution = rna_seurat_umap_resolution,
+            prefix = prefix,
+            disk_factor = rna_seurat_disk_factor,
+            memory_factor = rna_seurat_memory_factor
     }
 
     output {
