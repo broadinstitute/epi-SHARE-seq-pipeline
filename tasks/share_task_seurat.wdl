@@ -105,7 +105,7 @@ task seurat {
         -p rna_matrix ${rna_matrix} \
         -p genome ${genome_name} \
         -p min_features ${min_features} \
-        -p percent_MT ${percent_MT} \
+        -p percent_MT ${percent_mt} \
         -p min_cells ${min_cells} \
         -p normalization_method ${normalization_method} \
         -p normalization_scale_factor ${normalization_scale_factor} \
@@ -184,7 +184,7 @@ task seurat {
             example: 200
         }
 
-        percent_MT: {
+        percent_mt: {
             description: 'Max percentage of MT reads in cell',
             help: 'Seurat QC for max % (float) of mt',
             example: 5.0
