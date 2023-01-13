@@ -62,6 +62,8 @@ task seurat {
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
+    
+    String monitor_log = "monitor.log"
 
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.seurat.plots.${genome_name}'
@@ -93,7 +95,7 @@ task seurat {
     
         set -e
 
-        bash $(which monitor_script.sh) > ~{monitor_log} 2>&1 &
+        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
         if [[ ${rna_matrix} == *.tar.gz ]]
         then
