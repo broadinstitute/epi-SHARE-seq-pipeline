@@ -47,7 +47,7 @@ task seurat {
         
         #Int mem_gb = 128
         
-        Float? disk_factor = 16.0
+        Float? disk_factor = 0.1
         Float? memory_factor = 0.15
     }
     
@@ -58,12 +58,12 @@ task seurat {
     Float mem_gb = 32.0 + memory_factor * input_file_size_mb
 
     # Determining disk size base on the size of the input files.
-    Int disk_gb = round(16.0 + disk_factor)
+    Int disk_gb = round(disk_factor * input_file_size_gb)
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
     
-    String monitor_log = "monitor.log"
+    String monitor_log = "rna_seurat_monitor.log"
 
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.seurat.plots.${genome_name}'
@@ -151,6 +151,7 @@ task seurat {
         File? seurat_filtered_obj = filtered_seurat_rds
         File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
+        File? seurat_monitor_log = monitor_log
     }
 
     runtime {
@@ -302,7 +303,7 @@ task seurat {
         
         disk_factor: {
             description: 'Disk factor',
-            help: 'Add this value to default 16GB disk space.',
+            help: 'Multiply this value to input .h5 file size (MB) to determine disk space (GB)',
             example: 16.0
         }
         
