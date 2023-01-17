@@ -490,8 +490,7 @@ task AggregateBarcodeQC {
 
 	command <<<
 		cat ~{sep=" " barcodeQCs} > combined.txt
-		awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}'\ 
-			combined.txt > final.txt
+		awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}' combined.txt > final.txt
 	>>>
 	
 	output {
