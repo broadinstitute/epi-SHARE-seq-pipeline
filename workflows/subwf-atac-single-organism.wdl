@@ -60,6 +60,7 @@ workflow wf_atac {
             cpus = align_cpus,
             docker_image = align_docker_image
     }
+
     call share_task_filter.share_atac_filter as filter {
         input:
             cpus = filter_cpus,

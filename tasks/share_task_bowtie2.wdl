@@ -14,8 +14,9 @@ task share_atac_align {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Array[File] fastq_R1
         Array[File] fastq_R2
+        Boolean encode_mode = false
         Int? cpus = 16
-        Int? multimappers = 0
+        Int? multimappers = 1
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
@@ -56,6 +57,7 @@ task share_atac_align {
     String sorted_bam = "${prefix}.atac.align.k${multimappers}.${genome_name}.sorted.bam"
     String sorted_bai = "${prefix}.atac.align.k${multimappers}.${genome_name}.sorted.bam.bai"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log"
+    String samstats_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.samstats.raw.log"
     String non_mito_bam = "${prefix}.atac.align.k${multimappers}.${genome_name}.nonmito.sorted.bam"
 
     String monitor_log = "atac_align_monitor.log"
@@ -71,36 +73,49 @@ task share_atac_align {
         # Aligning and adding the cell barcode to the CB tag and the barcodes plus pkr in the XC tag.
         bowtie2 -X2000 \
             -p ~{cpus} \
-            ~{if multimappers != 0 then "-k ~{multimappers}" else ""} \
+            -k ~{multimappers} \
             --rg-id ~{prefix + "."}atac \
             --rg "SM:None" \
             --rg "LB:None" \
             --rg "PL:Illumina" \
+            ~{if encode_mode then "--sam-append-comment" else ""} \
             -x $genome_prefix \
             -1 ~{sep="," fastq_R1} \
             -2 ~{sep="," fastq_R2} 2> ~{alignment_log} | \
-            awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4] "," a[5]);}}' | \
             samtools view \
                 -b \
                 -@ ~{samtools_threads} \
                 - \
                 -o ~{unsorted_bam}
 
-        samtools sort \
-            -@ ~{samtools_threads} \
-            -m ~{samtools_memory_per_thread}M \
-            ~{unsorted_bam} > ~{sorted_bam}
+
+        if ( ~{encode_mode} == "true" ) then
+            samtools sort \
+                -@ ~{samtools_threads} \
+                -m ~{samtools_memory_per_thread}M \
+                ~{unsorted_bam} \
+                -o ~{sorted_bam}
+        else
+            # Splitting the read name to ge the cell barcode and adding it to the CB tag in the BAM file.
+
+            samtools view ~{unsorted_bam} | \
+            awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4] "," a[5]);}}' | \
+            samtools sort \
+                -@ ~{samtools_threads} \
+                -m ~{samtools_memory_per_thread}M \
+                - \
+                -o ~{sorted_bam}
+        fi
 
         samtools index -@ ~{cpus} ~{sorted_bam}
 
-        # Getting a bam without mitochondrial reads for QCs.
-        samtools idxstats ~{sorted_bam} | cut -f 1 | grep -v -P "^chrM$" | xargs samtools view ~{sorted_bam} -@ ~{samtools_threads} -b > ~{non_mito_bam}
+        samtools view -o - {sorted_bam} | SAMstats --sorted_sam_file - --outf {output} > {samstats_log}
+
     >>>
 
     output {
         File? atac_alignment = sorted_bam
         File? atac_alignment_index = sorted_bai
-        File? atac_alignment_non_mito = non_mito_bam
         File? atac_alignment_log = alignment_log
         File? atac_alignment_monitor_log = monitor_log
     }
