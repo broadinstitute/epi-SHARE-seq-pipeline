@@ -80,6 +80,7 @@ task share_rna_align {
         gzip raw.tar
 
         # rename files to include prefix
+        cd
         mv result/Aligned.sortedByCoord.out.bam result/~{prefix}.Aligned.sortedByCoord.out.bam
         mv result/Log.final.out result/~{prefix}.Log.final.out
         mv result/Log.out result/~{prefix}.Log.out
