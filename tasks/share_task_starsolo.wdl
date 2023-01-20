@@ -74,21 +74,23 @@ task share_rna_align {
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
 
+        ls result/*/*/*
+
         cd $(pwd)/result/Solo.out/GeneFull/raw/
         gzip *
-        tar -cvzf ~{prefix}.raw.tar *.gz
+        tar -cvzf ~{default=share-seq prefix}.raw.tar *.gz
 
     >>>
 
     output{
-        File output_bam = "result/~{prefix}.Aligned.sortedByCoord.out.bam"
-        File log_final_out = "result/~{prefix}.Log.final.out"
-        File log_out = "result/~{prefix}.Log.out"
-        File log_progress_out = "result/~{prefix}.Log.progress.out"
-        File output_sj = "result/~{prefix}.SJ.out.tab"
-        File barcodes_stats = "result/Solo.out/~{prefix}.Barcodes.stats"
-        File features_stats = "result/Solo.out/GeneFull/~{prefix}.Features.stats"
-        File summary_csv = "result/Solo.out/GeneFull/~{prefix}.Summary.csv"
+        File output_bam = "result/~{default=share-seq prefix}.Aligned.sortedByCoord.out.bam"
+        File log_final_out = "result/~{default=share-seq prefix}.Log.final.out"
+        File log_out = "result/~{default=share-seq prefix}.Log.out"
+        File log_progress_out = "result/~{default=share-seq prefix}.Log.progress.out"
+        File output_sj = "result/~{default=share-seq prefix}.SJ.out.tab"
+        File barcodes_stats = "result/Solo.out/~{default=share-seq prefix}.Barcodes.stats"
+        File features_stats = "result/Solo.out/GeneFull/~{default=share-seq prefix}.Features.stats"
+        File summary_csv = "result/Solo.out/GeneFull/~{default=share-seq prefix}.Summary.csv"
         File umi_per_cell = "result/Solo.out/GeneFull/~{prefix}.UMIperCellSorted.txt"
         File raw_tar = "result/Solo.out/GeneFull/raw/~{prefix}.raw.tar.gz"
     }
