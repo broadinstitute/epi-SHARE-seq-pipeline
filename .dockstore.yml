@@ -11,7 +11,8 @@ workflows:
              - minimal-inputs
              - dynamic-memory
              - knudson
-             - filenames
+             - insert_size_hist
+             - barcode_plot_annotations
          tags:
              - /.*/
 
