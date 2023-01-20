@@ -78,18 +78,31 @@ task share_rna_align {
         gzip *
         tar -cvf raw.tar *.gz
         gzip raw.tar
+
+        # rename files to include prefix
+        mv result/Aligned.sortedByCoord.out.bam result/~{prefix}.Aligned.sortedByCoord.out.bam
+        mv result/Log.final.out result/~{prefix}.Log.final.out
+        mv result/Log.out result/~{prefix}.Log.out
+        mv result/Log.progress.out result/~{prefix}.Log.progress.out
+        mv result/SJ.out.tab result/~{prefix}.SJ.out.tab
+        mv result/Solo.out/Barcodes.stats result/Solo.out/~{prefix}.Barcodes.stats
+        mv result/Solo.out/GeneFull/Features.stats result/Solo.out/GeneFull/~{prefix}.Features.stats
+        mv result/Solo.out/GeneFull/Summary.csv result/Solo.out/GeneFull/~{prefix}.Summary.csv
+        mv result/Solo.out/GeneFull/UMIperCellSorted.txt result/Solo.out/GeneFull/~{prefix}.UMIperCellSorted.txt
+        mv result/Solo.out/GeneFull/raw/raw.tar.gz result/Solo.out/GeneFull/raw/~{prefix}.raw.tar.gz
     >>>
+
     output{
-        File output_bam = "result/Aligned.sortedByCoord.out.bam"
-        File log_final_out = "result/Log.final.out"
-        File log_out = "result/Log.out"
-        File log_progress_out = "result/Log.progress.out"
-        File output_sj = "result/SJ.out.tab"
-        File barcodes_stats = "result/Solo.out/Barcodes.stats"
-        File features_stats = "result/Solo.out/GeneFull/Features.stats"
-        File summary_csv = "result/Solo.out/GeneFull/Summary.csv"
-        File umi_per_cell = "result/Solo.out/GeneFull/UMIperCellSorted.txt"
-        File raw_tar = "result/Solo.out/GeneFull/raw/raw.tar.gz"
+        File output_bam = "result/~{prefix}.Aligned.sortedByCoord.out.bam"
+        File log_final_out = "result/~{prefix}.Log.final.out"
+        File log_out = "result/~{prefix}.Log.out"
+        File log_progress_out = "result/~{prefix}.Log.progress.out"
+        File output_sj = "result/~{prefix}.SJ.out.tab"
+        File barcodes_stats = "result/Solo.out/~{prefix}.Barcodes.stats"
+        File features_stats = "result/Solo.out/GeneFull/~{prefix}.Features.stats"
+        File summary_csv = "result/Solo.out/GeneFull/~{prefix}.Summary.csv"
+        File umi_per_cell = "result/Solo.out/GeneFull/~{prefix}.UMIperCellSorted.txt"
+        File raw_tar = "result/Solo.out/GeneFull/raw/~{prefix}.raw.tar.gz"
     }
     runtime{
         cpu : cpus
