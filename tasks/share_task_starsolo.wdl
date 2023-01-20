@@ -66,7 +66,7 @@ task share_rna_align {
         --runThreadN ~{cpus} \
         --chimOutType WithinBAM \
         --genomeDir ./ \
-        --outFileNamePrefix result/ \
+        --outFileNamePrefix result/~{prefix}. \
         --outFilterMultimapNmax 20 \
         --outFilterScoreMinOverLread 0.3 \
         --outFilterMatchNminOverLread 0.3 \
@@ -79,18 +79,6 @@ task share_rna_align {
         tar -cvf raw.tar *.gz
         gzip raw.tar
 
-        # rename files to include prefix
-        cd
-        mv result/Aligned.sortedByCoord.out.bam result/~{prefix}.Aligned.sortedByCoord.out.bam
-        mv result/Log.final.out result/~{prefix}.Log.final.out
-        mv result/Log.out result/~{prefix}.Log.out
-        mv result/Log.progress.out result/~{prefix}.Log.progress.out
-        mv result/SJ.out.tab result/~{prefix}.SJ.out.tab
-        mv result/Solo.out/Barcodes.stats result/Solo.out/~{prefix}.Barcodes.stats
-        mv result/Solo.out/GeneFull/Features.stats result/Solo.out/GeneFull/~{prefix}.Features.stats
-        mv result/Solo.out/GeneFull/Summary.csv result/Solo.out/GeneFull/~{prefix}.Summary.csv
-        mv result/Solo.out/GeneFull/UMIperCellSorted.txt result/Solo.out/GeneFull/~{prefix}.UMIperCellSorted.txt
-        mv result/Solo.out/GeneFull/raw/raw.tar.gz result/Solo.out/GeneFull/raw/~{prefix}.raw.tar.gz
     >>>
 
     output{
