@@ -76,8 +76,7 @@ task share_rna_align {
 
         cd $(pwd)/result/Solo.out/GeneFull/raw/
         gzip *
-        tar -cvf raw.tar *.gz
-        gzip raw.tar
+        tar -cvzf ~{prefix}.raw.tar *.gz
 
     >>>
 
