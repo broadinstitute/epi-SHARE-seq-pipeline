@@ -74,9 +74,14 @@ task share_rna_align {
         --outReadsUnmapped Fastx \
         --readFilesCommand zcat
 
-        ls result/*/*/*
+        # rename files to include prefix (--outFileNamePrefix doesn't split folder and prefix names in subdirectories) 
+        mv result/~{default="share-seq" prefix}.Solo.out/ result/Solo.out/
+        mv result/Solo.out/Barcodes.stats result/Solo.out/~{default="share-seq" prefix}.Barcodes.stats
+        mv result/Solo.out/GeneFull/Features.stats result/Solo.out/GeneFull/~{default="share-seq" prefix}.Features.stats
+        mv result/Solo.out/GeneFull/Summary.csv result/Solo.out/GeneFull/~{default="share-seq" prefix}.Summary.csv
+        mv result/Solo.out/GeneFull/UMIperCellSorted.txt result/Solo.out/GeneFull/~{default="share-seq" prefix}.UMIperCellSorted.txt
 
-        cd $(pwd)/result/Solo.out/GeneFull/raw/
+        cd result/Solo.out/GeneFull/raw/
         gzip *
         tar -cvzf ~{default="share-seq" prefix}.raw.tar *.gz
 
