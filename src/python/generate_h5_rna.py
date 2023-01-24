@@ -58,7 +58,7 @@ def write_h5(output_file, count_matrix, barcode_list, gene_list):
     h5_file = h5py.File(output_file, "w")
     
     # create datasets expected for Seurat import    
-    g = h5_file.create_group("group")
+    g = h5_file.create_group("matrix")
     g.create_dataset("barcodes", data=barcode_list)
     g.create_dataset("data", data=count_matrix.data)
     g.create_dataset("gene_names", data=gene_list)
