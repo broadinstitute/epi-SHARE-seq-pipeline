@@ -1,10 +1,11 @@
 version 1.0
 
+import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
+import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
-import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
+import "../tasks/share_task_cellbender.wdl" as share_task_cellbender
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
-import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 
 # Import the tasks called by the pipeline
 workflow wf_rna {
@@ -30,8 +31,11 @@ workflow wf_rna {
         Int? umi_cutoff
         Int? gene_cutoff
         
-        # Seurat
+        # Proceed to Seurat/CellBender?
         Boolean count_only = false
+
+        # CellBender
+        Int? cellbender_expected_cells = 5000
         
         #Seurat filtering parameters
         Int? rna_seurat_min_features
@@ -81,6 +85,13 @@ workflow wf_rna {
     }
 
     if (!count_only) {
+        call share_task_cellbender.cellbender as cellbender {
+            input: 
+                prefix = prefix,
+                h5 = generate_h5.h5_matrix,
+                expected_cells = cellbender_expected_cells
+        }
+
         call share_task_seurat.seurat as seurat {
             input:
                 rna_matrix = generate_h5.h5_matrix,
@@ -115,6 +126,10 @@ workflow wf_rna {
         File share_rna_umi_barcode_rank_plot  = qc_rna.rna_umi_barcode_rank_plot
         File share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
         File share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
+
+        File? share_rna_cellbender_h5 = cellbender.cellbender_h5
+        File? share_rna_cellbender_csv = cellbender.cellbender_csv
+        File? share_rna_cellbender_pdf = cellbender.cellbender_pdf
 
         File? share_rna_seurat_notebook_output = seurat.notebook_output
         File? share_rna_seurat_notebook_log = seurat.notebook_log
