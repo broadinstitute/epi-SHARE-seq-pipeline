@@ -22,7 +22,7 @@ task share_atac_filter {
         File? bam_index
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        Int? multimappers=0
+        Int? multimappers = 0
         String? barcode_tag = "CB"
         String docker_image = "polumechanos/share_atac_filter"
         String genome_name
@@ -109,19 +109,21 @@ task share_atac_filter {
         # Only keep properly paired reads
         # Obtain name sorted BAM file
         # =============================
-        samtools view -@ ~{samtools_threads} -F 524 -f 2 -u ~{non_mito_bam} | \
+        samtools view -h -@ ~{samtools_threads} -F 524 -f 2 -u ~{non_mito_bam} | \
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n /dev/stdin -o ~{tmp_filtered_bam}
 
+        samtools index ~{tmp_filtered_bam}
+
         # Assign multimappers if necessary
-        if [ ~{multimappers} -eq 0 ]; then
-            samtools view ~{tmp_filtered_bam} $(echo ${chrs}) | samtools fixmate -@ ~{samtools_threads} -r /dev/stdin ~{tmp_fixmate_bam}
+        if [ ~{multimappers} -le 1 ]; then
+            samtools view -h ~{tmp_filtered_bam} $(echo ${chrs}) | samtools fixmate -@ ~{samtools_threads} -r /dev/stdin ~{tmp_fixmate_bam}
         else
             samtools view -h ~{tmp_filtered_bam} | \
             python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | samtools view  - $(echo ${chrs}) | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
         fi
 
         # Cleaning up bams we don't need anymore
-        rm ~{tmp_fixmate_bam}
+        rm ~{tmp_filtered_bam}
 
         # =============
         # Mark duplicates
@@ -137,7 +139,7 @@ task share_atac_filter {
         --BARCODE_TAG ~{barcode_tag} 2> ~{picard_mark_duplicates_log}
 
         # Create the final bam removing the duplicates
-        samtools view -F 1804 -f 2 -b -o ~{queryname_final_bam} ~{final_bam_wdup}
+        samtools view -h -F 1804 -f 2 -b -o ~{queryname_final_bam} ~{final_bam_wdup}
 
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{queryname_final_bam} -o ~{final_bam}
         samtools index ~{final_bam}

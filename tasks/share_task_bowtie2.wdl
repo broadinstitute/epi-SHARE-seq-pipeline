@@ -110,7 +110,6 @@ task share_atac_align {
     >>>
 
     output {
-        File? tmp_atac_alignment = unsorted_bam
         File? atac_alignment = sorted_bam
         File? atac_alignment_index = sorted_bai
         File? atac_alignment_log = alignment_log
