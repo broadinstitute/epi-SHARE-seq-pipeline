@@ -81,7 +81,7 @@ task share_atac_align {
             -1 ~{sep="," fastq_R1} \
             -2 ~{sep="," fastq_R2} 2> ~{alignment_log} | \
             samtools view \
-                -b \
+                -bS \
                 -@ ~{samtools_threads} \
                 - \
                 -o ~{unsorted_bam}
