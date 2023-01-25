@@ -45,7 +45,7 @@ task cellbender {
     command {
         cellbender remove-background \
             --input "${h5}" \
-            --output "${prefix}_out.h5" \
+            --output "${prefix}_cellbender.h5" \
             --cuda \
             ${"--expected-cells " + expected_cells} \
             ${"--total-droplets-included " + total_droplets_included} \
@@ -62,10 +62,11 @@ task cellbender {
     }
 
     output {
-        File cellbender_log = "${prefix}_out.log"
-        File cellbender_pdf = "${prefix}_out.pdf"
-        File cellbender_csv = "${prefix}_out_cell_barcodes.csv"
-        File cellbender_h5 = "${prefix}_out.h5"  # v2 creates a number of outputs depending on "fpr"
+        File cellbender_log = "${prefix}_cellbender.log"
+        File cellbender_pdf = "${prefix}_cellbender.pdf"
+        File cellbender_csv = "${prefix}_cellbender_cell_barcodes.csv"
+        File cellbender_h5 = "${prefix}_cellbender.h5"  # v2 creates a number of outputs depending on "fpr"
+        File cellbender_filtered_h5 = "${prefix}_cellbender_filtered.h5"
     }
 
     runtime {
