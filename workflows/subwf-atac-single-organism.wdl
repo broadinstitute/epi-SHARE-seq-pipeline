@@ -35,7 +35,7 @@ workflow wf_atac {
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
         Int? align_cpus
-        Int? align_multimappers = 0
+        Int? align_multimappers = 1
         String align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
 
         # Filtering-specific inputs
