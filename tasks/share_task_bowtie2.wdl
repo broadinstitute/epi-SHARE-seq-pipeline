@@ -87,7 +87,7 @@ task share_atac_align {
                 -o ~{unsorted_bam}
 
 
-        if ( ~{encode_mode} == "true" ) then
+        if [[ ~{encode_mode} ]] then
             samtools sort \
                 -@ ~{samtools_threads} \
                 -m ~{samtools_memory_per_thread}M \
