@@ -81,7 +81,8 @@ task share_atac_align {
             -1 ~{sep="," fastq_R1} \
             -2 ~{sep="," fastq_R2} 2> ~{alignment_log} | \
             samtools view \
-                -bS \
+                -b \
+                -S \
                 -@ ~{samtools_threads} \
                 - \
                 -o ~{unsorted_bam}
@@ -95,7 +96,7 @@ task share_atac_align {
                 -o ~{sorted_bam}
         else
             # Splitting the read name to ge the cell barcode and adding it to the CB tag in the BAM file.
-            samtools view ~{unsorted_bam} | \
+            samtools view -h ~{unsorted_bam} | \
             awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4] "," a[5]);}}' | \
             samtools sort \
                 -@ ~{samtools_threads} \
@@ -109,6 +110,7 @@ task share_atac_align {
     >>>
 
     output {
+        File? tmp_atac_alignment = unsorted_bam
         File? atac_alignment = sorted_bam
         File? atac_alignment_index = sorted_bai
         File? atac_alignment_log = alignment_log
