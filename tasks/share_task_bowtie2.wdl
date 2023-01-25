@@ -57,8 +57,6 @@ task share_atac_align {
     String sorted_bam = "${prefix}.atac.align.k${multimappers}.${genome_name}.sorted.bam"
     String sorted_bai = "${prefix}.atac.align.k${multimappers}.${genome_name}.sorted.bam.bai"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log"
-    String samstats_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.samstats.raw.log"
-    String non_mito_bam = "${prefix}.atac.align.k${multimappers}.${genome_name}.nonmito.sorted.bam"
 
     String monitor_log = "atac_align_monitor.log"
 
@@ -97,7 +95,6 @@ task share_atac_align {
                 -o ~{sorted_bam}
         else
             # Splitting the read name to ge the cell barcode and adding it to the CB tag in the BAM file.
-
             samtools view ~{unsorted_bam} | \
             awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4] "," a[5]);}}' | \
             samtools sort \
@@ -108,8 +105,6 @@ task share_atac_align {
         fi
 
         samtools index -@ ~{cpus} ~{sorted_bam}
-
-        samtools view -o - {sorted_bam} | SAMstats --sorted_sam_file - --outf {output} > {samstats_log}
 
     >>>
 

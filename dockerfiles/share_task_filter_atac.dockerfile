@@ -85,6 +85,12 @@ ENV PATH="/software:${PATH}"
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+COPY --chown=$USER:$USER src/python/filter_mito_reads.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/bam_to_fragments.py /usr/local/bin
+# COPY --chown=$USER:$USER src/python/assign_multimappers.py /usr/local/bin
+
+
+
 
 
 USER ${USER}

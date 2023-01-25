@@ -59,19 +59,21 @@ task share_atac_filter {
     Float picard_java_heap_factor = 0.9
     Int picard_java_memory = round(mem_gb * picard_java_heap_factor)
 
-    String filtering_params = if multimappers == 0 then "-q ${mapq_threshold} -F 1804" else "-F 524"
+    #String filtering_params = if multimappers == 0 then "-q ${mapq_threshold} -F 1804" else "-F 524"
 
+
+    String non_mito_bam = "${prefix}.atac.align.k${multimappers}.${genome_name}.nonmito.sorted.bam"
 
     String tmp_filtered_bam = '${prefix}.filtered.tmp.bam'
     String tmp_fixmate_bam = '${prefix}.filtered.fixmate.tmp.bam'
-    String filtered_bam = '${prefix}.filtered.fixmate.bam'
-    String queryname_fixmate_bam = '${prefix}.filtered.queryname.bam'
-    String queryname_final_bam = '${prefix}.filtered.queryname.final.bam'
+
+
     String tmp_dup_bam_sorted = '${prefix}.filtered.fixmate.dupmarked.tmp.sorted.bam'
     String picard_mark_duplicates_metrics = '${prefix}.picard.marksduplicates.metrics.txt'
     String picard_mark_duplicates_log = '${prefix}.picard.marksduplicates.log'
 
     String final_bam_wdup = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.bam'
+    String queryname_final_bam = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.queryname.final.bam'
     String final_bam_wdup_index = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.bam.bai'
     String final_bam = '${prefix}.atac.filter.fixmate.dedup.k${multimappers}.${genome_name}.bam'
     String final_bam_index = '${prefix}.atac.filter.fixmate.dedup.k${multimappers}.${genome_name}.bam.bai'
@@ -84,19 +86,21 @@ task share_atac_filter {
 
         bash $(which monitor_script.sh) > ~{monitor_log} 2>&1 &
 
-        # TODO: Fraction of mito reads
-
         # I need to do this because the bam and bai need to be in the same folder but WDL doesn't allow you to
         # co-localize them in the same path.
         ln -s ~{bam} in.bam
         ln -s ~{bam_index} in.bam.bai
 
+        # The script removes the mithocondrial reads and creates two log file with bulk and barcode statistics.
+        python3 $(which filter_mito_reads.py) -o ~{non_mito_bam} --prefix ~{prefix} --bc_tag ~{barcode_tag} in.bam
+
+        samtools index ~{non_mito_bam}
+
         # Keep only assembled chromosomes
-        chrs=$(samtools view -H in.bam | \
+        chrs=$(samtools view -H ~{non_mito_bam}| \
             grep chr | \
             cut -f2 | \
             sed 's/SN://g' | \
-            grep -v chrM | \
             awk '{if(length($0)<6)print}')
 
         # =============================
@@ -105,34 +109,26 @@ task share_atac_filter {
         # Only keep properly paired reads
         # Obtain name sorted BAM file
         # =============================
-        samtools view -@ ~{samtools_threads} ~{filtering_params} -f 2 -u in.bam $(echo ${chrs}) | \
+        samtools view -@ ~{samtools_threads} -F 524 -f 2 -u ~{non_mito_bam} | \
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n /dev/stdin -o ~{tmp_filtered_bam}
 
         # Assign multimappers if necessary
         if [ ~{multimappers} -eq 0 ]; then
-            samtools fixmate -@ ~{samtools_threads} -r ~{tmp_filtered_bam} ~{tmp_fixmate_bam}
+            samtools view ~{tmp_filtered_bam} $(echo ${chrs}) | samtools fixmate -@ ~{samtools_threads} -r /dev/stdin ~{tmp_fixmate_bam}
         else
             samtools view -h ~{tmp_filtered_bam} | \
-            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
+            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | samtools view  - $(echo ${chrs}) | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
         fi
-
-        # Remove orphan reads (pair was removed)
-        # and read pairs mapping to different chromosomes
-        # Obtain position sorted BAM
-        samtools view -F 1804 -f 2 -u ~{tmp_fixmate_bam} -o ~{queryname_fixmate_bam}
-
-        #samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n ~{queryname_fixmate_bam} -o ~{filtered_bam}
 
         # Cleaning up bams we don't need anymore
         rm ~{tmp_fixmate_bam}
-        rm ~{tmp_filtered_bam}
 
         # =============
         # Mark duplicates
         # =============
 
         java -Xmx~{picard_java_memory}G -jar $(which picard.jar) MarkDuplicates \
-        --INPUT ~{queryname_fixmate_bam} --OUTPUT ~{final_bam_wdup} \
+        --INPUT ~{tmp_fixmate_bam} --OUTPUT ~{final_bam_wdup} \
         --METRICS_FILE ~{picard_mark_duplicates_metrics} \
         --VALIDATION_STRINGENCY LENIENT \
         --ASSUME_SORT_ORDER queryname \
@@ -146,13 +142,7 @@ task share_atac_filter {
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{queryname_final_bam} -o ~{final_bam}
         samtools index ~{final_bam}
 
-        #rm ~{filtered_bam}
-
-        # tmp_dup_bam and final_bam are the two files necessary for computing qc statistics.
-
-        # TODO: Add library complexity
-
-        #samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n ~{final_bam} -o tmp_final_bam_namesort
+        rm ~{tmp_fixmate_bam}
 
         # Convert bam to bed.gz and mark duplicates
         # Removing reads that starts and ends at the same position (duplicates)
@@ -162,13 +152,25 @@ task share_atac_filter {
             sort -k1,1 -k2,2n - | \
             bgzip -c > ~{fragments}
 
+        # other method to get fragments
+        # "{prefix}.fragments.tsv"
+        python3 $(which bam_to_fragments.py) --shift_plus 4 --shift_minus -4 --bc_tag ~{barcode_tag} --prefix ~{prefix} ~{final_bam}
+
+        bgzip -c ~{prefix}.fragments.tsv > ~{prefix}.fragments.tsv.gz
+
+        # ~{prefix}.fragments.tsv.gz.tbi
+        tabix --zero-based --preset bed ~{prefix}.fragments.tsv.gz
+
+
     >>>
 
     output {
         File? atac_filter_alignment_dedup = final_bam
         File? atac_filter_alignment_dedup_index = final_bam_index
         File? atac_filter_alignment_wdup = final_bam_wdup
+        File? atac_filter_alignment_dedup_queryname = queryname_final_bam
         File? atac_filter_fragments = fragments
+        File? atac_filter_fragments_new = "~{prefix}.fragments.tsv.gz"
         File? atac_filter_monitor_log = monitor_log
     }
 

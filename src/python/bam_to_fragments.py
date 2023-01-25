@@ -1,10 +1,11 @@
 # From Kundaje lab
 # https://github.com/kundajelab/ENCODE_scatac/blob/master/workflow/scripts/bam_to_fragments.py
 
+import argparse
 import pysam
 import sys
 
-def bam_to_frag(in_path, out_path, shift_plus=4, shift_minus=-4):
+def bam_to_frag(in_path, out_path, barcode_tag="CB", shift_plus=4, shift_minus=-4):
     """
     Convert coordinate-sorted BAM file to a fragment file format, while adding Tn5 coordinate adjustment
     BAM should be pre-filtered for PCR duplicates, secondary alignments, and unpaired reads
@@ -22,7 +23,7 @@ def bam_to_frag(in_path, out_path, shift_plus=4, shift_minus=-4):
             chromosome = read.reference_name
             start = read.reference_start + shift_plus
             end = read.reference_start + read.template_length + shift_minus
-            cell_barcode = read.get_tag("CB")
+            cell_barcode = read.get_tag(barcode_tag)
             # assert(read.next_reference_start >= read.reference_start) ####
             data = (chromosome, start, end, cell_barcode, 1)
             pos = (chromosome, start)
@@ -38,14 +39,32 @@ def bam_to_frag(in_path, out_path, shift_plus=4, shift_minus=-4):
                 curr_pos = pos
 
 if __name__ == '__main__':
-    try:
-        in_path, = sys.argv[1]
-        out_path, = sys.argv[2]
 
-        shift_plus = sys.argv[3]
-        shift_minus = sys.argv[4]
+    msg = "Add the description"
+    parser = argparse.ArgumentParser(description = msg)
 
-        bam_to_frag(in_path, out_path, shift_plus=shift_plus, shift_minus=shift_minus)
+    # Adding optional argument
+    parser.add_argument("bam", help = "Path to the coordinate-sorted bam file.")
+    parser.add_argument("-o", "--output", help = "Path to the fragments output file.")
+    parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
+    parser.add_argument("--shift_plus", help = "Tn5 coordinate adjustment for the plus strand.", default = 4)
+    parser.add_argument("--shift_minus", help = "Tn5 coordinate adjustment for the minus strand.", default = -4)
+    parser.add_argument("--bc_tag", help = "Specify the tag containing the cell barcode.", default="CB")
 
-    except NameError:
-        bam_to_frag('/dev/stdin', '/dev/stdout')
+    # Read arguments from command line
+    args = parser.parse_args()
+
+    if args.prefix:
+        prefix = args.prefix
+    else:
+        prefix = args.bam[:-4]
+
+    if args.output:
+        out_path = args.output
+    else:
+        out_path = f"{prefix}.fragments.tsv"
+
+    bc_tag = args.bc_tag
+
+
+    bam_to_frag(args.bam, out_path, bc_tag, shift_plus=args.shift_plus, shift_minus=args.shift_minus)

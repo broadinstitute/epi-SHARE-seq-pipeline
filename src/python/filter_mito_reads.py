@@ -23,8 +23,8 @@ def filter_mito(in_path, out_path, barcode_tag, prefix):
 
     infile = pysam.AlignmentFile(in_path, "rb")
     outfile = pysam.AlignmentFile(out_path, "wb", template=infile)
-    outfile_bulk_metrics = f"{prefix}.bulk-metrics.tsv"
-    outfile_barcode_metrics = f"{prefix}.bc-metrics.tsv"
+    outfile_bulk_metrics = f"{prefix}.mito.bulk-metrics.tsv"
+    outfile_barcode_metrics = f"{prefix}.mito.bc-metrics.tsv"
 
     number_mito = 0
     number_non_mito = 0

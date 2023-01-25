@@ -21,6 +21,7 @@ task qc_atac {
         File filtered_bam
         File filtered_bam_index
         File tss
+        String? barcode_tag = "CB"
         String genome_name
         String? prefix
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
@@ -38,6 +39,7 @@ task qc_atac {
     String hist_log_png = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.png'
     String tss_pileup_prefix = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log'
     String tss_pileup_out = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log.png'
+    String samstats_log = "${prefix}.atac.align.${genome_name}.samstats.raw.log"
 
 
     command {
@@ -47,6 +49,26 @@ task qc_atac {
         ln -s ${raw_bam_index} in.raw.bam.bai
         ln -s ${filtered_bam} in.filtered.bam
         ln -s ${filtered_bam_index} in.filtered.bam.bai
+
+        # samstats raw
+        # output of bowtie2
+        samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf {WRITE OUTPUT} > {samstats_log}
+
+         # The script creates two log file with bulk and barcode statistics.
+        # "{prefix}.mito.bulk-metrics.tsv"
+        # "{prefix}.mito.bc-metrics.tsv"
+        python3 $(which filter_mito_reads.py) --prefix ~{prefix} --bc_tag ~{barcode_tag} in.bam
+
+        # library complexity
+        # queryname_final_bam from filter
+        samtools view {queryname_final_bam} | python3 $(which pbc_stats.py) {output}
+
+        # SAMstat final filtered file
+        # final bam
+        "samtools view -o - {input.bam} | "
+        "SAMstats --sorted_sam_file -  --outf {output} > {log}"
+
+
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
         samtools idxstats in.raw.bam >> ${stats_log}
