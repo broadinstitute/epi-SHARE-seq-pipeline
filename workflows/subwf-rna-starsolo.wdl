@@ -94,7 +94,7 @@ workflow wf_rna {
 
         call share_task_seurat.seurat as seurat {
             input:
-                rna_matrix = generate_h5.h5_matrix,
+                rna_matrix = cellbender.cellbender_h5,
                 genome_name = genome_name,
                 min_features = rna_seurat_min_features,
                 percent_mt = rna_seurat_percent_mt,
