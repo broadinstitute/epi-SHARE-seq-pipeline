@@ -41,6 +41,8 @@ workflow wf_atac {
         # Filtering-specific inputs
         Int? filter_cpus = 16
         Int? filter_mapq_threshold
+        Int? filter_shift_plus = 4
+        Int? filter_shift_minus = -5
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
         String? filter_barcode_tag = "CB"
@@ -70,6 +72,8 @@ workflow wf_atac {
             disk_factor = filter_disk_factor,
             memory_factor = filter_memory_factor,
             multimappers = align_multimappers,
+            shift_plus = filter_shift_plus,
+            shift_minus = filter_shift_minus,
             barcode_tag = filter_barcode_tag,
             docker_image = filter_docker_image,
             genome_name = genome_name,

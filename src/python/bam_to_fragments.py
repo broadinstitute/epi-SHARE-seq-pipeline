@@ -5,7 +5,7 @@ import argparse
 import pysam
 import sys
 
-def bam_to_frag(in_path, out_path, barcode_tag="CB", shift_plus=4, shift_minus=-4):
+def bam_to_frag(in_path, out_path, barcode_tag="CB", shift_plus=4, shift_minus=-5):
     """
     Convert coordinate-sorted BAM file to a fragment file format, while adding Tn5 coordinate adjustment
     BAM should be pre-filtered for PCR duplicates, secondary alignments, and unpaired reads
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output", help = "Path to the fragments output file.")
     parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
     parser.add_argument("--shift_plus", help = "Tn5 coordinate adjustment for the plus strand.", type = int, default = 4)
-    parser.add_argument("--shift_minus", help = "Tn5 coordinate adjustment for the minus strand.", type = int, default = -4)
+    parser.add_argument("--shift_minus", help = "Tn5 coordinate adjustment for the minus strand.", type = int, default = -5)
     parser.add_argument("--bc_tag", help = "Specify the tag containing the cell barcode.", default="CB")
 
     # Read arguments from command line

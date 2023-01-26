@@ -16,13 +16,15 @@ task share_atac_filter {
     input {
         # This task takes in input the aligned bam file and rmeove the low quality reads, the extra chromosomes, marks
         # the duplicats, and convert to a bedpe file.
+        Int? shift_plus = 4
+        Int? shift_minus = -5
         Int? cpus = 16
         Int? mapq_threshold = 30
+        Int? multimappers = 0
         File? bam
         File? bam_index
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        Int? multimappers = 0
         String? barcode_tag = "CB"
         String docker_image = "polumechanos/share_atac_filter"
         String genome_name
@@ -154,7 +156,7 @@ task share_atac_filter {
 
         # other method to get fragments
         # "{prefix}.fragments.tsv"
-        python3 $(which bam_to_fragments.py) --shift_plus 4 --shift_minus -4 --bc_tag ~{barcode_tag} --prefix ~{prefix} ~{final_bam}
+        python3 $(which bam_to_fragments.py) --shift_plus ~{shift_plus} --shift_minus ~{shift_minus} --bc_tag ~{barcode_tag} --prefix ~{prefix} ~{final_bam}
 
         bgzip -c ~{prefix}.fragments.tsv > ~{prefix}.fragments.tsv.gz
 

@@ -36,6 +36,8 @@ workflow ShareSeq {
         # ATAC - Filter
         Int? atac_filter_cpus = 16
         Int? atac_filter_mapq_threshold
+        Int? atac_filter_shift_plus = 4
+        Int? atac_filter_shift_minus = -5
         Float? atac_filter_disk_factor = 8.0
         Float? atac_filter_memory_factor = 0.15
         String? atac_filter_barcode_tag = "CB"
@@ -160,7 +162,9 @@ workflow ShareSeq {
                     filter_disk_factor = atac_filter_disk_factor,
                     filter_memory_factor = atac_filter_memory_factor,
                     filter_barcode_tag = atac_filter_barcode_tag,
-                    filter_docker_image = atac_filter_docker_image
+                    filter_docker_image = atac_filter_docker_image,
+                    filter_shift_plus = atac_filter_shift_plus,
+                    filter_shift_minus = atac_filter_shift_minus
             }
         }
     }
