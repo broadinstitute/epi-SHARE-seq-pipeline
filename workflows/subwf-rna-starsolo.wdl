@@ -1,10 +1,11 @@
 version 1.0
 
+import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
+import "../tasks/share_task_starsolo_10x.wdl" as share_task_starsolo_10x
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
-import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 
 # Import the tasks called by the pipeline
 workflow wf_rna {
@@ -18,6 +19,7 @@ workflow wf_rna {
         # RNA Sub-workflow inputs
 
         # Align
+        Boolean is_10x
         Array[File] read1
         Array[File] read2
         File idx_tar
@@ -48,14 +50,26 @@ workflow wf_rna {
         
     }
 
-    call share_task_starsolo.share_rna_align as align {
-        input:
-            fastq_R1 = read1,
-            fastq_R2 = read2,
-            genome_name = genome_name,
-            genome_index_tar = idx_tar,
-            prefix = prefix,
-            cpus = cpus
+    if is_10x {
+        call share_task_starsolo_10x.10x_rna_align as align {
+            input:
+                fastq_R1 = read1,
+                fastq_R2 = read2,
+                genome_name = genome_name,
+                genome_index_tar = idx_tar,
+                prefix = prefix,
+                cpus = cpus
+        }
+    } 
+    else {
+        call share_task_starsolo.share_rna_align as align {
+            input:
+                fastq_R1 = read1,
+                fastq_R2 = read2,
+                genome_name = genome_name,
+                genome_index_tar = idx_tar,
+                prefix = prefix,
+                cpus = cpus
     }
 
     call share_task_generate_h5.generate_h5 as generate_h5 {
