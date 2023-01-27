@@ -3,7 +3,7 @@ version 1.0
 # TASK
 # 10X-RNA-STARsolo
 
-task 10x_rna_align {
+task share_rna_align_10x {
     meta {
         version: 'v0.1'
         source:  'https://portal.firecloud.org/?return=terra#methods/cumulus/star_solo/7/wdl'
@@ -29,19 +29,29 @@ task 10x_rna_align {
         # File? CBwhitelist
         Int cpus = 16
         File genome_index_tar
-        String genome
+        String genome_name
         Int? CBstart
         Int? CBlen
         Int? UMIstart
         Int? UMIlen
-        File? CBwhitelist
-        File? whitelist
         String docker_image = 'docker.io/nchernia/share_task_star:1'
-        String star_version
-        Int disk_space
-        Int memory
+        Float? disk_factor = 50.0
+        Float? memory_factor = 2.0
     }
 
+    # Determine the size of the input
+    Float input_file_size_gb = size(fastq_R1, "G") + size(fastq_R2, "G")
+
+    # Determining memory size based on the size of the input files.
+    Float mem_gb = 5.0 + size(genome_index_tar, "G") + memory_factor * input_file_size_gb
+
+    # Determining disk size based on the size of the input files.
+    Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
+
+    # Determining disk type base on the size of disk.
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
+
+    String monitor_log = "monitor.log"
 
     command <<<
         set -e

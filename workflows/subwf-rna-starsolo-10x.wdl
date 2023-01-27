@@ -1,6 +1,6 @@
 version 1.0
 
-import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
+import "../tasks/share_task_starsolo_10x.wdl" as share_task_starsolo_10x
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
@@ -18,6 +18,7 @@ workflow wf_rna {
         # RNA Sub-workflow inputs
 
         # Align
+        String chemistry
         Array[File] read1
         Array[File] read2
         File idx_tar
@@ -25,6 +26,7 @@ workflow wf_rna {
         String genome_name
         Int? cpus = 16
         String? docker
+        File whitelist
         # QC
         Int? umi_cutoff
         Int? gene_cutoff
@@ -47,10 +49,11 @@ workflow wf_rna {
         
     }
 
-    call share_task_starsolo.share_rna_align as align {
+    call share_task_starsolo_10x.share_rna_align_10x as align {
         input:
             fastq_R1 = read1,
             fastq_R2 = read2,
+            chemistry = chemistry,
             genome_name = genome_name,
             genome_index_tar = idx_tar,
             prefix = prefix,
