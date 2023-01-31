@@ -87,7 +87,7 @@ task share_rna_align {
 
         # 10X multiome
         else
-            gunzip ~{tenX_whitelist} >> tenX_whitelist.txt
+            gunzip -c ~{tenX_whitelist} > tenX_whitelist.txt
 
             $(which STAR) \
             --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
