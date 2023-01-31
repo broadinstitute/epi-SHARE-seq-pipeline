@@ -121,7 +121,7 @@ task share_rna_align {
             --soloUMIlen 12 \
             --soloCBlen 16 \
             --soloBarcodeReadLength 0 \
-            --soloCBwhitelist tenX_whitelist \
+            --soloCBwhitelist ~{tenX_whitelist} \
             --soloStrand Forward \
             --soloFeatures Gene SJ \
             --soloMultiMappers Unique EM \
