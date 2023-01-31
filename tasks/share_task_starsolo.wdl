@@ -50,7 +50,7 @@ task share_rna_align {
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
         # SHARE-seq
-        if (~{method} == 'share-seq') {
+        if ('~{method}' == 'share-seq') {
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
               do
