@@ -1,17 +1,19 @@
 version 1.0
 
 # TASK
-# SHARE-atac-STAR
+# SHARE-rna-STARsolo
+
 task share_rna_align {
     meta {
         version: 'v0.1'
         author: 'Neva Durand (neva@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: align RNA task'
+        attribution: '10X multiome STARsolo run parameters and whitelist from Wold Lab at Caltech https://github.com/detrout/woldlab-rna-seq/'
     }
 
     input{
         # This function takes in input the pre-processed fastqs 
-        # and aligns it to the genome using STAR solo.
+        # and aligns it to the genome using STARsolo.
         # The CB+UMI is expected to be in read2.
 
         String method # options: 'share-seq', 'tenX' (for 10X multiome)
@@ -50,7 +52,8 @@ task share_rna_align {
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
         # SHARE-seq
-        if ('~{method}' == 'share-seq') {
+        if ~{method} == 'share-seq' 
+        then
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
               do
@@ -81,10 +84,9 @@ task share_rna_align {
             --limitOutSJcollapsed 2000000 \
             --outReadsUnmapped Fastx \
             --readFilesCommand zcat
-        }
-
+        
         # 10X multiome
-        else {
+        else
             gunzip tenX_whitelist
 
             $(which STAR) \
@@ -123,8 +125,8 @@ task share_rna_align {
             --soloStrand Forward \
             --soloFeatures Gene SJ \
             --soloMultiMappers Unique EM \
-            --outFileNamePrefix result/~{prefix}
-        }
+            --outFileNamePrefix result/~{prefix}.
+        fi
 
         # rename files to include prefix (--outFileNamePrefix doesn't split folder and prefix names in subdirectories) 
         mv result/~{prefix}.Solo.out/ result/Solo.out/
