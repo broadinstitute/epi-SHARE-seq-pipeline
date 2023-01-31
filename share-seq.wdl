@@ -3,7 +3,6 @@ version 1.0
 # Import the sub-workflow for preprocessing the fastqs.
 import "workflows/subwf-atac-single-organism.wdl" as share_atac
 import "workflows/subwf-rna-starsolo.wdl" as share_rna
-import "workflows/subwf-rna-starsolo-10x.wdl" as share_rna_10x
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report
@@ -14,8 +13,7 @@ workflow ShareSeq {
 
     input {
         # Common inputs
-        Boolean? is_10x = false
-        String? chemistry
+        String method
         String prefix = "shareseq-project"
         String genome_name_input
         Int? cpus = 16
@@ -98,51 +96,26 @@ workflow ShareSeq {
 
     if ( process_rna ) {
         if ( read1_rna[0] != "" ) {
-            # standard SHARE-seq
-            if (!is_10x) { 
-                call share_rna.wf_rna as rna{
-                    input:
-                        read1 = read1_rna,
-                        read2 = read2_rna,
-                        idx_tar = idx_tar_rna_,
-                        umi_cutoff = umi_cutoff,
-                        gene_cutoff = gene_cutoff,
-                        prefix = prefix,
-                        genome_name = genome_name,
-                        cpus = cpus_rna,
-                        count_only = count_only,
-                        rna_seurat_min_features = rna_seurat_min_features,
-                        rna_seurat_percent_mt = rna_seurat_percent_mt,
-                        rna_seurat_min_cells = rna_seurat_min_cells,
-                        rna_seurat_umap_dim = rna_seurat_umap_dim,
-                        rna_seurat_umap_resolution = rna_seurat_umap_resolution,
-                        rna_seurat_disk_factor = rna_seurat_disk_factor,
-                        rna_seurat_memory_factor = rna_seurat_memory_factor
-                } 
-            }
-            # 10X multiome
-            if (is_10x) {
-                call share_rna_10x.wf_rna as rna{
-                    input:
-                        chemistry = chemistry,
-                        read1 = read1_rna,
-                        read2 = read2_rna,
-                        idx_tar = idx_tar_rna_,
-                        umi_cutoff = umi_cutoff,
-                        gene_cutoff = gene_cutoff, 
-                        prefix = prefix,
-                        genome_name = genome_name,
-                        cpus = cpus_rna,
-                        count_only = count_only,
-                        rna_seurat_min_features = rna_seurat_min_features,
-                        rna_seurat_percent_mt = rna_seurat_percent_mt,
-                        rna_seurat_min_cells = rna_seurat_min_cells,
-                        rna_seurat_umap_dim = rna_seurat_umap_dim,
-                        rna_seurat_umap_resolution = rna_seurat_umap_resolution,
-                        rna_seurat_disk_factor = rna_seurat_disk_factor,
-                        rna_seurat_memory_factor = rna_seurat_memory_factor
-                }
-            }
+            call share_rna.wf_rna as rna{
+                input:
+                    method = method,
+                    read1 = read1_rna,
+                    read2 = read2_rna,
+                    idx_tar = idx_tar_rna_,
+                    umi_cutoff = umi_cutoff,
+                    gene_cutoff = gene_cutoff,
+                    prefix = prefix,
+                    genome_name = genome_name,
+                    cpus = cpus_rna,
+                    count_only = count_only,
+                    rna_seurat_min_features = rna_seurat_min_features,
+                    rna_seurat_percent_mt = rna_seurat_percent_mt,
+                    rna_seurat_min_cells = rna_seurat_min_cells,
+                    rna_seurat_umap_dim = rna_seurat_umap_dim,
+                    rna_seurat_umap_resolution = rna_seurat_umap_resolution,
+                    rna_seurat_disk_factor = rna_seurat_disk_factor,
+                    rna_seurat_memory_factor = rna_seurat_memory_factor
+            } 
         }
     }
 
