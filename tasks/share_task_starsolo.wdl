@@ -62,69 +62,69 @@ task share_rna_align {
 
             $(which STAR) \
             --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
+            --readFilesCommand zcat
+            --runThreadN ~{cpus} \
+            --genomeDir ./ \
             --soloType CB_UMI_Simple \
+            --soloFeatures GeneFull  \
+            --soloStrand Forward \
+            --soloCBwhitelist share_whitelist.txt \
+            --soloCBmatchWLtype Exact \
             --soloCBstart 1 \
             --soloCBlen 24 \
             --soloUMIstart 25 \
             --soloUMIlen 10 \
-            --soloCBmatchWLtype Exact \
-            --soloStrand Forward \
             --soloUMIdedup 1MM_All \
-            --soloCBwhitelist share_whitelist.txt \
-            --soloFeatures GeneFull  \
-            --outSAMtype BAM SortedByCoordinate \
-            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
-            --runThreadN ~{cpus} \
             --chimOutType WithinBAM \
-            --genomeDir ./ \
-            --outFileNamePrefix result/~{prefix}. \
+            --limitOutSJcollapsed 2000000 \
             --outFilterMultimapNmax 20 \
             --outFilterScoreMinOverLread 0.3 \
             --outFilterMatchNminOverLread 0.3 \
-            --limitOutSJcollapsed 2000000 \
+            --outSAMtype BAM SortedByCoordinate \
+            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
             --outReadsUnmapped Fastx \
-            --readFilesCommand zcat
-        
+            --outFileNamePrefix result/~{prefix}. \            
+
         # 10X multiome
         else
-            gunzip tenX_whitelist
+            gunzip ~{tenX_whitelist} >> tenX_whitelist.txt
 
             $(which STAR) \
             --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
-            --genomeDir ./ \
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
+            --genomeDir ./ \
             --genomeLoad NoSharedMemory \
-            --outFilterMultimapNmax 20 \
+            --soloType CB_UMI_Simple \
+            --soloFeatures Gene SJ \
+            --soloStrand Forward \
+            --soloCellFilter EmptyDrops_CR \
+            --soloBarcodeReadLength 0 \
+            --soloMultiMappers Unique EM \
+            --soloCBwhitelist tenX_whitelist.txt \
+            --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
+            --soloCBlen 16 \
+            --soloUMIlen 12 \
+            --soloUMIdedup 1MM_CR \
+            --soloUMIfiltering MultiGeneUMI_CR \
             --alignSJoverhangMin 8 \
             --alignSJDBoverhangMin 1 \
-            --outFilterMismatchNmax 999 \
-            --outFilterMismatchNoverReadLmax 0.04 \
             --alignIntronMin 20 \
             --alignIntronMax 1000000 \
             --alignMatesGapMax 1000000 \
+            --sjdbScore 1 \
+            --clipAdapterType CellRanger4 \
+            --outFilterType BySJout \
+            --outFilterMultimapNmax 20 \
+            --outFilterMismatchNmax 999 \
+            --outFilterMismatchNoverReadLmax 0.04 \
+            --outSAMtype BAM SortedByCoordinate \
+            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
             --outSAMheaderCommentFile COfile.txt \
             --outSAMheaderHD @HD VN:1.4 SO:coordinate \
             --outSAMunmapped Within \
-            --outFilterType BySJout \
-            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
             --outSAMstrandField intronMotif \
-            --outSAMtype BAM SortedByCoordinate \
-            --sjdbScore 1 \
-            --clipAdapterType CellRanger4 \
             --outFilterScoreMin 30 \
-            --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
-            --soloUMIdedup 1MM_CR \
-            --soloUMIfiltering MultiGeneUMI_CR \
-            --soloType CB_UMI_Simple \
-            --soloCellFilter EmptyDrops_CR \
-            --soloUMIlen 12 \
-            --soloCBlen 16 \
-            --soloBarcodeReadLength 0 \
-            --soloCBwhitelist ~{tenX_whitelist} \
-            --soloStrand Forward \
-            --soloFeatures Gene SJ \
-            --soloMultiMappers Unique EM \
             --outFileNamePrefix result/~{prefix}.
         fi
 
