@@ -85,7 +85,7 @@ task share_rna_align {
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \  
 
-            feature_type = 'GeneFull'          
+            feature_type='GeneFull'          
 
         # 10X multiome
         else
@@ -129,7 +129,7 @@ task share_rna_align {
             --outFilterScoreMin 30 \
             --outFileNamePrefix result/ 
 
-            feature_type = 'Gene'
+            feature_type='Gene'
         fi
 
         # tar and gzip barcodes, features, and matrix files
