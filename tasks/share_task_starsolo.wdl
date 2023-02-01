@@ -137,8 +137,8 @@ task share_rna_align {
         pwd
 
         # move and rename files
-        mv result/**/*(.) result
-        for file in $(ls)
+        find result -type f -exec mv {} result_files \;
+        for file in $(ls result_files)
         do 
             mv $file ~{prefix}.$file
         done
