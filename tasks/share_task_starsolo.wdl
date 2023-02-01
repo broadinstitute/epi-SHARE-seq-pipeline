@@ -11,15 +11,15 @@ task share_rna_align {
         attribution: '10X multiome STARsolo run parameters and whitelist from Wold Lab at Caltech https://github.com/detrout/woldlab-rna-seq/'
     }
 
-    input{
+    input {
         # This function takes in input the pre-processed fastqs 
         # and aligns it to the genome using STARsolo.
         # The CB+UMI is expected to be in read2.
-
-        String method # options: 'share-seq', 'tenX' (for 10X multiome)
         Array[File] fastq_R1
         Array[File] fastq_R2
-        File? tenX_whitelist = if method == 'tenX' then 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/737K-arc-v1-GEX.txt.gz' else '' # is there a nicer way to do this?
+        String chemistry
+        File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
+        File? whitelist
         File genome_index_tar
         String genome_name
         String prefix
@@ -28,6 +28,9 @@ task share_rna_align {
         Float? disk_factor = 50.0
         Float? memory_factor = 2.0
     }
+
+    Map[String, File] whitelists = read_map(whitelists_tsv)
+    File whitelist_ = if (chemistry != 'shareseq') then select_first([whitelist, whitelists[chemistry]]) else '' 
 
     # Determine the size of the input
     Float input_file_size_gb = size(fastq_R1, 'G') + size(fastq_R2, 'G')
@@ -52,12 +55,11 @@ task share_rna_align {
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
         # SHARE-seq
-        if [[ '~{method}' == 'share-seq' ]]
-        then
+        if [ '~{chemistry}' == 'share-seq' ]; then
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
               do
-              gunzip -c "${fq}" | awk 'NR%4==2{dict[substr($1,1,24)]}END{for (i in dict){print i}}' >> share_whitelist.txt
+              gunzip -c "${fq}" | awk 'NR%4==2{dict[substr($1,1,24)]}END{for (i in dict){print i}}' >> shareseq_whitelist.txt
             done
 
             $(which STAR) \
@@ -68,7 +70,7 @@ task share_rna_align {
             --soloType CB_UMI_Simple \
             --soloFeatures GeneFull  \
             --soloStrand Forward \
-            --soloCBwhitelist share_whitelist.txt \
+            --soloCBwhitelist shareseq_whitelist.txt \
             --soloCBmatchWLtype Exact \
             --soloCBstart 1 \
             --soloCBlen 24 \
@@ -83,13 +85,13 @@ task share_rna_align {
             --outSAMtype BAM SortedByCoordinate \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
             --outReadsUnmapped Fastx \
-            --outFileNamePrefix result/ \  
+            --outFileNamePrefix result/ \
 
-            feature_type='GeneFull'          
+            feature_type='GeneFull'
 
-        # 10X multiome
-        else
-            gunzip -c ~{tenX_whitelist} > tenX_whitelist.txt
+        # 10X v2
+        elif [ '~{chemistry}' == '10x_v2' ]; then
+            gunzip -c ~{whitelist_} > 10x_v2_whitelist.txt
 
             $(which STAR) \
             --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
@@ -103,7 +105,51 @@ task share_rna_align {
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
             --soloMultiMappers Unique EM \
-            --soloCBwhitelist tenX_whitelist.txt \
+            --soloCBwhitelist 10x_v2_whitelist.txt \
+            --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
+            --soloCBlen 16 \
+            --soloUMIlen 10 \
+            --soloUMIdedup 1MM_CR \
+            --soloUMIfiltering MultiGeneUMI_CR \
+            --alignSJoverhangMin 8 \
+            --alignSJDBoverhangMin 1 \
+            --alignIntronMin 20 \
+            --alignIntronMax 1000000 \
+            --alignMatesGapMax 1000000 \
+            --sjdbScore 1 \
+            --clipAdapterType CellRanger4 \
+            --outFilterType BySJout \
+            --outFilterMultimapNmax 20 \
+            --outFilterMismatchNmax 999 \
+            --outFilterMismatchNoverReadLmax 0.04 \
+            --outSAMtype BAM SortedByCoordinate \
+            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
+            --outSAMheaderCommentFile COfile.txt \
+            --outSAMheaderHD @HD VN:1.4 SO:coordinate \
+            --outSAMunmapped Within \
+            --outSAMstrandField intronMotif \
+            --outFilterScoreMin 30 \
+            --outFileNamePrefix result/
+
+            feature_type='Gene'       
+
+        # 10X v3 (multiome)
+        elif [ '~{chemistry}' == '10x_v3' ]; then
+            gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
+
+            $(which STAR) \
+            --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
+            --readFilesCommand zcat \
+            --runThreadN ~{cpus} \
+            --genomeDir ./ \
+            --genomeLoad NoSharedMemory \
+            --soloType CB_UMI_Simple \
+            --soloFeatures Gene SJ \
+            --soloStrand Forward \
+            --soloCellFilter EmptyDrops_CR \
+            --soloBarcodeReadLength 0 \
+            --soloMultiMappers Unique EM \
+            --soloCBwhitelist 10x_v3_whitelist.txt \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 12 \
@@ -127,10 +173,13 @@ task share_rna_align {
             --outSAMunmapped Within \
             --outSAMstrandField intronMotif \
             --outFilterScoreMin 30 \
-            --outFileNamePrefix result/ 
+            --outFileNamePrefix result/
 
             feature_type='Gene'
+
         fi
+
+        ls -R result/
 
         # tar and gzip barcodes, features, and matrix files
         gzip result/Solo.out/$feature_type/raw/*
@@ -138,6 +187,7 @@ task share_rna_align {
 
         # Move files and rename
         find result -type f -exec mv {} result_files \;
+        ls result_files/
         for file in $(ls result_files)
         do 
             mv $file ~{prefix}.$file

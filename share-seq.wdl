@@ -13,7 +13,7 @@ workflow ShareSeq {
 
     input {
         # Common inputs
-        String method
+        String chemistry
         String prefix = "shareseq-project"
         String genome_name_input
         Int? cpus = 16
@@ -98,7 +98,7 @@ workflow ShareSeq {
         if ( read1_rna[0] != "" ) {
             call share_rna.wf_rna as rna{
                 input:
-                    method = method,
+                    chemistry = chemistry,
                     read1 = read1_rna,
                     read2 = read2_rna,
                     idx_tar = idx_tar_rna_,

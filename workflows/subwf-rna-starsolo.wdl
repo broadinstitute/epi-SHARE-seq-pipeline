@@ -18,11 +18,11 @@ workflow wf_rna {
         # RNA Sub-workflow inputs
 
         # Align
-        String method
+        String chemistry
         Array[File] read1
         Array[File] read2
         File idx_tar
-        String prefix = if method == "share-seq" then "share-seq" else "tenX"
+        String prefix
         String genome_name
         Int? cpus = 16
         String? docker
@@ -50,7 +50,7 @@ workflow wf_rna {
 
     call share_task_starsolo.share_rna_align as align {
         input:
-            method = method,
+            chemistry = chemistry,
             fastq_R1 = read1,
             fastq_R2 = read2,
             genome_name = genome_name,
