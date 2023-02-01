@@ -83,7 +83,7 @@ task share_rna_align {
             --outSAMtype BAM SortedByCoordinate \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
             --outReadsUnmapped Fastx \
-            --outFileNamePrefix result/~{prefix}. \            
+            --outFileNamePrefix result/ \            
 
         # 10X multiome
         else
@@ -125,19 +125,23 @@ task share_rna_align {
             --outSAMunmapped Within \
             --outSAMstrandField intronMotif \
             --outFilterScoreMin 30 \
-            --outFileNamePrefix result/~{prefix}.
+            --outFileNamePrefix result/
         fi
 
-        # rename files to include prefix (--outFileNamePrefix doesn't split folder and prefix names in subdirectories) 
-        mv result/~{prefix}.Solo.out/ result/Solo.out/
-        mv result/Solo.out/Barcodes.stats result/Solo.out/~{prefix}.Barcodes.stats
-        mv result/Solo.out/GeneFull/Features.stats result/Solo.out/GeneFull/~{prefix}.Features.stats
-        mv result/Solo.out/GeneFull/Summary.csv result/Solo.out/GeneFull/~{prefix}.Summary.csv
-        mv result/Solo.out/GeneFull/UMIperCellSorted.txt result/Solo.out/GeneFull/~{prefix}.UMIperCellSorted.txt
+        ls result/**
 
-        cd result/Solo.out/GeneFull/raw/
-        gzip *
-        tar -cvzf ~{prefix}.raw.tar.gz *.gz
+        gzip result/**/raw/*
+        tar -cvzf result/raw.tar.gz result/**/raw/*.gz
+
+        ls result/**
+        pwd
+
+        # move and rename files
+        mv result/**/*(.) result
+        for file in $(ls)
+        do 
+            mv $file ~{prefix}.$file
+        done
 
     >>>
 
@@ -147,18 +151,16 @@ task share_rna_align {
         File log_out = "result/~{prefix}.Log.out"
         File log_progress_out = "result/~{prefix}.Log.progress.out"
         File output_sj = "result/~{prefix}.SJ.out.tab"
-        File barcodes_stats = "result/Solo.out/~{prefix}.Barcodes.stats"
-        File features_stats = "result/Solo.out/GeneFull/~{prefix}.Features.stats"
-        File summary_csv = "result/Solo.out/GeneFull/~{prefix}.Summary.csv"
-        File umi_per_cell = "result/Solo.out/GeneFull/~{prefix}.UMIperCellSorted.txt"
-        File raw_tar = "result/Solo.out/GeneFull/raw/~{prefix}.raw.tar.gz"
+        File barcodes_stats = "result/~{prefix}.Barcodes.stats"
+        File features_stats = "result/~{prefix}.Features.stats"
+        File summary_csv = "result/~{prefix}.Summary.csv"
+        File umi_per_cell = "result/~{prefix}.UMIperCellSorted.txt"
+        File raw_tar = "result/~{prefix}.raw.tar.gz"
     }
     runtime{
         cpu : cpus
         memory : "${mem_gb} GB"
-        memory_retry_multiplier: 2
         disks: "local-disk ${disk_gb} ${disk_type}"
-        maxRetries: 1
         docker: docker_image
     }
 }
