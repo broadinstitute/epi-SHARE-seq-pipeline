@@ -52,7 +52,7 @@ task share_rna_align {
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
         # SHARE-seq
-        if ~{method} == 'share-seq' 
+        if [[ '~{method}' == 'share-seq' ]]
         then
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
@@ -83,7 +83,9 @@ task share_rna_align {
             --outSAMtype BAM SortedByCoordinate \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
             --outReadsUnmapped Fastx \
-            --outFileNamePrefix result/ \            
+            --outFileNamePrefix result/ \  
+
+            feature_type = 'GeneFull'          
 
         # 10X multiome
         else
@@ -125,18 +127,16 @@ task share_rna_align {
             --outSAMunmapped Within \
             --outSAMstrandField intronMotif \
             --outFilterScoreMin 30 \
-            --outFileNamePrefix result/
+            --outFileNamePrefix result/ 
+
+            feature_type = 'Gene'
         fi
 
-        ls result/**
+        # tar and gzip barcodes, features, and matrix files
+        gzip result/Solo.out/$feature_type/raw/*
+        tar -cvzf result/raw.tar.gz result/Solo.out/$feature_type/raw/*.gz
 
-        gzip result/**/raw/*
-        tar -cvzf result/raw.tar.gz result/**/raw/*.gz
-
-        ls result/**
-        pwd
-
-        # move and rename files
+        # Move files and rename
         find result -type f -exec mv {} result_files \;
         for file in $(ls result_files)
         do 
