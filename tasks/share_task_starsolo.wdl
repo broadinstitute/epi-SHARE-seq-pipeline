@@ -174,7 +174,7 @@ task share_rna_align {
             --outSAMheaderHD @HD VN:1.4 SO:coordinate \
             --outSAMunmapped Within \
             --outSAMstrandField intronMotif \
-            --outFilterScoreMin 30 \
+            --outFilterScoreMin 0 \ #CHANGED FROM 30
             --outFileNamePrefix result/
 
             feature_type='Gene'
