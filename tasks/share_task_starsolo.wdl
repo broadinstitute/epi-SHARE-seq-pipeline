@@ -180,10 +180,15 @@ task share_rna_align {
         fi
 
         # tar and gzip barcodes, features, and matrix files
-        gzip result/Solo.out/$feature_type/raw/*
-        tar -cvzf result/raw.tar.gz result/Solo.out/$feature_type/raw/*.gz
+        cd result/Solo.out/$feature_type/raw/
+        gzip *
+        tar -cvzf raw.tar.gz *.gz
+
+        ls ~
+        ls ~/cromwell_root/
 
         # Move files and rename
+        cd ~/cromwell_root/
         find result -type f -exec mv {} result \;
         cd result
         for file in $(ls)
