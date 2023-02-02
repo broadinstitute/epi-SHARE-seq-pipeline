@@ -227,23 +227,23 @@ task share_rna_align {
             example: 'rna.R2.fastq.gz'
         }
         chemistry: {
-            description: 'Experiment chemistry'
-            help: 'Chemistry used in the experiment.'
+            description: 'Experiment chemistry',
+            help: 'Chemistry/method used in the experiment.',
             examples: ['shareseq', '10x_v2', '10x_v3', 'splitseq']
         }
         whitelists_tsv: {
-            description: 'TSV with file paths to whitelists'
-            help: 'TSV where each row has two columns: chemistry, and file path to corresponding whitelist'
+            description: 'TSV with file paths to whitelists',
+            help: 'TSV where each row has two columns: chemistry, and file path to corresponding whitelist',
             example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         }
         whitelist: {
-            description: 'Barcode whitelist'
-            help: 'TXT file containing list of known possible barcodes'
+            description: 'Barcode whitelist',
+            help: 'TXT file containing list of known possible barcodes',
             example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/737K-arc-v1-GEX.txt.gz' 
         }
         genome_index_tar: {
-            description: 'Genome index files for STARsolo'
-            help: 'TAR containing genome index files for STARsolo to use during alignment'
+            description: 'Genome index files for STARsolo',
+            help: 'TAR containing genome index files for STARsolo to use during alignment',
             examples: ['gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human/star/GRCh38_STAR_2.7.10a.tar.gz', 'gs://broad-buenrostro-pipeline-genome-annotations/mm10/star/Mus_musculus.GRCm38.star.2.7.10.tar.gz']
         }
         genome_name: {
@@ -268,12 +268,12 @@ task share_rna_align {
         }
         disk_factor: {
             description: 'Disk space scaling factor',
-            help: 'Scaling factor used to request disk space based on input size'
+            help: 'Scaling factor used to request disk space based on input size',
             example: 10.0
         }
         memory_factor: {
             description: 'Memory scaling factor',
-            help: 'Scaling factor used to request memory based on input size'
+            help: 'Scaling factor used to request memory based on input size',
             example: 2.0
         }
     }
