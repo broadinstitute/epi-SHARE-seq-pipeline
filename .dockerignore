@@ -1,0 +1,7 @@
+.git
+.cache
+data
+input_examples
+tasks
+tests
+tmp

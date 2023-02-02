@@ -37,7 +37,7 @@ workflow ShareSeq {
         Int? atac_filter_cpus = 16
         Int? atac_filter_mapq_threshold
         Int? atac_filter_shift_plus = 4
-        Int? atac_filter_shift_minus = -5
+        Int? atac_filter_shift_minus = -4
         Float? atac_filter_disk_factor = 8.0
         Float? atac_filter_memory_factor = 0.15
         String? atac_filter_barcode_tag = "CB"
@@ -282,7 +282,9 @@ workflow ShareSeq {
         File? share_atac_filter_alignment_dedup = atac.share_atac_filter_alignment_dedup
         File? share_atac_filter_alignment_dedup_index = atac.share_atac_filter_alignment_dedup_index
         File? share_atac_filter_alignment_wdup = atac.share_atac_filter_alignment_wdup
+        File? share_atac_filter_alignment_wdup_index = atac.share_atac_filter_alignment_wdup_index
         File? share_atac_filter_fragments = atac.share_atac_filter_fragments
+        File? share_atac_filter_fragments_index = atac.share_atac_filter_fragments_index
 
 
     }

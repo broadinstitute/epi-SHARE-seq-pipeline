@@ -17,7 +17,7 @@ task share_atac_filter {
         # This task takes in input the aligned bam file and rmeove the low quality reads, the extra chromosomes, marks
         # the duplicats, and convert to a bedpe file.
         Int? shift_plus = 4
-        Int? shift_minus = -5
+        Int? shift_minus = -4
         Int? cpus = 16
         Int? mapq_threshold = 30
         Int? multimappers = 0
@@ -70,16 +70,18 @@ task share_atac_filter {
     String tmp_fixmate_bam = '${prefix}.filtered.fixmate.tmp.bam'
 
 
-    String tmp_dup_bam_sorted = '${prefix}.filtered.fixmate.dupmarked.tmp.sorted.bam'
     String picard_mark_duplicates_metrics = '${prefix}.picard.marksduplicates.metrics.txt'
     String picard_mark_duplicates_log = '${prefix}.picard.marksduplicates.log'
 
     String final_bam_wdup = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.bam'
-    String queryname_final_bam = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.queryname.final.bam'
     String final_bam_wdup_index = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.bam.bai'
+
+    String queryname_final_bam = '${prefix}.atac.filter.fixmate.dedup.k${multimappers}.${genome_name}.queryname.final.bam'
+
     String final_bam = '${prefix}.atac.filter.fixmate.dedup.k${multimappers}.${genome_name}.bam'
     String final_bam_index = '${prefix}.atac.filter.fixmate.dedup.k${multimappers}.${genome_name}.bam.bai'
-    String fragments = '${prefix}.atac.filter.fragments.${genome_name}.tsv.gz'
+
+    String fragments = '${prefix}.atac.filter.fragments.${genome_name}.tsv'
 
     String monitor_log = "atac_filter_monitor.log"
 
@@ -124,6 +126,7 @@ task share_atac_filter {
 
         # Cleaning up bams we don't need anymore
         rm ~{tmp_filtered_bam}
+        # rm ~{non_mito_bam}
 
         # =============
         # Mark duplicates
@@ -140,28 +143,19 @@ task share_atac_filter {
 
         # Create the final bam removing the duplicates
         samtools view -h -F 1804 -f 2 -b -o ~{queryname_final_bam} ~{final_bam_wdup}
+        samtools index ~{final_bam_wdup}
 
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{queryname_final_bam} -o ~{final_bam}
         samtools index ~{final_bam}
 
         rm ~{tmp_fixmate_bam}
 
-        # Convert bam to bed.gz and mark duplicates
-        # Removing reads that starts and ends at the same position (duplicates)
-        bedtools bamtobed -bedpe -i ~{queryname_final_bam} | \
-            sed 's/_/\t/g' | \
-            awk -v OFS="\t" '{if($10=="+"){print $1,$2+4,$6-5,$8}else if($10=="-"){print $1,$2-5,$6+4,$8}}' | \
-            sort -k1,1 -k2,2n - | \
-            bgzip -c > ~{fragments}
+        python3 $(which bam_to_fragments.py) --shift_plus ~{shift_plus} --shift_minus ~{shift_minus} --bc_tag ~{barcode_tag} -o ~{fragments} ~{final_bam}
 
-        # other method to get fragments
-        # "{prefix}.fragments.tsv"
-        python3 $(which bam_to_fragments.py) --shift_plus ~{shift_plus} --shift_minus ~{shift_minus} --bc_tag ~{barcode_tag} --prefix ~{prefix} ~{final_bam}
-
-        bgzip -c ~{prefix}.fragments.tsv > ~{prefix}.fragments.tsv.gz
+        bgzip -c ~{fragments} > ~{fragments}.gz
 
         # ~{prefix}.fragments.tsv.gz.tbi
-        tabix --zero-based --preset bed ~{prefix}.fragments.tsv.gz
+        tabix --zero-based --preset bed ~{fragments}.gz
 
 
     >>>
@@ -170,10 +164,13 @@ task share_atac_filter {
         File? atac_filter_alignment_dedup = final_bam
         File? atac_filter_alignment_dedup_index = final_bam_index
         File? atac_filter_alignment_wdup = final_bam_wdup
+        File? atac_filter_alignment_wdup_index = final_bam_wdup_index
         File? atac_filter_alignment_dedup_queryname = queryname_final_bam
-        File? atac_filter_fragments = fragments
-        File? atac_filter_fragments_new = "~{prefix}.fragments.tsv.gz"
+        File? atac_filter_fragments = "~{fragments}.gz"
+        File? atac_filter_fragments_index = "~{fragments}.gz.tbi"
         File? atac_filter_monitor_log = monitor_log
+        File? atac_filter_picard_duplicates_metrics = picard_mark_duplicates_metrics
+        File? atac_filter_picard_duplicates_log = picard_mark_duplicates_log
     }
 
     runtime {
@@ -201,6 +198,16 @@ task share_atac_filter {
             help: 'Which tag inside the bma file contains the cell barcode.',
             examples: ['CB','XC']
             }
+        shift_plus: {
+                description: 'Integer indicating by how any basepair shift the star position on the positive strand.',
+                help: 'Shift the start position of the fragment by the amount of basepairs indicate.',
+                example: '4'
+            }
+        shift_minus: {
+                description: 'Integer indicating by how any basepair shift the star position on the negative strand.',
+                help: 'Shift the end position of the fragment by the amount of basepairs indicate.',
+                example: '-4'
+            }
         mapq_threshold: {
             description: 'MAPQ value',
             help: 'Minimum value for MAPQ allowed',
@@ -210,11 +217,6 @@ task share_atac_filter {
                 description: 'Number of cpus',
                 help: 'Set the number of cpus.',
                 examples: '4'
-            }
-        docker_image: {
-                description: 'Docker image.',
-                help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
-                example: ['put link to gcr or dockerhub']
             }
         multimappers: {
                     description: 'Specifiy the numbers of multimappers allowed.',

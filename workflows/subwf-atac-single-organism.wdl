@@ -42,7 +42,7 @@ workflow wf_atac {
         Int? filter_cpus = 16
         Int? filter_mapq_threshold
         Int? filter_shift_plus = 4
-        Int? filter_shift_minus = -5
+        Int? filter_shift_minus = -4
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
         String? filter_barcode_tag = "CB"
@@ -152,7 +152,9 @@ workflow wf_atac {
         File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
         File? share_atac_filter_alignment_dedup_index = filter.atac_filter_alignment_dedup_index
         File? share_atac_filter_alignment_wdup = filter.atac_filter_alignment_wdup
+        File? share_atac_filter_alignment_wdup = filter.atac_filter_alignment_wdup_index
         File? share_atac_filter_fragments = filter.atac_filter_fragments
+        File? share_atac_filter_fragments_index = filter.atac_filter_fragments_index
         File? share_atac_filter_monitor_log = filter.atac_filter_monitor_log
 
 

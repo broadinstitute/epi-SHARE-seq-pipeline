@@ -20,6 +20,7 @@ task qc_atac {
         File raw_bam_index
         File filtered_bam
         File filtered_bam_index
+        File peaks
         File tss
         String? barcode_tag = "CB"
         String genome_name
@@ -52,23 +53,41 @@ task qc_atac {
 
         # samstats raw
         # output of bowtie2
-        samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf {WRITE OUTPUT} > {samstats_log}
-
-         # The script creates two log file with bulk and barcode statistics.
-        # "{prefix}.mito.bulk-metrics.tsv"
-        # "{prefix}.mito.bc-metrics.tsv"
-        python3 $(which filter_mito_reads.py) --prefix ~{prefix} --bc_tag ~{barcode_tag} in.bam
-
-        # library complexity
-        # queryname_final_bam from filter
-        samtools view {queryname_final_bam} | python3 $(which pbc_stats.py) {output}
+        samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf {WRITE OUTPUT} > {samstats_raw_log}
 
         # SAMstat final filtered file
         # final bam
-        "samtools view -o - {input.bam} | "
-        "SAMstats --sorted_sam_file -  --outf {output} > {log}"
+        samtools view in.filtered.bam |  SAMstats --sorted_sam_file - --outf {output} > {samstats_filtered_log}
 
+        # The script creates two log file with bulk and barcode statistics.
+        # "{prefix}.mito.bulk-metrics.tsv"
+        # "{prefix}.mito.bc-metrics.tsv"
+        python3 $(which filter_mito_reads.py) --prefix ~{prefix} --bc_tag ~{barcode_tag} in.raw.bam
 
+        # library complexity
+        # queryname_final_bam from filter
+        samtools view {queryname_final_bam} | python3 $(which pbc_stats.py) {pbc_stats_out}
+
+        # TSS enrichment per cell, bulk
+        # Fragments in promoter
+        # make TSS pileup fig # original code has a 'set +e' why?
+        # the pyMakeVplot is missing
+        python2 $(which make-tss-pileup-jbd.py) \
+            -a in.filtered.bam \
+            -b ${tss} \
+            -e 2000 \
+            -p ends \
+            -v \
+            -u \
+            -o ${tss_pileup_prefix}
+
+        # Insert size plot bulk
+
+        python3 $(which plot_insert_size_hist.py) ${hist_log} ${prefix} ${hist_log_png}
+
+        # Fragments in peaks
+
+        # Duplicates per barcode
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
         samtools idxstats in.raw.bam >> ${stats_log}
@@ -84,18 +103,6 @@ task qc_atac {
             H=${hist_log_pdf} \
             W=1000  2>> picard_run.log
 
-        python3 $(which plot_insert_size_hist.py) ${hist_log} ${prefix} ${hist_log_png}
-
-        # make TSS pileup fig # original code has a 'set +e' why?
-        # the pyMakeVplot is missing
-        python2 $(which make-tss-pileup-jbd.py) \
-            -a in.filtered.bam \
-            -b ${tss} \
-            -e 2000 \
-            -p ends \
-            -v \
-            -u \
-            -o ${tss_pileup_prefix}
 
     }
 
