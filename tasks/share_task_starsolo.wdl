@@ -23,7 +23,7 @@ task share_rna_align {
         File genome_index_tar
         String genome_name
         String prefix
-        String docker_image = 'docker.io/nchernia/share_task_star:1'
+        String docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star'
         Int cpus = 16
         Float? disk_factor = 50.0
         Float? memory_factor = 2.0
@@ -186,16 +186,16 @@ task share_rna_align {
         tar -cvzf result/raw.tar.gz result/Solo.out/$feature_type/raw/*.gz
 
         # Move files and rename
-        find result -type f -exec mv {} result_files \;
-        ls result_files/
-        for file in $(ls result_files)
+        find result -type f -exec mv {} result \;
+        ls result/
+        for file in $(ls result)
         do 
             mv $file ~{prefix}.$file
         done
 
     >>>
 
-    output{
+    output {
         File output_bam = "result/~{prefix}.Aligned.sortedByCoord.out.bam"
         File log_final_out = "result/~{prefix}.Log.final.out"
         File log_out = "result/~{prefix}.Log.out"
@@ -207,11 +207,75 @@ task share_rna_align {
         File umi_per_cell = "result/~{prefix}.UMIperCellSorted.txt"
         File raw_tar = "result/~{prefix}.raw.tar.gz"
     }
-    runtime{
+
+    runtime {
         cpu : cpus
         memory : "${mem_gb} GB"
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: docker_image
+    }
+
+    parameter_meta {
+        fastq_R1: {
+            description: 'Read 1 RNA fastq file',
+            help: 'Preprocessed RNA fastq for read 1.',
+            example: 'rna.R1.fastq.gz'
+        }
+        fastq_R2: {
+            description: 'Read 2 RNA fastq file',
+            help: 'Preprocessed RNA fastq for read 2, containing cell barcode and UMI.',
+            example: 'rna.R2.fastq.gz'
+        }
+        chemistry: {
+            description: 'Experiment method'
+            help: 'Method/chemistry used in the experiment.'
+            examples: ['shareseq', '10x_v2', '10x_v3', 'splitseq']
+        }
+        whitelists_tsv: {
+            description: 'TSV with file paths to whitelists'
+            help: 'TSV where each row has two columns: chemistry, and file path to corresponding whitelist'
+            example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
+        }
+        whitelist: {
+            description: 'Barcode whitelist'
+            help: 'TXT file containing list of known possible barcodes'
+            example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/737K-arc-v1-GEX.txt.gz' 
+        }
+        genome_index_tar: {
+            description: 'Genome index files for STARsolo'
+            help: 'TAR containing genome index files for STARsolo to use during alignment'
+            examples: ['gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human/star/GRCh38_STAR_2.7.10a.tar.gz', 'gs://broad-buenrostro-pipeline-genome-annotations/mm10/star/Mus_musculus.GRCm38.star.2.7.10.tar.gz']
+        }
+        genome_name: {
+            description: 'Reference name',
+            help: 'The name of the reference genome used by the aligner.',
+            examples: ['hg38', 'mm10']
+        }
+        prefix: {
+            description: 'Prefix for output files',
+            help: 'Prefix that will be used to name the output files',
+            example: 'SS-PKR-1'
+        }
+        docker_image: {
+            description: 'Docker image',
+            help: 'Docker image for alignment step',
+            example: ['us.gcr.io/buenrostro-share-seq/share_task_star']
+        }
+        cpus: {
+            description: 'Number of CPUs',
+            help: 'Set the number of CPUs to be used by STARsolo',
+            default: 16
+        }
+        disk_factor: {
+            description: 'Disk space scaling factor',
+            help: 'Scaling factor used to request disk space based on input size'
+            example: 10.0
+        }
+        memory_factor: {
+            description: 'Memory scaling factor',
+            help: 'Scaling factor used to request memory based on input size'
+            example: 2.0
+        }
     }
 }
 
