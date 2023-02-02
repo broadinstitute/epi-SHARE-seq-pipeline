@@ -227,8 +227,8 @@ task share_rna_align {
             example: 'rna.R2.fastq.gz'
         }
         chemistry: {
-            description: 'Experiment method'
-            help: 'Method/chemistry used in the experiment.'
+            description: 'Experiment chemistry'
+            help: 'Chemistry used in the experiment.'
             examples: ['shareseq', '10x_v2', '10x_v3', 'splitseq']
         }
         whitelists_tsv: {
