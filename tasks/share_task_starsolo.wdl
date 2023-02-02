@@ -48,6 +48,8 @@ task share_rna_align {
 
     command <<<
         set -e
+
+        pwd
      
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
@@ -184,11 +186,9 @@ task share_rna_align {
         gzip *
         tar -cvzf raw.tar.gz *.gz
 
-        ls ~
-        ls ~/cromwell_root/
+        cd ../../../../
 
         # Move files and rename
-        cd ~/cromwell_root/
         find result -type f -exec mv {} result \;
         cd result
         for file in $(ls)
