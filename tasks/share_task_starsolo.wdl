@@ -179,16 +179,14 @@ task share_rna_align {
 
         fi
 
-        ls -R result/
-
         # tar and gzip barcodes, features, and matrix files
         gzip result/Solo.out/$feature_type/raw/*
         tar -cvzf result/raw.tar.gz result/Solo.out/$feature_type/raw/*.gz
 
         # Move files and rename
         find result -type f -exec mv {} result \;
-        ls result/
-        for file in $(ls result)
+        cd result
+        for file in $(ls)
         do 
             mv $file ~{prefix}.$file
         done
