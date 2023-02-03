@@ -58,7 +58,7 @@ task share_rna_align {
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
         # SHARE-seq
-        if [ '~{chemistry}' == 'share-seq' ]; then
+        if [ '~{chemistry}' == 'shareseq' ]; then
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
               do
@@ -165,7 +165,7 @@ task share_rna_align {
             --alignIntronMax 1000000 \
             --alignMatesGapMax ~{if encode then 1000000 else 999999} \
             --sjdbScore ~{if encode then 1 else 2} \
-            --limitsSjdbInsertNsj ~{if encode then 1000000 else 1200000} \
+            --limitSjdbInsertNsj ~{if encode then 1000000 else 1200000} \
             --clipAdapterType CellRanger4 \
             --chimJunctionOverhangMin ~{if encode then 20 else 15} \
             --chimMainSegmentMultNmax ~{if encode then 10 else 1} \
