@@ -178,7 +178,7 @@ task share_rna_align {
             --alignSJDBoverhangMin 1 \
             --alignMatesGapMax 999999 \
             --outFilterMismatchNmax 999 \ 
-            --soloCBwhitelist 0x_v3_whitelist.txt 
+            --soloCBwhitelist 10x_v3_whitelist.txt 
     
             feature_type='Gene'
 
