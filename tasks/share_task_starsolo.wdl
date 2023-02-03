@@ -166,11 +166,6 @@ task share_rna_align {
             --alignMatesGapMax ~{if encode then 1000000 else 999999} \
             --sjdbScore ~{if encode then 1 else 2} \
             --limitSjdbInsertNsj ~{if encode then 1000000 else 1200000} \
-            --clipAdapterType CellRanger4 \
-            --chimJunctionOverhangMin ~{if encode then 20 else 15} \
-            --chimMainSegmentMultNmax ~{if encode then 10 else 1} \
-            --chimOutType ~{if encode then 'Junctions' else 'Junctions WithinBAM SoftClip'} \
-            --chimSegmentMin ~{if encode then 0 else 15} \ 
             --outFilterType BySJout \
             --outFilterMatchNminOverLread ~{if encode then '0.66' else '0.33'} \
             --outFilterMultimapNmax 20 \
@@ -186,7 +181,13 @@ task share_rna_align {
             --outSAMunmapped ~{if encode then 'Within' else 'None'} \
             --outSAMstrandField intronMotif \
             --outFilterScoreMin 30 \
-            --outFileNamePrefix result/ 
+            --outFileNamePrefix result/ \
+            --clipAdapterType CellRanger4 \
+            --chimJunctionOverhangMin ~{if encode then 20 else 15} \
+            --chimMainSegmentMultNmax ~{if encode then 10 else 1} \
+            --chimOutType ~{if encode then 'Junctions' else 'Junctions WithinBAM SoftClip'} \
+            --chimSegmentMin ~{if encode then 0 else 15} \
+            
             feature_type='Gene'
 
         fi
