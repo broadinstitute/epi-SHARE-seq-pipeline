@@ -121,7 +121,7 @@ task share_rna_align {
             gunzip -c ~{whitelist_} > 10x_v2_whitelist.txt
 
             $(which STAR) \
-            --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
+            --readFilesIn $read_files  \
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
@@ -171,7 +171,7 @@ task share_rna_align {
             gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
 
             $(which STAR) \
-            --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
+            --readFilesIn $read_files \
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
@@ -202,7 +202,7 @@ task share_rna_align {
             --outFilterMismatchNmax 999 \
             --outFilterMismatchNoverLmax ~{if encode then '0.3' else '0.1'} \
             --outFilterMismatchNoverReadLmax 0.04 \
-            --outFilterScoreMinOverLread ~{if encode then '0.66' else '0.33'} \ 
+            --outFilterScoreMinOverLread ~{if encode then '0.66' else '0.33'} \
             --outSAMtype BAM SortedByCoordinate \
             --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
             --outSAMattrRGline ~{if encode then '-' else 'ID:rg1 SM:sm1'} \ 
