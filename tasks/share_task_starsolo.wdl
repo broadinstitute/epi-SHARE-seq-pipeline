@@ -136,7 +136,7 @@ task share_rna_align {
             feature_type='Gene'       
 
         # neva params
-        elif [ '~{chemistry} == '10x_v3' ]; then
+        elif [ '~{chemistry}' == '10x_v3' ]; then
             gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
 
             $(which STAR) \
