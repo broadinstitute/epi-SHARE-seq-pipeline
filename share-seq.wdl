@@ -29,10 +29,11 @@ workflow ShareSeq {
         Int? cutoff_atac = 100
 
         # RNA-specific inputs
-        Boolean count_only = false
-        Boolean multimappers = false
-        Boolean include_multimappers = false
-        Boolean include_introns = true
+        Boolean? encode = false
+        Boolean? count_only = false
+        Boolean? multimappers = false
+        Boolean? include_multimappers = false
+        Boolean? include_introns = true
         Array[File] read1_rna
         Array[File] read2_rna
         File? genes_annotation_bed
@@ -99,6 +100,7 @@ workflow ShareSeq {
             call share_rna.wf_rna as rna{
                 input:
                     chemistry = chemistry,
+                    encode = encode,
                     read1 = read1_rna,
                     read2 = read2_rna,
                     idx_tar = idx_tar_rna_,

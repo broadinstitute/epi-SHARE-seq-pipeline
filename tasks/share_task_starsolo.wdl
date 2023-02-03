@@ -18,6 +18,7 @@ task share_rna_align {
         Array[File] fastq_R1
         Array[File] fastq_R2
         String chemistry
+        Boolean encode = false
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         File? whitelist
         File genome_index_tar
@@ -135,51 +136,57 @@ task share_rna_align {
 
             feature_type='Gene'       
 
-        # neva params
+        # 10X v3 (multiome)
         elif [ '~{chemistry}' == '10x_v3' ]; then
             gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
 
             $(which STAR) \
             --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
+            --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
-            --readFilesCommand zcat \ 
-            --outFileNamePrefix result \ 
-            --outSAMtype BAM SortedByCoordinate \ 
-            --quantMode TranscriptomeSAM GeneCounts \ 
-            --alignSoftClipAtReferenceEnds Yes \
-            --outSAMstrandField intronMotif \
-            --outFilterMismatchNoverLmax 0.1 \
-            --chimMainSegmentMultNmax 1 \
+            --genomeLoad NoSharedMemory \
+            --quantMode ~{if encode then '-' else 'TranscriptomeSAM GeneCounts'} \
             --soloType CB_UMI_Simple \
-            --soloCBstart 1 \
-            --soloCBlen 16 \
-            --soloUMIstart 17 \ 
-            --soloUMIlen 12 \
+            --soloFeatures ~{if encode then 'Gene SJ' else 'Gene'} \
+            --soloStrand Forward \
+            --soloCellFilter ~{if encode then 'EmptyDrops_CR' else 'CellRanger2.2'} \
+            --soloBarcodeReadLength ~{if encode then 0 else 1} \
+            --soloMultiMappers ~{if encode then 'Unique EM' else 'Unique'} \
+            --soloCBwhitelist 10x_v3_whitelist.txt \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
-            --soloUMIfiltering MultiGeneUMI_CR \
+            --soloCBlen 16 \
+            --soloUMIlen 12 \
             --soloUMIdedup 1MM_CR \
-            --clipAdapterType CellRanger4 \ 
-            --outFilterScoreMin 30 \
-            --outSAMattributes CR UR CY UY CB UB \ 
-            --outFilterMatchNminOverLread 0.33 \
-            --outSAMattrRGline ID:rg1 SM:sm1 \
-            --chimJunctionOverhangMin 15 \
-            --alignIntronMax 1000000 \
-            --chimOutType Junctions WithinBAM SoftClip \
-            --outFilterMultimapNmax 20 \
-            --limitSjdbInsertNsj 1200000 \ 
+            --soloUMIfiltering MultiGeneUMI_CR \
             --alignSJoverhangMin 8 \
-            --outFilterType BySJout \
-            --outFilterScoreMinOverLread 0.33 \
-            --outFilterIntronMotifs None \
-            --chimSegmentMin 15 \
-            --alignIntronMin 20 \
             --alignSJDBoverhangMin 1 \
-            --alignMatesGapMax 999999 \
-            --outFilterMismatchNmax 999 \ 
-            --soloCBwhitelist 10x_v3_whitelist.txt 
-    
+            --alignIntronMin 20 \
+            --alignIntronMax 1000000 \
+            --alignMatesGapMax ~{if encode then 1000000 else 999999} \
+            --sjdbScore ~{if encode then 1 else 2} \
+            --limitsSjdbInsertNsj ~{if encode then 1000000 else 1200000} \
+            --clipAdapterType CellRanger4 \
+            --chimJunctionOverhangMin ~{if encode then 20 else 15} \
+            --chimMainSegmentMultNmax ~{if encode then 10 else 1} \
+            --chimOutType ~{if encode then 'Junctions' else 'Junctions WithinBAM SoftClip'} \
+            --chimSegmentMin ~{if encode then 0 else 15} \ 
+            --outFilterType BySJout \
+            --outFilterMatchNminOverLread ~{if encode then '0.66' else '0.33'} \
+            --outFilterMultimapNmax 20 \
+            --outFilterMismatchNmax 999 \
+            --outFilterMismatchNoverLmax ~{if encode then '0.3' else '0.1'} \
+            --outFilterMismatchNoverReadLmax 0.04 \
+            --outFilterScoreMinOverLread ~{if encode then '0.66' else '0.33'} \ 
+            --outSAMtype BAM SortedByCoordinate \
+            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
+            --outSAMattrRGline ~{if encode then '-' else 'ID:rg1 SM:sm1'} \ 
+            --outSAMheaderCommentFile ~{if encode then 'COfile.txt' else '-'} \
+            --outSAMheaderHD ~{if encode then '@HD VN:1.4 SO:coordinate' else '-'} \
+            --outSAMunmapped ~{if encode then 'Within' else 'None'} \
+            --outSAMstrandField intronMotif \
+            --outFilterScoreMin 30 \
+            --outFileNamePrefix result/ 
             feature_type='Gene'
 
         fi
