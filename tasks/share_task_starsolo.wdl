@@ -135,50 +135,6 @@ task share_rna_align {
 
             feature_type='Gene'       
 
-        # 10X v3 (multiome)
-        #elif [ '~{chemistry}' == '10x_v3' ]; then
-            gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
-
-            $(which STAR) \
-            --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
-            --readFilesCommand zcat \
-            --runThreadN ~{cpus} \
-            --genomeDir ./ \
-            --genomeLoad NoSharedMemory \
-            --soloType CB_UMI_Simple \
-            --soloFeatures Gene SJ \
-            --soloStrand Forward \
-            --soloCellFilter EmptyDrops_CR \
-            --soloBarcodeReadLength 0 \
-            --soloMultiMappers Unique EM \
-            --soloCBwhitelist 10x_v3_whitelist.txt \
-            --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
-            --soloCBlen 16 \
-            --soloUMIlen 12 \
-            --soloUMIdedup 1MM_CR \
-            --soloUMIfiltering MultiGeneUMI_CR \
-            --alignSJoverhangMin 8 \
-            --alignSJDBoverhangMin 1 \
-            --alignIntronMin 20 \
-            --alignIntronMax 1000000 \
-            --alignMatesGapMax 1000000 \
-            --sjdbScore 1 \
-            --clipAdapterType CellRanger4 \
-            --outFilterType BySJout \
-            --outFilterMultimapNmax 20 \
-            --outFilterMismatchNmax 999 \
-            --outFilterMismatchNoverReadLmax 0.04 \
-            --outSAMtype BAM SortedByCoordinate \
-            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
-            --outSAMheaderCommentFile COfile.txt \
-            --outSAMheaderHD @HD VN:1.4 SO:coordinate \
-            --outSAMunmapped Within \
-            --outSAMstrandField intronMotif \
-            --outFilterScoreMin 0 \ #CHANGED FROM 30
-            --outFileNamePrefix result/
-
-            feature_type='Gene'
-
         # neva params
         elif [[ '~{chemistry} == '10x_v3' ]]; then
             gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
