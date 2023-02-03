@@ -36,7 +36,7 @@ task share_rna_align {
     Float input_file_size_gb = size(fastq_R1, 'G') + size(fastq_R2, 'G')
 
     # Determining memory size based on the size of the input files.
-    Float mem_gb = 5.0 + size(genome_index_tar, 'G') + memory_factor * input_file_size_gb
+    Float mem_gb = 20.0 + size(genome_index_tar, 'G') + memory_factor * input_file_size_gb
 
     # Determining disk size based on the size of the input files.
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
