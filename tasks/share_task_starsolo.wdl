@@ -54,11 +54,29 @@ task share_rna_align {
      
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
+        # Check which fastq contains CB + UMI
+        r1_length=$(zcat fastq_R1[0] | head -2 | tail -1 | awk '{print length($1)}')
+        r2_length=$(zcat fastq_R2[0] | head -2 | tail -1 | awk '{print length($1)}')
+        if [ r1_length -gt r2_length ]; then
+            read_files='~{sep=',' fastq_R1} ~{sep=',' fastq_R2}'
+            cb_umi_length=r2_length
+        else
+            read_files='~{sep=',' fastq_R2} ~{sep=',' fastq_R1}'
+            cb_umi_length=r1_length
+        fi
+           
+
         # Untar the genome
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
         # SHARE-seq
         if [ '~{chemistry}' == 'shareseq' ]; then
+            # Check that CB + UMI length is correct
+            if [ $cb_umi_length -ne 34 ]; then
+                echo 'CB + UMI length is $cb_umi_length; expected 34'
+                exit 1
+            fi
+      
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
               do
@@ -66,7 +84,7 @@ task share_rna_align {
             done
 
             $(which STAR) \
-            --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
+            --readFilesIn $read_files  \
             --readFilesCommand zcat
             --runThreadN ~{cpus} \
             --genomeDir ./ \
@@ -94,6 +112,12 @@ task share_rna_align {
 
         # 10X v2
         elif [ '~{chemistry}' == '10x_v2' ]; then
+            # Check that CB + UMI length is correct
+            if [ $cb_umi_length -ne 26 ]; then
+                echo 'CB + UMI length is $cb_umi_length; expected 26'
+                exit 1
+            fi
+
             gunzip -c ~{whitelist_} > 10x_v2_whitelist.txt
 
             $(which STAR) \
@@ -138,6 +162,12 @@ task share_rna_align {
 
         # 10X v3 (multiome)
         elif [ '~{chemistry}' == '10x_v3' ]; then
+            # Check that CB + UMI length is correct
+            if [ $cb_umi_length -ne 28 ]; then
+                echo 'CB + UMI length is $cb_umi_length; expected 28'
+                exit 1
+            fi
+
             gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
 
             $(which STAR) \
@@ -197,9 +227,8 @@ task share_rna_align {
         gzip *
         tar -cvzf raw.tar.gz *.gz
 
-        cd ../../../../
-
         # Move files and rename
+        cd
         find result -type f -exec mv {} result \;
         cd result
         for file in $(ls)
