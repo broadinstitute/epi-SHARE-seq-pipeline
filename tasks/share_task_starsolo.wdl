@@ -136,7 +136,7 @@ task share_rna_align {
             feature_type='Gene'       
 
         # 10X v3 (multiome)
-        elif [ '~{chemistry}' == '10x_v3' ]; then
+        #elif [ '~{chemistry}' == '10x_v3' ]; then
             gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
 
             $(which STAR) \
@@ -177,6 +177,53 @@ task share_rna_align {
             --outFilterScoreMin 0 \ #CHANGED FROM 30
             --outFileNamePrefix result/
 
+            feature_type='Gene'
+
+        # neva params
+        elif [[ '~{chemistry} == '10x_v3' ]]; then
+            gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
+
+            $(which STAR) \
+            --readFilesIn ~{sep=',' fastq_R1} ~{sep=',' fastq_R2}  \
+            --runThreadN ~{cpus} \
+            --genomeDir ./ \
+            --readFilesCommand zcat \ 
+            --outFileNamePrefix result \ 
+            --outSAMtype BAM SortedByCoordinate \ 
+            --quantMode TranscriptomeSAM GeneCounts \ 
+            --alignSoftClipAtReferenceEnds Yes \
+            --outSAMstrandField intronMotif \
+            --outFilterMismatchNoverLmax 0.1 \
+            --chimMainSegmentMultNmax 1 \
+            --soloType CB_UMI_Simple \
+            --soloCBstart 1 \
+            --soloCBlen 16 \
+            --soloUMIstart 17 \ 
+            --soloUMIlen 12 \
+            --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
+            --soloUMIfiltering MultiGeneUMI_CR \
+            --soloUMIdedup 1MM_CR \
+            --clipAdapterType CellRanger4 \ 
+            --outFilterScoreMin 30 \
+            --outSAMattributes CR UR CY UY CB UB \ 
+            --outFilterMatchNminOverLread 0.33 \
+            --outSAMattrRGline ID:rg1 SM:sm1 \
+            --chimJunctionOverhangMin 15 \
+            --alignIntronMax 1000000 \
+            --chimOutType Junctions WithinBAM SoftClip \
+            --outFilterMultimapNmax 20 \
+            --limitSjdbInsertNsj 1200000 \ 
+            --alignSJoverhangMin 8 \
+            --outFilterType BySJout \
+            --outFilterScoreMinOverLread 0.33 \
+            --outFilterIntronMotifs None \
+            --chimSegmentMin 15 \
+            --alignIntronMin 20 \
+            --alignSJDBoverhangMin 1 \
+            --alignMatesGapMax 999999 \
+            --outFilterMismatchNmax 999 \ 
+            --soloCBwhitelist 0x_v3_whitelist.txt 
+    
             feature_type='Gene'
 
         fi
