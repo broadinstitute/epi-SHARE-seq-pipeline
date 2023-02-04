@@ -231,7 +231,7 @@ task share_rna_align {
         tar -cvzf raw.tar.gz *.gz
 
         # Move files and rename
-        cd
+        cd ../../../../
         find result -type f -exec mv {} result \;
         cd result
         for file in $(ls)
