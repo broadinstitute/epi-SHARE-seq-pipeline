@@ -29,7 +29,7 @@ workflow ShareSeq {
         Int? cutoff_atac = 100
 
         # RNA-specific inputs
-        Boolean? encode = false
+        Boolean? encode = true
         Boolean? count_only = false
         Boolean? multimappers = false
         Boolean? include_multimappers = false
