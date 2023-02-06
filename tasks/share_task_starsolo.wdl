@@ -66,9 +66,13 @@ task share_rna_align {
         echo $r2_length
         echo $read_files
            
+        pwd
 
         # Untar the genome
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
+
+        pwd
+        ls
 
         # SHARE-seq
         if [ '~{chemistry}' == 'shareseq' ]; then
@@ -77,13 +81,14 @@ task share_rna_align {
                 echo 'CB + UMI length is $cb_umi_length; expected 34'
                 exit 1
             fi
-      
+            pwd 
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
               do
               gunzip -c "${fq}" | awk 'NR%4==2{dict[substr($1,1,24)]}END{for (i in dict){print i}}' >> shareseq_whitelist.txt
             done
-
+            pwd
+            ls
             $(which STAR) \
             --readFilesIn $read_files  \
             --readFilesCommand zcat
