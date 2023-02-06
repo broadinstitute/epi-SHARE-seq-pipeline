@@ -50,8 +50,6 @@ task share_rna_align {
     command <<<
         set -e
 
-        pwd
-     
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Check which fastq contains CB + UMI
@@ -229,11 +227,6 @@ task share_rna_align {
         cd result/Solo.out/$feature_type/raw/
         gzip *
         tar -cvzf raw.tar.gz *.gz
-
-        pwd
-        cd
-        pwd
-        ls -R
 
         # Move files and rename
         cd ../../../../
