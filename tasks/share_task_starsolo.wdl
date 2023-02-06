@@ -31,7 +31,7 @@ task share_rna_align {
     }
 
     Map[String, File] whitelists = read_map(whitelists_tsv)
-    File whitelist_ = if (chemistry != 'shareseq') then select_first([whitelist, whitelists[chemistry]]) else '' 
+    File? whitelist_ = if (chemistry != 'shareseq') then select_first([whitelist, whitelists[chemistry]]) else ''
 
     # Determine the size of the input
     Float input_file_size_gb = size(fastq_R1, 'G') + size(fastq_R2, 'G')
