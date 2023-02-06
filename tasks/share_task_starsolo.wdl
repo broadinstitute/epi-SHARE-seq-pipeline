@@ -18,7 +18,7 @@ task share_rna_align {
         Array[File] fastq_R1
         Array[File] fastq_R2
         String chemistry
-        Boolean encode = false
+        Boolean encode = true
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         File? whitelist
         File genome_index_tar
@@ -229,6 +229,11 @@ task share_rna_align {
         cd result/Solo.out/$feature_type/raw/
         gzip *
         tar -cvzf raw.tar.gz *.gz
+
+        pwd
+        cd
+        pwd
+        ls -R
 
         # Move files and rename
         cd ../../../../
