@@ -13,7 +13,6 @@ workflows:
              - knudson
              - insert_size_hist
              - barcode_plot_annotations
-             - fix_qc_rna
          tags:
              - /.*/
 
