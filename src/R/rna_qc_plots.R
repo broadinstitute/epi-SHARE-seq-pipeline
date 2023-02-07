@@ -176,86 +176,82 @@ if (gene_plot1) {
 options(scipen=999)
 
 # Make UMI barcode rank plots
-if (umi_plot1 | umi_plot2) {
-  png(umi_rank_plot_file, width=8, height=8, units='in', res=300)
-  par(mfrow = c(2,1))
-  
-  # Plot 1 (all barcodes passing UMI filter vs log10(UMIs))
-  if (umi_plot1) {
-    plot(x=umi_rank,
-         y=umi_filtered_sort,
-         log="y",
-         xlab=paste0(" Barcode rank (", length(umi_rank)-umi_elbow[1], " low quality cells)"), 
-         ylab="log10(UMIs)",
-         main="RNA UMIs per Barcode", 
-         col=c("dimgrey","darkblue")[is_top_ranked_umi], 
-         pch=16,
-         ylim=c(1,100000))
-    abline(v=umi_elbow[1], h=10^(umi_elbow[2]))
-    text(umi_elbow[1], 10^(umi_elbow[2]),
-         paste0("(", umi_elbow[1], ", ", 10^(umi_elbow[2]), ")"),
-         adj=c(-0.1,-0.5))
-  }
-  # Plot 2 (top ranked barcodes vs log10(UMIs))
-  if (umi_plot2) {
-    plot(x=umi_top_rank,
-         y=umi_top_umi,
-         log="y",
-         xlab="Barcode rank",
-         ylab="log10(UMIs)",
-         main="RNA UMIs per Top-Ranked Barcode",
-         col=c("dimgrey","darkblue")[is_top_top_ranked_umi],
-         pch=16,
-         ylim=c(1,100000))
-    abline(v=umi_point[1], h=10^(umi_point[2]))
-    text(umi_point[1], 10^(umi_point[2]),
-         paste("(", umi_point[1], ", ", 10^(umi_point[2]), ")", sep=""),
-         adj=c(-0.1,-0.5))
-  }
-  dev.off()
+png(umi_rank_plot_file, width=8, height=8, units='in', res=300)
+par(mfrow = c(2,1))
+
+# Plot 1 (all barcodes passing UMI filter vs log10(UMIs))
+if (umi_plot1) {
+  plot(x=umi_rank,
+       y=umi_filtered_sort,
+       log="y",
+       xlab=paste0(" Barcode rank (", length(umi_rank)-umi_elbow[1], " low quality cells)"), 
+       ylab="log10(UMIs)",
+       main="RNA UMIs per Barcode", 
+       col=c("dimgrey","darkblue")[is_top_ranked_umi], 
+       pch=16,
+       ylim=c(1,100000))
+  abline(v=umi_elbow[1], h=10^(umi_elbow[2]))
+  text(umi_elbow[1], 10^(umi_elbow[2]),
+       paste0("(", umi_elbow[1], ", ", 10^(umi_elbow[2]), ")"),
+       adj=c(-0.1,-0.5))
 }
+# Plot 2 (top ranked barcodes vs log10(UMIs))
+if (umi_plot2) {
+  plot(x=umi_top_rank,
+       y=umi_top_umi,
+       log="y",
+       xlab="Barcode rank",
+       ylab="log10(UMIs)",
+       main="RNA UMIs per Top-Ranked Barcode",
+       col=c("dimgrey","darkblue")[is_top_top_ranked_umi],
+       pch=16,
+       ylim=c(1,100000))
+  abline(v=umi_point[1], h=10^(umi_point[2]))
+  text(umi_point[1], 10^(umi_point[2]),
+       paste("(", umi_point[1], ", ", 10^(umi_point[2]), ")", sep=""),
+       adj=c(-0.1,-0.5))
+}
+dev.off()
 
 
 # Make gene barcode rank plots
-if (gene_plot1 | gene_plot2) {
-  png(gene_rank_plot_file, width=8, height=8, units='in', res=300)
-  par(mfrow = c(2,1))
-  
-  # Plot 1 (all barcodes passing gene filter vs log10(genes))
-  if (gene_plot1) {
-    plot(x=gene_rank,
-         y=gene_filtered_sort,
-         log="y",
-         xlab=paste0(" Barcode rank (", length(gene_rank)-gene_elbow[1], " low quality cells)"), 
-         ylab="log10(genes)",
-         main="RNA Genes per Barcode", 
-         col=c("dimgrey","darkblue")[is_top_ranked_gene], 
-         pch=16,
-         ylim=c(1,10000))
-    abline(v=gene_elbow[1], h=10^(gene_elbow[2]))
-    text(gene_elbow[1], 10^(gene_elbow[2]),
-         paste0("(", gene_elbow[1], ", ", 10^(gene_elbow[2]), ")"),
-         adj=c(-0.1,-0.5))
-  }
-  
-  # Plot 2 (top ranked barcodes vs log10(genes))
-  if (gene_plot2) {
-    plot(x=gene_top_rank,
-         y=gene_top_gene,
-         log="y",
-         xlab="Barcode rank",
-         ylab="log10(genes)",
-         main="RNA Genes per Top-Ranked Barcode",
-         col=c("dimgrey","darkblue")[is_top_top_ranked_gene],
-         pch=16,
-         ylim=c(1,10000))
-    abline(v=gene_point[1], h=10^(gene_point[2]))
-    text(gene_point[1], 10^(gene_point[2]),
-         paste("(", gene_point[1], ", ", 10^(gene_point[2]), ")", sep=""),
-         adj=c(-0.1,-0.5))
-  }
-  dev.off()
+png(gene_rank_plot_file, width=8, height=8, units='in', res=300)
+par(mfrow = c(2,1))
+
+# Plot 1 (all barcodes passing gene filter vs log10(genes))
+if (gene_plot1) {
+  plot(x=gene_rank,
+       y=gene_filtered_sort,
+       log="y",
+       xlab=paste0(" Barcode rank (", length(gene_rank)-gene_elbow[1], " low quality cells)"), 
+       ylab="log10(genes)",
+       main="RNA Genes per Barcode", 
+       col=c("dimgrey","darkblue")[is_top_ranked_gene], 
+       pch=16,
+       ylim=c(1,10000))
+  abline(v=gene_elbow[1], h=10^(gene_elbow[2]))
+  text(gene_elbow[1], 10^(gene_elbow[2]),
+       paste0("(", gene_elbow[1], ", ", 10^(gene_elbow[2]), ")"),
+       adj=c(-0.1,-0.5))
 }
+
+# Plot 2 (top ranked barcodes vs log10(genes))
+if (gene_plot2) {
+  plot(x=gene_top_rank,
+       y=gene_top_gene,
+       log="y",
+       xlab="Barcode rank",
+       ylab="log10(genes)",
+       main="RNA Genes per Top-Ranked Barcode",
+       col=c("dimgrey","darkblue")[is_top_top_ranked_gene],
+       pch=16,
+       ylim=c(1,10000))
+  abline(v=gene_point[1], h=10^(gene_point[2]))
+  text(gene_point[1], 10^(gene_point[2]),
+       paste("(", gene_point[1], ", ", 10^(gene_point[2]), ")", sep=""),
+       adj=c(-0.1,-0.5))
+}
+dev.off()
 
 # Make genes vs UMIs scatter plot
 png(gene_umi_plot_file, width=8, height=8, units='in', res=300)

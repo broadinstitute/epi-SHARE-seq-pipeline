@@ -112,9 +112,9 @@ workflow wf_rna {
 
         File share_rna_barcode_metadata  = qc_rna.rna_barcode_metadata
         File share_rna_duplicates_log = qc_rna.rna_duplicates_log
-        File share_rna_umi_barcode_rank_plot  = qc_rna.rna_umi_barcode_rank_plot
-        File share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
-        File share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
+        File? share_rna_umi_barcode_rank_plot = qc_rna.rna_umi_barcode_rank_plot
+        File? share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
+        File? share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
 
         File? share_rna_seurat_notebook_output = seurat.notebook_output
         File? share_rna_seurat_notebook_log = seurat.notebook_log

@@ -67,9 +67,9 @@ task qc_rna {
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
         File rna_duplicates_log = "~{duplicates_log}"
-        File rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
-        File rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
-        File rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"   
+        File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
+        File? rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
+        File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"   
     }
 
     runtime {
