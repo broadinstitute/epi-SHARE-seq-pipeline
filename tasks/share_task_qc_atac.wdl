@@ -40,7 +40,11 @@ task qc_atac {
     String hist_log_png = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.png'
     String tss_pileup_prefix = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log'
     String tss_pileup_out = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log.png'
-    String samstats_log = "${prefix}.atac.align.${genome_name}.samstats.raw.log"
+    String samstats_raw_log = "${prefix}.atac.qc.${genome_name}.samstats.raw.log.txt"
+    String samstats_raw_out = "${prefix}.atac.qc.${genome_name}.samstats.raw.txt"
+    String samstats_filtered_log = "${prefix}.atac.qc.${genome_name}.samstats.filtered.log.txt"
+    String samstats_filtered_out = "${prefix}.atac.qc.${genome_name}.samstats.filtered.txt"
+    String pbc_stats = "${prefix}.atac.qc.${genome_name}.pbcstats.log"
 
 
     command {
@@ -53,41 +57,28 @@ task qc_atac {
 
         # samstats raw
         # output of bowtie2
-        samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf {WRITE OUTPUT} > {samstats_raw_log}
+        samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf ${samstats_raw_out} > ${samstats_raw_log}
 
         # SAMstat final filtered file
         # final bam
-        samtools view in.filtered.bam |  SAMstats --sorted_sam_file - --outf {output} > {samstats_filtered_log}
-
-        # The script creates two log file with bulk and barcode statistics.
-        # "{prefix}.mito.bulk-metrics.tsv"
-        # "{prefix}.mito.bc-metrics.tsv"
-        python3 $(which filter_mito_reads.py) --prefix ~{prefix} --bc_tag ~{barcode_tag} in.raw.bam
+        samtools view in.filtered.bam |  SAMstats --sorted_sam_file - --outf ${samstats_filtered_out}  > ${samstats_filtered_log}
 
         # library complexity
         # queryname_final_bam from filter
-        samtools view {queryname_final_bam} | python3 $(which pbc_stats.py) {pbc_stats_out}
+        samtools view ${queryname_final_bam} | python3 $(which pbc_stats.py) ${pbc_stats}
 
-        # TSS enrichment per cell, bulk
-        # Fragments in promoter
-        # make TSS pileup fig # original code has a 'set +e' why?
-        # the pyMakeVplot is missing
-        python2 $(which make-tss-pileup-jbd.py) \
-            -a in.filtered.bam \
-            -b ${tss} \
+        # TSS enrichment stats
+        python3 $(which qc-atac-tss-enrichment.py) \
             -e 2000 \
-            -p ends \
-            -v \
-            -u \
-            -o ${tss_pileup_prefix}
+            --tss ${tss} \
+            --bc_tag CB \
+            --fragment_cutoff -1 \
+            --prefix "${prefix}.atac.qc.${genome_name}" \
+            in.filtered.bam
 
-        # Insert size plot bulk
+        # Fragments in peaks?
 
-        python3 $(which plot_insert_size_hist.py) ${hist_log} ${prefix} ${hist_log_png}
-
-        # Fragments in peaks
-
-        # Duplicates per barcode
+        # Duplicates per barcode?
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
         samtools idxstats in.raw.bam >> ${stats_log}
@@ -103,15 +94,25 @@ task qc_atac {
             H=${hist_log_pdf} \
             W=1000  2>> picard_run.log
 
+        # Insert size plot bulk
+        python3 $(which plot_insert_size_hist.py) ${hist_log} ${prefix} ${hist_log_png}
+
 
     }
 
     output {
-        File atac_final_stats = stats_log
-        File atac_final_hist_png = hist_log_png
-        File atac_final_hist = stats_log
-        File atac_tss_pileup_png = tss_pileup_out
-        File atac_hist_log = hist_log
+        File atac_qc_samstats_raw = samstats_raw_out
+        File atac_qc_samstats_filtered = samstats_filtered_out
+        File atac_qc_pbc_stats = pbc_stats
+
+        File atac_qc_final_stats = stats_log
+        File atac_qc_final_hist_png = hist_log_png
+        File atac_qc_final_hist = hist_log
+
+        File atac_qc_tss_enrichment_barcode_stats = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
+        File atac_qc_tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
+        File atac_qc_tss_enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
+
     }
 
     runtime {

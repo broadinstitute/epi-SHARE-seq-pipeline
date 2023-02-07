@@ -95,6 +95,8 @@ task share_atac_filter {
         ln -s ~{bam} in.bam
         ln -s ~{bam_index} in.bam.bai
 
+        # "{prefix}.mito.bulk-metrics.tsv"
+        # "{prefix}.mito.bc-metrics.tsv"
         # The script removes the mithocondrial reads and creates two log file with bulk and barcode statistics.
         python3 $(which filter_mito_reads.py) -o ~{non_mito_bam} --prefix ~{prefix} --bc_tag ~{barcode_tag} in.bam
 
@@ -121,7 +123,7 @@ task share_atac_filter {
             samtools view -h ~{tmp_filtered_bam}  | samtools fixmate -@ ~{samtools_threads} -r /dev/stdin ~{tmp_fixmate_bam}
         else
             samtools view -h ~{tmp_filtered_bam} | \
-            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
+            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | samtools view -u - | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
         fi
 
         # Cleaning up bams we don't need anymore
@@ -171,6 +173,8 @@ task share_atac_filter {
         File? atac_filter_monitor_log = monitor_log
         File? atac_filter_picard_duplicates_metrics = picard_mark_duplicates_metrics
         File? atac_filter_picard_duplicates_log = picard_mark_duplicates_log
+        File? atac_filter_mito_metrics_bulk = "~{prefix}.mito.bulk-metrics.tsv"
+        File? atac_filter_mito_metrics_barcode = "~{prefix}.mito.bc-metrics.tsv"
     }
 
     runtime {

@@ -156,6 +156,8 @@ workflow wf_atac {
         File? share_atac_filter_fragments = filter.atac_filter_fragments
         File? share_atac_filter_fragments_index = filter.atac_filter_fragments_index
         File? share_atac_filter_monitor_log = filter.atac_filter_monitor_log
+        File? share_atac_filter_mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk
+        File? share_atac_filter_mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode
 
 
 #        File share_atac_barcodes = count.atac_barcodes
