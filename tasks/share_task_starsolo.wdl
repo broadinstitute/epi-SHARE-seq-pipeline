@@ -91,7 +91,7 @@ task share_rna_align {
             ls
             $(which STAR) \
             --readFilesIn $read_files  \
-            --readFilesCommand zcat
+            --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
             --soloType CB_UMI_Simple \
