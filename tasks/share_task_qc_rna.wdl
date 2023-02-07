@@ -21,7 +21,6 @@ task qc_rna {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 1.5
-
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
     }
 
@@ -67,9 +66,9 @@ task qc_rna {
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
         File rna_duplicates_log = "~{duplicates_log}"
-        File rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
-        File rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
-        File rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"   
+        File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
+        File? rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
+        File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"   
     }
 
     runtime {
