@@ -80,8 +80,8 @@ def get_metrics(bam, chemistry):
     for barcode in barcodes:
         total_val = str(total_counts[barcode])
         umi_val = str(umis_per_barcode.get(barcode, 0))
-        duplicate_val = str(total_counts[barcode] - umis_per_barcode[barcode])
-        gene_val = str(genes_per_barcode[barcode])
+        duplicate_val = str(total_counts[barcode] - umis_per_barcode[barcode].get(barcode, 0))
+        gene_val = str(genes_per_barcode[barcode].get(barcode, 0))
         mitochondrial_val = str(round(mitochondrial_counts.get(barcode, 0) / total_counts[barcode] * 100, 2))
         
         metrics = [barcode, total_val, duplicate_val, umi_val, gene_val, mitochondrial_val]
