@@ -11,7 +11,7 @@ import pysam
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Get total reads, duplicate reads, UMIs, genes, and percent mitochondrial reads for each barcode from bam file")
-    parser.add_argument("chemistry", choices=["shareseq", "10x_v2", "10x_v3", "splitseq"], help="Method chemistry")
+    parser.add_argument("chemistry", choices=["shareseq", "10x_v2", "10x_v3"], help="Method chemistry")
     parser.add_argument("bam_file", help="Filename for input bam file")
     parser.add_argument("bai_file", help="Filename for bam index file")
     parser.add_argument("barcode_metadata_file", help="Filename for output barcode metadata txt file")
@@ -29,6 +29,7 @@ def get_metrics(bam, chemistry):
     umi_gene = defaultdict(set)
     mitochondrial_counts = defaultdict(int)
     barcodes = set()
+    formatted_barcodes = {}
     
     for read in bam.fetch():
         # get barcode; skip read if not present
@@ -45,6 +46,8 @@ def get_metrics(bam, chemistry):
         umi = read.get_tag("UB")
         if umi == "-":
             continue
+        
+        barcodes.add(barcode)
         
         total_counts[barcode] += 1
         
@@ -63,11 +66,7 @@ def get_metrics(bam, chemistry):
             read_id_barcode = read_id.split("_")[1]
             pkr = read_id_barcode.split(",")[3]
             formatted_barcode = barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + pkr
-            barcodes.add(formatted_barcode)
-        
-        # all other chemistries: no additional barcode formatting
-        else:
-            barcodes.add(barcode)
+            formatted_barcodes[barcode] = formatted_barcode
         
     # count unique genes per barcode
     genes_per_barcode = {barcode:len(gene_set) for (barcode, gene_set) in genes.items()}
@@ -80,11 +79,12 @@ def get_metrics(bam, chemistry):
     for barcode in barcodes:
         total_val = str(total_counts[barcode])
         umi_val = str(umis_per_barcode.get(barcode, 0))
-        duplicate_val = str(total_counts[barcode] - umis_per_barcode[barcode].get(barcode, 0))
-        gene_val = str(genes_per_barcode[barcode].get(barcode, 0))
+        duplicate_val = str(total_counts[barcode] - umis_per_barcode.get(barcode, 0))
+        gene_val = str(genes_per_barcode.get(barcode, 0))
         mitochondrial_val = str(round(mitochondrial_counts.get(barcode, 0) / total_counts[barcode] * 100, 2))
+        out_barcode = formatted_barcodes[barcode] if formatted_barcodes else barcode
         
-        metrics = [barcode, total_val, duplicate_val, umi_val, gene_val, mitochondrial_val]
+        metrics = [out_barcode, total_val, duplicate_val, umi_val, gene_val, mitochondrial_val]
         
         barcode_metadata.append(metrics)
     
