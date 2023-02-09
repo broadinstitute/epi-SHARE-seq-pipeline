@@ -21,6 +21,7 @@ task share_rna_align {
         Boolean encode = true
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         File? whitelist
+        Boolean no_whitelist = false
         File genome_index_tar
         String genome_name
         String prefix
@@ -138,7 +139,7 @@ task share_rna_align {
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
             --soloMultiMappers Unique EM \
-            --soloCBwhitelist 10x_v2_whitelist.txt \
+            --soloCBwhitelist ~{if no_whitelist then '-' else 10x_v2_whitelist.txt} \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 10 \
