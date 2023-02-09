@@ -37,6 +37,7 @@ workflow ShareSeq {
         Boolean? no_whitelist = false
         Array[File] read1_rna
         Array[File] read2_rna
+        File? whitelist
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -104,6 +105,7 @@ workflow ShareSeq {
                     encode = encode,
                     read1 = read1_rna,
                     read2 = read2_rna,
+                    whitelist = whitelist,
                     no_whitelist = no_whitelist,
                     idx_tar = idx_tar_rna_,
                     umi_cutoff = umi_cutoff,
