@@ -139,7 +139,7 @@ task share_rna_align {
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
             --soloMultiMappers Unique EM \
-            --soloCBwhitelist ~{if no_whitelist then '-' else '10x_v2_whitelist.txt'} \
+            --soloCBwhitelist ~{if no_whitelist then 'None' else '10x_v2_whitelist.txt'} \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 10 \
