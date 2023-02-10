@@ -208,7 +208,6 @@ if __name__ == '__main__':
     parser.add_argument("-s", help="Column with strand information; 1-based. (default= 4)", type= int, default= 4)
     parser.add_argument("-w", "--window", help= "Smoothing window size for plotting. (default= 20)", type= int, default= 20)
     parser.add_argument("--bc_tag", help = "Specify the tag containing the cell barcode.", default="CB")
-    parser.add_argument("--fragment_cutoff", help= "TSS bed file", type= int, default= -1)
     parser.add_argument("--mapq_threshold", help= "Filter reads with a mapq value lower than the threshold.", type= int, default= 30)
     parser.add_argument("--prefix", help = "Prefix for the metrics output fil.")
     parser.add_argument("--tss", help= "TSS bed file")
@@ -239,9 +238,8 @@ if __name__ == '__main__':
     with open(per_barcode_output,"w") as out_file:
         print(f"barcode\tfragments_in_promoter\treads_in_tss\ttss_enrichment", file=out_file)
         for barcode, fragments_in_promoter in stats.items():
-            if fragments_in_promoter > args.fragment_cutoff:
-                reads_in_tss, tss_enrichment = compute_tss_enrichment_barcode(barcode_counts[barcode])
-                print(f"{barcode}\t{fragments_in_promoter}\t{reads_in_tss}\t{tss_enrichment}", file=out_file)
+            reads_in_tss, tss_enrichment = compute_tss_enrichment_barcode(barcode_counts[barcode])
+            print(f"{barcode}\t{fragments_in_promoter}\t{reads_in_tss}\t{tss_enrichment}", file=out_file)
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:
         tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp)

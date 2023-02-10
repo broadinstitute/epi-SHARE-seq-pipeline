@@ -51,7 +51,7 @@ if __name__ == '__main__':
     if args.output:
         out_path = args.output
     else:
-        out_path = f"{prefix}.duplicates.tsv"
+        out_path = f"{prefix}.duplicate.stats.tsv"
 
     bc_tag = args.bc_tag
 

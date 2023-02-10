@@ -70,7 +70,6 @@ workflow wf_atac {
             bam = align.atac_alignment,
             bam_index = align.atac_alignment_index,
             disk_factor = filter_disk_factor,
-            memory_factor = filter_memory_factor,
             multimappers = align_multimappers,
             shift_plus = filter_shift_plus,
             shift_minus = filter_shift_minus,
@@ -152,7 +151,7 @@ workflow wf_atac {
         File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
         File? share_atac_filter_alignment_dedup_index = filter.atac_filter_alignment_dedup_index
         File? share_atac_filter_alignment_wdup = filter.atac_filter_alignment_wdup
-        File? share_atac_filter_alignment_wdup = filter.atac_filter_alignment_wdup_index
+        File? share_atac_filter_alignment_wdup_index = filter.atac_filter_alignment_wdup_index
         File? share_atac_filter_fragments = filter.atac_filter_fragments
         File? share_atac_filter_fragments_index = filter.atac_filter_fragments_index
         File? share_atac_filter_monitor_log = filter.atac_filter_monitor_log

@@ -22,10 +22,13 @@ task qc_atac {
         File filtered_bam_index
         File peaks
         File tss
+        Int mapq_threshold = 30
+        Int minimum_number_fragments = -1
         String? barcode_tag = "CB"
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:dev"
+        String docker_image = "polumechanos/share_task_qc_atac:dev"
     }
 
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
@@ -35,6 +38,7 @@ task qc_atac {
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
+    String duplicate_stats = '${default="share-seq" prefix}.atac.qc.duplicate.stats.${genome_name}.tsv'
     # pdf string needed as required input to Picard CollectInsertSizeMetrics
     String hist_log_pdf = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.pdf'
     String hist_log_png = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.png'
@@ -72,13 +76,25 @@ task qc_atac {
             -e 2000 \
             --tss ${tss} \
             --bc_tag CB \
-            --fragment_cutoff -1 \
+            --mapq_threshold {mapq_threshold} \
             --prefix "${prefix}.atac.qc.${genome_name}" \
             in.filtered.bam
 
-        # Fragments in peaks?
+        # Fragments in peaks
+        python3 $(which qc-atac-compute-reads-in-peaks.py) \
+            --peaks ${peaks} \
+            --mapq_threshold {mapq_threshold} \
+            --bc_tag CB \
+            --prefix "${prefix}.atac.qc.${genome_name}" \
+            in.filtered.bam
 
-        # Duplicates per barcode?
+        # Duplicates per barcode
+        python3 $(which count-duplicates-per-barcode.py) \
+            -o ${duplicate_stats} \
+            --bc_tag CB \
+            --mapq_threshold {mapq_threshold} \
+            --prefix "${prefix}.atac.qc.${genome_name}" \
+            in.filtered.bam
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
         samtools idxstats in.raw.bam >> ${stats_log}
@@ -112,7 +128,8 @@ task qc_atac {
         File atac_qc_tss_enrichment_barcode_stats = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
         File atac_qc_tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
         File atac_qc_tss_enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
-
+        File atac_qc_duplicate_stats = duplicate_stats
+        File atac_qc_fragments_in_peaks = "${prefix}.atac.qc.${genome_name}.fragments.in.peak.tsv"
     }
 
     runtime {
