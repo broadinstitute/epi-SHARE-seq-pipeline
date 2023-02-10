@@ -12,6 +12,7 @@ ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
     apt-get install -y -qq --no-install-recommends\
+    binutils \
     gtk-doc-tools \
     libssl-dev \
     libcairo2-dev \

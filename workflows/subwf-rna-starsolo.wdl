@@ -1,5 +1,10 @@
 version 1.0
 
+import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
+import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
+import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
+import "../tasks/share_task_seurat.wdl" as share_task_seurat
+import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 
 # Import the tasks called by the pipeline
 workflow wf_rna {
@@ -10,7 +15,7 @@ workflow wf_rna {
     }
 
     input {
-        # RNA Sub-worflow inputs
+        # RNA Sub-workflow inputs
 
         # Align
         Array[File] read1
@@ -20,35 +25,80 @@ workflow wf_rna {
         String genome_name
         Int? cpus = 16
         String? docker
-        # Update RGID
-        Boolean multimappers = false
-        # Assign features
-        Boolean include_multimappers = false
-        Boolean include_introns = false
-        File gtf
-        String gene_naming = "gene_name"
-        # Group UMI
-        Boolean remove_single_umi = true
-        String mode = "fast"
-        Int cutoff = 100
         File whitelist
+        # QC
+        Int? umi_cutoff
+        Int? gene_cutoff
+        
+        # Seurat
+        Boolean count_only = false
+        
+        #Seurat filtering parameters
+        Int? rna_seurat_min_features
+        Float? rna_seurat_percent_mt
+        Int? rna_seurat_min_cells
+        
+        #Seurat UMAP
+        Int? rna_seurat_umap_dim
+        Float? rna_seurat_umap_resolution
+        
+        # Seurat runtime parameters
+        Float? rna_seurat_disk_factor 
+        Float? rna_seurat_memory_factor
+        
     }
 
-    call share_task_align_starsolo as align {
+    call share_task_starsolo.share_rna_align as align {
         input:
             fastq_R1 = read1,
             fastq_R2 = read2,
             genome_name = genome_name,
             genome_index_tar = idx_tar,
             prefix = prefix,
-            whitelist = whitelist,
             cpus = cpus
     }
 
+    call share_task_generate_h5.generate_h5 as generate_h5 {
+        input:
+            tar = align.raw_tar,
+            genome_name = genome_name,
+            prefix = prefix
+    }
+
+    call share_task_qc_rna.qc_rna as qc_rna {
+        input:
+            bam = align.output_bam,
+            umi_cutoff = umi_cutoff,
+            gene_cutoff = gene_cutoff,
+            genome_name = genome_name,
+            prefix = prefix
+    }
+
+    call share_task_log_rna.log_rna as log_rna {
+       input:
+           alignment_log = align.log_final_out,
+           dups_log = qc_rna.rna_duplicates_log
+    }
+
+    if (!count_only) {
+        call share_task_seurat.seurat as seurat {
+            input:
+                rna_matrix = generate_h5.h5_matrix,
+                genome_name = genome_name,
+                min_features = rna_seurat_min_features,
+                percent_mt = rna_seurat_percent_mt,
+                min_cells = rna_seurat_min_cells,
+                umap_dim = rna_seurat_umap_dim,
+                umap_resolution = rna_seurat_umap_resolution,
+                prefix = prefix,
+                disk_factor = rna_seurat_disk_factor,
+                memory_factor = rna_seurat_memory_factor
+        }
+    }
 
     output {
         File share_task_starsolo_output_bam = align.output_bam
-        File share_task_starsolo_log_final_out = align.log_final_out
+        File share_rna_alignment_log = align.log_final_out
         File share_task_starsolo_log_out = align.log_out
         File share_task_starsolo_log_progress_out = align.log_progress_out
         File share_task_starsolo_output_sj = align.output_sj
@@ -56,81 +106,40 @@ workflow wf_rna {
         File share_task_starsolo_features_stats = align.features_stats
         File share_task_starsolo_summary_csv = align.summary_csv
         File share_task_starsolo_umi_per_cell = align.umi_per_cell
-        File share_task_starsolo_barcodes_raw = align.barcodes_raw
-        File share_task_starsolo_features_raw = align.features_raw
-        File share_task_starsolo_matrix_raw = align.matrix_raw
-    }
-}
+        File share_task_starsolo_raw_tar = align.raw_tar
 
-task share_task_align_starsolo {
-    input{
-        Array[File] fastq_R1
-        Array[File] fastq_R2
-        File genome_index_tar
-        String genome_name
-        String? prefix
-        String docker_image = "cumulusprod/starsolo:2.7.10a"
-        File whitelist
-        Int cpus = 16
-    }
+        File share_rna_h5 = generate_h5.h5_matrix
 
-    Int mem_gb = 64
-    Int disk_gb = 250
-    command{
-        set -e
-        # Untar the genome
-        tar xvzf ${genome_index_tar} --no-same-owner -C ./
+        File share_rna_barcode_metadata  = qc_rna.rna_barcode_metadata
+        File share_rna_duplicates_log = qc_rna.rna_duplicates_log
+        File? share_rna_umi_barcode_rank_plot = qc_rna.rna_umi_barcode_rank_plot
+        File? share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
+        File? share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
 
-        $(which STAR) \
-        --readFilesIn ${sep=',' fastq_R1} ${sep=',' fastq_R2}  \
-        --soloType CB_UMI_Simple \
-        --soloCBstart 1 \
-        --soloCBlen 24 \
-        --soloUMIstart 25 \
-        --soloUMIlen 10 \
-        --soloCBmatchWLtype Exact \
-        --soloUMIfiltering MultiGeneUMI_CR \
-        --soloUMIdedup 1MM_CR \
-        --soloCBwhitelist ${whitelist} \
-        --soloFeatures Gene  \
-        --clipAdapterType CellRanger4 \
-        --outFilterScoreMin 30 \
-        --outSAMtype BAM SortedByCoordinate \
-        --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD \
-        --runThreadN ${cpus} \
-        --chimOutType WithinBAM \
-        --genomeDir ./ \
-        --outFileNamePrefix result/ \
-        --outFilterMultimapNmax 20 \
-        --outFilterScoreMinOverLread 0.3 \
-        --outFilterMatchNminOverLread 0.3 \
-        --limitOutSJcollapsed 2000000 \
-        --outReadsUnmapped Fastx \
-        --readFilesCommand zcat
+        File? share_rna_seurat_notebook_output = seurat.notebook_output
+        File? share_rna_seurat_notebook_log = seurat.notebook_log
+        File? share_rna_seurat_raw_violin_plot = seurat.seurat_raw_violin_plot
+        File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
+        File? share_rna_seurat_raw_qc_scatter_plot = seurat.seurat_raw_qc_scatter_plot
+        File? share_rna_seurat_filtered_qc_scatter_plot = seurat.seurat_filtered_qc_scatter_plot
+        File? share_rna_seurat_variable_genes_plot = seurat.seurat_variable_genes_plot
+        File? share_rna_seurat_PCA_dim_loadings_plot = seurat.seurat_PCA_dim_loadings_plot
+        File? share_rna_seurat_PCA_plot = seurat.seurat_PCA_plot
+        File? share_rna_seurat_heatmap_plot = seurat.seurat_heatmap_plot
+        File? share_rna_seurat_jackstraw_plot = seurat.seurat_jackstraw_plot
+        File? share_rna_seurat_elbow_plot = seurat.seurat_elbow_plot
+        File? share_rna_seurat_umap_cluster_plot = seurat.seurat_umap_cluster_plot
+        File? share_rna_seurat_umap_rna_count_plot = seurat.seurat_umap_rna_count_plot
+        File? share_rna_seurat_umap_gene_count_plot = seurat.seurat_umap_gene_count_plot
+        File? share_rna_seurat_umap_mito_plot = seurat.seurat_umap_mito_plot
+        File? share_rna_seurat_obj = seurat.seurat_filtered_obj
+        File? share_rna_plots_zip = seurat.plots_zip
 
-        ls $(pwd)/result/Solo.out/Gene
-        gzip $(pwd)/result/Solo.out/Gene/raw/*
-    }
-    output{
-        File output_bam = "result/Aligned.sortedByCoord.out.bam"
-        File log_final_out = "result/Log.final.out"
-        File log_out = "result/Log.out"
-        File log_progress_out = "result/Log.progress.out"
-        File output_sj = "result/SJ.out.tab"
-        File barcodes_stats = "result/Solo.out/Barcodes.stats"
-        File features_stats = "result/Solo.out/Gene/Features.stats"
-        File summary_csv = "result/Solo.out/Gene/Summary.csv"
-        File umi_per_cell = "result/Solo.out/Gene/UMIperCellSorted.txt"
-        File matrix_raw = "result/Solo.out/Gene/raw/matrix.mtx.gz"
-        File barcodes_raw = "result/Solo.out/Gene/raw/barcodes.tsv.gz"
-        File features_raw = "result/Solo.out/Gene/raw/features.tsv.gz"
-
-    }
-    runtime{
-        cpu : cpus
-        memory : mem_gb+'G'
-        disks : 'local-disk ${disk_gb} SSD'
-        maxRetries: 0
-        docker: docker_image
+        Int share_rna_total_reads = log_rna.rna_total_reads
+        Int share_rna_aligned_uniquely = log_rna.rna_aligned_uniquely
+        Int share_rna_aligned_multimap = log_rna.rna_aligned_multimap
+        Int share_rna_unaligned = log_rna.rna_unaligned
+        Int share_rna_feature_reads = log_rna.rna_feature_reads
+        Int share_rna_duplicate_reads = log_rna.rna_duplicate_reads
     }
 }

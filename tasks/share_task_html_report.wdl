@@ -16,6 +16,8 @@ task html_report {
         # This function takes as input the files to append to the report
         # and the metrics and writes out an html file
 
+        String? prefix
+
         # Stats for ATAC and RNA, will go at top of html
         Int? atac_total_reads
         Int? atac_aligned_uniquely 
@@ -36,6 +38,8 @@ task html_report {
         Array[String?] log_files
        
     }
+
+    String output_file = "~{default="share-seq" prefix}.html"
     # need to select from valid files since some are optional
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
@@ -60,10 +64,10 @@ task html_report {
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt       
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py output.html image_list.txt log_list.txt --input_file_name output.txt  
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt  
     >>>
     output {
-        File html_report_file = glob('*.html')[0]
+        File html_report_file = "~{output_file}"
     }
 
     runtime {

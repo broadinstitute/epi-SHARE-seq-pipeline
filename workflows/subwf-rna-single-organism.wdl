@@ -42,9 +42,19 @@ workflow wf_rna {
         # Lib_size QC
         Boolean qc = false
         File genes_annotation_bed
-        # Seurat
-        Int umap_dim = 10
-        Float umap_resolution = 0.5
+        
+        #Seurat filtering parameters
+        Int? rna_seurat_min_features
+        Float? rna_seurat_percent_mt
+        Int? rna_seurat_min_cells
+        
+        # Seurat UMAP
+        Int? rna_seurat_umap_dim
+        Float? rna_seurat_umap_resolution
+        
+        # Seurat runtime parameters
+        Float? rna_seurat_disk_factor 
+        Float? rna_seurat_memory_factor
     }
 
     call share_task_align.share_rna_align as align {
@@ -121,9 +131,14 @@ workflow wf_rna {
         input:
             rna_matrix = generate_h5.h5_matrix,
             genome_name = genome_name,
-            umap_dim = umap_dim,
-            umap_resolution = umap_resolution,
-            prefix = prefix
+            min_features = rna_seurat_min_features,
+            percent_mt = rna_seurat_percent_mt,
+            min_cells = rna_seurat_min_cells,
+            umap_dim = rna_seurat_umap_dim,
+            umap_resolution = rna_seurat_umap_resolution,
+            prefix = prefix,
+            disk_factor = rna_seurat_disk_factor,
+            memory_factor = rna_seurat_memory_factor
     }
 
     output {
@@ -161,7 +176,7 @@ workflow wf_rna {
 
         File share_rna_seurat_notebook_output = seurat.notebook_output
         File share_rna_seurat_notebook_log = seurat.notebook_log
-        File share_rna_seurat_barcode_metadata = seurat.seurat_barcode_metadata
+        File? share_rna_seurat_barcode_metadata = seurat.seurat_barcode_metadata
         File? share_rna_seurat_raw_violin_plot = seurat.seurat_raw_violin_plot
         File? share_rna_seurat_filtered_violin_plot = seurat.seurat_filtered_violin_plot
         File? share_rna_seurat_raw_qc_scatter_plot = seurat.seurat_raw_qc_scatter_plot

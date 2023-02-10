@@ -12,40 +12,58 @@ task seurat {
         File rna_matrix
         String genome_name
 
-        Int min_features = 200
-        Float percent_MT = 5.0
-        Int min_cells = 3
+        Int? min_features = 200
+        Float? percent_mt = 5.0
+        Int? min_cells = 3
 
-        String normalization_method = "LogNormalize"
-        Float normalization_scale_factor = 10000
+        String? normalization_method = "LogNormalize"
+        Float? normalization_scale_factor = 10000
 
-        String variable_features_method = "vst"
-        Int variable_features_num = 2000
+        String? variable_features_method = "vst"
+        Int? variable_features_num = 2000
 
-        Int dim_loadings_dim = 2
+        Int? dim_loadings_dim = 2
 
-        Int jackstraw_replicates = 100
-        Int jackstraw_score_dim = 20
-        Int jackstraw_plot_dim = 15
+        Int? jackstraw_replicates = 100
+        Int? jackstraw_score_dim = 20
+        Int? jackstraw_plot_dim = 15
 
-        Int heatmap_dim = 1
-        Int heatmap_cells = 500
-        String heatmap_balanced = "TRUE"
+        Int? heatmap_dim = 1
+        Int? heatmap_cells = 500
+        String? heatmap_balanced = "TRUE"
 
-        Int umap_dim = 10
-        Float umap_resolution = 0.5
+        Int? umap_dim = 10
+        Float? umap_resolution = 0.5
 
         String prefix = "prefix"
-        Int threads = 8
+        Int? threads = 8
 
         String papermill = "TRUE"
         
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
         
-        String docker_image = "swekhande/shareseq-prod:share-task-seurat"
-        Int mem_gb = 128
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
+        
+        #Int mem_gb = 128
+        
+        Float? disk_factor = 0.1
+        Float? memory_factor = 0.15
     }
+    
+    # Determine the size of the input
+    Float input_file_size_mb = size(rna_matrix, "M")
+
+    # Determining memory size base on the size of the input files.
+    Float mem_gb = 32.0 + memory_factor * input_file_size_mb
+
+    # Determining disk size base on the size of the input files.
+    Int disk_gb = round(disk_factor * input_file_size_mb)
+
+    # Determining disk type base on the size of disk.
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
+    
+    String monitor_log = "rna_seurat_monitor.log"
 
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.seurat.plots.${genome_name}'
@@ -74,12 +92,22 @@ task seurat {
     #String papermill_log_filename = 'papermill.logfile.txt'
 
     command {
+    
+        set -e
 
+        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+        
+        if [[ ${rna_matrix} == *.tar.gz ]]
+        then
+           tar -xvzf ${rna_matrix} 
+           rna_matrix="./"
+        fi
+        
         papermill $(which seurat_notebook.ipynb) ${output_filename} \
         -p rna_matrix ${rna_matrix} \
         -p genome ${genome_name} \
         -p min_features ${min_features} \
-        -p percent_MT ${percent_MT} \
+        -p percent_MT ${percent_mt} \
         -p min_cells ${min_cells} \
         -p normalization_method ${normalization_method} \
         -p normalization_scale_factor ${normalization_scale_factor} \
@@ -103,7 +131,7 @@ task seurat {
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
-        File seurat_barcode_metadata = barcode_metadata
+        File? seurat_barcode_metadata = barcode_metadata
         #File papermill_log = papermill_log_filename
         File? seurat_raw_violin_plot = raw_violin_plot
         File? seurat_filtered_violin_plot = filtered_violin_plot
@@ -121,15 +149,17 @@ task seurat {
         File? seurat_umap_mito_plot = umap_mito_plot
         File? seurat_raw_obj = raw_seurat_rds
         File? seurat_filtered_obj = filtered_seurat_rds
-        File? seurat_raw_matrix = raw_seurat_h5
         File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
+        File? seurat_monitor_log = monitor_log
     }
 
     runtime {
-        cpu : 4
-        memory : mem_gb+'G'
-        docker : docker_image
+        memory : "${mem_gb} GB"
+        memory_retry_multiplier: 2
+        disks: "local-disk ${disk_gb} ${disk_type}"
+        docker : "${docker_image}"
+        maxRetries:1
     }
 
     parameter_meta {
@@ -157,7 +187,7 @@ task seurat {
             example: 200
         }
 
-        percent_MT: {
+        percent_mt: {
             description: 'Max percentage of MT reads in cell',
             help: 'Seurat QC for max % (float) of mt',
             example: 5.0
@@ -169,29 +199,29 @@ task seurat {
             example: 3
         }
 
-        #normalization_method: {
-           # description: 'Normalization method used in Seurat',
-          #  help: 'Seurat normalization method used in Seurat::NormalizeData()',
-         #   examples: ["LogNormalize","CLR","RC"]
-        #}
+        normalization_method: {
+            description: 'Normalization method used in Seurat',
+            help: 'Seurat normalization method used in Seurat::NormalizeData()',
+            examples: ["LogNormalize","CLR","RC"]
+        }
 
-        #normalization_scale_factor: {
-         #   description: 'Scaling factor used in Seurat normalization',
-          #  help: 'Scaling factor parameter used in Seurat::NormalizeData()',
-           # example: 10000
-        #}
+        normalization_scale_factor: {
+            description: 'Scaling factor used in Seurat normalization',
+            help: 'Scaling factor parameter used in Seurat::NormalizeData()',
+            example: 10000
+        }
 
-        #variable_features_method: {
-           # description: 'Method used to select variable features',
-          #  help: 'Parameter used in Seurat::FindVariableFeatures()',
-         #   example: "vst"
-        #}
+        variable_features_method: {
+            description: 'Method used to select variable features',
+            help: 'Parameter used in Seurat::FindVariableFeatures()',
+            example: "vst"
+        }
 
-        #variable_features_num: {
-           # description: 'Number of variable features used to find',
-          #  help: 'Parameter used in Seurat::FindVariableFeatures()',
-         #   example: 2000
-        #}
+        variable_features_num: {
+            description: 'Number of variable features used to find',
+            help: 'Parameter used in Seurat::FindVariableFeatures()',
+            example: 2000
+        }
 
         dim_loadings_dim: {
             description: 'Number of dimensions to display in PCA',
@@ -199,23 +229,23 @@ task seurat {
             example: 2
         }
 
-        #jackstraw_replicates: {
-           # description: 'Number of replicate samplings to perform',
-          #  help: 'Parameter used in Seurat::JackStraw()',
-         #   example: 100
-        #}
+        jackstraw_replicates: {
+            description: 'Number of replicate samplings to perform',
+            help: 'Parameter used in Seurat::JackStraw()',
+            example: 100
+        }
 
-        #jackstraw_score_dim: {
-           # description: 'Number of dimensions to examine in JackStraw Plot',
-          #  help: 'Parameter used in Seurat::ScoreJackStraw(), in default case, 1:20',
-         #   example: 20
-        #}
+        jackstraw_score_dim: {
+            description: 'Number of dimensions to examine in JackStraw Plot',
+            help: 'Parameter used in Seurat::ScoreJackStraw(), in default case, 1:20',
+            example: 20
+        }
 
-       # jackstraw_plot_dim: {
-        #    description: 'Number of dimensions to plot in JackStraw Plot',
-         #   help: 'Parameter used in Seurat::JackStrawPlot(), in default case, 1:15',
-          #  example: 15
-        #}
+        jackstraw_plot_dim: {
+            description: 'Number of dimensions to plot in JackStraw Plot',
+            help: 'Parameter used in Seurat::JackStrawPlot(), in default case, 1:15',
+            example: 15
+        }
 
         heatmap_dim: {
             description: 'Number of dimensions to use for heatmap',
@@ -269,6 +299,18 @@ task seurat {
             description: 'Docker image.',
             help: 'Docker image for preprocessing step.',
             example: ['put link to gcr or dockerhub']
+        }
+        
+        disk_factor: {
+            description: 'Disk factor',
+            help: 'Multiply this value to input .h5 file size (MB) to determine disk space (GB)',
+            example: 16.0
+        }
+        
+        memory_factor: {
+            description: 'Memory factor',
+            help: 'Multiply this value to input .h5 file size (MB) and add to default 32GB memory to determine RAM (GB)',
+            example: 0.15
         }
     }
 }
