@@ -101,7 +101,6 @@ task share_atac_filter {
         # The script removes the mithocondrial reads and creates two log file with bulk and barcode statistics.
         python3 $(which filter_mito_reads.py) -o ~{non_mito_bam} --prefix ~{prefix} --bc_tag ~{barcode_tag} in.bam
 
-        #python3 $(filter-atac-remove-single-umi.py) --filter_list ~{prefix}.mito.bc-metrics.tsv -o ~{x_mito_x_single_bc_bam} --prefix ~{prefix} --bc_tag ~{barcode_tag} ~{non_mito_bam}
 
         samtools index ~{non_mito_bam}
 
