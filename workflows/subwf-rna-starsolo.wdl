@@ -19,7 +19,6 @@ workflow wf_rna {
 
         # Align
         String chemistry
-        Boolean? encode = false
         Array[File] read1
         Array[File] read2
         Boolean? no_whitelist = false
@@ -54,7 +53,6 @@ workflow wf_rna {
     call share_task_starsolo.share_rna_align as align {
         input:
             chemistry = chemistry,
-            encode = encode,
             fastq_R1 = read1,
             fastq_R2 = read2,
             whitelist = whitelist,

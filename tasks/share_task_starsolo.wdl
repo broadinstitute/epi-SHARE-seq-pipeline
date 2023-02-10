@@ -14,11 +14,9 @@ task share_rna_align {
     input {
         # This function takes in input the pre-processed fastqs 
         # and aligns it to the genome using STARsolo.
-        # The CB+UMI is expected to be in read2.
         Array[File] fastq_R1
         Array[File] fastq_R2
         String chemistry
-        Boolean encode = true
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         File? whitelist
         Boolean no_whitelist = false
@@ -92,7 +90,7 @@ task share_rna_align {
             --soloType CB_UMI_Simple \
             --soloFeatures GeneFull  \
             --soloStrand Forward \
-            --soloCBwhitelist shareseq_whitelist.txt \
+            --soloCBwhitelist ~{if no_whitelist then 'None' else 'shareseq_whitelist.txt'} \
             --soloCBmatchWLtype Exact \
             --soloCBstart 1 \
             --soloCBlen 24 \
@@ -122,7 +120,7 @@ task share_rna_align {
             gunzip -c ~{whitelist_} > 10x_v2_whitelist.txt
 
             $(which STAR) \
-            --readFilesIn $read_files  \
+            --readFilesIn $read_files \
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
@@ -177,14 +175,13 @@ task share_rna_align {
             --runThreadN ~{cpus} \
             --genomeDir ./ \
             --genomeLoad NoSharedMemory \
-            --quantMode ~{if encode then '-' else 'TranscriptomeSAM GeneCounts'} \
             --soloType CB_UMI_Simple \
-            --soloFeatures ~{if encode then 'Gene SJ' else 'Gene'} \
+            --soloFeatures Gene SJ \
             --soloStrand Forward \
-            --soloCellFilter ~{if encode then 'EmptyDrops_CR' else 'CellRanger2.2'} \
-            --soloBarcodeReadLength ~{if encode then 0 else 1} \
-            --soloMultiMappers ~{if encode then 'Unique EM' else 'Unique'} \
-            --soloCBwhitelist 10x_v3_whitelist.txt \
+            --soloCellFilter EmptyDrops_CR \
+            --soloBarcodeReadLength 0 \
+            --soloMultiMappers Unique EM \
+            --soloCBwhitelist ~{if no_whitelist then 'None' else '10x_v3_whitelist.txt'} \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 12 \
@@ -194,30 +191,21 @@ task share_rna_align {
             --alignSJDBoverhangMin 1 \
             --alignIntronMin 20 \
             --alignIntronMax 1000000 \
-            --alignMatesGapMax ~{if encode then 1000000 else 999999} \
-            --sjdbScore ~{if encode then 1 else 2} \
-            --limitSjdbInsertNsj ~{if encode then 1000000 else 1200000} \
+            --alignMatesGapMax 1000000 \
+            --sjdbScore 1 \
             --outFilterType BySJout \
-            --outFilterMatchNminOverLread ~{if encode then '0.66' else '0.33'} \
             --outFilterMultimapNmax 20 \
             --outFilterMismatchNmax 999 \
-            --outFilterMismatchNoverLmax ~{if encode then '0.3' else '0.1'} \
             --outFilterMismatchNoverReadLmax 0.04 \
-            --outFilterScoreMinOverLread ~{if encode then '0.66' else '0.33'} \
             --outSAMtype BAM SortedByCoordinate \
             --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
-            --outSAMattrRGline ~{if encode then '-' else 'ID:rg1 SM:sm1'} \
-            --outSAMheaderCommentFile ~{if encode then 'COfile.txt' else '-'} \
-            --outSAMheaderHD ~{if encode then '@HD VN:1.4 SO:coordinate' else '-'} \
-            --outSAMunmapped ~{if encode then 'Within' else 'None'} \
+            --outSAMheaderCommentFile COfile.txt \
+            --outSAMheaderHD @HD VN:1.4 SO:coordinate \
+            --outSAMunmapped Within \
             --outSAMstrandField intronMotif \
             --outFilterScoreMin 30 \
             --outFileNamePrefix result/ \
             --clipAdapterType CellRanger4 \
-            --chimJunctionOverhangMin ~{if encode then 20 else 15} \
-            --chimMainSegmentMultNmax ~{if encode then 10 else 1} \
-            --chimOutType ~{if encode then 'Junctions' else 'Junctions WithinBAM SoftClip'} \
-            --chimSegmentMin ~{if encode then 0 else 15} \
             
             feature_type='Gene'
 
@@ -229,11 +217,7 @@ task share_rna_align {
         tar -cvzf raw.tar.gz *.gz
 
         # Move files and rename
-        cd
-        pwd
-        ls
-        cd /cromwell_root
-        #cd ../../../../
+        cd ../../../../
         find result -type f -exec mv {} result \;
         cd result
         for file in $(ls)
@@ -266,18 +250,18 @@ task share_rna_align {
     parameter_meta {
         fastq_R1: {
             description: 'Read 1 RNA fastq file',
-            help: 'Preprocessed RNA fastq for read 1.',
+            help: 'Preprocessed RNA fastq for read 1',
             example: 'rna.R1.fastq.gz'
         }
         fastq_R2: {
             description: 'Read 2 RNA fastq file',
-            help: 'Preprocessed RNA fastq for read 2, containing cell barcode and UMI.',
+            help: 'Preprocessed RNA fastq for read 2',
             example: 'rna.R2.fastq.gz'
         }
         chemistry: {
             description: 'Experiment chemistry',
-            help: 'Chemistry/method used in the experiment.',
-            examples: ['shareseq', '10x_v2', '10x_v3', 'splitseq']
+            help: 'Chemistry/method used in the experiment',
+            examples: ['shareseq', '10x_v2', '10x_v3']
         }
         whitelists_tsv: {
             description: 'TSV with file paths to whitelists',
@@ -288,6 +272,11 @@ task share_rna_align {
             description: 'Barcode whitelist',
             help: 'TXT file containing list of known possible barcodes',
             example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/737K-arc-v1-GEX.txt.gz' 
+        }
+        no_whitelist: {
+            description: 'Boolean indicating if no whitelist should be used',
+            help: 'If true, STARsolo will run without a whitelist',
+            default: false
         }
         genome_index_tar: {
             description: 'Genome index files for STARsolo',
