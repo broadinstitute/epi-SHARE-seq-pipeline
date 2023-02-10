@@ -74,6 +74,7 @@ task share_atac_filter {
     String picard_mark_duplicates_log = '${prefix}.picard.marksduplicates.log'
 
     String final_bam_wdup = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.bam'
+    String final_bam_wdup_tmp = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.tmp.bam'
     String final_bam_wdup_index = '${prefix}.atac.filter.fixmate.wdup.k${multimappers}.${genome_name}.bam.bai'
 
     String queryname_final_bam = '${prefix}.atac.filter.fixmate.dedup.k${multimappers}.${genome_name}.queryname.final.bam'
@@ -99,6 +100,8 @@ task share_atac_filter {
         # "{prefix}.mito.bc-metrics.tsv"
         # The script removes the mithocondrial reads and creates two log file with bulk and barcode statistics.
         python3 $(which filter_mito_reads.py) -o ~{non_mito_bam} --prefix ~{prefix} --bc_tag ~{barcode_tag} in.bam
+
+        python3 $(filter-atac-remove-single-umi.py) --filter_list ~{prefix}.mito.bc-metrics.tsv -o ~{x_mito_x_single_bc_bam} --prefix ~{prefix} --bc_tag ~{barcode_tag} ~{non_mito_bam}
 
         samtools index ~{non_mito_bam}
 
@@ -135,7 +138,7 @@ task share_atac_filter {
         # =============
 
         java -Xmx~{picard_java_memory}G -jar $(which picard.jar) MarkDuplicates \
-        --INPUT ~{tmp_fixmate_bam} --OUTPUT ~{final_bam_wdup} \
+        --INPUT ~{tmp_fixmate_bam} --OUTPUT ~{final_bam_wdup_tmp} \
         --METRICS_FILE ~{picard_mark_duplicates_metrics} \
         --VALIDATION_STRINGENCY LENIENT \
         --ASSUME_SORT_ORDER queryname \
@@ -144,7 +147,9 @@ task share_atac_filter {
         --BARCODE_TAG ~{barcode_tag} 2> ~{picard_mark_duplicates_log}
 
         # Create the final bam removing the duplicates
-        samtools view -h -F 1804 -f 2 -b -o ~{queryname_final_bam} ~{final_bam_wdup}
+        samtools view -h -F 1804 -f 2 -b -o ~{queryname_final_bam} ~{final_bam_wdup_tmp}
+
+        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{final_bam_wdup_tmp} -o ~{final_bam_wdup}
         samtools index ~{final_bam_wdup}
 
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{queryname_final_bam} -o ~{final_bam}
