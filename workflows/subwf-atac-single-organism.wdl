@@ -111,8 +111,8 @@ workflow wf_atac {
             prefix = prefix,
             cpus = qc_cpus,
             disk_factor = qc_disk_factor,
-            memory_factor = qc_docker_image,
-            docker_image = qc_docker_image
+            docker_image = qc_docker_image,
+            memory_factor = qc_memory_factor
     }
 
 #    call share_task_bam2bed.share_atac_bam2bed as bam2bed {
