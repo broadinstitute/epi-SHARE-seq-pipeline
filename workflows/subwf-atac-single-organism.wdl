@@ -98,8 +98,8 @@ workflow wf_atac {
 
     call share_task_qc_atac.qc_atac as qc_atac{
         input:
-            raw_bam = align.share_atac_alignment_raw,
-            raw_bam_index = align.share_atac_alignment_raw_index,
+            raw_bam = align.atac_alignment,
+            raw_bam_index = align.atac_alignment_index,
             filtered_bam = filter.atac_filter_alignment_dedup,
             filtered_bam_index = filter.atac_filter_alignment_dedup_index,
             queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
