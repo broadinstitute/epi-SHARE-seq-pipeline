@@ -63,11 +63,11 @@ task qc_atac {
     Int picard_java_memory = round(picard_java_heap_factor * mem_gb)
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
-    String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
     String duplicate_stats = '${default="share-seq" prefix}.atac.qc.duplicate.stats.${genome_name}.tsv'
     # pdf string needed as required input to Picard CollectInsertSizeMetrics
     String hist_log_pdf = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.pdf'
     String hist_log_png = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.png'
+    String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
     String tss_pileup_prefix = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log'
     String tss_pileup_out = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log.png'
     String samstats_raw_log = "${prefix}.atac.qc.${genome_name}.samstats.raw.log.txt"

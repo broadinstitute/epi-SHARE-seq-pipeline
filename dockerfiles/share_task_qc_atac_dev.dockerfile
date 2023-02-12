@@ -86,6 +86,13 @@ ENV PATH="/software:${PATH}"
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+COPY --chown=$USER:$USER src/python/pbc_stats.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/qc-atac-tss-enrichment.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/count-duplicates-per-barcode.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/qc-atac-compute-reads-in-peaks.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/plot_insert_size_hist.py /usr/local/bin
+
+
 
 
 USER ${USER}
