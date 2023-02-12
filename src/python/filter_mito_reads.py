@@ -14,7 +14,7 @@ from collections import defaultdict
 
 
 
-def filter_mito(in_path, out_path, barcode_tag, prefix):
+def filter_mito(in_path, out_path, barcode_tag, remove_single_fragments, prefix):
     """
     Removes mitochondrial alignments from BAM
     Calculates number of mapped mitochondrial and non-mitochondrial reads (not alignments)
@@ -42,20 +42,28 @@ def filter_mito(in_path, out_path, barcode_tag, prefix):
             if read.flag & 260 == 0:
                 number_non_mito += 1
                 barcode_metrics[read.get_tag("CB")][0] += 1
-            outfile.write(read)
+            #outfile.write(read)
 
 
     # Write the summary metrics
     with open(outfile_bulk_metrics, "w") as fh:
-        print("Non-Mitochondrial\tMitochondrial", file = fh)
+        print("non-mitochondrial_reads\tmitochondrial_reads", file = fh)
         print(f"{number_non_mito}\t{number_mito}", file = fh)
 
     # Write the metrics per barcode
     with open(outfile_barcode_metrics, "w") as fh:
         # Print header
-        print("Barcode\tNon-Mitochondrial\tMitochondrial", file = fh)
+        print("barcode\tnon_mitochondrial_reads\tmitochondrial_reads", file = fh)
         for barcode,counts in barcode_metrics.items():
             print(f"{barcode}\t{counts[0]}\t{counts[1]}", file = fh)
+
+    # Write a filtered bam
+    for read in infile:
+        if read.flag & 260 == 0 & read.reference_name != "chrM" & barcode_metrics[read.get_tag("CB")][0] >= cutoff*2:
+            outfile.write(read)
+
+    outfile.close()
+    return
 
 
 
@@ -68,6 +76,7 @@ if __name__ == '__main__':
     parser.add_argument("bam", help = "Path to the coordinate-sorted bam file.")
     parser.add_argument("-o", "--output", help = "Path to the mitochondrial-free bam file.")
     parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
+    parser.add_argument("--cutoff", help = "Remove barcodes with a number of fragments less than the cutoff.", type=int, default=2)
     parser.add_argument("--bc_tag", help = "Specify the tag containing the cell barcode.", default="CB")
 
     # Read arguments from command line
@@ -84,5 +93,6 @@ if __name__ == '__main__':
         out_path = f"{prefix}.no_mito.bam"
 
     bc_tag = args.bc_tag
+    remove_single_fragments = args.filter
 
-    filter_mito(args.bam, out_path, bc_tag, prefix)
+    filter_mito(args.bam, out_path, bc_tag, cutoff, prefix)

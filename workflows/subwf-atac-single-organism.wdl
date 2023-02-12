@@ -39,6 +39,7 @@ workflow wf_atac {
         String align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
 
         # Filtering-specific inputs
+        Int? filter_mimimum_fragments_cutoff = 1
         Int? filter_cpus = 16
         Int? filter_mapq_threshold
         Int? filter_shift_plus = 4
@@ -76,6 +77,7 @@ workflow wf_atac {
             barcode_tag = filter_barcode_tag,
             docker_image = filter_docker_image,
             genome_name = genome_name,
+            mimimum_fragments_cutoff = filter_mimimum_fragments_cutoff,
             prefix = prefix
     }
 
