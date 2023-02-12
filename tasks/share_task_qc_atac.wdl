@@ -14,15 +14,14 @@ task qc_atac {
         # This function takes in input the raw and filtered bams
         # and compute some alignment metrics along with the TSS
         # enrichment plot.
-        File raw_bam
-        File raw_bam_index
-        File filtered_bam
-        File filtered_bam_index
-        File queryname_final_bam
-        File peaks
-        File tss
-        Int mapq_threshold = 30
-        Int minimum_number_fragments = 1
+        File? raw_bam
+        File? raw_bam_index
+        File? filtered_bam
+        File? filtered_bam_index
+        File? queryname_final_bam
+        File? peaks
+        File? tss
+        Int? mapq_threshold = 30
         String? barcode_tag = "CB"
         String? genome_name
         String? prefix
@@ -36,7 +35,7 @@ task qc_atac {
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(raw_bam, "G") + size(filtered_bam, "G") + size(queryname_bam, "G")
+    Float input_file_size_gb = size(raw_bam, "G") + size(filtered_bam, "G") + size(queryname_final_bam, "G")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 6.0 + memory_factor * input_file_size_gb
@@ -107,20 +106,20 @@ task qc_atac {
             --prefix "${prefix}.atac.qc.${genome_name}" \
             in.filtered.bam
 
-        # Fragments in peaks
-        # {prefix}.fragments.in.peak.tsv
-        python3 $(which qc-atac-compute-reads-in-peaks.py) \
-            --peaks ${peaks} \
-            --mapq_threshold ${mapq_threshold} \
-            --bc_tag ${barcode_tag} \
-            --prefix "${prefix}.atac.qc.${genome_name}" \
-            in.filtered.bam
-
         # Duplicates per barcode
         python3 $(which count-duplicates-per-barcode.py) \
             -o ${duplicate_stats} \
             --bc_tag ${barcode_tag} \
             --mapq_threshold ${mapq_threshold} \
+            --prefix "${prefix}.atac.qc.${genome_name}" \
+            in.filtered.bam
+
+        # Fragments in peaks
+        # "${prefix}.fragments.in.peak.tsv"
+        python3 $(which qc-atac-compute-reads-in-peaks.py) \
+            --peaks ${peaks} \
+            --mapq_threshold ${mapq_threshold} \
+            --bc_tag ${barcode_tag} \
             --prefix "${prefix}.atac.qc.${genome_name}" \
             in.filtered.bam
 

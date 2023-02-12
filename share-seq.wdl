@@ -25,7 +25,8 @@ workflow ShareSeq {
         File? tss_bed
         Int? cpus_atac
         Int? cutoff_atac = 100
-        String? barcode_tag = "CB"
+        Int? atac_mapq_threshold = 30
+        String? atac_barcode_tag = "CB"
 
         # ATAC - Align
         Float? atac_align_disk_factor
@@ -36,16 +37,21 @@ workflow ShareSeq {
 
         # ATAC - Filter
         ## Biological
-        Int? atac_filter_mapq_threshold = 30
         Int? atac_filter_minimum_fragments_cutoff = 1
         Int? atac_filter_shift_plus = 4
         Int? atac_filter_shift_minus = -4
-        #String? atac_filter_barcode_tag = "CB" # This is general for the entire workflow.
         ## Runtime
         Int? atac_filter_cpus = 16
         Float? atac_filter_disk_factor = 8.0
         Float? atac_filter_memory_factor = 0.15
         String atac_filter_docker_image = "polumechanos/share_atac_filter"
+
+        # ATAC - QC
+        ## Runtime
+        Int? atac_qc_cpus = 16
+        Float? atac_qc_disk_factor = 8.0
+        Float? atac_qc_memory_factor = 0.15
+        String atac_qc_docker_image = "polumechanos/share_task_qc_atac:dev"
 
 
 
@@ -162,15 +168,22 @@ workflow ShareSeq {
                     align_memory_factor = atac_align_memory_factor,
 
                     # Filter
-                    filter_cpus = atac_filter_cpus,
-                    filter_mapq_threshold = atac_filter_mapq_threshold,
-                    filter_disk_factor = atac_filter_disk_factor,
-                    filter_memory_factor = atac_filter_memory_factor,
-                    filter_barcode_tag = barcode_tag,
-                    filter_docker_image = atac_filter_docker_image,
                     filter_shift_plus = atac_filter_shift_plus,
                     filter_shift_minus = atac_filter_shift_minus,
-                    filter_minimum_fragments_cutoff = atac_filter_minimum_fragments_cutoff
+                    filter_minimum_fragments_cutoff = atac_filter_minimum_fragments_cutoff,
+                    mapq_threshold = atac_mapq_threshold,
+                    barcode_tag = atac_barcode_tag,
+                    filter_cpus = atac_filter_cpus,
+                    filter_disk_factor = atac_filter_disk_factor,
+                    filter_docker_image = atac_filter_docker_image,
+                    filter_memory_factor = atac_filter_memory_factor,
+
+                    # QC
+                    qc_cpus = atac_qc_cpus,
+                    qc_disk_factor = atac_qc_disk_factor,
+                    qc_memory_factor = atac_qc_memory_factor,
+                    qc_docker_image = atac_qc_docker_image
+
             }
         }
     }

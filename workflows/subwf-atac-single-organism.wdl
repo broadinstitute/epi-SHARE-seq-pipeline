@@ -3,8 +3,8 @@ version 1.0
 # Import the tasks called by the pipeline
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
 import "../tasks/share_task_filter_atac.wdl" as share_task_filter
+import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 #import "../tasks/share_task_count_atac.wdl" as share_task_count
-#import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 #import "../tasks/share_task_qc_library.wdl" as share_task_qc_library
 #import "../tasks/share_task_archr.wdl" as share_task_archr
 #import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
@@ -21,6 +21,8 @@ workflow wf_atac {
         File chrom_sizes
         File tss_bed
         File peak_set
+        Int? mapq_threshold = 30
+        String? barcode_tag = "CB"
         String? prefix = "sample"
         String genome_name
         Int? cutoff
@@ -41,10 +43,8 @@ workflow wf_atac {
         # Filter-specific inputs
         ## Biological
         Int? filter_minimum_fragments_cutoff = 1
-        Int? filter_mapq_threshold = 30
         Int? filter_shift_plus = 4
         Int? filter_shift_minus = -4
-        String? filter_barcode_tag = "CB"
         ## Runtime
         Int? filter_cpus = 16
         Float? filter_disk_factor = 8.0
@@ -57,17 +57,6 @@ workflow wf_atac {
         File? raw_bam_index
         File? filtered_bam
         File? filtered_bam_index
-        Int? mapq_threshold = 30
-        Int? minimum_number_fragments = 1
-        String? barcode_tag = "CB"
-        String genome_name
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:dev"
-        String? docker_image = "polumechanos/share_task_qc_atac:dev"
-        Int? filter_minimum_fragments_cutoff = 1
-        Int? filter_mapq_threshold = 30
-        Int? filter_shift_plus = 4
-        Int? filter_shift_minus = -4
-        String? filter_barcode_tag = "CB"
         ## Runtime
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
@@ -91,19 +80,39 @@ workflow wf_atac {
 
     call share_task_filter.share_atac_filter as filter {
         input:
-            cpus = filter_cpus,
-            mapq_threshold = filter_mapq_threshold,
             bam = align.atac_alignment,
             bam_index = align.atac_alignment_index,
-            disk_factor = filter_disk_factor,
             multimappers = align_multimappers,
             shift_plus = filter_shift_plus,
             shift_minus = filter_shift_minus,
-            barcode_tag = filter_barcode_tag,
-            docker_image = filter_docker_image,
+            barcode_tag = barcode_tag,
+            mapq_threshold = mapq_threshold,
             genome_name = genome_name,
             minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
-            prefix = prefix
+            prefix = prefix,
+            cpus = filter_cpus,
+            disk_factor = filter_disk_factor,
+            docker_image = filter_docker_image,
+            memory_factor = filter_memory_factor
+    }
+
+    call share_task_qc_atac.qc_atac as qc_atac{
+        input:
+            raw_bam = share_atac_alignment_raw,
+            raw_bam_index = share_atac_alignment_raw_index,
+            filtered_bam = filter.atac_filter_alignment_dedup,
+            filtered_bam_index = filter.atac_filter_alignment_dedup_index,
+            queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
+            peaks = peak_set,
+            tss = tss_bed,
+            mapq_threshold = mapq_threshold,
+            barcode_tag = barcode_tag,
+            genome_name = genome_name,
+            prefix = prefix,
+            cpus = qc_cpus,
+            disk_factor = qc_disk_factor,
+            memory_factor = qc_docker_image,
+            docker_image = qc_docker_image
     }
 
 #    call share_task_bam2bed.share_atac_bam2bed as bam2bed {
@@ -134,17 +143,6 @@ workflow wf_atac {
 #            assay = "ATAC"
 #    }
 #
-#    call share_task_qc_atac.qc_atac as qc_atac{
-#        input:
-#            raw_bam = align.atac_alignment,#
-#            raw_bam_index = align.atac_alignment_index,
-#            filtered_bam = bam2bed.atac_alignment_filtered,
-#            filtered_bam_index = bam2bed.atac_alignment_filtered_index,
-#            tss = tss_bed,
-#            genome_name = genome_name,
-#            prefix = prefix,
-#            cpus = cpus
-#    }
 #    call share_task_log_atac.log_atac as log_atac {
 #       input:
 #           alignment_log = align.atac_alignment_log,
@@ -185,12 +183,7 @@ workflow wf_atac {
         File? share_atac_filter_mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk
         File? share_atac_filter_mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode
 
-
-#        File share_atac_barcodes = count.atac_barcodes
-#        File share_atac_fragments_filtered = count.atac_fragments_filtered
-#        File share_atac_counts_raw = count.atac_counts_unfiltered
-#        File share_atac_counts_filtered = count.atac_counts_filtered
-
+        # QC
 #        File share_atac_qc_library_counts = qc_library.lib_size_counts
 #        File share_atac_qc_library_duplicates = qc_library.lib_size_log
 #        File share_atac_qc_library_plot = qc_library.plot
@@ -200,6 +193,12 @@ workflow wf_atac {
 #        File share_atac_qc_hist_txt = qc_atac.atac_final_hist
 #        File share_atac_qc_tss_enrichment = qc_atac.atac_tss_pileup_png
 
+
+
+#        File share_atac_barcodes = count.atac_barcodes
+#        File share_atac_fragments_filtered = count.atac_fragments_filtered
+#        File share_atac_counts_raw = count.atac_counts_unfiltered
+#        File share_atac_counts_filtered = count.atac_counts_filtered
 #        File share_atac_archr_notebook_output = archr.notebook_output
 #        File share_atac_archr_notebook_log = archr.notebook_log
 #        File share_atac_archr_barcode_metadata = archr.archr_barcode_metadata
