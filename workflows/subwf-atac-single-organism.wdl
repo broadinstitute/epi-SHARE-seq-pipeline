@@ -21,12 +21,10 @@ workflow wf_atac {
         File chrom_sizes
         File tss_bed
         File peak_set
-
         String prefix = "sample"
         String genome_name
         Int? cutoff
         Int? cpus = 4
-        String? docker
 
         # Alignment-specific inputs
         ## Biological

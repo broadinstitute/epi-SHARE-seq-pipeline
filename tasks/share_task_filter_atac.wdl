@@ -18,19 +18,19 @@ task share_atac_filter {
         # the duplicats, and convert to a bedpe file.
         Int? shift_plus = 4
         Int? shift_minus = -4
-        Int? cpus = 16
         Int? mapq_threshold = 30
-        Int? multimappers = 0
+        Int? multimappers = 1
         Int? minimum_fragments_cutoff = 1
         File? bam
         File? bam_index
-        Float? disk_factor = 8.0
-        Float? memory_factor = 0.15
         String? barcode_tag = "CB"
-        String docker_image = "polumechanos/share_atac_filter"
         String genome_name
         String? prefix = "sample"
-
+        ## Runtime
+        Int? cpus = 16
+        Float? disk_factor = 8.0
+        Float? memory_factor = 0.15
+        String docker_image = "polumechanos/share_atac_filter"
     }
 
 
@@ -183,12 +183,12 @@ task share_atac_filter {
     }
 
     runtime {
-        cpu : cpus
-        memory : "${mem_gb} GB"
-        memory_retry_multiplier: 2
+        cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
-        docker : "${docker_image}"
-        maxRetries:1
+        docker: "${docker_image}"
+        maxRetries: 1
+        memory: "${mem_gb} GB"
+        memory_retry_multiplier: 2
     }
 
     parameter_meta {

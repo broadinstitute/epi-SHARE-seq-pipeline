@@ -24,6 +24,8 @@ workflow ShareSeq {
         File? atac_genome_index_tar
         File? tss_bed
         Int? cpus_atac
+        Int? cutoff_atac = 100
+        String? barcode_tag = "CB"
 
         # ATAC - Align
         Float? atac_align_disk_factor
@@ -33,17 +35,19 @@ workflow ShareSeq {
         String atac_align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
 
         # ATAC - Filter
-        Int? atac_filter_cpus = 16
+        ## Biological
         Int? atac_filter_mapq_threshold = 30
         Int? atac_filter_minimum_fragments_cutoff = 1
         Int? atac_filter_shift_plus = 4
         Int? atac_filter_shift_minus = -4
+        #String? atac_filter_barcode_tag = "CB" # This is general for the entire workflow.
+        ## Runtime
+        Int? atac_filter_cpus = 16
         Float? atac_filter_disk_factor = 8.0
         Float? atac_filter_memory_factor = 0.15
-        String? atac_filter_barcode_tag = "CB"
         String atac_filter_docker_image = "polumechanos/share_atac_filter"
 
-        Int? cutoff_atac = 100
+
 
         # RNA-specific inputs
         Boolean count_only = false
@@ -150,18 +154,19 @@ workflow ShareSeq {
                     cutoff = cutoff_atac,
 
                     cpus = cpus_atac,
-
-                    align_disk_factor = atac_align_disk_factor,
-                    align_memory_factor = atac_align_memory_factor,
-                    align_cpus = atac_align_cpus,
+                    # Align
                     align_multimappers = atac_align_multimappers,
+                    align_cpus = atac_align_cpus,
+                    align_disk_factor = atac_align_disk_factor,
                     align_docker_image = atac_align_docker_image,
+                    align_memory_factor = atac_align_memory_factor,
 
+                    # Filter
                     filter_cpus = atac_filter_cpus,
                     filter_mapq_threshold = atac_filter_mapq_threshold,
                     filter_disk_factor = atac_filter_disk_factor,
                     filter_memory_factor = atac_filter_memory_factor,
-                    filter_barcode_tag = atac_filter_barcode_tag,
+                    filter_barcode_tag = barcode_tag,
                     filter_docker_image = atac_filter_docker_image,
                     filter_shift_plus = atac_filter_shift_plus,
                     filter_shift_minus = atac_filter_shift_minus,

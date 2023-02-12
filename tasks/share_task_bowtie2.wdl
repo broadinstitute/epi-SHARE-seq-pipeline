@@ -15,14 +15,15 @@ task share_atac_align {
         Array[File] fastq_R1
         Array[File] fastq_R2
         Boolean encode_mode = false
-        Int? cpus = 16
         Int? multimappers = 1
-        Float? disk_factor = 8.0
-        Float? memory_factor = 0.15
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
         File genome_index_tar       # This is a tar.gz folder with all the index files.
         String genome_name          # GRCh38, mm10
-        String prefix = "sample"
+        String prefix = "sample-share"
+
+        Int? cpus = 16
+        Float? disk_factor = 8.0
+        Float? memory_factor = 0.15
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
     }
 
     # Determine the size of the input
@@ -117,12 +118,12 @@ task share_atac_align {
     }
 
     runtime {
-        cpu : cpus
-        memory : "${mem_gb} GB"
-        memory_retry_multiplier: 2
+        cpu: cpus
+        docker: "${docker_image}"
         disks: "local-disk ${disk_gb} ${disk_type}"
-        docker : "${docker_image}"
         maxRetries:1
+        memory: "${mem_gb} GB"
+        memory_retry_multiplier: 2
     }
 
     parameter_meta {

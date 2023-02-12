@@ -14,7 +14,7 @@ from collections import defaultdict
 
 
 
-def filter_mito(in_path, out_path, barcode_tag, remove_single_fragments, prefix):
+def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix):
     """
     Removes mitochondrial alignments from BAM
     Calculates number of mapped mitochondrial and non-mitochondrial reads (not alignments)
@@ -93,6 +93,5 @@ if __name__ == '__main__':
         out_path = f"{prefix}.no_mito.bam"
 
     bc_tag = args.bc_tag
-    remove_single_fragments = args.filter
 
     filter_mito(args.bam, out_path, bc_tag, cutoff, prefix)
