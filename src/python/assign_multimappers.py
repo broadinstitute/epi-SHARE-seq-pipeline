@@ -3,6 +3,8 @@ import argparse
 
 """
 From https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/src/assign_multimappers.py
+Script to take multimappers and randomly assign
+REQUIRES A QJNAME SORTED FILE!
 """
 
 def parse_args():

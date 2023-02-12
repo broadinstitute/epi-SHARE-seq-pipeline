@@ -21,7 +21,7 @@ task share_atac_filter {
         Int? cpus = 16
         Int? mapq_threshold = 30
         Int? multimappers = 0
-        Int? mimimum_fragments_cutoff = 1
+        Int? minimum_fragments_cutoff = 1
         File? bam
         File? bam_index
         Float? disk_factor = 8.0

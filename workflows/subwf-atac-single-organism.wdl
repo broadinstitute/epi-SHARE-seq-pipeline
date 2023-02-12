@@ -29,24 +29,28 @@ workflow wf_atac {
         String? docker
 
         # Alignment-specific inputs
+        ## Biological
         Array[File] read1
         Array[File] read2
+        Int? align_multimappers = 1
         File genome_index_tar
+        ## Runtime
+        Int? align_cpus
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
-        Int? align_cpus
-        Int? align_multimappers = 1
         String align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
 
         # Filtering-specific inputs
-        Int? filter_mimimum_fragments_cutoff = 1
-        Int? filter_cpus = 16
-        Int? filter_mapq_threshold
+        ## Biological
+        Int? filter_minimum_fragments_cutoff = 1
+        Int? filter_mapq_threshold = 30
         Int? filter_shift_plus = 4
         Int? filter_shift_minus = -4
+        String? filter_barcode_tag = "CB"
+        ## Runtime
+        Int? filter_cpus = 16
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
-        String? filter_barcode_tag = "CB"
         String filter_docker_image = "polumechanos/share_atac_filter"
     }
 
@@ -77,7 +81,7 @@ workflow wf_atac {
             barcode_tag = filter_barcode_tag,
             docker_image = filter_docker_image,
             genome_name = genome_name,
-            mimimum_fragments_cutoff = filter_mimimum_fragments_cutoff,
+            minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
             prefix = prefix
     }
 
