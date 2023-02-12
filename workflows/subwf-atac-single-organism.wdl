@@ -53,18 +53,16 @@ workflow wf_atac {
 
         # QC-specific inputs
         ## Biological
-        File raw_bam
-        File raw_bam_index
-        File filtered_bam
-        File filtered_bam_index
-        File peaks
-        File tss
-        Int mapq_threshold = 30
-        Int minimum_number_fragments = 1
+        File? raw_bam
+        File? raw_bam_index
+        File? filtered_bam
+        File? filtered_bam_index
+        Int? mapq_threshold = 30
+        Int? minimum_number_fragments = 1
         String? barcode_tag = "CB"
         String genome_name
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:dev"
-        String docker_image = "polumechanos/share_task_qc_atac:dev"
+        String? docker_image = "polumechanos/share_task_qc_atac:dev"
         Int? filter_minimum_fragments_cutoff = 1
         Int? filter_mapq_threshold = 30
         Int? filter_shift_plus = 4
