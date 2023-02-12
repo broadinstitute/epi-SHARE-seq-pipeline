@@ -14,15 +14,15 @@ from collections import defaultdict
 
 
 
-def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix):
+def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix, threads=1):
     """
     Removes mitochondrial alignments from BAM
     Calculates number of mapped mitochondrial and non-mitochondrial reads (not alignments)
     Assumes mitochondrial chromosome is "chrM"
     """
 
-    infile = pysam.AlignmentFile(in_path, "rb")
-    outfile = pysam.AlignmentFile(out_path, "wb", template=infile)
+    infile = pysam.AlignmentFile(in_path, "rb", threads=threads)
+    outfile = pysam.AlignmentFile(out_path, "wb", template=infile, threads=threads)
     outfile_bulk_metrics = f"{prefix}.mito.bulk-metrics.tsv"
     outfile_barcode_metrics = f"{prefix}.mito.bc-metrics.tsv"
 
@@ -32,18 +32,17 @@ def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix):
     # Initializing the dictionary setting the counts for non-mito and mito.
     barcode_metrics = defaultdict(lambda: [0,0])
 
-    for read in infile:
+    for read in infile.fetch(until_eof=True,multiple_iterators=True):
         if read.reference_name == "chrM":
             if read.flag & 260 == 0: # Alignment is mapped and is primary
                 number_mito += 1
-                barcode_metrics[read.get_tag("CB")][1] += 1
+                barcode_metrics[read.get_tag(barcode_tag)][1] += 1
 
         else:
             if read.flag & 260 == 0:
                 number_non_mito += 1
-                barcode_metrics[read.get_tag("CB")][0] += 1
+                barcode_metrics[read.get_tag(barcode_tag)][0] += 1
             #outfile.write(read)
-
 
     # Write the summary metrics
     with open(outfile_bulk_metrics, "w") as fh:
@@ -59,7 +58,7 @@ def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix):
 
     # Write a filtered bam
     for read in infile:
-        if read.flag & 260 == 0 & read.reference_name != "chrM" & barcode_metrics[read.get_tag("CB")][0] >= cutoff*2:
+        if read.flag & 260 == 0 and read.reference_name != "chrM" and barcode_metrics[read.get_tag(barcode_tag)][0] > cutoff*2:
             outfile.write(read)
 
     outfile.close()
@@ -75,6 +74,7 @@ if __name__ == '__main__':
     # Adding optional argument
     parser.add_argument("bam", help = "Path to the coordinate-sorted bam file.")
     parser.add_argument("-o", "--output", help = "Path to the mitochondrial-free bam file.")
+    parser.add_argument("-p", help = "Number of threads to use.", type=int, default=1)
     parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
     parser.add_argument("--cutoff", help = "Remove barcodes with a number of fragments less than the cutoff.", type=int, default=1)
     parser.add_argument("--bc_tag", help = "Specify the tag containing the cell barcode.", default="CB")
@@ -94,4 +94,4 @@ if __name__ == '__main__':
 
     bc_tag = args.bc_tag
 
-    filter_mito(args.bam, out_path, bc_tag, cutoff, prefix)
+    filter_mito(args.bam, out_path, bc_tag, args.cutoff, prefix, threads=args.p)

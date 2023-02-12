@@ -26,7 +26,7 @@ workflow wf_atac {
         Int? cutoff
         Int? cpus = 4
 
-        # Alignment-specific inputs
+        # Align-specific inputs
         ## Biological
         Array[File] read1
         Array[File] read2
@@ -38,7 +38,7 @@ workflow wf_atac {
         Float? align_memory_factor = 0.15
         String align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
 
-        # Filtering-specific inputs
+        # Filter-specific inputs
         ## Biological
         Int? filter_minimum_fragments_cutoff = 1
         Int? filter_mapq_threshold = 30
@@ -50,6 +50,32 @@ workflow wf_atac {
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
         String filter_docker_image = "polumechanos/share_atac_filter"
+
+        # QC-specific inputs
+        ## Biological
+        File raw_bam
+        File raw_bam_index
+        File filtered_bam
+        File filtered_bam_index
+        File peaks
+        File tss
+        Int mapq_threshold = 30
+        Int minimum_number_fragments = 1
+        String? barcode_tag = "CB"
+        String genome_name
+        String? prefix
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:dev"
+        String docker_image = "polumechanos/share_task_qc_atac:dev"
+        Int? filter_minimum_fragments_cutoff = 1
+        Int? filter_mapq_threshold = 30
+        Int? filter_shift_plus = 4
+        Int? filter_shift_minus = -4
+        String? filter_barcode_tag = "CB"
+        ## Runtime
+        Int? qc_cpus = 16
+        Float? qc_disk_factor = 8.0
+        Float? qc_memory_factor = 0.15
+        String qc_docker_image = "polumechanos/share_task_qc_atac:dev"
     }
 
     call share_task_align.share_atac_align as align {

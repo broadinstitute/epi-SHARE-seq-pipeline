@@ -14,27 +14,54 @@ task qc_atac {
         # This function takes in input the raw and filtered bams
         # and compute some alignment metrics along with the TSS
         # enrichment plot.
-
-        Int cpus= 4
         File raw_bam
         File raw_bam_index
         File filtered_bam
         File filtered_bam_index
+        File queryname_final_bam
         File peaks
         File tss
         Int mapq_threshold = 30
         Int minimum_number_fragments = 1
         String? barcode_tag = "CB"
-        String genome_name
+        String? genome_name
         String? prefix
+
+        # Runtime
+        Int? cpus = 2
+        Float? disk_factor = 8.0
+        Float? memory_factor = 0.15
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:dev"
         String docker_image = "polumechanos/share_task_qc_atac:dev"
     }
 
-    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
-    Int disk_gb = 100
-    Float input_file_size_gb = size(raw_bam, "G")
-    Int mem_gb = 16
+    # Determine the size of the input
+    Float input_file_size_gb = size(raw_bam, "G") + size(filtered_bam, "G") + size(queryname_bam, "G")
+
+    # Determining memory size base on the size of the input files.
+    Float mem_gb = 6.0 + memory_factor * input_file_size_gb
+
+    # Determining disk size base on the size of the input files.
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
+
+    # Determining disk type base on the size of disk.
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
+
+    # Determining memory for samtools.
+    Float samtools_memory_gb = 0.8 * mem_gb # Samtools has overheads so reducing the memory to 80% of the total.
+
+    # Number of threads to beable to use 4GB of memory per thread seems to be the fastest way
+    Int samtools_threads_ = floor(samtools_memory_gb / 4)
+    Int samtools_threads =  if samtools_threads_ == 0 then 1 else samtools_threads_
+
+    # Now that we know how many threads we can use to assure 4GB of memory per thread
+    # we assign any remaining memory to the threads.
+    Int samtools_memory_per_thread_ = floor(samtools_memory_gb * 1024 / samtools_threads) # Computing the memory per thread for samtools in MB.
+    Int samtools_memory_per_thread = if samtools_memory_per_thread_ < 768 then 768 else samtools_memory_per_thread_
+
+    # Memory for picard
+    Float picard_java_heap_factor = 0.9
+    Int picard_java_memory = round(mem_gb * picard_java_heap_factor)
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
@@ -75,35 +102,36 @@ task qc_atac {
         python3 $(which qc-atac-tss-enrichment.py) \
             -e 2000 \
             --tss ${tss} \
-            --bc_tag CB \
-            --mapq_threshold {mapq_threshold} \
+            --bc_tag ${barcode_tag} \
+            --mapq_threshold ${mapq_threshold} \
             --prefix "${prefix}.atac.qc.${genome_name}" \
             in.filtered.bam
 
         # Fragments in peaks
+        # {prefix}.fragments.in.peak.tsv
         python3 $(which qc-atac-compute-reads-in-peaks.py) \
             --peaks ${peaks} \
-            --mapq_threshold {mapq_threshold} \
-            --bc_tag CB \
+            --mapq_threshold ${mapq_threshold} \
+            --bc_tag ${barcode_tag} \
             --prefix "${prefix}.atac.qc.${genome_name}" \
             in.filtered.bam
 
         # Duplicates per barcode
         python3 $(which count-duplicates-per-barcode.py) \
             -o ${duplicate_stats} \
-            --bc_tag CB \
-            --mapq_threshold {mapq_threshold} \
+            --bc_tag ${barcode_tag} \
+            --mapq_threshold ${mapq_threshold} \
             --prefix "${prefix}.atac.qc.${genome_name}" \
             in.filtered.bam
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
-        samtools idxstats in.raw.bam >> ${stats_log}
+        samtools idxstats -@ ${samtools_threads} in.raw.bam >> ${stats_log}
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ${stats_log}
-        samtools idxstats in.filtered.bam >> ${stats_log}
+        samtools idxstats -@ ${samtools_threads} in.filtered.bam >> ${stats_log}
 
         echo '' > ${hist_log}
-        java -jar $(which picard.jar) CollectInsertSizeMetrics \
+        java -Xmx${picard_java_memory}G -jar $(which picard.jar) CollectInsertSizeMetrics \
             VALIDATION_STRINGENCY=SILENT \
             I=in.raw.bam \
             O=${hist_log} \
@@ -133,11 +161,12 @@ task qc_atac {
     }
 
     runtime {
-        cpu : cpus
-        memory : mem_gb+'G'
-        disks : 'local-disk ${disk_gb} SSD'
-        maxRetries : 0
-        docker: docker_image
+        cpu: cpus
+        disks: "local-disk ${disk_gb} ${disk_type}"
+        docker: "${docker_image}"
+        maxRetries: 1
+        memory: "${mem_gb} GB"
+        memory_retry_multiplier: 2
     }
 
     parameter_meta {
