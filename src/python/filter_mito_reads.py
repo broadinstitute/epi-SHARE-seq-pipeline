@@ -76,7 +76,7 @@ if __name__ == '__main__':
     parser.add_argument("bam", help = "Path to the coordinate-sorted bam file.")
     parser.add_argument("-o", "--output", help = "Path to the mitochondrial-free bam file.")
     parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
-    parser.add_argument("--cutoff", help = "Remove barcodes with a number of fragments less than the cutoff.", type=int, default=2)
+    parser.add_argument("--cutoff", help = "Remove barcodes with a number of fragments less than the cutoff.", type=int, default=1)
     parser.add_argument("--bc_tag", help = "Specify the tag containing the cell barcode.", default="CB")
 
     # Read arguments from command line
