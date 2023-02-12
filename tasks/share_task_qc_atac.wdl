@@ -110,7 +110,6 @@ task qc_atac {
         python3 $(which count-duplicates-per-barcode.py) \
             -o ${duplicate_stats} \
             --bc_tag ${barcode_tag} \
-            --mapq_threshold ${mapq_threshold} \
             --prefix "${prefix}.atac.qc.${genome_name}" \
             in.filtered.bam
 

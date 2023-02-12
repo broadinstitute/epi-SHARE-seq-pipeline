@@ -209,16 +209,16 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--window", help= "Smoothing window size for plotting. (default= 20)", type= int, default= 20)
     parser.add_argument("--bc_tag", help = "Specify the tag containing the cell barcode.", default="CB")
     parser.add_argument("--mapq_threshold", help= "Filter reads with a mapq value lower than the threshold.", type= int, default= 30)
-    parser.add_argument("--prefix", help = "Prefix for the metrics output fil.")
+    parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
     parser.add_argument("--tss", help= "TSS bed file")
+
+    # Read arguments from command line
+    args = parser.parse_args()
 
     if args.prefix:
         prefix = args.prefix
     else:
         prefix = args.bam[:-4]
-
-    # Read arguments from command line
-    args = parser.parse_args()
 
     # It is extremely fast. Don't think we need parallel processing.
     #cpus = len(os.sched_getaffinity(0))/2
