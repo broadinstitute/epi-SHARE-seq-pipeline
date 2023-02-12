@@ -60,7 +60,8 @@ task qc_atac {
 
     # Memory for picard
     Float picard_java_heap_factor = 0.9
-    Int picard_java_memory = round(mem_gb * picard_java_heap_factor)
+    Float test = picard_java_heap_factor * mem_gb
+    Int picard_java_memory = round(test)
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
