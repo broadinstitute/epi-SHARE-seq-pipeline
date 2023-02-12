@@ -21,7 +21,7 @@ workflow wf_atac {
         File chrom_sizes
         File tss_bed
         File peak_set
-        String prefix = "sample"
+        String? prefix = "sample"
         String genome_name
         Int? cutoff
         Int? cpus = 4
@@ -63,7 +63,6 @@ workflow wf_atac {
         Int minimum_number_fragments = 1
         String? barcode_tag = "CB"
         String genome_name
-        String? prefix
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:dev"
         String docker_image = "polumechanos/share_task_qc_atac:dev"
         Int? filter_minimum_fragments_cutoff = 1
