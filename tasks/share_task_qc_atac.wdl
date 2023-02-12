@@ -53,15 +53,9 @@ task qc_atac {
     Int samtools_threads_ = floor(samtools_memory_gb / 4)
     Int samtools_threads =  if samtools_threads_ == 0 then 1 else samtools_threads_
 
-    # Now that we know how many threads we can use to assure 4GB of memory per thread
-    # we assign any remaining memory to the threads.
-    Int samtools_memory_per_thread_ = floor(samtools_memory_gb * 1024 / samtools_threads) # Computing the memory per thread for samtools in MB.
-    Int samtools_memory_per_thread = if samtools_memory_per_thread_ < 768 then 768 else samtools_memory_per_thread_
-
     # Memory for picard
     Float picard_java_heap_factor = 0.9
-    Float test = picard_java_heap_factor * mem_gb
-    Int picard_java_memory = round(test)
+    Int picard_java_memory = round(picard_java_heap_factor * mem_gb)
 
     String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
