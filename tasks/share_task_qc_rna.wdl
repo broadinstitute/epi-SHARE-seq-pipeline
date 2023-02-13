@@ -22,8 +22,7 @@ task qc_rna {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 1.5
-        String docker_image = "mknudson/share_task_qc_rna:test"
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
     }
 
     # Determine the size of the input
@@ -101,7 +100,7 @@ task qc_rna {
         chemistry: {
                 description: 'Experiment chemistry',
                 help: 'Chemistry/method used in the experiment.',
-                examples: ['shareseq', '10x_v2', '10x_v3', 'splitseq']
+                examples: ['shareseq', '10x_v2', '10x_v3']
             }
         genome_name: {
                 description: 'Reference name',
