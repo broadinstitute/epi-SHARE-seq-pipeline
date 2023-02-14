@@ -17,7 +17,7 @@ task share_rna_align {
         Array[File] fastq_R1
         Array[File] fastq_R2
         String chemistry
-        File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
+        Map[String, File] whitelists
         File? whitelist
         Boolean no_whitelist = false
         File genome_index_tar
@@ -27,10 +27,10 @@ task share_rna_align {
         Int cpus = 16
         Float? disk_factor = 50.0
         Float? memory_factor = 2.0
+        File? placeholder
     }
 
-    Map[String, File] whitelists = read_map(whitelists_tsv)
-    File whitelist_ = select_first([whitelist, whitelists[chemistry]])
+    File? whitelist_ = if chemistry=='shareseq' then select_first([whitelist, placeholder]) else select_first([whitelist, whitelists[chemistry]])
 
     # Determine the size of the input
     Float input_file_size_gb = size(fastq_R1, 'G') + size(fastq_R2, 'G')
@@ -262,11 +262,6 @@ task share_rna_align {
             description: 'Experiment chemistry',
             help: 'Chemistry/method used in the experiment',
             examples: ['shareseq', '10x_v2', '10x_v3']
-        }
-        whitelists_tsv: {
-            description: 'TSV with file paths to whitelists',
-            help: 'TSV where each row has two columns: chemistry, and file path to corresponding whitelist',
-            example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         }
         whitelist: {
             description: 'Barcode whitelist',

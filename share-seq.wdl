@@ -36,6 +36,7 @@ workflow ShareSeq {
         Boolean? no_whitelist = false
         Array[File] read1_rna
         Array[File] read2_rna
+        File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         File? whitelist
         File? genes_annotation_bed
         File? gtf
@@ -93,6 +94,8 @@ workflow ShareSeq {
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
 
+    Map[String, File] whitelists = read_map(whitelists_tsv)
+
     Boolean process_atac = if length(read1_atac)>0 then true else false
     Boolean process_rna = if length(read1_rna)>0 then true else false
 
@@ -104,6 +107,7 @@ workflow ShareSeq {
                     read1 = read1_rna,
                     read2 = read2_rna,
                     whitelist = whitelist,
+                    whitelists = whitelists,
                     no_whitelist = no_whitelist,
                     idx_tar = idx_tar_rna_,
                     umi_cutoff = umi_cutoff,
