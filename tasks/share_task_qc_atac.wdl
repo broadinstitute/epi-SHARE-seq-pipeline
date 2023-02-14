@@ -85,7 +85,7 @@ task qc_atac {
     command<<<
         set -e
 
-        bash ~(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         ln -s ~{raw_bam} in.raw.bam
         ln -s ~{raw_bam_index} in.raw.bam.bai
