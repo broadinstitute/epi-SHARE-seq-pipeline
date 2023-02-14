@@ -51,7 +51,7 @@ workflow ShareSeq {
         Int? atac_qc_cpus = 16
         Float? atac_qc_disk_factor = 8.0
         Float? atac_qc_memory_factor = 0.15
-        String atac_qc_docker_image = "polumechanos/share_task_qc_atac:dev"
+        String atac_qc_docker_image = "polumechanos/share_task_qc_atac"
 
 
 

@@ -61,7 +61,7 @@ workflow wf_atac {
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
         Float? qc_memory_factor = 0.15
-        String qc_docker_image = "polumechanos/share_task_qc_atac:dev"
+        String qc_docker_image = "polumechanos/share_task_qc_atac"
     }
 
     call share_task_align.share_atac_align as align {
@@ -168,11 +168,6 @@ workflow wf_atac {
 #        File share_atac_qc_tss_enrichment = qc_atac.atac_tss_pileup_png
 
 
-
-#        File share_atac_barcodes = count.atac_barcodes
-#        File share_atac_fragments_filtered = count.atac_fragments_filtered
-#        File share_atac_counts_raw = count.atac_counts_unfiltered
-#        File share_atac_counts_filtered = count.atac_counts_filtered
 #        File share_atac_archr_notebook_output = archr.notebook_output
 #        File share_atac_archr_notebook_log = archr.notebook_log
 #        File share_atac_archr_barcode_metadata = archr.archr_barcode_metadata
