@@ -17,7 +17,6 @@ task share_rna_align {
         Array[File] fastq_R1
         Array[File] fastq_R2
         String chemistry
-        Map[String, File] whitelists
         File? whitelist
         Boolean no_whitelist = false
         File genome_index_tar
@@ -29,8 +28,6 @@ task share_rna_align {
         Float? memory_factor = 2.0
         File? placeholder
     }
-
-    File? whitelist_ = if chemistry=='shareseq' then select_first([whitelist, placeholder]) else select_first([whitelist, whitelists[chemistry]])
 
     # Determine the size of the input
     Float input_file_size_gb = size(fastq_R1, 'G') + size(fastq_R2, 'G')
@@ -117,7 +114,7 @@ task share_rna_align {
                 exit 1
             fi
 
-            gunzip -c ~{whitelist_} > 10x_v2_whitelist.txt
+            gunzip -c ~{whitelist} > 10x_v2_whitelist.txt
 
             $(which STAR) \
             --readFilesIn $read_files \
@@ -167,7 +164,7 @@ task share_rna_align {
                 exit 1
             fi
 
-            gunzip -c ~{whitelist_} > 10x_v3_whitelist.txt
+            gunzip -c ~{whitelist} > 10x_v3_whitelist.txt
 
             $(which STAR) \
             --readFilesIn $read_files \

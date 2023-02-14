@@ -95,6 +95,7 @@ workflow ShareSeq {
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
 
     Map[String, File] whitelists = read_map(whitelists_tsv)
+    File? whitelist_ = if chemistry=='shareseq' then whitelist else select_first([whitelist, whitelists[chemistry]])
 
     Boolean process_atac = if length(read1_atac)>0 then true else false
     Boolean process_rna = if length(read1_rna)>0 then true else false
@@ -106,8 +107,7 @@ workflow ShareSeq {
                     chemistry = chemistry,
                     read1 = read1_rna,
                     read2 = read2_rna,
-                    whitelist = whitelist,
-                    whitelists = whitelists,
+                    whitelist = whitelist_,
                     no_whitelist = no_whitelist,
                     idx_tar = idx_tar_rna_,
                     umi_cutoff = umi_cutoff,

@@ -22,7 +22,6 @@ workflow wf_rna {
         Array[File] read1
         Array[File] read2
         Boolean? no_whitelist = false
-        Map[String, File] whitelists
         File? whitelist
         File idx_tar
         String prefix
@@ -57,7 +56,6 @@ workflow wf_rna {
             fastq_R1 = read1,
             fastq_R2 = read2,
             whitelist = whitelist,
-            whitelists = whitelists,
             no_whitelist = no_whitelist,
             genome_name = genome_name,
             genome_index_tar = idx_tar,
