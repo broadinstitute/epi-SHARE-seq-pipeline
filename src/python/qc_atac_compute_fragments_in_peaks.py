@@ -66,7 +66,7 @@ def count_fragments_in_peaks(bam_filename,
 
             # Increment the counter for the specific barcode.
             barcode = read.get_tag(barcode_tag)
-            fragments_in_peaks_counter[barcode].add(read.name)
+            fragments_in_peaks_counter[barcode].add(read.query_name)
 
     return fragments_in_peaks_counter
 
