@@ -46,13 +46,13 @@ def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix, threads=1):
 
     # Write the summary metrics
     with open(outfile_bulk_metrics, "w") as fh:
-        print("non-mitochondrial_reads\tmitochondrial_reads", file = fh)
+        print("raw_reads_nonmito\traw_reads_mito", file = fh)
         print(f"{number_non_mito}\t{number_mito}", file = fh)
 
     # Write the metrics per barcode
     with open(outfile_barcode_metrics, "w") as fh:
         # Print header
-        print("barcode\tnon_mitochondrial_reads\tmitochondrial_reads", file = fh)
+        print("barcode\traw_reads_nonmito\traw_reads_mito", file = fh)
         for barcode,counts in barcode_metrics.items():
             print(f"{barcode}\t{counts[0]}\t{counts[1]}", file = fh)
 

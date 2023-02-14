@@ -25,7 +25,7 @@ def count_duplicates(in_path, out_path, barcode_tag="CB"):
             counter[cell_barcode][1] += 1
 
     with open(out_path, "w") as out_file:
-        print("barcode\tunique\tunique_plus_duplicates\tpct_duplicates", file=out_file)
+        print("barcode\treads_unique\treads_unique_duplicate\tpct_duplicates", file=out_file)
         for barcode, counts_vector in counter.items():
             print(f"{barcode}\t{counts_vector[0]}\t{counts_vector[1]}\t{round(100-(counts_vector[0]/counts_vector[1]*100),1)}", file=out_file)
 

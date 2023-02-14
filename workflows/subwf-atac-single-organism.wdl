@@ -103,6 +103,8 @@ workflow wf_atac {
             filtered_bam = filter.atac_filter_alignment_dedup,
             filtered_bam_index = filter.atac_filter_alignment_dedup_index,
             queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
+            mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
+            mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
             peaks = peak_set,
             tss = tss_bed,
             mapq_threshold = mapq_threshold,
@@ -115,34 +117,6 @@ workflow wf_atac {
             memory_factor = qc_memory_factor
     }
 
-#    call share_task_bam2bed.share_atac_bam2bed as bam2bed {
-#        input:
-#            bam = align.atac_alignment,
-#            bam_index = align.atac_alignment_index,
-#            genome_name = genome_name,
-#            chrom_sizes = chrom_sizes,
-#            prefix = prefix
-#    }
-#
-#    call share_task_count.count_reads_atac as count {
-#        input:
-#            cutoff = cutoff,
-#            fragments_raw = bam2bed.atac_fragments_raw,
-#            genome_name = genome_name,
-#            prefix = prefix,
-#            cpus = cpus
-#    }
-#
-#    call share_task_qc_library.qc_library as qc_library{
-#        input:
-#            raw_counts = count.atac_counts_unfiltered,
-#            filtered_counts = count.atac_counts_filtered,
-#            cutoff = cutoff,
-#            genome_name = genome_name,
-#            prefix = prefix,
-#            assay = "ATAC"
-#    }
-#
 #    call share_task_log_atac.log_atac as log_atac {
 #       input:
 #           alignment_log = align.atac_alignment_log,

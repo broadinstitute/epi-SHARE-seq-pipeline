@@ -236,12 +236,12 @@ if __name__ == '__main__':
     tss_enrichment_plot_fnp = f"{args.prefix}.tss_enrichment_bulk.png"
 
     with open(per_barcode_output,"w") as out_file:
-        print(f"barcode\tfragments_in_promoter\treads_in_tss\ttss_enrichment", file=out_file)
+        print(f"barcode\tfragments_promoter\treads_tss\ttss_enrichment", file=out_file)
         for barcode, fragments_in_promoter in stats.items():
             reads_in_tss, tss_enrichment = compute_tss_enrichment_barcode(barcode_counts[barcode])
             print(f"{barcode}\t{fragments_in_promoter}\t{reads_in_tss}\t{tss_enrichment}", file=out_file)
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:
         tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp)
-        print(f"tss_Score", file=out_file)
+        print(f"tss_enrichment\n{tss_score_bulk}", file=out_file)
 

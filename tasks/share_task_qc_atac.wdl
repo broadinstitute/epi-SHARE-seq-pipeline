@@ -19,6 +19,8 @@ task qc_atac {
         File? filtered_bam
         File? filtered_bam_index
         File? queryname_final_bam
+        File? mito_metrics_bulk # From filter step
+        File? mito_metrics_barcode # From filter step
         File? peaks
         File? tss
         Int? mapq_threshold = 30
@@ -31,7 +33,7 @@ task qc_atac {
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:dev"
-        String docker_image = "polumechanos/share_task_qc_atac:dev"
+        String docker_image = "polumechanos/share_task_qc_atac"
     }
 
     # Determine the size of the input
@@ -75,72 +77,82 @@ task qc_atac {
     String samstats_filtered_log = "${prefix}.atac.qc.${genome_name}.samstats.filtered.log.txt"
     String samstats_filtered_out = "${prefix}.atac.qc.${genome_name}.samstats.filtered.txt"
     String pbc_stats = "${prefix}.atac.qc.${genome_name}.pbcstats.log"
+    String final_barcode_metadata = '${default="share-seq" prefix}.atac.qc.${genome_name}.metadata.tsv'
+
+    String monitor_log = "atac_qc_monitor.log"
 
 
-    command {
+    command<<<
         set -e
 
-        ln -s ${raw_bam} in.raw.bam
-        ln -s ${raw_bam_index} in.raw.bam.bai
-        ln -s ${filtered_bam} in.filtered.bam
-        ln -s ${filtered_bam_index} in.filtered.bam.bai
+        bash ~(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+
+        ln -s ~{raw_bam} in.raw.bam
+        ln -s ~{raw_bam_index} in.raw.bam.bai
+        ln -s ~{filtered_bam} in.filtered.bam
+        ln -s ~{filtered_bam_index} in.filtered.bam.bai
 
         # samstats raw
         # output of bowtie2
-        samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf ${samstats_raw_out} > ${samstats_raw_log}
+        samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
 
         # SAMstat final filtered file
         # final bam
-        samtools view in.filtered.bam |  SAMstats --sorted_sam_file - --outf ${samstats_filtered_out}  > ${samstats_filtered_log}
+        samtools view in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
 
         # library complexity
         # queryname_final_bam from filter
-        samtools view ${queryname_final_bam} | python3 $(which pbc_stats.py) ${pbc_stats}
+        samtools view ~{queryname_final_bam} | python3 ~(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
-        python3 $(which qc-atac-tss-enrichment.py) \
+        python3 $(which qc_atac_compute_tss_enrichment.py) \
             -e 2000 \
-            --tss ${tss} \
-            --bc_tag ${barcode_tag} \
-            --mapq_threshold ${mapq_threshold} \
-            --prefix "${prefix}.atac.qc.${genome_name}" \
+            --tss ~{tss} \
+            --bc_tag ~{barcode_tag} \
+            --mapq_threshold ~{mapq_threshold} \
+            --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.filtered.bam
 
         # Duplicates per barcode
-        python3 $(which count-duplicates-per-barcode.py) \
-            -o ${duplicate_stats} \
-            --bc_tag ${barcode_tag} \
-            --prefix "${prefix}.atac.qc.${genome_name}" \
+        python3 $(which qc_atac_count_duplicates_per_barcode.py) \
+            -o ~{duplicate_stats} \
+            --bc_tag ~{barcode_tag} \
+            --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.filtered.bam
 
         # Fragments in peaks
-        # "${prefix}.fragments.in.peak.tsv"
-        python3 $(which qc-atac-compute-reads-in-peaks.py) \
-            --peaks ${peaks} \
-            --mapq_threshold ${mapq_threshold} \
-            --bc_tag ${barcode_tag} \
-            --prefix "${prefix}.atac.qc.${genome_name}" \
+        # "~{prefix}.fragments.in.peak.tsv"
+        python3 $(which qc_atac_compute_fragments_in_peaks.py) \
+            --peaks ~{peaks} \
+            --mapq_threshold ~{mapq_threshold} \
+            --bc_tag ~{barcode_tag} \
+            --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.filtered.bam
 
-        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ${stats_log}
-        samtools idxstats -@ ${samtools_threads} in.raw.bam >> ${stats_log}
+        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ~{stats_log}
+        samtools idxstats -@ ~{samtools_threads} in.raw.bam >> ~{stats_log}
 
-        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ${stats_log}
-        samtools idxstats -@ ${samtools_threads} in.filtered.bam >> ${stats_log}
+        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ~{stats_log}
+        samtools idxstats -@ ~{samtools_threads} in.filtered.bam >> ~{stats_log}
 
-        echo '' > ${hist_log}
-        java -Xmx${picard_java_memory}G -jar $(which picard.jar) CollectInsertSizeMetrics \
+        echo '' > ~{hist_log}
+        java -Xmx~{picard_java_memory}G -jar $(which picard.jar) CollectInsertSizeMetrics \
             VALIDATION_STRINGENCY=SILENT \
             I=in.raw.bam \
-            O=${hist_log} \
-            H=${hist_log_pdf} \
+            O=~{hist_log} \
+            H=~{hist_log_pdf} \
             W=1000  2>> picard_run.log
 
         # Insert size plot bulk
-        python3 $(which plot_insert_size_hist.py) ${hist_log} ${prefix} ${hist_log_png}
+        python3 $(which plot_insert_size_hist.py) ~{hist_log} ~{prefix} ~{hist_log_png}
+
+        join -j1  <(sort -k1,1 ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv) <(sort -k1,1 ~{duplicate_stats}) | \
+        join -j 1 - <(sort -k1,1 ~{prefix}.atac.qc.~{genome_name}.fragments.in.peak.tsv) | \
+        join -j 1 - <(sort -k1,1 ~{mito_metrics_barcode}) | \
+        awk -v FS=" " -v OFS="\t" 'NR==1{print $0,"pct_fragments_promoter","pct_fragments_peaks","pct_mito_reads"}NR>1{print $0,$2*100/($5/2),$8*100/($5/2),$10*100/($9+$10)}' > ~{final_barcode_metadata}
 
 
-    }
+    >>>
 
     output {
         File atac_qc_samstats_raw = samstats_raw_out
@@ -156,6 +168,10 @@ task qc_atac {
         File atac_qc_tss_enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
         File atac_qc_duplicate_stats = duplicate_stats
         File atac_qc_fragments_in_peaks = "${prefix}.atac.qc.${genome_name}.fragments.in.peak.tsv"
+
+        File atac_qc_barcode_metadata = final_barcode_metadata
+
+        File atac_qc_monitor_log = monitor_log
     }
 
     runtime {
