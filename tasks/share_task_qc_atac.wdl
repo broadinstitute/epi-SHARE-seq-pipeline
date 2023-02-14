@@ -102,7 +102,7 @@ task qc_atac {
 
         # library complexity
         # queryname_final_bam from filter
-        samtools view ~{queryname_final_bam} | python3 ~(which pbc_stats.py) ~{pbc_stats}
+        samtools view ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
         python3 $(which qc_atac_compute_tss_enrichment.py) \
