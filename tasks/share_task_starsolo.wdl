@@ -113,7 +113,7 @@ task share_rna_align {
                 exit 1
             fi
 
-            if [[ ~{whitelist} == *.gz ]]; then
+            if [[ '~{whitelist}' == *.gz ]]; then
                 gunzip -c ~{whitelist} > 10x_v2_whitelist.txt
             else
                 cat ~{whitelist} > 10x_v2_whitelist.txt
@@ -167,7 +167,7 @@ task share_rna_align {
                 exit 1
             fi
 
-            if [[ ~{whitelist} == *.gz ]]; then
+            if [[ '~{whitelist}' == *.gz ]]; then
                 gunzip -c ~{whitelist} > 10x_v3_whitelist.txt
             else
                 cat ~{whitelist} > 10x_v3_whitelist.txt
