@@ -33,7 +33,6 @@ workflow ShareSeq {
         Boolean? multimappers = false
         Boolean? include_multimappers = false
         Boolean? include_introns = true
-        Boolean? no_whitelist = false
         Array[File] read1_rna
         Array[File] read2_rna
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
@@ -108,7 +107,6 @@ workflow ShareSeq {
                     read1 = read1_rna,
                     read2 = read2_rna,
                     whitelist = whitelist_,
-                    no_whitelist = no_whitelist,
                     idx_tar = idx_tar_rna_,
                     umi_cutoff = umi_cutoff,
                     gene_cutoff = gene_cutoff,

@@ -18,7 +18,6 @@ task share_rna_align {
         Array[File] fastq_R2
         String chemistry
         File? whitelist
-        Boolean no_whitelist = false
         File genome_index_tar
         String genome_name
         String prefix
@@ -87,7 +86,7 @@ task share_rna_align {
             --soloType CB_UMI_Simple \
             --soloFeatures GeneFull  \
             --soloStrand Forward \
-            --soloCBwhitelist ~{if no_whitelist then 'None' else 'shareseq_whitelist.txt'} \
+            --soloCBwhitelist shareseq_whitelist.txt \
             --soloCBmatchWLtype Exact \
             --soloCBstart 1 \
             --soloCBlen 24 \
@@ -114,7 +113,11 @@ task share_rna_align {
                 exit 1
             fi
 
-            gunzip -c ~{whitelist} > 10x_v2_whitelist.txt
+            if [[ ~{whitelist} == *.gz ]]; then
+                gunzip -c ~{whitelist} > 10x_v2_whitelist.txt
+            else
+                cat ~{whitelist} > 10x_v2_whitelist.txt
+            fi
 
             $(which STAR) \
             --readFilesIn $read_files \
@@ -128,7 +131,7 @@ task share_rna_align {
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
             --soloMultiMappers Unique EM \
-            --soloCBwhitelist ~{if no_whitelist then 'None' else '10x_v2_whitelist.txt'} \
+            --soloCBwhitelist 10x_v2_whitelist.txt \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 10 \
@@ -164,7 +167,11 @@ task share_rna_align {
                 exit 1
             fi
 
-            gunzip -c ~{whitelist} > 10x_v3_whitelist.txt
+            if [[ ~{whitelist} == *.gz ]]; then
+                gunzip -c ~{whitelist} > 10x_v3_whitelist.txt
+            else
+                cat ~{whitelist} > 10x_v3_whitelist.txt
+            fi
 
             $(which STAR) \
             --readFilesIn $read_files \
@@ -178,7 +185,7 @@ task share_rna_align {
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
             --soloMultiMappers Unique EM \
-            --soloCBwhitelist ~{if no_whitelist then 'None' else '10x_v3_whitelist.txt'} \
+            --soloCBwhitelist 10x_v3_whitelist.txt \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 12 \
@@ -264,11 +271,6 @@ task share_rna_align {
             description: 'Barcode whitelist',
             help: 'TXT file containing list of known possible barcodes',
             example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/737K-arc-v1-GEX.txt.gz' 
-        }
-        no_whitelist: {
-            description: 'Boolean indicating if no whitelist should be used',
-            help: 'If true, STARsolo will run without a whitelist',
-            default: false
         }
         genome_index_tar: {
             description: 'Genome index files for STARsolo',
