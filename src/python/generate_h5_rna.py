@@ -91,7 +91,7 @@ def main():
     # get barcodes from barcodes file, reformat as R1,R2,R3,PKR
     barcodes = get_split_lines(barcodes_file, delimiter="\t")
     barcode_list = [line[0] for line in barcodes]
-    formatted_barcode_list = [barcode[:8]+","+barcode[8:16]+","+barcode[16:]+","+prefix for barcode in barcode_list]
+    formatted_barcode_list = [barcode + "_" + prefix for barcode in barcode_list]
     
     # generate count matrix
     logging.info("Generating count matrix\n")
