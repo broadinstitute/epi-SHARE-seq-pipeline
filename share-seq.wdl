@@ -13,6 +13,7 @@ workflow ShareSeq {
 
     input {
         # Common inputs
+        String chemistry
         String prefix = "shareseq-project"
         String genome_name_input
         Int? cpus = 16
@@ -28,12 +29,14 @@ workflow ShareSeq {
         Int? cutoff_atac = 100
 
         # RNA-specific inputs
-        Boolean count_only = false
-        Boolean multimappers = false
-        Boolean include_multimappers = false
-        Boolean include_introns = true
+        Boolean? count_only = false
+        Boolean? multimappers = false
+        Boolean? include_multimappers = false
+        Boolean? include_introns = true
         Array[File] read1_rna
         Array[File] read2_rna
+        File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
+        File? whitelist
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -90,6 +93,9 @@ workflow ShareSeq {
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
 
+    Map[String, File] whitelists = read_map(whitelists_tsv)
+    File? whitelist_ = if chemistry=='shareseq' then whitelist else select_first([whitelist, whitelists[chemistry]])
+
     Boolean process_atac = if length(read1_atac)>0 then true else false
     Boolean process_rna = if length(read1_rna)>0 then true else false
 
@@ -97,11 +103,13 @@ workflow ShareSeq {
         if ( read1_rna[0] != "" ) {
             call share_rna.wf_rna as rna{
                 input:
+                    chemistry = chemistry,
                     read1 = read1_rna,
                     read2 = read2_rna,
+                    whitelist = whitelist_,
                     idx_tar = idx_tar_rna_,
                     umi_cutoff = umi_cutoff,
-                    gene_cutoff = gene_cutoff, 
+                    gene_cutoff = gene_cutoff,
                     prefix = prefix,
                     genome_name = genome_name,
                     cpus = cpus_rna,
@@ -113,7 +121,7 @@ workflow ShareSeq {
                     rna_seurat_umap_resolution = rna_seurat_umap_resolution,
                     rna_seurat_disk_factor = rna_seurat_disk_factor,
                     rna_seurat_memory_factor = rna_seurat_memory_factor
-            }
+            } 
         }
     }
 

@@ -51,7 +51,7 @@ get_vectors <- function(x, y){
     endpt_1_idx <- tail(which(left_vect >= 0), n=1)
     # Find first non-positive value after absolute minimum
     right_vect <- second_deriv$y[abs_min_idx:length(second_deriv$y)]
-    endpt_2_idx <- abs_min_idx + which(right_vect >= 0)[1]
+    endpt_2_idx <- abs_min_idx + which(right_vect >= 0)[1] - 1
     
     # Error cases: revert to elbow finder
     # Used when second derivative curve has both positive and negative values, 
