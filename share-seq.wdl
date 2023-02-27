@@ -43,6 +43,7 @@ workflow ShareSeq {
         Int? umi_cutoff = 100
         Int? gene_cutoff = 100
         Int? cpus_rna
+        Int? cellbender_expected_cells
         String? gene_naming = "gene_name"
         
         # Seurat
@@ -114,6 +115,7 @@ workflow ShareSeq {
                     genome_name = genome_name,
                     cpus = cpus_rna,
                     count_only = count_only,
+                    cellbender_expected_cells = cellbender_expected_cells,
                     rna_seurat_min_features = rna_seurat_min_features,
                     rna_seurat_percent_mt = rna_seurat_percent_mt,
                     rna_seurat_min_cells = rna_seurat_min_cells,

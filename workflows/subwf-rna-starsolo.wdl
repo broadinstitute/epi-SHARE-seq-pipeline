@@ -36,7 +36,7 @@ workflow wf_rna {
         Boolean count_only = false
 
         # CellBender
-        Int? cellbender_expected_cells = 5000
+        Int? cellbender_expected_cells
         
         #Seurat filtering parameters
         Int? rna_seurat_min_features

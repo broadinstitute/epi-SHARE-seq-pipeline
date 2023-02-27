@@ -19,7 +19,7 @@ task cellbender {
         String docker_image = "us.gcr.io/broad-dsde-methods/cellbender:0.2.0"
 
         # Method configuration inputs
-        Int? expected_cells
+        Int? expected_cells = 5000
         Int? total_droplets_included
         String? model
         Int? low_count_threshold
