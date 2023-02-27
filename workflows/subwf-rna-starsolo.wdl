@@ -19,14 +19,15 @@ workflow wf_rna {
         # RNA Sub-workflow inputs
 
         # Align
+        String chemistry
         Array[File] read1
         Array[File] read2
+        File? whitelist
         File idx_tar
-        String prefix = "shareseq-project"
+        String prefix
         String genome_name
         Int? cpus = 16
         String? docker
-        File whitelist
         # QC
         Int? umi_cutoff
         Int? gene_cutoff
@@ -54,8 +55,10 @@ workflow wf_rna {
 
     call share_task_starsolo.share_rna_align as align {
         input:
+            chemistry = chemistry,
             fastq_R1 = read1,
             fastq_R2 = read2,
+            whitelist = whitelist,
             genome_name = genome_name,
             genome_index_tar = idx_tar,
             prefix = prefix,
@@ -74,6 +77,7 @@ workflow wf_rna {
             bam = align.output_bam,
             umi_cutoff = umi_cutoff,
             gene_cutoff = gene_cutoff,
+            chemistry = chemistry,
             genome_name = genome_name,
             prefix = prefix
     }
@@ -123,9 +127,9 @@ workflow wf_rna {
 
         File share_rna_barcode_metadata  = qc_rna.rna_barcode_metadata
         File share_rna_duplicates_log = qc_rna.rna_duplicates_log
-        File share_rna_umi_barcode_rank_plot  = qc_rna.rna_umi_barcode_rank_plot
-        File share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
-        File share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
+        File? share_rna_umi_barcode_rank_plot = qc_rna.rna_umi_barcode_rank_plot
+        File? share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
+        File? share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
 
         File? share_rna_cellbender_h5 = cellbender.cellbender_h5
         File? share_rna_cellbender_csv = cellbender.cellbender_csv
