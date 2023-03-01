@@ -102,12 +102,19 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                 R2,Q2 = check_putative_barcode(R2str, r2_barcode_dict, Q2str)
                 R3,Q3 = check_putative_barcode(R3str, r3_barcode_dict, Q3str)
                 
-                if R1 and R2 and R3:
+                read_right = read
+                # add UMI to queryname
+                umi = read_right.query_sequence[0:10]
+                umi_qual = read_right.qual[0:10]
+
+                if umi == 'GGGGGGGGGG':
+                    homop += 1
+                elif R1 and R2 and R3:
                     good += 1
                     # add cell barcodes to queryname
                     qname_barcode = ",".join([R1,R2,R3,pkr_id])
                     qname = qname + "_" + qname_barcode
-                    read_right = read
+                    
                     if sample_type == 'ATAC':
                         read_left.query_name = qname
                         read_right.query_name = qname
@@ -118,9 +125,7 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                         write_read(left[barcode_set[R1]], read_left, where)
                         write_read(right[barcode_set[R1]], read_right, where)
                     elif sample_type == 'RNA':
-                        # add UMI to queryname
-                        umi = read_right.query_sequence[0:10]
-                        umi_qual = read_right.qual[0:10]
+                        
                         #umi_qual = ''.join(map(lambda x: chr( x+33 ), read_right.query_qualities[0:10]))
                         qname = qname + "_" + umi
                         read_left.query_name = qname
@@ -132,12 +137,7 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                         write_read(left[barcode_set[R1]], read_left)
                         write_read(right[barcode_set[R1]], read_right)
                 elif G in R1str and G in R2str and G in R3str:
-                    read_right = read
-                    umi = read_right.query_sequence[0:10]
-                    if umi == 'GGGGGGGGGG':
-                        homop += 1
-                    else:
-                        ggg += 1
+                    ggg += 1
                 else:                 
                     bad += 1
     
