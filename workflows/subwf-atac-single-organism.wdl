@@ -26,6 +26,11 @@ workflow wf_atac {
         File tss_bed
         File peak_set
 
+        # Parameters for bam2bed
+        Int? bam2bed_cpus = 16
+        Float? bam2bed_disk_factor = 8.0
+        Float? bam2bed_memory_factor = 0.15
+
         String prefix = "shareseq-project"
         String genome_name
         Int? cutoff
@@ -44,8 +49,11 @@ workflow wf_atac {
 
     call share_task_bam2bed.share_atac_bam2bed as bam2bed {
         input:
+            cpus = bam2bed_cpus,
             bam = align.atac_alignment,
             bam_index = align.atac_alignment_index,
+            disk_factor = bam2bed_disk_factor,
+            memory_factor = bam2bed_memory_factor,
             genome_name = genome_name,
             chrom_sizes = chrom_sizes,
             prefix = prefix
@@ -128,19 +136,19 @@ workflow wf_atac {
         File share_atac_qc_tss_enrichment = qc_atac.atac_tss_pileup_png
 
         File share_atac_archr_notebook_output = archr.notebook_output
-        File share_atac_archr_notebook_log = archr.notebook_log        
+        File share_atac_archr_notebook_log = archr.notebook_log
         File share_atac_archr_barcode_metadata = archr.archr_barcode_metadata
         File? share_atac_archr_raw_tss_enrichment = archr.archr_raw_tss_by_uniq_frags_plot
         File? share_atac_archr_filtered_tss_enrichment = archr.archr_filtered_tss_by_uniq_frags_plot
         File? share_atac_archr_raw_fragment_size_plot = archr.archr_raw_frag_size_dist_plot
         File? share_atac_archr_filtered_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
-        
+
         File? share_atac_archr_umap_doublets = archr.archr_umap_doublets
         File? share_atac_archr_umap_cluster_plot = archr.archr_umap_cluster_plot
         File? share_atac_archr_umap_num_frags_plot = archr.archr_umap_num_frags_plot
         File? share_atac_archr_umap_tss_score_plot = archr.archr_umap_tss_score_plot
         File? share_atac_archr_umap_frip_plot = archr.archr_umap_frip_plot
-        
+
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_raw_obj
@@ -149,26 +157,26 @@ workflow wf_atac {
         Int share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely
         Int share_atac_unaligned = log_atac.atac_unaligned
         Int share_atac_feature_reads = log_atac.atac_feature_reads
-        Int share_atac_duplicate_reads = log_atac.atac_duplicate_reads 
-        
+        Int share_atac_duplicate_reads = log_atac.atac_duplicate_reads
+
         File share_atac_archr_strict_notebook_output = archr_strict.notebook_output
         File share_atac_archr_strict_notebook_log = archr_strict.notebook_log
-        
+
         File? share_atac_archr_strict_raw_tss_enrichment = archr_strict.archr_raw_tss_by_uniq_frags_plot
         File? share_atac_archr_strict_filtered_tss_enrichment = archr_strict.archr_filtered_tss_by_uniq_frags_plot
         File? share_atac_archr_strict_raw_fragment_size_plot = archr_strict.archr_raw_frag_size_dist_plot
         File? share_atac_archr_strict_filtered_fragment_size_plot = archr_strict.archr_filtered_frag_size_dist_plot
-        
+
         File? share_atac_archr_strict_umap_doublets = archr_strict.archr_umap_doublets
         File? share_atac_archr_strict_umap_cluster_plot = archr_strict.archr_umap_cluster_plot
         File? share_atac_archr_strict_umap_num_frags_plot = archr_strict.archr_umap_num_frags_plot
         File? share_atac_archr_strict_umap_tss_score_plot = archr_strict.archr_umap_tss_score_plot
         File? share_atac_archr_strict_umap_frip_plot = archr_strict.archr_umap_frip_plot
-        
+
         File? share_atac_archr_strict_gene_heatmap_plot = archr_strict.archr_heatmap_plot
         File? share_atac_archr_strict_arrow = archr_strict.archr_arrow
         File? share_atac_archr_strict_obj = archr_strict.archr_raw_obj
         File? share_atac_archr_strict_plots_zip = archr_strict.plots_zip
-        
+
     }
 }

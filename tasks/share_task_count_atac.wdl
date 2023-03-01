@@ -17,8 +17,8 @@ task count_reads_atac {
         Int? cutoff = 100
         File fragments_raw
         String genome_name
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_count_atac:release"
-        #String docker_image = "polumechanos/share_task_count_atac:monitor"
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_count_atac:release"
+        String docker_image = "polumechanos/share_task_count_atac:monitor"
         String? prefix
     }
 

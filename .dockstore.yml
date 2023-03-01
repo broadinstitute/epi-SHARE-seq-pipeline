@@ -7,6 +7,7 @@ workflows:
          branches:
              - main
              - release
+             - release-bamtobed-factors
              - neva
              - minimal-inputs
              - dynamic-memory
