@@ -45,8 +45,8 @@ task joint_cell_calling {
     output {
         File joint_calling_monitor = "monitoring.log"
         File joint_calling_log = "joint_cell_plotting.log"
-        File? joint_cell_plot = glob('*_joint_cell_plot.png')[0]
-        File? joint_cell_density_plot = glob('*_joint_cell_density_plot.png')[0]
+        File? joint_cell_plot = "${prefix}_joint_cell_plot.png"
+        File? joint_cell_density_plot = "${prefix}_joint_cell_density_plot.png"
     }
 
     runtime {
