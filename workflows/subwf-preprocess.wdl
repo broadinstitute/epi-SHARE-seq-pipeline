@@ -456,7 +456,9 @@ task BamToFastq {
 
 
 	command <<<
-		python3 /software/bam_fastq.py ~{bam} ~{R1file} ~{R2file} ~{R3file} ~{pkrId} -p ~{prefix} -s ~{sampleType}
+		samtools addreplacerg -r '@RG\tID:"~{pkrId}"' ~{bam} -o tmp.bam
+
+		python3 /software/bam_fastq.py tmp.bam ~{R1file} ~{R2file} ~{R3file} ~{pkrId} -p ~{prefix} -s ~{sampleType}
 
 		gzip *.fastq
 	>>>
