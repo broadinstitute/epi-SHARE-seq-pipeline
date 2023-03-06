@@ -7,8 +7,8 @@ struct Fastq {
 	String sampleType
 	String genome
 	String notes
-	Array[File] read1
-	Array[File] read2
+	Array[String] read1
+	Array[String] read2
 }
 
 workflow wf_preprocess {
@@ -20,7 +20,7 @@ workflow wf_preprocess {
 		File metaCsv
 		String terra_project # set to none or make optional
 		String workspace_name
-		String dockerImage = "nchernia/share_task_preprocess:13"
+		String dockerImage = "nchernia/share_task_preprocess:16"
 	}
 
 	String barcodeStructure = "14S10M28S10M28S9M8B"
@@ -111,6 +111,11 @@ workflow wf_preprocess {
 		}
 	}
 
+	call AggregateBarcodeQC {
+		input:
+			barcodeQCs = flatten(BamToFastq.qc)
+	}
+
 	call QC {
 		input:
 			barcodeMetrics = ExtractBarcodes.barcodeMetrics
@@ -138,9 +143,10 @@ workflow wf_preprocess {
 	output {
 		Array[String] percentMismatch = QC.percentMismatch
 		Array[String] terraResponse = TerraUpsert.upsert_response
-                Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
-                Array[File] monitoringLogsBasecalls = BasecallsToBams.monitoringLog		
-                # Array[Fastq] fastqs = flatten(BamToFastq.out)
+		Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
+		Array[File] monitoringLogsBasecalls = BasecallsToBams.monitoringLog		
+        File BarcodeQC = AggregateBarcodeQC.laneQC
+		# Array[Fastq] fastqs = flatten(BamToFastq.out)
 		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
 	}
 }
@@ -450,7 +456,9 @@ task BamToFastq {
 
 
 	command <<<
-		python3 /software/bam_fastq.py ~{bam} ~{R1file} ~{R2file} ~{R3file} ~{pkrId} -p ~{prefix} -s ~{sampleType}
+		samtools addreplacerg -r '@RG\tID:"~{pkrId}"' ~{bam} -o tmp.bam
+
+		python3 /software/bam_fastq.py tmp.bam ~{R1file} ~{R2file} ~{R3file} ~{pkrId} -p ~{prefix} -s ~{sampleType}
 
 		gzip *.fastq
 	>>>
@@ -466,12 +474,34 @@ task BamToFastq {
 			read1: glob("*R1.fastq.gz"),
 			read2: glob("*R2.fastq.gz")
 		}
+
+		File qc = 'qc.txt'
 		# Array[File] fastqs = glob("*.fastq")
 	}
 	runtime {
 		docker: dockerImage
 		disks: "local-disk ~{diskSize} ~{diskType}"
 		memory: memory + 'G'
+	}
+}
+
+task AggregateBarcodeQC {
+	input {
+		Array[File] barcodeQCs
+	}
+
+	command <<<
+		echo -e "LIB_BARCODE\tPASS\tFAIL_MISMATCH\tFAIL_HOMOPOLYMER\tFAIL_UMI" > final.txt
+		cat ~{sep=" " barcodeQCs} >> final.txt
+		# awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}' combined.txt > final.txt
+	>>>
+	
+	output {
+		File laneQC = 'final.txt'
+	}
+	
+	runtime {
+		docker: "ubuntu:latest"
 	}
 }
 
