@@ -41,6 +41,9 @@ density_plot <- ggplot(passing_df, aes(x=frags, y=umis)) +
                                            limits=c(10,xy_lim))
                         
 out_file <- paste0(pkr, "_joint_cell_density_plot.png", sep="")
-png(out_file, width=8.75, height=6, units="in", res=300)
-density_plot
-dev.off()
+# density plotting fails when 0 cells pass both filters
+if (sum(barcode_metadata$QC=="both") > 0) {
+  png(out_file, width=8.75, height=6, units="in", res=300)
+  density_plot
+  dev.off()
+}
