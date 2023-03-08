@@ -92,6 +92,8 @@ COPY --chown=$USER:$USER src/python/qc_atac_compute_tss_enrichment.py /usr/local
 COPY --chown=$USER:$USER src/python/qc_atac_count_duplicates_per_barcode.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/qc_atac_compute_fragments_in_peaks.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/plot_insert_size_hist.py /usr/local/bin
+COPY --chown=$USER:$USER src/R/barcode_rank_functions.R /usr/local/bin
+COPY --chown=$USER:$USER src/R/atac_qc_plots.R /usr/local/bin
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 

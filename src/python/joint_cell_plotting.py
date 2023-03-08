@@ -47,7 +47,7 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     umis = []
     genes = []
     rna_barcodes = []
-    # remove cells that have less than 10 UMIs
+    # remove cells that have fewer than 10 UMIs
     for line in rna_metrics_contents:
         if int(line[3]) >= remove_low_yielding_cells: 
             umis.append(int(line[3]))
@@ -59,12 +59,12 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     tss = []
     frags = []
     atac_barcodes = []
-    # remove cells that have less than 10 fragments
+    # remove cells that have fewer than 10 fragments
     for line in atac_metrics_contents: 
-        if int(line[10]) >= remove_low_yielding_cells:
-            tss.append(float(line[1]))
-            frags.append(int(line[10]))
-            atac_barcodes.append(line[15].split("#")[1]) # get barcode string after library name
+        if int(line[4]) >= remove_low_yielding_cells:
+            tss.append(float(line[3]))
+            frags.append(int(line[4]))
+            atac_barcodes.append(line[0]) 
     atac_metrics = dict(zip(atac_barcodes, zip(tss, frags)))
     
     # merge metrics by barcodes
