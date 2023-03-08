@@ -19,7 +19,6 @@ task generate_h5 {
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
-
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
     }
 
@@ -27,7 +26,7 @@ task generate_h5 {
     Float input_file_size_gb = size(tar, "G")
 
     # Determining memory size based on the size of the input files.
-    Float mem_gb = 5.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 10.0 + memory_factor * input_file_size_gb
 
     # Determining disk size based on the size of the input files.
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
@@ -56,10 +55,8 @@ task generate_h5 {
 
     runtime {
         memory : "${mem_gb} GB"
-        memory_retry_multiplier: 2
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker : docker_image
-        maxRetries:1
     }
 
     parameter_meta {

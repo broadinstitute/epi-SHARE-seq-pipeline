@@ -42,5 +42,7 @@ density_plot <- ggplot(passing_df, aes(x=frags, y=umis)) +
                                            limits=c(10,xy_lim))
                         
 png(plot_file, width=8.75, height=6, units="in", res=300)
-density_plot
-dev.off()
+if (sum(barcode_metadata$QC=="both") > 0) {
+    density_plot
+    dev.off()
+}

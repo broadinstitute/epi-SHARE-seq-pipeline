@@ -62,8 +62,8 @@ task joint_qc_plotting {
     output {
         File joint_calling_monitor = "monitoring.log"
         File joint_calling_log = "joint_cell_plotting.log"
-        File joint_qc_plot = "${joint_qc_plot}"
-        File joint_density_plot = "${joint_density_plot}"
+        File? joint_qc_plot = "${joint_qc_plot}"
+        File? joint_density_plot = "${joint_density_plot}"
         File joint_barcode_metadata = "${joint_barcode_metadata}"
     }
 

@@ -47,7 +47,7 @@ def main(bam_file, r1_barcode_sets, r2_barcode_file, r3_barcode_file, pkr_id, sa
         fp = open(file_prefix + '_' + value + '_R2.fastq', 'w')
         right[value] = fp
     with pysam.Samfile(bam_file, 'rb', check_sq=False) as bam:
-        process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, pkr_id, sample_type)
+        process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, pkr_id, sample_type, file_prefix)
 
 def create_barcode_dict(barcode_list):
     """
@@ -75,12 +75,14 @@ def create_barcode_set(file_path):
                 barcodelist.append(item)
     return barcodeset, barcodelist
 
-def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, pkr_id, sample_type):
+def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_dict, barcode_set, pkr_id, sample_type, file_prefix):
     """
     Get reads from open BAM file and write them in pairs.
     """
     
     qname = read_left = read_right = None
+    good = bad = ggg = homop = 0
+    G = 'GGGGGGGG'
 
     for read in bam:
         if read.is_read1:
@@ -100,11 +102,19 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                 R2,Q2 = check_putative_barcode(R2str, r2_barcode_dict, Q2str)
                 R3,Q3 = check_putative_barcode(R3str, r3_barcode_dict, Q3str)
                 
-                if R1 and R2 and R3:
+                read_right = read
+                # add UMI to queryname
+                umi = read_right.query_sequence[0:10]
+                umi_qual = read_right.qual[0:10]
+
+                if umi == 'GGGGGGGGGG':
+                    homop += 1
+                elif R1 and R2 and R3:
+                    good += 1
                     # add cell barcodes to queryname
                     qname_barcode = ",".join([R1,R2,R3,pkr_id])
                     qname = qname + "_" + qname_barcode
-                    read_right = read
+                    
                     if sample_type == 'ATAC':
                         read_left.query_name = qname
                         read_right.query_name = qname
@@ -115,9 +125,7 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                         write_read(left[barcode_set[R1]], read_left, where)
                         write_read(right[barcode_set[R1]], read_right, where)
                     elif sample_type == 'RNA':
-                        # add UMI to queryname
-                        umi = read_right.query_sequence[0:10]
-                        umi_qual = read_right.qual[0:10]
+                        
                         #umi_qual = ''.join(map(lambda x: chr( x+33 ), read_right.query_qualities[0:10]))
                         qname = qname + "_" + umi
                         read_left.query_name = qname
@@ -128,6 +136,13 @@ def process_bam(bam, left, right, r1_barcode_dict, r2_barcode_dict, r3_barcode_d
                         # write read to correct file based on R1 barcode
                         write_read(left[barcode_set[R1]], read_left)
                         write_read(right[barcode_set[R1]], read_right)
+                elif G in R1str and G in R2str and G in R3str:
+                    ggg += 1
+                else:                 
+                    bad += 1
+    
+    with open("qc.txt", 'w') as f:
+        print("%s\t%s\t%s\t%s\t%s" % (file_prefix, good, bad, ggg, homop), file=f)
 
 def check_putative_barcode(barcode_str, barcode_dict, quality_str):
     '''
