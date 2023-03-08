@@ -59,9 +59,9 @@ RUN R --no-echo --no-restore --no-save -e "devtools::install_github('immunogenom
 
 RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
 
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('logr','hexbin'))"
+RUN R --no-echo --no-restore --no-save -e "install.packages(c('logr','hexbin', 'ggpointdensity'))"
 
-RUN python3 -m pip install jupyter papermill
+RUN python3 -m pip install --break-system-packages jupyter papermill
 
 COPY src/jupyter_nb/archr_notebook.ipynb /usr/local/bin/
 
