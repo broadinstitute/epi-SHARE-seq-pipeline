@@ -24,6 +24,7 @@ task share_atac_filter {
         File? bam
         File? bam_index
         String? barcode_tag = "CB"
+        String? barcode_tag_fragments = "CB"
         String genome_name
         String? prefix = "sample"
         ## Runtime

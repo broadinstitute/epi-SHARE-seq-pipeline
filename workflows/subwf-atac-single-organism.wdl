@@ -53,10 +53,7 @@ workflow wf_atac {
 
         # QC-specific inputs
         ## Biological
-        File? raw_bam
-        File? raw_bam_index
-        File? filtered_bam
-        File? filtered_bam_index
+        String? barcode_tag_fragments = "CB"
         ## Runtime
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
@@ -86,6 +83,7 @@ workflow wf_atac {
             shift_plus = filter_shift_plus,
             shift_minus = filter_shift_minus,
             barcode_tag = barcode_tag,
+            barcode_tag_fragments = barcode_tag_fragments,
             mapq_threshold = mapq_threshold,
             genome_name = genome_name,
             minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
