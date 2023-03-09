@@ -20,7 +20,7 @@ workflow wf_preprocess {
 		File metaCsv
 		String terra_project # set to none or make optional
 		String workspace_name
-		String dockerImage = "nchernia/share_task_preprocess:16"
+		String dockerImage = "nchernia/share_task_preprocess:17"
 	}
 
 	String barcodeStructure = "14S10M28S10M28S9M8B"
@@ -457,8 +457,7 @@ task BamToFastq {
 
 	command <<<
 		samtools addreplacerg -r '@RG\tID:"~{pkrId}"' ~{bam} -o tmp.bam
-
-		python3 /software/bam_fastq.py tmp.bam ~{R1file} ~{R2file} ~{R3file} ~{pkrId} -p ~{prefix} -s ~{sampleType}
+		python3 /software/bam_fastq.py tmp.bam ~{R1file} ~{R2file} ~{R3file} -p ~{prefix} -s ~{sampleType}
 
 		gzip *.fastq
 	>>>
@@ -491,7 +490,7 @@ task AggregateBarcodeQC {
 	}
 
 	command <<<
-		echo -e "LIB_BARCODE\tPASS\tFAIL_MISMATCH\tFAIL_HOMOPOLYMER\tFAIL_UMI" > final.txt
+		echo -e "LIB_BARCODE\tEXACT\tPASS\tFAIL_MISMATCH\tFAIL_HOMOPOLYMER\tFAIL_UMI" > final.txt
 		cat ~{sep=" " barcodeQCs} >> final.txt
 		# awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}' combined.txt > final.txt
 	>>>
