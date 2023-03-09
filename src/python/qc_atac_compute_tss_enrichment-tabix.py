@@ -19,11 +19,10 @@ import matplotlib.pyplot as plt
 
 
 ##### DEFINE FUNCTIONS #####
-def count_fragments_in_promoter(bam_filename,
+def count_fragments_in_promoter(tabix_filename,
                                 tss_list,
                                 flank=2000,
-                                barcode_tag = "CB",
-                                mapq_threshold = 30):
+                                barcode_tag = "CB"):
     """
     This funtion counts the per-barcode number of reads in the promoter region of the TSSs passed in input.
     The code follows the ArchR heuristic to minimize memory usage. Only the reads in the +/-50bp around the
@@ -31,8 +30,8 @@ def count_fragments_in_promoter(bam_filename,
 
     Parameters
     ----------
-    bam_filename : str
-        Path to the SAM/BAM file containing the mapped reads.
+    tabix_filename : str
+        Path to the tabix file containing the fragments.
         File needs to be coordinate-sorted and indexed.
     tss_list : array
         Array containing the list of TSSs to be included.
@@ -43,10 +42,6 @@ def count_fragments_in_promoter(bam_filename,
         default: 2000
     barcode_tag : str
         Which tag in the BAM file contains the barcode id.
-    mapq_threshold : int
-        Keep only the reads with mapq score greater or equal.
-        default: 30
-
     Returns
     -------
     Array
@@ -61,38 +56,52 @@ def count_fragments_in_promoter(bam_filename,
         Value: Cumulative number of reads around the promoter (TSS +/-flank)
     """
     # TSS +/- flank
-    promoter_size = flank * 2 + 1
+    promoter_size = flank * 2
     counts_dict_bulk = np.zeros(promoter_size)
     # To count the number of reads in the promoter region.
     fragments_in_promoter_counter = defaultdict(set)
-    fragments_in_tss_counter = defaultdict(set)
+    reads_in_tss_counter = defaultdict(set)
+    reads_in_promoter_counter = defaultdict(set)
 
     # 100(flank)signal TSS +/- 50(101)flank(100) = 301
     # Follwoing ArchR heuristic.
     counts_dict = defaultdict(lambda: np.zeros(301))
 
-    bamfile = pysam.Samfile(bam_filename, "rb")
+    tabixfile = pysam.TabixFile(tabix_filename)
 
     for tss in tss_list:
+        #print(tss)
         # TSS example: ["chr", "start", "end", "strand"]
         # Create the promoter region by adding the upstream and downstream.
         promoter_start = int(tss[1]) - flank
-        promoter_end = int(tss[2]) + flank
+        promoter_end = int(tss[1]) + flank
         promoter_strand = tss[3]
-
+        counter=0
+        #if not(tss[0] == "chr1" and tss[1] == "24614812" and tss[2] == "24614813" and tss[3] == "-"):
+        #    continue
+        #print(f"{promoter_start}\t{promoter_end}\t{promoter_strand}")
         # Find all the fragments overlapping the promoter.
-        for read in bamfile.fetch(str(tss[0]), max(0,promoter_start), promoter_end):
-            # Check mapping quality
-            if read.mapq < mapq_threshold or read.flag & 16 == 16:# or read.get_tag(barcode_tag)!="TATGTGGCCAGATCTGTTAGGCAT":
-                continue # Ignore low quality reads and reverse (coordinate-wise second) read in pair.
-            fragment_start = read.pos + 4
-            # The -1 is needed to get the last accessible element because BED/BAM files are 0-based [s,e)
-            fragment_end = read.pos + read.tlen - 4
+        for fragment in tabixfile.fetch(str(tss[0]), max(0,promoter_start), promoter_end):
+
+            fragment_fields = fragment.split("\t")
+
+            fragment_contig = fragment_fields[0]
+            fragment_start = int(fragment_fields[1])
+            fragment_end = int(fragment_fields[2])
+            barcode = fragment_fields[3]
+
+            fragment_id = "-".join(fragment_fields)
+
+         #   if barcode != "TATGTGGCCAGATCTGTTAGGCAT":
+         #       continue
+
+            counter +=1
+
+
             fragment_length = fragment_end - fragment_start
 
             # Increment the counter for the specific barcode.
-            barcode = read.get_tag(barcode_tag)
-            fragments_in_promoter_counter[barcode].add(read.qname)
+            fragments_in_promoter_counter[barcode].add(fragment_id)
 
             # Update the array with the counts around the promoter.
             _add_read_to_dictionary(counts_dict_bulk,
@@ -102,8 +111,10 @@ def count_fragments_in_promoter(bam_filename,
                                     promoter_end,
                                     promoter_strand,
                                     barcode,
-                                    fragments_in_tss_counter,
-                                    read.qname)
+                                    reads_in_tss_counter,
+                                    reads_in_promoter_counter,
+                                    fragment_id,
+                                    "start")
 
             _add_read_to_dictionary(counts_dict_bulk,
                                     counts_dict,
@@ -112,12 +123,14 @@ def count_fragments_in_promoter(bam_filename,
                                     promoter_end,
                                     promoter_strand,
                                     barcode,
-                                    fragments_in_tss_counter,
-                                    read.qname)
-    print(len(fragments_in_promoter_counter["TATGTGGCCAGATCTGTTAGGCAT"]))
-    print(len(fragments_in_tss_counter["TATGTGGCCAGATCTGTTAGGCAT"]))
-    print(len(counts_dict_bulk))
-    return counts_dict_bulk, counts_dict, fragments_in_promoter_counter, fragments_in_tss_counter
+                                    reads_in_tss_counter,
+                                    reads_in_promoter_counter,
+                                    fragment_id,
+                                    "end")
+
+    #print(len(fragments_in_promoter_counter["TATGTGGCCAGATCTGTTAGGCAT"]))
+    #print(len(fragments_in_tss_counter["TATGTGGCCAGATCTGTTAGGCAT"]))
+    return counts_dict_bulk, counts_dict, fragments_in_promoter_counter, reads_in_tss_counter, reads_in_promoter_counter
 
 def _add_read_to_dictionary(fragment_counter,
                             fragment_counter_barcodes,
@@ -126,19 +139,23 @@ def _add_read_to_dictionary(fragment_counter,
                             promoter_end,
                             promoter_strand,
                             barcode,
-                            fragments_in_tss,
-                            qname
+                            reads_in_tss,
+                            reads_in_promoter,
+                            fragment_id,
+                            end
                             ):
     weight = 1
     if  fragment_position >= promoter_start and fragment_position <= promoter_end - 1:
         # We are adding to an array that covers each basepair from promoter_start to promoter_end.
         # This converts the genomic coordinates to the index that we need to update in the array.
         index = int(fragment_position - promoter_start) # 0-based
+        index_reduced = -1
 
         max_window = len(fragment_counter)-1 # max accessible array index
         tss_pos = int(max_window/2)
 
         add_count_to_barcode = False
+        add_count_to_barcode_tss = False
 
         if index >= 0 and index <= 99:
             index_reduced = index
@@ -152,6 +169,7 @@ def _add_read_to_dictionary(fragment_counter,
             # Find the center of the region with max_window/2+50
             index_reduced = int(index - (tss_pos - 50)) + 100
             add_count_to_barcode = True
+            add_count_to_barcode_tss = True
 
         # If the TSS is in the negative strand we need to add from the end.
         if promoter_strand == "-":
@@ -160,10 +178,13 @@ def _add_read_to_dictionary(fragment_counter,
                 index_reduced = 301 - index_reduced - 1
 
         # Finally update the dictionary
-        fragment_counter[index] += weight
+        fragment_counter[index] += weight # bulk tss enrichment
+        reads_in_promoter[barcode].add(fragment_id+end)
+
         if add_count_to_barcode:
-            fragment_counter_barcodes[barcode][index_reduced] += weight
-            fragments_in_tss[barcode].add(qname)
+            fragment_counter_barcodes[barcode][index_reduced] += weight # per barcode tss enrichment
+        if add_count_to_barcode_tss:
+            reads_in_tss[barcode].add(fragment_id)
     return
 
 def plot_tss_enrichment(raw_signal, smoothed_signal, out_file):
@@ -200,7 +221,7 @@ def compute_tss_enrichment_barcode(array_counts):
     # To avoid big TSS enrichment scores we use 0.2 as minimum. (Taken from ArchR).
     tss_enrichment = 2*reads_in_tss/101/max(0.2,normalization_factor)
 
-    return tss_enrichment
+    return tss_enrichment,reads_in_tss
 
 
 if __name__ == '__main__':
@@ -211,12 +232,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = msg)
 
     # Adding optional argument
-    parser.add_argument("bam", help= "Path to the coordinate-sorted bam file.")
+    parser.add_argument("tabix", help= "Fragments file in tabix format and indexed.")
     parser.add_argument("-e", help= "Number of bases to extend to each side. (default= 1000)", type= int, default= 2000)
     parser.add_argument("-s", help="Column with strand information; 1-based. (default= 4)", type= int, default= 4)
     parser.add_argument("-w", "--window", help= "Smoothing window size for plotting. (default= 20)", type= int, default= 20)
     parser.add_argument("--bc_tag", help = "Specify the tag containing the cell barcode.", default="CB")
-    parser.add_argument("--mapq_threshold", help= "Filter reads with a mapq value lower than the threshold.", type= int, default= 30)
     parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
     parser.add_argument("--tss", help= "TSS bed file")
 
@@ -233,21 +253,20 @@ if __name__ == '__main__':
     # Using column chr, start, end and what user input contains the strand information.
     tss_list = np.loadtxt(args.tss, 'str', usecols = (0,1,2,args.s-1))
 
-    bulk_counts, barcode_counts, stats, fragments_in_tss = count_fragments_in_promoter(args.bam,
-                                                                     tss_list,
-                                                                     flank= args.e,
-                                                                     barcode_tag = args.bc_tag,
-                                                                     mapq_threshold = args.mapq_threshold
-                                                                    )
+    bulk_counts, barcode_counts, stats, reads_in_tss, reads_in_promoter = count_fragments_in_promoter(args.tabix,
+                                                                                                      tss_list,
+                                                                                                      flank= args.e,
+                                                                                                      barcode_tag = args.bc_tag
+                                                                                                      )
 
     per_barcode_output = f"{args.prefix}.tss_enrichment_barcode_stats.tsv"
     tss_enrichment_plot_fnp = f"{args.prefix}.tss_enrichment_bulk.png"
 
     with open(per_barcode_output,"w") as out_file:
-        print(f"barcode\tfragments_promoter\treads_tss\ttss_enrichment", file=out_file)
+        print(f"barcode\tfragments_promoter\treads_tss\treads_promoter\ttss_enrichment", file=out_file)
         for barcode, fragments_in_promoter in stats.items():
-            tss_enrichment = compute_tss_enrichment_barcode(barcode_counts[barcode])
-            print(f"{barcode}\t{len(fragments_in_promoter)}\t{len(fragments_in_tss[barcode])}\t{tss_enrichment}", file=out_file)
+            tss_enrichment,reads_sum = compute_tss_enrichment_barcode(barcode_counts[barcode])
+            print(f"{barcode}\t{len(fragments_in_promoter)}\t{len(reads_in_tss[barcode])}\t{len(reads_in_promoter[barcode])}\t{tss_enrichment}\t{reads_sum}", file=out_file)
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:
         tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp)
