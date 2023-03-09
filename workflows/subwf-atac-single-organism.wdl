@@ -105,6 +105,8 @@ workflow wf_atac {
             queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
             mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
             mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
+            fragments = filter.atac_filter_fragments,
+            fragments_index = filter.atac_filter_fragments_index,
             peaks = peak_set,
             tss = tss_bed,
             mapq_threshold = mapq_threshold,
