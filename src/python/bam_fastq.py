@@ -128,6 +128,7 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
                         exact += 1
                     else:
                         good += 1
+                        
                     # add cell barcodes to queryname
                     qname_barcode = ",".join([R1,R2,R3,pkr_id])
                     qname = qname + "_" + qname_barcode
