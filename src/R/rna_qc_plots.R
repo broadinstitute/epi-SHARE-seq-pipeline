@@ -6,7 +6,7 @@
 ### and genes vs UMIs scatter plot.
 
 ## Import helper functions
-source("barcode_rank_functions.R")
+source("/usr/local/bin/barcode_rank_functions.R")
 
 ## Get arguments, read input
 args <- commandArgs()
