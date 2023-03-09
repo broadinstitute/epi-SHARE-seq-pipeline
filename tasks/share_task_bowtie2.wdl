@@ -98,7 +98,7 @@ task share_atac_align {
         else
             # Splitting the read name to ge the cell barcode and adding it to the CB tag in the BAM file.
             samtools view -h ~{unsorted_bam} | \
-            awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4]"SSPKR129");}}' | \
+            awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4] "_" a[5]);}}' | \
             samtools sort \
                 -@ ~{samtools_threads} \
                 -m ~{samtools_memory_per_thread}M \
