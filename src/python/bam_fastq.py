@@ -1,14 +1,38 @@
 #!/usr/bin/env python
 """
 Write paired end reads from unmapped BAM file to FASTQ files.
-Write only reads that match (given) barcodes within 
-mismatch tolerance.
+Write only reads that match (given) barcodes within mismatch tolerance.
+Output FASTQ files per sample based on splits of round 1 cell barcodes.
+
+The BAM file contains RX and QX tags with sequence and quality, respectively, 
+of the cell barcodes. The format is 10bp-10bp-9bp (dash separated) with the 
+round 1 cell barcode in the first position, the round 2 cell barcode in the
+second position, and the round 3 barcode in the third position. There is a 1 bp 
+shift tolerance on either side of the barcode, except for round 3, where the
+barcode is expected to be at the end. The expected location of the exact match 
+is in the center.
+
+The BAM file also contains an RG tag with the PKR identifier, so cells from the
+same PKR (giving rise to separate ATAC and RNA libraries) may be matched.
+
+The cell barcode and PKR id are added to the read name; for RNA, the UMI is 
+added as well. The read2 FASTQ for RNA contains the cell barcode and UMI.
+
+There are two FASTQ files written per sample as indicated by the round1 
+barcode set file. Each line of the barcode set file represents a barcode set.
+The first field is the name of the barcode set (e.g., 96-PLATE1-1st-THIRD) and 
+the following fields are the barcodes. If samples are not split on the plate,
+there will be only one line, with the first field as the name (e.g. 
+96-FULL-PLATE) and the following fields the barcodes; in the case of one 96 
+well plate, there will be 97 total fields on that one line. 
+
+The round2 and round3 barcode files can be the same as the round1 barcode file
+if the same barcodes are used for round2 and round3.
 
 @author Neva Durand (c) 2021
 """
 
 import argparse
-import Levenshtein
 import os
 import sys
 import pysam
@@ -40,6 +64,7 @@ def main(bam_file, r1_barcode_set_file, r2_barcode_file, r3_barcode_file,
 
     barcode_set_values = set(barcode_set.values())
 
+    # create file pointers from the round1 barcode set to write to
     left = dict()
     right = dict()
     for value in barcode_set_values:
@@ -70,6 +95,10 @@ def create_barcode_dict(barcode_list):
     return barcode_dict_exact, barcode_dict_mismatch    
 
 def create_barcode_set(file_path):
+    """
+    Create dictionary for looking up per round1 barcode which sample file
+    to write to
+    """    
     with open(file_path) as f:
         barcodeset = dict() # [seq: set_name]
         barcodelist = list() # [seq]
@@ -87,6 +116,16 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
                 barcode_set, sample_type, file_prefix):
     """
     Get reads from open BAM file and write them in pairs.
+    left / right are arrays containing file pointers to left "read1" and right 
+     "read2"
+    The dictionaries are the round1, round2, round3 exact and single mismatch 
+     hashtables
+    The barcode set dictates which file (from left/right) is written to based 
+     on the round1 barcode
+    sample_type is RNA or ATAC
+    file_prefix is for the QC stats output file; these stats indicate how many 
+     reads are lost to various complexity issues (homopolymers in first 10bp of 
+     read2, where UMI lives; homopolymers in cell barcode; cell barcode mismatch) 
     """
     
     qname = read_left = read_right = None
@@ -136,14 +175,11 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
                     if sample_type == 'ATAC':
                         read_left.query_name = qname
                         read_right.query_name = qname
-                        # trim adapters for ATAC
-                        where = trim(read_left.query_sequence, read_right.query_sequence)
                         # left and right contain open file pointers
                         # write read to correct file based on R1 barcode
-                        write_read(left[barcode_set[R1]], read_left, where)
-                        write_read(right[barcode_set[R1]], read_right, where)
+                        write_read(left[barcode_set[R1]], read_left)
+                        write_read(right[barcode_set[R1]], read_right)
                     elif sample_type == 'RNA':
-                        #umi_qual = ''.join(map(lambda x: chr( x+33 ), read_right.query_qualities[0:10]))
                         qname = qname + "_" + umi
                         read_left.query_name = qname
                         read_right.query_name = qname
@@ -163,8 +199,8 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
 
 def check_putative_barcode(barcode_str, barcode_dict_exact, barcode_dict_mismatch, quality_str):
     '''
-    Procedure: check exact match R1, then 1 mismatch, then 1bp left/right shift
-    
+    Procedure: check exact match of barcode, then 1 mismatch, then 1bp left/right
+     shift
     '''
     exact = True
     value = barcode_dict_exact.get(barcode_str[1:9]) # check exact location first
@@ -187,40 +223,7 @@ def check_putative_barcode(barcode_str, barcode_dict_exact, barcode_dict_mismatc
     return value, quality, exact
 
 
-def trim(seq1,seq2):
-    '''
-    Trim putative adapters in ATAC reads
-    This code is buggy (idx > 0) and ought to be verified
-    Not clear it's better than more standard adapter trimming
-    Need to check alignment stats
-    Also Levenshtein vs Hamming, speed & accuracy
-    '''
-    query = reverse_complement(seq2[0:20])
-    idx = seq1.rfind(query) # look for perfect match
-    if idx == -1:
-        idx = fuzz_align(query,seq1)
-    # found it, return everything through match
-    # NOTE: idx > 0 is incorrect
-    if idx > 0:
-        idx = idx+20-1
-    else:
-        idx = -1
-    return idx
-
-def fuzz_align(s_seq,l_seq):
-    '''
-    Check tradeoff using Hamming instead of Levenshtein
-    This iteration should go from the right end of l_seq
-    since we want to do a rfind 
-    '''
-    for i, base in enumerate(l_seq):  # loop through equal size windows
-        l_subset = l_seq[i:i+len(s_seq)]
-        dist = Levenshtein.distance(l_subset, s_seq)
-        if dist <= 1:  # find first then break
-            return i
-    return -1
-
-def write_read(fastq, read, idx=-1):
+def write_read(fastq, read):
     """
     Write read to open FASTQ file.
     """
@@ -233,9 +236,6 @@ def write_read(fastq, read, idx=-1):
     else:
         info.update({'quality':  read.qual,
                      'sequence': read.query_sequence})
-    if idx > -1:
-        info.update({'quality':  read.qual[0:idx],
-                    'sequence': read.query_sequence[0:idx]})
     fastq.write('@{name}\n{sequence}\n+\n{quality}\n'.format(**info))
 
 def reverse_complement(sequence):
