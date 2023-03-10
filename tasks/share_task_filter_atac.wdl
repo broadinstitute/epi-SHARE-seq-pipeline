@@ -158,7 +158,7 @@ task share_atac_filter {
 
         rm ~{tmp_fixmate_bam}
 
-        python3 $(which bam_to_fragments.py) --shift_plus ~{shift_plus} --shift_minus ~{shift_minus} --bc_tag ~{barcode_tag} -o ~{fragments} ~{final_bam}
+        python3 $(which bam_to_fragments.py) --shift_plus ~{shift_plus} --shift_minus ~{shift_minus} --bc_tag ~{barcode_tag_fragments} -o ~{fragments} ~{final_bam}
 
         bgzip -c ~{fragments} > ~{fragments}.gz
 
