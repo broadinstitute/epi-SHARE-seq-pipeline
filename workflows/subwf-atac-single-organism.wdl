@@ -108,7 +108,7 @@ workflow wf_atac {
             peaks = peak_set,
             tss = tss_bed,
             mapq_threshold = mapq_threshold,
-            barcode_tag = barcode_tag,
+            barcode_tag = barcode_tag_fragments,
             genome_name = genome_name,
             prefix = prefix,
             cpus = qc_cpus,
