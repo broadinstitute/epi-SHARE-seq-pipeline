@@ -167,7 +167,7 @@ task qc_atac {
         File atac_qc_tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
         File atac_qc_tss_enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
         File atac_qc_duplicate_stats = duplicate_stats
-        File atac_qc_fragments_in_peaks = "${prefix}.atac.qc.${genome_name}.fragments.in.peak.tsv"
+        File atac_qc_fragments_in_peaks = "${prefix}.atac.qc.${genome_name}.reads.in.peak.tsv"
 
         File atac_qc_barcode_metadata = final_barcode_metadata
 

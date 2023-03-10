@@ -113,4 +113,4 @@ if __name__ == '__main__':
     with open(output_fnp,"w") as out_file:
         print(f"barcode\treads_peaks\tfragment_peaks", file=out_file)
         for barcode,fragments_in_peak in fragments_in_peaks.items():
-            print(f"{barcode}\t{len(reads_in_peak[barcode])}\t{len(fragments_in_peak)}", file=out_file)
+            print(f"{barcode}\t{len(reads_in_peaks[barcode])}\t{len(fragments_in_peaks)}", file=out_file)
