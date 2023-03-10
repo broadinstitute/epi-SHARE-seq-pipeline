@@ -37,6 +37,7 @@ workflow wf_atac {
     }
 
     if ( trim_fastqs ){
+        # Remove dovetail in the ATAC reads.
         scatter (idx in range(length(read1))) {
             call share_task_trim.share_trim_fastqs_atac as trim{
                 input:
