@@ -149,7 +149,7 @@ task qc_atac {
         join -j 1  <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q;sort -k1,1)) <(cat ~{duplicate_stats} | (sed -u 1q;sort -k1,1)) | \
         join -j 1 - <(cat ~{prefix}.atac.qc.~{genome_name}.reads.in.peak.tsv | (sed -u 1q;sort -k1,1)) | \
         join -j 1 - <(cat ~{mito_metrics_barcode}| (sed -u 1q;sort -k1,1)) | \
-        awk -v FS=" " -v OFS="\t" 'NR==1{print $0,"pct_fragments_promoter","pct_fragments_peaks","pct_mito_reads"}NR>1{print $0,$2*100/($5/2),$8*100/($5/2),$10*100/($9+$10)}' > ~{final_barcode_metadata}
+        awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_fragments_promoter","pct_fragments_peaks","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
 
 
     >>>

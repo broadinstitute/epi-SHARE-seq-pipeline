@@ -38,7 +38,7 @@ workflow wf_atac {
         Int? align_cpus
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
-        String align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
+        String? align_docker_image
 
         # Filter-specific inputs
         ## Biological
@@ -49,7 +49,7 @@ workflow wf_atac {
         Int? filter_cpus = 16
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
-        String filter_docker_image = "polumechanos/share_atac_filter"
+        String? filter_docker_image
 
         # QC-specific inputs
         ## Biological
@@ -58,7 +58,7 @@ workflow wf_atac {
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
         Float? qc_memory_factor = 0.15
-        String qc_docker_image = "polumechanos/share_task_qc_atac"
+        String? qc_docker_image
     }
 
     call share_task_align.share_atac_align as align {
