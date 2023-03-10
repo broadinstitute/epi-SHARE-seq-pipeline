@@ -53,7 +53,7 @@ workflow wf_atac {
 
         # QC-specific inputs
         ## Biological
-        String? barcode_tag_fragments = "CB"
+        String? barcode_tag_fragments
         ## Runtime
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
@@ -83,7 +83,7 @@ workflow wf_atac {
             shift_plus = filter_shift_plus,
             shift_minus = filter_shift_minus,
             barcode_tag = barcode_tag,
-            barcode_tag_fragments = barcode_tag_fragments,
+            barcode_tag_fragments = select_first([barcode_tag_fragments,barcode_tag]),
             mapq_threshold = mapq_threshold,
             genome_name = genome_name,
             minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
@@ -108,7 +108,7 @@ workflow wf_atac {
             peaks = peak_set,
             tss = tss_bed,
             mapq_threshold = mapq_threshold,
-            barcode_tag = barcode_tag_fragments,
+            barcode_tag = select_first([barcode_tag_fragments,barcode_tag]),
             genome_name = genome_name,
             prefix = prefix,
             cpus = qc_cpus,
