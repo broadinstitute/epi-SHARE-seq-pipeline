@@ -38,7 +38,11 @@ if (length(umi_points) > 0) { # Elbow found in first plot
     umi_top_rank <- umi_rank[1:umi_points[1]]
     umi_top_umi <- umi_filtered_sort[1:umi_points[1]]
     is_top_top_ranked_umi <- factor(ifelse(umi_top_rank <= umi_points[3], 1, 0))
+  } else {
+    umi_plot2 <- FALSE
   }
+} else {
+  umi_plot1 <- FALSE
 }
 
 # Impose gene cutoff, sort in decreasing order, assign rank
@@ -57,7 +61,11 @@ if (length(gene_points) > 0) { # Elbow found in first plot
     gene_top_rank <- gene_rank[1:gene_points[1]]
     gene_top_gene <- gene_filtered_sort[1:gene_points[1]]
     is_top_top_ranked_gene <- factor(ifelse(gene_top_rank <= gene_points[3], 1, 0))
+  } else {
+    gene_plot2 <- FALSE
   }
+} else {
+  gene_plot1 <- FALSE
 }
 
 ## Generate plots

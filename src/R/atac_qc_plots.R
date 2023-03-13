@@ -34,7 +34,11 @@ if (length(fragment_points) > 0) { # Elbow found in first plot
     fragment_top_rank <- fragment_rank[1:fragment_points[1]]
     fragment_top_fragment <- fragment_filtered_sort[1:fragment_points[1]]
     is_top_top_ranked_fragment <- factor(ifelse(fragment_top_rank <= fragment_points[3], 1, 0))
+  } else {
+    fragment_plot2 <- FALSE
   }
+} else {
+    fragment_plot1 <- FALSE
 }
 
 ## Generate plots
