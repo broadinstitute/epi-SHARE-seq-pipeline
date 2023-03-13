@@ -99,7 +99,7 @@ elbow_knee_finder <- function(x, y, mode="basic") {
 # xy coordinates of first elbow/knee, and xy coordinates of second elbow/knee.
 get_elbow_knee_points <- function(x, y) {
   point_1 <- elbow_knee_finder(x, y, mode="basic")
-  if !(is.null(point_1)) {
+  if (!is.null(point_1)) {
     point_2 <- elbow_knee_finder(x[point_1[1]], y[point_1[1]], mode="advanced")
   }
   return(c(point_1, point_2))
