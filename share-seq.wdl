@@ -152,12 +152,13 @@ workflow ShareSeq {
                     filter_shift_minus = atac_filter_shift_minus,
                     filter_minimum_fragments_cutoff = atac_filter_minimum_fragments_cutoff,
                     mapq_threshold = atac_mapq_threshold,
-                    barcode_tag = atac_barcode_tag,
+                    barcode_tag = atac_barcode_tag
+
             }
         }
     }
 
-#    if ( process_atac && process_rna ) {
+    if ( process_atac && process_rna ) {
 #        if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
 #            call find_dorcs.wf_dorcs as dorcs{
 #                input:
@@ -185,14 +186,14 @@ workflow ShareSeq {
 #                    mem_gb = mem_gb_dorcs
 #            }
 #        }
-#        call joint_cell_calling.joint_cell_calling as joint {
-#            input:
-#                atac_barcode_metadata = atac.share_atac_archr_barcode_metadata,
-#                rna_barcode_metadata = rna.share_rna_seurat_barcode_metadata,
-#                prefix = prefix,
-#                genome_name = genome_name
-#        }
-#    }
+        call joint_qc.joint_qc_plotting as joint_qc {
+            input:
+                atac_barcode_metadata = atac.share_atac_barcode_metadata,
+                rna_barcode_metadata = rna.share_rna_barcode_metadata,
+                prefix = prefix,
+                genome_name = genome_name
+        }
+    }
 
 #    call html_report.html_report as html_report {
 #        input:
@@ -203,7 +204,7 @@ workflow ShareSeq {
 #            atac_duplicate_reads = atac.share_atac_duplicate_reads,
 #            rna_total_reads = rna.share_rna_total_reads,
 #            rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
-#              rna_aligned_multimap = rna.share_rna_aligned_multimap,
+#            rna_aligned_multimap = rna.share_rna_aligned_multimap,
 #            rna_unaligned = rna.share_rna_unaligned,
 #            rna_feature_reads = rna.share_rna_feature_reads,
 #            rna_duplicate_reads = rna.share_rna_duplicate_reads,
@@ -217,41 +218,41 @@ workflow ShareSeq {
 #    }
 
     output{
-#        File? share_rna_output_bam = rna.share_task_starsolo_output_bam
-#        File? share_rna_alignment_log = rna.share_task_starsolo_log_out
-#        File? share_rna_summary_stats = rna.share_task_starsolo_summary_csv
-#        File? share_rna_barcodes_stats = rna.share_task_starsolo_barcodes_stats
-#        File? share_rna_features_stats = rna.share_task_starsolo_features_stats
-#        File? share_rna_summary_csv = rna.share_task_starsolo_summary_csv
-#        File? share_rna_umi_per_cell = rna.share_task_starsolo_umi_per_cell
-#        File? share_rna_raw_tar = rna.share_task_starsolo_raw_tar
+        File? share_rna_output_bam = rna.share_task_starsolo_output_bam
+        File? share_rna_alignment_log = rna.share_task_starsolo_log_out
+        File? share_rna_summary_stats = rna.share_task_starsolo_summary_csv
+        File? share_rna_barcodes_stats = rna.share_task_starsolo_barcodes_stats
+        File? share_rna_features_stats = rna.share_task_starsolo_features_stats
+        File? share_rna_summary_csv = rna.share_task_starsolo_summary_csv
+        File? share_rna_umi_per_cell = rna.share_task_starsolo_umi_per_cell
+        File? share_rna_raw_tar = rna.share_task_starsolo_raw_tar
 
-#        File? share_rna_h5 = rna.share_rna_h5
+        File? share_rna_h5 = rna.share_rna_h5
 
-#        File? share_rna_barcode_metadata  = rna.share_rna_barcode_metadata
-#        File? share_rna_duplicates_log = rna.share_rna_duplicates_log
-#        File? share_rna_umi_barcode_rank_plot  = rna.share_rna_umi_barcode_rank_plot
-#        File? share_rna_gene_barcode_rank_plot = rna.share_rna_gene_barcode_rank_plot
-#        File? share_rna_gene_umi_scatter_plot = rna.share_rna_gene_umi_scatter_plot
+        File? share_rna_barcode_metadata  = rna.share_rna_barcode_metadata
+        File? share_rna_duplicates_log = rna.share_rna_duplicates_log
+        File? share_rna_umi_barcode_rank_plot  = rna.share_rna_umi_barcode_rank_plot
+        File? share_rna_gene_barcode_rank_plot = rna.share_rna_gene_barcode_rank_plot
+        File? share_rna_gene_umi_scatter_plot = rna.share_rna_gene_umi_scatter_plot
 
-#        File? share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
-#        File? share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
-#        File? share_rna_seurat_raw_violin_plot = rna.share_rna_seurat_raw_violin_plot
-#        File? share_rna_seurat_filtered_violin_plot = rna.share_rna_seurat_filtered_violin_plot
-#        File? share_rna_seurat_raw_qc_scatter_plot = rna.share_rna_seurat_raw_qc_scatter_plot
-#        File? share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot
-#        File? share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot
-#        File? share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot
-#        File? share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot
-#        File? share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot
-#        File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
-#        File? share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot
-#        File? share_rna_seurat_umap_cluster_plot = rna.share_rna_seurat_umap_cluster_plot
-#        File? share_rna_seurat_umap_rna_count_plot = rna.share_rna_seurat_umap_rna_count_plot
-#        File? share_rna_seurat_umap_gene_count_plot = rna.share_rna_seurat_umap_gene_count_plot
-#        File? share_rna_seurat_umap_mito_plot = rna.share_rna_seurat_umap_mito_plot
-#        File? share_rna_seurat_obj = rna.share_rna_seurat_obj
-#        File? share_rna_plots_zip = rna.share_rna_plots_zip3
+        File? share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
+        File? share_rna_seurat_notebook_log = rna.share_rna_seurat_notebook_log
+        File? share_rna_seurat_raw_violin_plot = rna.share_rna_seurat_raw_violin_plot
+        File? share_rna_seurat_filtered_violin_plot = rna.share_rna_seurat_filtered_violin_plot
+        File? share_rna_seurat_raw_qc_scatter_plot = rna.share_rna_seurat_raw_qc_scatter_plot
+        File? share_rna_seurat_filtered_qc_scatter_plot = rna.share_rna_seurat_filtered_qc_scatter_plot
+        File? share_rna_seurat_variable_genes_plot = rna.share_rna_seurat_variable_genes_plot
+        File? share_rna_seurat_PCA_dim_loadings_plot = rna.share_rna_seurat_PCA_dim_loadings_plot
+        File? share_rna_seurat_PCA_plot = rna.share_rna_seurat_PCA_plot
+        File? share_rna_seurat_heatmap_plot = rna.share_rna_seurat_heatmap_plot
+        File? share_rna_seurat_jackstraw_plot = rna.share_rna_seurat_jackstraw_plot
+        File? share_rna_seurat_elbow_plot = rna.share_rna_seurat_elbow_plot
+        File? share_rna_seurat_umap_cluster_plot = rna.share_rna_seurat_umap_cluster_plot
+        File? share_rna_seurat_umap_rna_count_plot = rna.share_rna_seurat_umap_rna_count_plot
+        File? share_rna_seurat_umap_gene_count_plot = rna.share_rna_seurat_umap_gene_count_plot
+        File? share_rna_seurat_umap_mito_plot = rna.share_rna_seurat_umap_mito_plot
+        File? share_rna_seurat_obj = rna.share_rna_seurat_obj
+        File? share_rna_plots_zip = rna.share_rna_plots_zip
 
         # Align
         File? share_atac_alignment_raw = atac.share_atac_alignment_raw
@@ -267,6 +268,8 @@ workflow ShareSeq {
         File? share_atac_filter_fragments = atac.share_atac_filter_fragments
         File? share_atac_filter_fragments_index = atac.share_atac_filter_fragments_index
 
+        # QC
+        File? share_atac_qc_barcode_metadata = atac.share_atac_barcode_metadata
 
 #        File? share_atac_alignment_filtered = atac.share_atac_alignment_filtered
 #        File? share_atac_alignment_filtered_index = atac.share_atac_alignment_filtered_index
@@ -307,9 +310,9 @@ workflow ShareSeq {
 #        File? dorcs_genes_summary = dorcs.dorcs_genes_summary
 #        File? dorcs_regions_summary = dorcs.dorcs_regions_summary
 
-#        File? joint_qc_plot = joint_qc.joint_qc_plot
-#        File? joint_density_plot = joint_qc.joint_density_plot
-#        File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
+        File? joint_qc_plot = joint_qc.joint_qc_plot
+        File? joint_density_plot = joint_qc.joint_density_plot
+        File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
 
 #        File? html_summary = html_report.html_report_file
     }

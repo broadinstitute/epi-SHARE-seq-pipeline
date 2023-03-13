@@ -17,7 +17,7 @@ workflow wf_atac {
     }
 
     input {
-        # ATAC Sub-worflow inputs
+        # ATAC sub-workflow inputs
         File chrom_sizes
         File tss_bed
         File peak_set
@@ -53,6 +53,11 @@ workflow wf_atac {
 
         # QC-specific inputs
         ## Biological
+        File? raw_bam
+        File? raw_bam_index
+        File? filtered_bam
+        File? filtered_bam_index
+        Int? qc_fragment_cutoff
         String? barcode_tag_fragments
         ## Runtime
         Int? qc_cpus = 16
@@ -107,6 +112,7 @@ workflow wf_atac {
             fragments_index = filter.atac_filter_fragments_index,
             peaks = peak_set,
             tss = tss_bed,
+            fragment_cutoff = qc_fragment_cutoff,
             mapq_threshold = mapq_threshold,
             barcode_tag = select_first([barcode_tag_fragments,barcode_tag]),
             genome_name = genome_name,
@@ -158,6 +164,7 @@ workflow wf_atac {
         File? share_atac_filter_mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode
 
         # QC
+        File share_atac_barcode_metadata = qc_atac.atac_qc_barcode_metadata
 #        File share_atac_qc_library_counts = qc_library.lib_size_counts
 #        File share_atac_qc_library_duplicates = qc_library.lib_size_log
 #        File share_atac_qc_library_plot = qc_library.plot

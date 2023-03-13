@@ -65,9 +65,8 @@ def get_metrics(bam):
         read_id = read.query_name
         read_id_barcode = read_id.split("_")[1]
         pkr = read_id_barcode.split(",")[3]
-        formatted = barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + pkr
+        formatted = barcode + "_" + pkr
         formatted_barcodes[barcode] = formatted
-    
     # count unique genes per barcode
     genes_per_barcode = {barcode:len(set(gene_list)) for (barcode, gene_list) in genes.items()}
     
