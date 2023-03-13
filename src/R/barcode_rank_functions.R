@@ -100,7 +100,7 @@ elbow_knee_finder <- function(x, y, mode="basic") {
 get_elbow_knee_points <- function(x, y) {
   point_1 <- elbow_knee_finder(x, y, mode="basic")
   if (!is.null(point_1)) {
-    point_2 <- elbow_knee_finder(x[point_1[1]], y[point_1[1]], mode="advanced")
+    point_2 <- elbow_knee_finder(x[1:point_1[1]], y[1:point_1[1]], mode="advanced")
   }
   return(c(point_1, point_2))
 }

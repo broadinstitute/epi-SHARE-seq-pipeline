@@ -14,7 +14,6 @@ workflows:
              - insert_size_hist
              - barcode_plot_annotations
              - atac-refactoring
-             - atac-refactoring-qc-plots
          tags:
              - /.*/
 
