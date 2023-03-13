@@ -111,10 +111,10 @@ task share_atac_align {
     >>>
 
     output {
-        File? atac_alignment = sorted_bam
-        File? atac_alignment_index = sorted_bai
-        File? atac_alignment_log = alignment_log
-        File? atac_alignment_monitor_log = monitor_log
+        File atac_alignment = sorted_bam
+        File atac_alignment_index = sorted_bai
+        File atac_alignment_log = alignment_log
+        File atac_alignment_monitor_log = monitor_log
     }
 
     runtime {

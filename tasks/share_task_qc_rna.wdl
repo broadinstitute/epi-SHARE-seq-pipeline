@@ -15,14 +15,14 @@ task qc_rna {
         File bam
         Int? umi_cutoff = 10
         Int? gene_cutoff = 10
+        String chemistry
         String genome_name
         String? prefix
-        
+
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 1.5
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
-        String docker_image = "mknudson/share_task_qc_rna"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
     }
 
     # Determine the size of the input
@@ -52,16 +52,16 @@ task qc_rna {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Index bam file
-        samtools index -@ ~{cpus} ~{bam} ~{bai} 
-         
+        samtools index -@ ~{cpus} ~{bam} ~{bai}
+
         # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
-        python3 $(which rna_barcode_metadata.py) ~{bam} ~{bai} ~{barcode_metadata}
-    
+        python3 $(which rna_barcode_metadata.py) ~{chemistry} ~{bam} ~{bai} ~{barcode_metadata}
+
         # Make duplicates log from barcode metadata file
         awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
-        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_cutoff} ~{gene_cutoff} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot} 
+        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_cutoff} ~{gene_cutoff} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot}
     >>>
 
     output {
@@ -69,7 +69,7 @@ task qc_rna {
         File rna_duplicates_log = "~{duplicates_log}"
         File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
         File? rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
-        File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"   
+        File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"
     }
 
     runtime {
@@ -96,6 +96,11 @@ task qc_rna {
                 description: 'Gene cutoff',
                 help: 'Cutoff for number of genes required when making gene barcode rank plot.',
                 example: 10
+            }
+        chemistry: {
+                description: 'Experiment chemistry',
+                help: 'Chemistry/method used in the experiment.',
+                examples: ['shareseq', '10x_v2', '10x_v3']
             }
         genome_name: {
                 description: 'Reference name',

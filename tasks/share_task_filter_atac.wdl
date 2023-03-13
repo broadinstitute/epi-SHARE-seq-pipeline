@@ -174,7 +174,7 @@ task share_atac_filter {
         File? atac_filter_alignment_wdup = final_bam_wdup
         File? atac_filter_alignment_wdup_index = final_bam_wdup_index
         File? atac_filter_alignment_dedup_queryname = queryname_final_bam
-        File? atac_filter_fragments = "~{fragments}.gz"
+        File atac_filter_fragments = "~{fragments}.gz"
         File? atac_filter_fragments_index = "~{fragments}.gz.tbi"
         File? atac_filter_monitor_log = monitor_log
         File? atac_filter_picard_duplicates_metrics = picard_mark_duplicates_metrics

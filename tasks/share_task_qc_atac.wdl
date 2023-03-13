@@ -121,7 +121,6 @@ task qc_atac {
         python3 $(which qc_atac_count_duplicates_per_barcode.py) \
             -o ~{duplicate_stats} \
             --bc_tag ~{barcode_tag} \
-            --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.filtered.bam
 
         # Fragments in peaks

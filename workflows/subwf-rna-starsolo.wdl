@@ -1,10 +1,10 @@
 version 1.0
 
+import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
+import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
-import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
-import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 
 # Import the tasks called by the pipeline
 workflow wf_rna {
@@ -18,40 +18,43 @@ workflow wf_rna {
         # RNA Sub-workflow inputs
 
         # Align
+        String chemistry
         Array[File] read1
         Array[File] read2
+        File? whitelist
         File idx_tar
-        String prefix = "shareseq-project"
+        String prefix
         String genome_name
         Int? cpus = 16
         String? docker
-        File whitelist
         # QC
         Int? umi_cutoff
         Int? gene_cutoff
-        
+
         # Seurat
         Boolean count_only = false
-        
+
         #Seurat filtering parameters
         Int? rna_seurat_min_features
         Float? rna_seurat_percent_mt
         Int? rna_seurat_min_cells
-        
+
         #Seurat UMAP
         Int? rna_seurat_umap_dim
         Float? rna_seurat_umap_resolution
-        
+
         # Seurat runtime parameters
-        Float? rna_seurat_disk_factor 
+        Float? rna_seurat_disk_factor
         Float? rna_seurat_memory_factor
-        
+
     }
 
     call share_task_starsolo.share_rna_align as align {
         input:
+            chemistry = chemistry,
             fastq_R1 = read1,
             fastq_R2 = read2,
+            whitelist = whitelist,
             genome_name = genome_name,
             genome_index_tar = idx_tar,
             prefix = prefix,
@@ -70,6 +73,7 @@ workflow wf_rna {
             bam = align.output_bam,
             umi_cutoff = umi_cutoff,
             gene_cutoff = gene_cutoff,
+            chemistry = chemistry,
             genome_name = genome_name,
             prefix = prefix
     }
