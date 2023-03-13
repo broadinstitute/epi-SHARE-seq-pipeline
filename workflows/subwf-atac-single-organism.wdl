@@ -38,7 +38,7 @@ workflow wf_atac {
         Int? align_cpus
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
-        String align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
+        String? align_docker_image
 
         # Filter-specific inputs
         ## Biological
@@ -49,7 +49,7 @@ workflow wf_atac {
         Int? filter_cpus = 16
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
-        String filter_docker_image = "polumechanos/share_atac_filter"
+        String? filter_docker_image
 
         # QC-specific inputs
         ## Biological
@@ -58,11 +58,12 @@ workflow wf_atac {
         File? filtered_bam
         File? filtered_bam_index
         Int? qc_fragment_cutoff
+        String? barcode_tag_fragments
         ## Runtime
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
         Float? qc_memory_factor = 0.15
-        String qc_docker_image = "polumechanos/share_task_qc_atac"
+        String? qc_docker_image
     }
 
     call share_task_align.share_atac_align as align {
@@ -87,6 +88,7 @@ workflow wf_atac {
             shift_plus = filter_shift_plus,
             shift_minus = filter_shift_minus,
             barcode_tag = barcode_tag,
+            barcode_tag_fragments = select_first([barcode_tag_fragments,barcode_tag]),
             mapq_threshold = mapq_threshold,
             genome_name = genome_name,
             minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
@@ -106,11 +108,13 @@ workflow wf_atac {
             queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
             mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
             mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
+            fragments = filter.atac_filter_fragments,
+            fragments_index = filter.atac_filter_fragments_index,
             peaks = peak_set,
             tss = tss_bed,
             fragment_cutoff = qc_fragment_cutoff,
             mapq_threshold = mapq_threshold,
-            barcode_tag = barcode_tag,
+            barcode_tag = select_first([barcode_tag_fragments,barcode_tag]),
             genome_name = genome_name,
             prefix = prefix,
             cpus = qc_cpus,

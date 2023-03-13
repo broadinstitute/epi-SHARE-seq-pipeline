@@ -29,11 +29,7 @@ workflow ShareSeq {
         String? atac_barcode_tag = "CB"
 
         # ATAC - Align
-        Float? atac_align_disk_factor
-        Float? atac_align_memory_factor
-        Int? atac_align_cpus
         Int? atac_align_multimappers
-        String atac_align_docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
 
         # ATAC - Filter
         ## Biological
@@ -163,10 +159,6 @@ workflow ShareSeq {
                     cpus = cpus_atac,
                     # Align
                     align_multimappers = atac_align_multimappers,
-                    align_cpus = atac_align_cpus,
-                    align_disk_factor = atac_align_disk_factor,
-                    align_docker_image = atac_align_docker_image,
-                    align_memory_factor = atac_align_memory_factor,
 
                     # Filter
                     filter_shift_plus = atac_filter_shift_plus,

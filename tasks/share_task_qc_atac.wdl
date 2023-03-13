@@ -18,6 +18,8 @@ task qc_atac {
         File? raw_bam_index
         File? filtered_bam
         File? filtered_bam_index
+        File? fragments
+        File? fragments_index
         File? queryname_final_bam
         File? mito_metrics_bulk # From filter step
         File? mito_metrics_barcode # From filter step
@@ -93,6 +95,8 @@ task qc_atac {
         ln -s ~{raw_bam_index} in.raw.bam.bai
         ln -s ~{filtered_bam} in.filtered.bam
         ln -s ~{filtered_bam_index} in.filtered.bam.bai
+        ln -s ~{fragments} in.fragments.tsv.gz
+        ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
 
         # samstats raw
         # output of bowtie2
@@ -110,10 +114,8 @@ task qc_atac {
         python3 $(which qc_atac_compute_tss_enrichment.py) \
             -e 2000 \
             --tss ~{tss} \
-            --bc_tag ~{barcode_tag} \
-            --mapq_threshold ~{mapq_threshold} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
-            in.filtered.bam
+            in.fragments.tsv.gz
 
         # Duplicates per barcode
         python3 $(which qc_atac_count_duplicates_per_barcode.py) \
@@ -123,13 +125,11 @@ task qc_atac {
             in.filtered.bam
 
         # Fragments in peaks
-        # "~{prefix}.fragments.in.peak.tsv"
-        python3 $(which qc_atac_compute_fragments_in_peaks.py) \
+        # "~{prefix}.reads.in.peak.tsv"
+        python3 $(which qc_atac_compute_reads_in_peaks.py) \
             --peaks ~{peaks} \
-            --mapq_threshold ~{mapq_threshold} \
-            --bc_tag ~{barcode_tag} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
-            in.filtered.bam
+            in.fragments.tsv.gz
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ~{stats_log}
         samtools idxstats -@ ~{samtools_threads} in.raw.bam >> ~{stats_log}
@@ -149,9 +149,9 @@ task qc_atac {
         python3 $(which plot_insert_size_hist.py) ~{hist_log} ~{prefix} ~{hist_log_png}
 
         join -j 1  <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q;sort -k1,1)) <(cat ~{duplicate_stats} | (sed -u 1q;sort -k1,1)) | \
-        join -j 1 - <(cat ~{prefix}.atac.qc.~{genome_name}.fragments.in.peak.tsv | (sed -u 1q;sort -k1,1)) | \
+        join -j 1 - <(cat ~{prefix}.atac.qc.~{genome_name}.reads.in.peak.tsv | (sed -u 1q;sort -k1,1)) | \
         join -j 1 - <(cat ~{mito_metrics_barcode}| (sed -u 1q;sort -k1,1)) | \
-        awk -v FS=" " -v OFS="\t" 'NR==1{print $0,"pct_fragments_promoter","pct_fragments_peaks","pct_mito_reads"}NR>1{print $0,$2*100/($5/2),$8*100/($5/2),$10*100/($9+$10)}' > ~{final_barcode_metadata}
+        awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_fragments_promoter","pct_fragments_peaks","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
 
         # Barcode rank plot
         Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_cutoff} ~{fragment_barcode_rank_plot}
@@ -170,7 +170,7 @@ task qc_atac {
         File atac_qc_tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
         File atac_qc_tss_enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
         File atac_qc_duplicate_stats = duplicate_stats
-        File atac_qc_fragments_in_peaks = "${prefix}.atac.qc.${genome_name}.fragments.in.peak.tsv"
+        File atac_qc_fragments_in_peaks = "${prefix}.atac.qc.${genome_name}.reads.in.peak.tsv"
 
         File atac_qc_barcode_metadata = final_barcode_metadata
 

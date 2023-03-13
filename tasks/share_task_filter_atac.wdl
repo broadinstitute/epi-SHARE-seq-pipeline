@@ -24,6 +24,7 @@ task share_atac_filter {
         File? bam
         File? bam_index
         String? barcode_tag = "CB"
+        String? barcode_tag_fragments = "CB"
         String genome_name
         String? prefix = "sample"
         ## Runtime
@@ -100,7 +101,7 @@ task share_atac_filter {
         # "{prefix}.mito.bulk-metrics.tsv"
         # "{prefix}.mito.bc-metrics.tsv"
         # The script removes the mithocondrial reads and creates two log file with bulk and barcode statistics.
-        python3 $(which filter_mito_reads.py) -o ~{non_mito_bam} -p ~{cpus} --cutoff ~{minimum_fragments_cutoff} --prefix ~{prefix} --bc_tag ~{barcode_tag} in.bam
+        python3 $(which filter_mito_reads.py) -o ~{non_mito_bam} -p ~{cpus} --cutoff ~{minimum_fragments_cutoff} --prefix ~{prefix} --bc_tag ~{barcode_tag_fragments} in.bam
 
 
         samtools index ~{non_mito_bam}
