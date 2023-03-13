@@ -36,19 +36,6 @@ workflow ShareSeq {
         Int? atac_filter_minimum_fragments_cutoff = 1
         Int? atac_filter_shift_plus = 4
         Int? atac_filter_shift_minus = -4
-        ## Runtime
-        Int? atac_filter_cpus = 16
-        Float? atac_filter_disk_factor = 8.0
-        Float? atac_filter_memory_factor = 0.15
-        String atac_filter_docker_image = "polumechanos/share_atac_filter"
-
-        # ATAC - QC
-        Int? atac_qc_fragment_cutoff = 100
-        ## Runtime
-        Int? atac_qc_cpus = 16
-        Float? atac_qc_disk_factor = 8.0
-        Float? atac_qc_memory_factor = 0.15
-        String atac_qc_docker_image = "polumechanos/share_task_qc_atac"
 
 
 
@@ -165,18 +152,7 @@ workflow ShareSeq {
                     filter_shift_minus = atac_filter_shift_minus,
                     filter_minimum_fragments_cutoff = atac_filter_minimum_fragments_cutoff,
                     mapq_threshold = atac_mapq_threshold,
-                    barcode_tag = atac_barcode_tag,
-                    filter_cpus = atac_filter_cpus,
-                    filter_disk_factor = atac_filter_disk_factor,
-                    filter_docker_image = atac_filter_docker_image,
-                    filter_memory_factor = atac_filter_memory_factor,
-
-                    # QC
-                    qc_fragment_cutoff = atac_qc_fragment_cutoff, 
-                    qc_cpus = atac_qc_cpus,
-                    qc_disk_factor = atac_qc_disk_factor,
-                    qc_memory_factor = atac_qc_memory_factor,
-                    qc_docker_image = atac_qc_docker_image
+                    barcode_tag = atac_barcode_tag
 
             }
         }
