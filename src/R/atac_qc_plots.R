@@ -3,7 +3,7 @@
 ### Takes ATAC barcode metadata tsv file, and outputs barcode rank plots as a png file.
 
 ## Import helper functions
-source(barcode_rank_functions.R)
+source("/usr/local/bin/barcode_rank_functions.R")
 
 ## Get arguments, read input
 args <- commandArgs()
