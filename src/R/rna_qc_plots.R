@@ -6,7 +6,7 @@
 ### and genes vs UMIs scatter plot.
 
 ## Import helper functions
-source("/usr/local/bin/barcode_rank_functions.R")
+source("barcode_rank_functions.R")
 
 ## Get arguments, read input
 args <- commandArgs()
@@ -27,28 +27,18 @@ umi_filtered <- barcode_metadata$umis[barcode_metadata$umis >= umi_cutoff]
 umi_filtered_sort <- sort(umi_filtered, decreasing=T)
 umi_rank <- 1:length(umi_filtered_sort)
 
-# Find elbow of UMI barcode rank plot
-umi_elbow <- elbow_knee_finder(x=umi_rank, y=log10(umi_filtered_sort), mode="basic")
-# Set flag for whether elbow was found or not 
-umi_plot1 <- ifelse(is.null(umi_elbow), FALSE, TRUE)
-# If elbow was found, make factor for coloring plot points and proceed to find elbow/knee
-# of top-ranked UMI barcode rank plot
-if (umi_plot1) {
-  is_top_ranked_umi <- factor(ifelse(umi_rank <= umi_elbow[1], 1, 0))
-  
-  umi_top_rank <- umi_rank[1:umi_elbow[1]]
-  umi_top_umi <- umi_filtered_sort[1:umi_elbow[1]]
-  umi_point <- elbow_knee_finder(x=umi_top_rank, y=log10(umi_top_umi), mode="advanced")
-  
-  # Set flag for whether elbow/knee was found or not
-  umi_plot2 <- ifelse(is.null(umi_point), FALSE, TRUE)
-  # If yes, make factor for coloring plot points
-  if (umi_plot2) {
-    is_top_top_ranked_umi <- factor(ifelse(umi_top_rank <= umi_point[1], 1, 0))
+# Find elbow/knee of UMI barcode rank plot and top-ranked UMI barcode rank plot
+umi_points <- get_elbow_knee_points(x=umi_rank, y=log10(umi_filtered_sort))
+# For each valid plot, make factor for coloring plot points
+if (length(umi_points) > 0) { # Elbow found in first plot
+  umi_plot1 <- TRUE
+  is_top_ranked_umi <- factor(ifelse(umi_rank <= umi_points[1], 1, 0))
+  if (length(umi_points) > 2) { # Elbow/knee found in second plot
+    umi_plot2 <- TRUE
+    umi_top_rank <- umi_rank[1:umi_points[1]]
+    umi_top_umi <- umi_filtered_sort[1:umi_points[1]]
+    is_top_top_ranked_umi <- factor(ifelse(umi_top_rank <= umi_points[3], 1, 0))
   }
-} else {
-  # If elbow not found previously, don't make top-ranked UMI barcode rank plot
-  umi_plot2 = FALSE
 }
 
 # Impose gene cutoff, sort in decreasing order, assign rank
@@ -56,30 +46,19 @@ gene_filtered <- barcode_metadata$genes[barcode_metadata$genes >= gene_cutoff]
 gene_filtered_sort <- sort(gene_filtered, decreasing=T)
 gene_rank <- 1:length(gene_filtered_sort)
 
-# Find elbow of gene barcode rank plot, make factor for coloring points
-gene_elbow <- elbow_knee_finder(x=gene_rank, y=log10(gene_filtered_sort), mode="basic")
-# Set flag for whether elbow was found or not 
-gene_plot1 <- ifelse(is.null(gene_elbow), FALSE, TRUE)
-# If elbow was found, make factor for coloring plot points and proceed to find elbow/knee
-# of top-ranked gene barcode rank plot
-if (gene_plot1) {
-  is_top_ranked_gene <- factor(ifelse(gene_rank <= gene_elbow[1], 1, 0))
-  
-  gene_top_rank <- gene_rank[1:gene_elbow[1]]
-  gene_top_gene <- gene_filtered_sort[1:gene_elbow[1]]
-  gene_point <- elbow_knee_finder(x=gene_top_rank, y=log10(gene_top_gene), mode="advanced")
-  
-  # Set flag for whether elbow/knee was found or not
-  gene_plot2 <- ifelse(is.null(gene_point), FALSE, TRUE)
-  # If yes, make factor for coloring plot points
-  if (gene_plot2) {
-    is_top_top_ranked_gene <- factor(ifelse(gene_top_rank <= gene_point[1], 1, 0))
+# Find elbow/knee of gene barcode rank plot and top-ranked gene barcode rank plot
+gene_points <- get_elbow_knee_points(x=gene_rank, y=log10(gene_filtered_sort))
+# For each valid plot, make factor for coloring plot points
+if (length(gene_points) > 0) { # Elbow found in first plot
+  gene_plot1 <- TRUE
+  is_top_ranked_gene <- factor(ifelse(gene_rank <= gene_points[1], 1, 0))
+  if (length(gene_points) > 2) { # Elbow/knee found in second plot
+    gene_plot2 <- TRUE
+    gene_top_rank <- gene_rank[1:gene_points[1]]
+    gene_top_gene <- gene_filtered_sort[1:gene_points[1]]
+    is_top_top_ranked_gene <- factor(ifelse(gene_top_rank <= gene_points[3], 1, 0))
   }
-} else {
-  # If elbow not found previously, don't make top-ranked UMI barcode rank plot
-  gene_plot2 = FALSE
 }
-
 
 ## Generate plots
 
@@ -94,15 +73,15 @@ if (umi_plot1) {
   plot(x=umi_rank,
        y=umi_filtered_sort,
        log="y",
-       xlab=paste0(" Barcode rank (", length(umi_rank)-umi_elbow[1], " low quality cells)"), 
+       xlab=paste0(" Barcode rank (", length(umi_rank)-umi_points[1], " low quality cells)"), 
        ylab="log10(UMIs)",
        main="RNA UMIs per Barcode", 
        col=c("dimgrey","darkblue")[is_top_ranked_umi], 
        pch=16,
        ylim=c(1,100000))
-  abline(v=umi_elbow[1], h=10^(umi_elbow[2]))
-  text(umi_elbow[1], 10^(umi_elbow[2]),
-       paste0("(", umi_elbow[1], ", ", 10^(umi_elbow[2]), ")"),
+  abline(v=umi_points[1], h=10^(umi_points[2]))
+  text(umi_points[1], 10^(umi_points[2]),
+       paste0("(", umi_points[1], ", ", 10^(umi_points[2]), ")"),
        adj=c(-0.1,-0.5))
 }
 
@@ -117,9 +96,9 @@ if (umi_plot2) {
        col=c("dimgrey","darkblue")[is_top_top_ranked_umi],
        pch=16,
        ylim=c(1,100000))
-  abline(v=umi_point[1], h=10^(umi_point[2]))
-  text(umi_point[1], 10^(umi_point[2]),
-       paste("(", umi_point[1], ", ", 10^(umi_point[2]), ")", sep=""),
+  abline(v=umi_points[3], h=10^(umi_points[4]))
+  text(umi_points[3], 10^(umi_points[4]),
+       paste("(", umi_points[3], ", ", 10^(umi_points[4]), ")", sep=""),
        adj=c(-0.1,-0.5))
 }
 dev.off()
@@ -134,15 +113,15 @@ if (gene_plot1) {
   plot(x=gene_rank,
        y=gene_filtered_sort,
        log="y",
-       xlab=paste0(" Barcode rank (", length(gene_rank)-gene_elbow[1], " low quality cells)"), 
+       xlab=paste0(" Barcode rank (", length(gene_rank)-gene_points[1], " low quality cells)"), 
        ylab="log10(genes)",
        main="RNA Genes per Barcode", 
        col=c("dimgrey","darkblue")[is_top_ranked_gene], 
        pch=16,
        ylim=c(1,10000))
-  abline(v=gene_elbow[1], h=10^(gene_elbow[2]))
-  text(gene_elbow[1], 10^(gene_elbow[2]),
-       paste0("(", gene_elbow[1], ", ", 10^(gene_elbow[2]), ")"),
+  abline(v=gene_points[1], h=10^(gene_points[2]))
+  text(gene_points[1], 10^(gene_points[2]),
+       paste0("(", gene_points[1], ", ", 10^(gene_points[2]), ")"),
        adj=c(-0.1,-0.5))
 }
 
@@ -157,9 +136,9 @@ if (gene_plot2) {
        col=c("dimgrey","darkblue")[is_top_top_ranked_gene],
        pch=16,
        ylim=c(1,10000))
-  abline(v=gene_point[1], h=10^(gene_point[2]))
-  text(gene_point[1], 10^(gene_point[2]),
-       paste("(", gene_point[1], ", ", 10^(gene_point[2]), ")", sep=""),
+  abline(v=gene_points[3], h=10^(gene_points[4]))
+  text(gene_points[3], 10^(gene_points[4]),
+       paste("(", gene_points[3], ", ", 10^(gene_points[4]), ")", sep=""),
        adj=c(-0.1,-0.5))
 }
 dev.off()

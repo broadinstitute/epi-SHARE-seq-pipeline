@@ -91,3 +91,16 @@ elbow_knee_finder <- function(x, y, mode="basic") {
   
   return(c(x_max_dist, y_max_dist))
 }
+
+# Function to find the elbow/knee of a plot, and the elbow/knee of the points 
+# before the first elbow/knee (i.e. elbow/knee of all barcodes, and elbow/knee
+# of top-ranked barcodes).
+# Takes in xy coordinates of the plot and returns vector of four coordinates:
+# xy coordinates of first elbow/knee, and xy coordinates of second elbow/knee.
+get_elbow_knee_points <- function(x, y) {
+  point_1 <- elbow_knee_finder(x, y, mode="basic")
+  if !(is.null(point_1)) {
+    point_2 <- elbow_knee_finder(x[point_1[1]], y[point_1[1]], mode="advanced")
+  }
+  return(c(point_1, point_2))
+}
