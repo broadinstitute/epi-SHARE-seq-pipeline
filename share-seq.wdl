@@ -46,9 +46,6 @@ workflow ShareSeq {
         # RNA-specific inputs
         Array[File] read1_rna
         Array[File] read2_rna
-        #Int? umi_cutoff = 100
-        #Int? gene_cutoff = 100
-        #Int? cpus_rna
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -56,32 +53,11 @@ workflow ShareSeq {
 
         String? gene_naming = "gene_name"
 
-        # Seurat
-        Int? rna_seurat_min_features = 200
-        Int? rna_seurat_max_features = 2500 #currently not used in Seurat, but used in DORCs
-        Float? rna_seurat_percent_mt = 5
-        Int? rna_seurat_min_cells = 3
-        Int? rna_seurat_umap_dim
-        Float? rna_seurat_umap_resolution
-        Float? rna_seurat_disk_factor
-        Float? rna_seurat_memory_factor
-
         # DORCs specific inputs
         File? peak_set
         #Int? cpus_dorcs
         #String save_plots_to_dir = "TRUE"
         #String? dorcs_output_filename
-
-        # DORCs filter
-        #Int dorcGeneCutOff = 10
-        #Float fripCutOff = 0.3
-        #Float corrPVal = 0.05
-        #Int topNGene = 20
-        # Regulatory region around TSS. Default is +/- 50Kb
-        Int windowPadSize = 50000
-        #Int bootstraps = 100
-        #String docker_image_dorcs = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
-        #Int? mem_gb_dorcs
 
         # Joint qc
         Int remove_low_yielding_cells = 10
@@ -121,16 +97,6 @@ workflow ShareSeq {
                     prefix = prefix,
                     genome_name = genome_name,
                     count_only = count_only
-                    #umi_cutoff = umi_cutoff,
-                    #gene_cutoff = gene_cutoff,
-                    #cpus = cpus_rna,
-                    #rna_seurat_min_features = rna_seurat_min_features,
-                    #rna_seurat_percent_mt = rna_seurat_percent_mt,
-                    #rna_seurat_min_cells = rna_seurat_min_cells,
-                    #rna_seurat_umap_dim = rna_seurat_umap_dim,
-                    #rna_seurat_umap_resolution = rna_seurat_umap_resolution,
-                    #rna_seurat_disk_factor = rna_seurat_disk_factor,
-                    #rna_seurat_memory_factor = rna_seurat_memory_factor
             }
         }
     }
@@ -173,25 +139,8 @@ workflow ShareSeq {
                     rna_matrix = rna.share_rna_h5,
                     atac_fragments = atac.share_atac_filter_fragments,
                     peak_file = peak_set_,
-
                     genome = genome_name,
-                    #n_cores = cpus_dorcs,
-                    #save_plots_to_dir = save_plots_to_dir,
-                    #output_filename = dorcs_output_filename,
                     prefix = prefix
-
-                    #minFeature_RNA = minFeature_RNA,
-                    #maxFeature_RNA = maxFeature_RNA,
-                    #percentMT_RNA = percentMT_RNA,
-                    #minCells_RNA = minCells_RNA,
-
-                    #dorcGeneCutOff = dorcGeneCutOff,
-                    #fripCutOff = fripCutOff,
-                    #corrPVal = corrPVal,
-                    #topNGene = topNGene,
-
-                    #windowPadSize = windowPadSize,
-                    #mem_gb = mem_gb_dorcs
             }
         }
         call joint_qc.joint_qc_plotting as joint_qc {

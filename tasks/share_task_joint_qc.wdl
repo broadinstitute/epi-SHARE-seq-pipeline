@@ -12,21 +12,21 @@ task joint_qc_plotting {
     }
 
     input {
-        # This task generates a plot of barcodes QC'd jointly by RNA and ATAC metrics, as well as a 
+        # This task generates a plot of barcodes QC'd jointly by RNA and ATAC metrics, as well as a
         # density plot of all barcodes passing at least one filter.
         File? atac_barcode_metadata
         File? rna_barcode_metadata
         Int remove_low_yielding_cells = 10
-	Int min_umis = 100
+        Int min_umis = 100
         Int min_genes = 200
         Int min_tss = 4
         Int min_frags = 100
-        
+
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
 
         String? prefix
-        String genome_name 
+        String genome_name
 
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
         String docker_image = "mknudson/share_task_joint_qc"

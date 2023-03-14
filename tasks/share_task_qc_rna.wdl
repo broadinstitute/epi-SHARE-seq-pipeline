@@ -13,8 +13,8 @@ task qc_rna {
     input {
         # This function takes in input the sorted bam file produced by STARsolo
         File bam
-        Int? umi_cutoff = 10
-        Int? gene_cutoff = 10
+        Int? umi_cutoff = 100
+        Int? gene_cutoff = 100
         String genome_name
         String? prefix
 
