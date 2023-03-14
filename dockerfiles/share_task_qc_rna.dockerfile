@@ -32,7 +32,8 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     python3 \
     python3-dev \
-    python3-pip \ 
+    python3-full \
+    python3-pip \
     wget \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
@@ -42,8 +43,7 @@ RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/sa
     git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
     cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
-# Install python packages
-RUN pip install --no-cache-dir pysam
+
 
 # Create and setup new user
 ENV USER=shareseq
@@ -51,6 +51,9 @@ WORKDIR /home/$USER
 RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
+
+# Install python packages
+RUN python3 -m pip install --no-cache-dir --ignore-installed --break-system-packages pysam
 
 ENV R_LIBS_USER=/usr/local/lib/R
 

@@ -15,7 +15,6 @@ task qc_rna {
         File bam
         Int? umi_cutoff = 10
         Int? gene_cutoff = 10
-        String chemistry
         String genome_name
         String? prefix
 
@@ -56,7 +55,7 @@ task qc_rna {
         samtools index -@ ~{cpus} ~{bam} ~{bai}
 
         # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
-        python3 $(which rna_barcode_metadata.py) ~{chemistry} ~{bam} ~{bai} ~{barcode_metadata}
+        python3 $(which rna_barcode_metadata.py) ~{bam} ~{bai} ~{barcode_metadata}
 
         # Make duplicates log from barcode metadata file
         awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
@@ -97,11 +96,6 @@ task qc_rna {
                 description: 'Gene cutoff',
                 help: 'Cutoff for number of genes required when making gene barcode rank plot.',
                 example: 10
-            }
-        chemistry: {
-                description: 'Experiment chemistry',
-                help: 'Chemistry/method used in the experiment.',
-                examples: ['shareseq', '10x_v2', '10x_v3']
             }
         genome_name: {
                 description: 'Reference name',

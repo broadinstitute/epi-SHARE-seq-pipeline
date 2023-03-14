@@ -73,7 +73,6 @@ workflow wf_rna {
             bam = align.output_bam,
             umi_cutoff = umi_cutoff,
             gene_cutoff = gene_cutoff,
-            chemistry = chemistry,
             genome_name = genome_name,
             prefix = prefix
     }
