@@ -54,10 +54,10 @@ if (fragment_plot1) {
   plot(x=fragment_rank,
        y=fragment_filtered_sort,
        log="y",
-       xlab=paste0(" Barcode rank (", length(fragment_rank)-fragment_points[1], " low quality cells)"), 
-       ylab="log10(fragments)",
-       main="ATAC Fragments per Barcode", 
-       col=c("dimgrey","darkblue")[is_top_ranked_fragment], 
+       xlab=paste0(" Barcode rank (", length(fragment_rank)-fragment_points[1], " low quality cells)"),
+       ylab="Fragments per barcode (log10 scale)",
+       main="ATAC Fragments per Barcode",
+       col=c("dimgrey","darkblue")[is_top_ranked_fragment],
        pch=16,
        ylim=c(1,100000))
   abline(v=fragment_points[1], h=10^(fragment_points[2]))
@@ -72,7 +72,7 @@ if (fragment_plot2) {
        y=fragment_top_fragment,
        log="y",
        xlab="Barcode rank",
-       ylab="log10(fragments)",
+       ylab="Fragments per barcode (log10 scale)",
        main="ATAC Fragments per Top-Ranked Barcode",
        col=c("dimgrey","darkblue")[is_top_top_ranked_fragment],
        pch=16,

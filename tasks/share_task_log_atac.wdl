@@ -28,11 +28,11 @@ task log_atac {
         echo $(($total_reads - $aligned_uniquely)) > unaligned.txt
         awk 'NR>1{sum += $2}END{print sum}' ~{dups_log} > feature_reads.txt
         awk 'NR>1{sum += $3}END{print sum}' ~{dups_log} > duplicate_reads.txt
-        nrf = $(awk 'NR==2{print $5}' ~{pbc_log})
+        nrf=$(awk 'NR==2{print $5}' ~{pbc_log})
         echo $nrf > nrf.txt
-        pbc1 =$(awk 'NR==2{print $6}' ~{pbc_log})
+        pbc1=$(awk 'NR==2{print $6}' ~{pbc_log})
         echo $pbc1 > pbc1.txt
-        pbc2 =$(awk 'NR==2{print $7}' ~{pbc_log})
+        pbc2=$(awk 'NR==2{print $7}' ~{pbc_log})
         echo $pbc2 > pbc2.txt
     >>>
     output {
