@@ -76,16 +76,6 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-group-umi'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_group_umi:latest',
-          '-f',
-          'dockerfiles/share_task_group_umi.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
   id: 'task-html-report'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_html_report:latest',
@@ -221,11 +211,6 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:latest']
   waitFor: ['task-generate-h5']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_group_umi:latest']
-  waitFor: ['task-group-umi']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
