@@ -205,6 +205,7 @@ workflow ShareSeq {
 
     call html_report.html_report as html_report {
         input:
+            prefix = prefix,
             atac_total_reads = atac.share_atac_total_reads,
             atac_aligned_uniquely = atac.share_atac_aligned_uniquely,
             atac_unaligned = atac.share_atac_unaligned,
