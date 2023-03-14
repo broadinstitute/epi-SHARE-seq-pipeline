@@ -28,6 +28,7 @@ task log_atac {
         echo $(($total_reads - $aligned_uniquely)) > unaligned.txt
         awk 'NR>1{sum += $2}END{print sum}' ~{dups_log} > feature_reads.txt
         awk 'NR>1{sum += $3}END{print sum}' ~{dups_log} > duplicate_reads.txt
+        awk 'NR>1{unique += $2; unique_multi +=$3}END{print (1-unique/unique_multi)*100}' ~{dups_log} > pct_duplicate_reads.txt
         nrf=$(awk 'NR==2{print $5}' ~{pbc_log})
         echo $nrf > nrf.txt
         pbc1=$(awk 'NR==2{print $6}' ~{pbc_log})
@@ -41,6 +42,7 @@ task log_atac {
         Int atac_unaligned = read_int("unaligned.txt")
         Int atac_feature_reads = read_int("feature_reads.txt")
         Int atac_duplicate_reads = read_int("duplicate_reads.txt")
+        Float atac_pct_dup = read_float("pct_duplicate_reads.txt")
         Float atac_nrf = read_float("nrf.txt")
         Float atac_pbc1 = read_float("pbc1.txt")
         Float atac_pbc2 = read_float("pbc2.txt")

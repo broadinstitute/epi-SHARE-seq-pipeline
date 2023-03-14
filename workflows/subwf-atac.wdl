@@ -207,6 +207,7 @@ workflow wf_atac {
         Float share_atac_nrf = log_atac.atac_nrf
         Float share_atac_pbc1 = log_atac.atac_pbc1
         Float share_atac_pbc2 = log_atac.atac_pbc2
+        Float share_atac_percent_duplicates = log_atac.atac_pct_dup
 
         # ArchR
         File? share_atac_archr_notebook_output = archr.notebook_output

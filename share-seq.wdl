@@ -213,6 +213,7 @@ workflow ShareSeq {
             atac_nrf = atac.share_atac_nrf,
             atac_pbc1 = atac.share_atac_pbc1,
             atac_pbc2 = atac.share_atac_pbc2,
+            atac_percent_duplicates = atac.share_atac_percent_duplicates,
             rna_total_reads = rna.share_rna_total_reads,
             rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
             rna_aligned_multimap = rna.share_rna_aligned_multimap,
