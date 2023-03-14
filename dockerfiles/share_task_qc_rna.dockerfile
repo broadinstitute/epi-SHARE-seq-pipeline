@@ -43,7 +43,7 @@ RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/sa
     cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
 # Install python packages
-RUN pip install --no-cache-dir pysam
+RUN pip install --no-cache-dir --break-system-packages pysam
 
 # Create and setup new user
 ENV USER=shareseq
