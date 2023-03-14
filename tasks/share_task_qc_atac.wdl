@@ -18,6 +18,8 @@ task qc_atac {
         File? raw_bam_index
         File? filtered_bam
         File? filtered_bam_index
+        File? wdup_bam
+        File? wdup_bam_index
         File? fragments
         File? fragments_index
         File? queryname_final_bam
@@ -36,7 +38,7 @@ task qc_atac {
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:dev"
-        String docker_image = "mknudson/share_task_qc_atac"
+        String docker_image = "polumechanos/share_task_qc_atac"
     }
 
     # Determine the size of the input
@@ -95,6 +97,8 @@ task qc_atac {
         ln -s ~{raw_bam_index} in.raw.bam.bai
         ln -s ~{filtered_bam} in.filtered.bam
         ln -s ~{filtered_bam_index} in.filtered.bam.bai
+        ln -s ~{wdup_bam} in.wdup.bam
+        ln -s ~{wdup_bam_index} in.wdup.bam.bai
         ln -s ~{fragments} in.fragments.tsv.gz
         ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
 
@@ -121,7 +125,7 @@ task qc_atac {
         python3 $(which qc_atac_count_duplicates_per_barcode.py) \
             -o ~{duplicate_stats} \
             --bc_tag ~{barcode_tag} \
-            in.filtered.bam
+            in.wdup.bam
 
         # Fragments in peaks
         # "~{prefix}.reads.in.peak.tsv"
@@ -150,7 +154,7 @@ task qc_atac {
         join -j 1  <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q;sort -k1,1)) <(cat ~{duplicate_stats} | (sed -u 1q;sort -k1,1)) | \
         join -j 1 - <(cat ~{prefix}.atac.qc.~{genome_name}.reads.in.peak.tsv | (sed -u 1q;sort -k1,1)) | \
         join -j 1 - <(cat ~{mito_metrics_barcode}| (sed -u 1q;sort -k1,1)) | \
-        awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_fragments_promoter","pct_fragments_peaks","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
+        awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_reads_promoter","pct_reads_peaks","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
 
         # Barcode rank plot
         Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_cutoff} ~{fragment_barcode_rank_plot}

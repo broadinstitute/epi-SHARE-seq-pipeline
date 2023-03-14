@@ -129,6 +129,8 @@ workflow wf_atac {
             filtered_bam = filter.atac_filter_alignment_dedup,
             filtered_bam_index = filter.atac_filter_alignment_dedup_index,
             queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
+            wdup_bam = filter.atac_filter_alignment_wdup,
+            wdup_bam_index = filter.atac_filter_alignment_wdup_index,
             mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
             mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
             fragments = filter.atac_filter_fragments,

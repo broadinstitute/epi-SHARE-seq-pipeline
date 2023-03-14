@@ -26,9 +26,9 @@ task log_atac {
         aligned_uniquely=$(awk 'NR==4{print $1}' ~{alignment_log})
         echo $aligned_uniquely > aligned_uniquely.txt
         echo $(($total_reads - $aligned_uniquely)) > unaligned.txt
-        awk 'NR>1{sum += $2}END{print sum}' ~{dups_log} > feature_reads.txt
-        awk 'NR>1{sum += $3}END{print sum}' ~{dups_log} > duplicate_reads.txt
-        awk 'NR>1{unique += $2; unique_multi +=$3}END{print (1-unique/unique_multi)*100}' ~{dups_log} > pct_duplicate_reads.txt
+        awk 'NR>1{sum += $2}END{print sum/2}' ~{dups_log} > feature_reads.txt
+        awk 'NR>1{sum += $3}END{print sum/2}' ~{dups_log} > duplicate_reads.txt
+        awk 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f%", 100*dups/(unique+dups)}' ~{dups_log} > pct_duplicate_reads.txt
         nrf=$(awk 'NR==2{print $5}' ~{pbc_log})
         echo $nrf > nrf.txt
         pbc1=$(awk 'NR==2{print $6}' ~{pbc_log})
