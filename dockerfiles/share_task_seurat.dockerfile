@@ -58,7 +58,7 @@ RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('rhdf5'), upda
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 
-RUN python3 -m pip install jupyter papermill
+RUN python3 -m pip install --break-system-packages jupyter papermill
 
 COPY src/jupyter_nb/seurat_notebook.ipynb /usr/local/bin/
 
