@@ -15,6 +15,7 @@ workflow ShareSeq {
         # Common inputs
         String chemistry
         String prefix = "shareseq-project"
+        String? pkr=""
         String genome_name_input
         Int? cpus = 16
 
@@ -112,6 +113,7 @@ workflow ShareSeq {
                     umi_cutoff = umi_cutoff,
                     gene_cutoff = gene_cutoff,
                     prefix = prefix,
+                    pkr = pkr,
                     genome_name = genome_name,
                     cpus = cpus_rna,
                     count_only = count_only,
