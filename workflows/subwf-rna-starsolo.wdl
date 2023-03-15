@@ -24,6 +24,7 @@ workflow wf_rna {
         File? whitelist
         File idx_tar
         String prefix
+        String? pkr
         String genome_name
         Int? cpus = 16
         String? docker
@@ -65,7 +66,8 @@ workflow wf_rna {
         input:
             tar = align.raw_tar,
             genome_name = genome_name,
-            prefix = prefix
+            prefix = prefix,
+            pkr = pkr
     }
 
     call share_task_qc_rna.qc_rna as qc_rna {

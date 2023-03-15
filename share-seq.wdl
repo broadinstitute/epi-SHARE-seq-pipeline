@@ -16,6 +16,7 @@ workflow ShareSeq {
         Boolean trim_fastqs = true
         String chemistry
         String prefix = "shareseq-project"
+        String? pkr=""
         String genome_name_input
 
         # ATAC-specific inputs
@@ -97,6 +98,7 @@ workflow ShareSeq {
                     whitelist = whitelist_,
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
+                    pkr = pkr,
                     genome_name = genome_name,
                     count_only = count_only
             }
