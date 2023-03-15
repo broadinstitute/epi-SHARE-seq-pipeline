@@ -14,6 +14,7 @@ workflows:
              - insert_size_hist
              - barcode_plot_annotations
              - trim-fastqs-atac
+             - pkr-input
          tags:
              - /.*/
 
