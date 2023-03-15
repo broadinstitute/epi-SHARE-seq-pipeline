@@ -15,11 +15,13 @@ task generate_h5 {
         # This task computes the the gene x cell matrix.
         File tar
         String genome_name
-        String? prefix
+        String? pkr
+        String prefix
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
+        String docker_image = "polumechanos/share_task_generate_h5"
     }
 
     # Determine the size of the input
@@ -36,17 +38,17 @@ task generate_h5 {
 
     String h5 = "${default="share-seq" prefix}.${genome_name}.rna.h5"
     String monitor_log = "monitor.log"
-    
+
     command {
         set -e
- 
+
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
-        
-        # Untar 
-        tar xzvf ${tar} 
+
+        # Untar
+        tar xzvf ${tar}
 
         # Generate h5 file
-        python3 $(which generate_h5_rna.py) ./matrix.mtx.gz ./features.tsv.gz ./barcodes.tsv.gz ${default="share-seq" prefix} ${h5} 
+        python3 $(which generate_h5_rna.py) ./matrix.mtx.gz ./features.tsv.gz ./barcodes.tsv.gz ${default="share-seq" pkr} ${h5}
     }
 
     output {
@@ -63,7 +65,7 @@ task generate_h5 {
         tar: {
                 description: 'STARsolo output tar.gz file',
                 help: 'tar.gz file containing raw matrix, features, and barcodes file from STARsolo.',
-                example: 'raw.tar.gz'           
+                example: 'raw.tar.gz'
             }
         genome_name: {
                 description: 'Reference name',
