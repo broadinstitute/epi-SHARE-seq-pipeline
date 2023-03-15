@@ -117,20 +117,6 @@ workflow ShareSeq {
                     prefix = prefix,
                     genome_name = genome_name,
                     count_only = count_only
-                    #cutoff = cutoff_atac,
-
-                    #cpus = cpus_atac,
-                    # Align
-                    #align_multimappers = atac_align_multimappers,
-
-                    # Filter
-                    #filter_shift_plus = atac_filter_shift_plus,
-                    #filter_shift_minus = atac_filter_shift_minus,
-                    #filter_minimum_fragments_cutoff = atac_filter_minimum_fragments_cutoff,
-                    #mapq_threshold = atac_mapq_threshold,
-                    #barcode_tag = barcode_tag
-
-            }
         }
     }
 
