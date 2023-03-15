@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 """
-This script takes in a bam file, and outputs a txt file containing the number of 
-total reads, duplicate reads, UMIs, genes, and percent mitochondrial reads for each barcode. 
+This script takes in a bam file, and outputs a txt file containing the number of
+total reads, duplicate reads, UMIs, genes, and percent mitochondrial reads for each barcode.
 """
 
 import argparse
@@ -30,7 +30,7 @@ def get_metrics(bam, chemistry):
     mitochondrial_counts = defaultdict(int)
     barcodes = set()
     formatted_barcodes = {}
-    
+
     for read in bam.fetch():
         # get barcode; skip read if not present
         barcode = read.get_tag("CB")
@@ -87,19 +87,19 @@ def get_metrics(bam, chemistry):
         metrics = [out_barcode, total_val, duplicate_val, umi_val, gene_val, mitochondrial_val]
         
         barcode_metadata.append(metrics)
-    
+
     return barcode_metadata
 
 def write_metadata_file(barcode_metadata, output_file):
     fields = ["barcode", "total_counts", "duplicate_counts", "umis", "genes", "percent_mitochondrial"]
-    
+
     with open(output_file, "w") as f:
-        # write header 
+        # write header
         f.write("\t".join(fields) + "\n")
         # write rows
         for metrics_list in barcode_metadata:
             f.write("\t".join(metrics_list[:]) + "\n")
-    
+
 def main():
     # get arguments
     args = parse_arguments() 
@@ -107,10 +107,10 @@ def main():
     bam_file = getattr(args, "bam_file")
     bai_file = getattr(args, "bai_file")
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
-    
+
     # load bam file
     bam = pysam.AlignmentFile(bam_file, "rb", index_filename=bai_file)
-    
+
     # get metrics for each barcode
     barcode_metadata = get_metrics(bam, chemistry)
     

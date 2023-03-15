@@ -1,63 +1,102 @@
 ############################################################
 # Dockerfile for BROAD GRO share-seq-pipeline
+# Based on Debian slim
 ############################################################
 
-FROM ubuntu@sha256:d1d454df0f579c6be4d8161d227462d69e163a8ff9d20a847533989cf0c94d90
+FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
 
-LABEL maintainer="Mei Knudson"
+ENV SAMTOOLS_VERSION 1.9
+ENV BEDTOOLS_VERSION v2.29.0
+ENV PICARD_VERSION 2.27.5
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
-ENV SAMTOOLS_VERSION 1.9
 
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
     autoconf \
-    binutils \
     build-essential \
-    gcc \
     git \
     libcurl4-openssl-dev \
-    libjpeg-dev \
     liblz4-dev \
     liblzma-dev \
     libncurses5-dev \
     libbz2-dev \
-    openjdk-11-jre \
-    python2.7 \
-    python3 \ 
-    python-pip \
-    python3-pip \
-    r-base \
+    python \
+    unzip \
     wget \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 
-# Install packages for python2 scripts
-RUN pip2 install --ignore-installed --no-cache-dir matplotlib pysam numpy==1.16.0
 
-# Install packages for python3 scripts
-RUN python3 -m pip install --ignore-installed matplotlib numpy==1.19.5 pandas plotnine pysam
+# Make directory for all softwares
+RUN mkdir /software
+WORKDIR /software
+ENV PATH="/software:${PATH}"
 
-# Install Picard 2.20.7
-RUN wget https://github.com/broadinstitute/picard/releases/download/2.20.7/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
+# Install bedtools 2.29.0
+RUN git clone --branch ${BEDTOOLS_VERSION} --single-branch https://github.com/arq5x/bedtools2.git && \
+    cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
 
 # Install samtools 1.9
 RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
     git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
-    cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
+    cd samtools && make && make install && cd ../ && rm -rf samtools* && \
+    cd htslib && autoreconf -i && make && make install && cd ../ && rm -rf htslib*
+
+# Install Picard 2.20.7
+RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
+
+
+
+FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
+
+LABEL maintainer = "Eugenio Mattei"
+LABEL software = "Share-seq pipeline"
+LABEL software.version="0.0.1"
+LABEL software.organization="Broad Institute of MIT and Harvard"
+LABEL software.version.is-production="No"
+LABEL software.task="qc-atac"
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    git \
+    python3 \
+    python3-dev \
+    python3-pip \
+    openjdk-11-jre \
+    r-base \
+    zlib1g-dev &&\
+    rm -rf /var/lib/apt/lists/*
+
+# Install packages for python3 scripts (pysam, SAMstats)
+RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam --editable=git+https://github.com/kundajelab/SAMstats@75e60f1e67c6d5d066371a0b53729e4b1f6f76c5#egg=SAMstats
 
 # Create and setup new user
 ENV USER=shareseq
 WORKDIR /home/$USER
+
 RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
 
-ENV PYTHONPATH="/usr/local/python:$PYTHONPATH"
+# Add folder with software to the path
+ENV PATH="/software:${PATH}"
 
-COPY --chown=$USER:$USER src/python/make-tss-pileup-jbd.py /usr/local/bin
+# Copy the compiled software from the builder
+COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
+COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+COPY --chown=$USER:$USER src/python/pbc_stats.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/qc_atac_compute_tss_enrichment.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/qc_atac_count_duplicates_per_barcode.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/qc_atac_compute_reads_in_peaks.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/plot_insert_size_hist.py /usr/local/bin
+COPY --chown=$USER:$USER src/R/barcode_rank_functions.R /usr/local/bin
+COPY --chown=$USER:$USER src/R/atac_qc_plots.R /usr/local/bin
+COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+
 
 USER ${USER}
+
+

@@ -12,7 +12,7 @@ task share_rna_align {
     }
 
     input {
-        # This function takes in input the pre-processed fastqs 
+        # This function takes in input the pre-processed fastqs
         # and aligns it to the genome using STARsolo.
         Array[File] fastq_R1
         Array[File] fastq_R2
@@ -60,7 +60,7 @@ task share_rna_align {
         echo $r1_length
         echo $r2_length
         echo $read_files
-           
+
         # Untar the genome
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
@@ -71,13 +71,13 @@ task share_rna_align {
                 echo 'CB + UMI length is $cb_umi_length; expected 34'
                 exit 1
             fi
-            
+
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
               do
               gunzip -c "${fq}" | awk 'NR%4==2{dict[substr($1,1,24)]}END{for (i in dict){print i}}' >> shareseq_whitelist.txt
             done
-            
+
             $(which STAR) \
             --readFilesIn $read_files  \
             --readFilesCommand zcat \
@@ -157,7 +157,7 @@ task share_rna_align {
             --outFilterScoreMin 30 \
             --outFileNamePrefix result/
 
-            feature_type='Gene'       
+            feature_type='Gene'
 
         # 10X v3 (multiome)
         elif [ '~{chemistry}' == '10x_v3' ]; then
@@ -210,7 +210,7 @@ task share_rna_align {
             --outFilterScoreMin 30 \
             --outFileNamePrefix result/ \
             --clipAdapterType CellRanger4 \
-            
+
             feature_type='Gene'
 
         fi
@@ -225,7 +225,7 @@ task share_rna_align {
         find result -type f -exec mv {} result \;
         cd result
         for file in $(ls)
-        do 
+        do
             mv $file ~{prefix}.$file
         done
 
@@ -250,7 +250,6 @@ task share_rna_align {
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: docker_image
     }
-
     parameter_meta {
         fastq_R1: {
             description: 'Read 1 RNA fastq file',
@@ -309,4 +308,3 @@ task share_rna_align {
         }
     }
 }
-

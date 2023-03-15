@@ -26,41 +26,11 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-bam2bed'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bam2bed:latest',
-          '-f',
-          'dockerfiles/share_task_bam2bed.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
   id: 'task-bowtie2'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:latest',
           '-f',
           'dockerfiles/share_task_bowtie2.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
-  id: 'task-count-atac'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_atac:latest',
-          '-f',
-          'dockerfiles/share_task_count_atac.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
-  id: 'task-count-rna'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_rna:latest',
-          '-f',
-          'dockerfiles/share_task_count_rna.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -116,16 +86,6 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-qc-library'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_library:latest',
-          '-f',
-          'dockerfiles/share_task_qc_library.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
   id: 'task-qc-rna'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_rna:latest',
@@ -156,16 +116,6 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-update-rgid'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest',
-          '-f',
-          'dockerfiles/share_task_update_rgid.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
   id: 'task-find-dorcs'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest',
@@ -189,23 +139,8 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bam2bed:latest']
-  waitFor: ['task-bam2bed']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:latest']
   waitFor: ['task-bowtie2']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_atac:latest']
-  waitFor: ['task-count-atac']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_count_rna:latest']
-  waitFor: ['task-count-rna']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
@@ -234,11 +169,6 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_library:latest']
-  waitFor: ['task-qc-library']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_rna:latest']
   waitFor: ['task-qc-rna']
 
@@ -251,11 +181,6 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:latest']
   waitFor: ['task-star']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_update_rgid:latest']
-  waitFor: ['task-update-rgid']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
