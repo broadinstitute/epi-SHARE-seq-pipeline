@@ -28,7 +28,7 @@ workflow ShareSeq {
         File? tss_bed
         Int? cpus_atac
 
-        Int? cutoff_atac = 100
+        Int? cutoff_atac = 10
 
         # RNA-specific inputs
         Boolean? count_only = false
