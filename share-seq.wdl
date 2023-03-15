@@ -117,6 +117,7 @@ workflow ShareSeq {
                     prefix = prefix,
                     genome_name = genome_name,
                     count_only = count_only
+						}
         }
     }
 
