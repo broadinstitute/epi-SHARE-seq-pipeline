@@ -14,7 +14,6 @@ def parse_arguments():
     parser.add_argument("chemistry", choices=["shareseq", "10x_v2", "10x_v3"], help="Method chemistry")
     parser.add_argument("bam_file", help="Filename for input bam file")
     parser.add_argument("bai_file", help="Filename for bam index file")
-    parser.add_argument('--pkr', "pkr", help="Filename for bam index file", default="")
     parser.add_argument("barcode_metadata_file", help="Filename for output barcode metadata txt file")
 
     return parser.parse_args()
@@ -107,7 +106,6 @@ def main():
     chemistry = getattr(args, "chemistry")
     bam_file = getattr(args, "bam_file")
     bai_file = getattr(args, "bai_file")
-    pkr = getattr(args, "pkr")
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
 
     # load bam file
