@@ -80,54 +80,58 @@ def count_fragments_in_promoter(tabix_filename,
         #    continue
         #print(f"{promoter_start}\t{promoter_end}\t{promoter_strand}")
         # Find all the fragments overlapping the promoter.
-        for fragment in tabixfile.fetch(str(tss[0]), max(0,promoter_start), promoter_end):
+        try:
+            for fragment in tabixfile.fetch(str(tss[0]), max(0,promoter_start), promoter_end):
 
-            fragment_fields = fragment.split("\t")
+                fragment_fields = fragment.split("\t")
 
-            fragment_contig = fragment_fields[0]
-            fragment_start = int(fragment_fields[1])
-            fragment_end = int(fragment_fields[2])
-            barcode = fragment_fields[3]
+                fragment_contig = fragment_fields[0]
+                fragment_start = int(fragment_fields[1])
+                fragment_end = int(fragment_fields[2])
+                barcode = fragment_fields[3]
 
-            fragment_id = "-".join(fragment_fields)
+                fragment_id = "-".join(fragment_fields)
 
-         #   if barcode != "TATGTGGCCAGATCTGTTAGGCAT":
-         #       continue
+             #   if barcode != "TATGTGGCCAGATCTGTTAGGCAT":
+             #       continue
 
-            counter +=1
+                counter +=1
 
 
-            fragment_length = fragment_end - fragment_start
+                fragment_length = fragment_end - fragment_start
 
-            # Increment the counter for the specific barcode.
-            fragments_in_promoter_counter[barcode].add(fragment_id)
+                # Increment the counter for the specific barcode.
+                fragments_in_promoter_counter[barcode].add(fragment_id)
 
-            # Update the array with the counts around the promoter.
-            # I need 'start' and 'end' to create a unique id for the reads and I can count
-            # the reads in TSSs wihtout double counting.
-            _add_read_to_dictionary(counts_dict_bulk,
-                                    counts_dict,
-                                    fragment_start,
-                                    promoter_start,
-                                    promoter_end,
-                                    promoter_strand,
-                                    barcode,
-                                    reads_in_tss_counter,
-                                    reads_in_promoter_counter,
-                                    fragment_id,
-                                    "start")
+                # Update the array with the counts around the promoter.
+                # I need 'start' and 'end' to create a unique id for the reads and I can count
+                # the reads in TSSs wihtout double counting.
+                _add_read_to_dictionary(counts_dict_bulk,
+                                        counts_dict,
+                                        fragment_start,
+                                        promoter_start,
+                                        promoter_end,
+                                        promoter_strand,
+                                        barcode,
+                                        reads_in_tss_counter,
+                                        reads_in_promoter_counter,
+                                        fragment_id,
+                                        "start")
 
-            _add_read_to_dictionary(counts_dict_bulk,
-                                    counts_dict,
-                                    fragment_end,
-                                    promoter_start,
-                                    promoter_end,
-                                    promoter_strand,
-                                    barcode,
-                                    reads_in_tss_counter,
-                                    reads_in_promoter_counter,
-                                    fragment_id,
-                                    "end")
+                _add_read_to_dictionary(counts_dict_bulk,
+                                        counts_dict,
+                                        fragment_end,
+                                        promoter_start,
+                                        promoter_end,
+                                        promoter_strand,
+                                        barcode,
+                                        reads_in_tss_counter,
+                                        reads_in_promoter_counter,
+                                        fragment_id,
+                                        "end")
+        except ValueError:
+            print(f"No reads found for {tss[0]}:{max(1,promoter_start)}-{promoter_end}.")
+
     return counts_dict_bulk, counts_dict, fragments_in_promoter_counter, reads_in_tss_counter, reads_in_promoter_counter
 
 def _add_read_to_dictionary(fragment_counter,

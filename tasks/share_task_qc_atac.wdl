@@ -28,7 +28,7 @@ task qc_atac {
         File? peaks
         File? tss
         Int? mapq_threshold = 30
-        Int? fragment_cutoff = 100
+        Int? fragment_cutoff = 5
         String? barcode_tag = "CB"
         String? genome_name
         String? prefix

@@ -34,7 +34,7 @@ workflow wf_atac {
         ## Biological
         Array[File] read1
         Array[File] read2
-        Int? align_multimappers = 1
+        Int? align_multimappers
         File genome_index_tar
         ## Runtime
         Int? align_cpus
@@ -44,7 +44,7 @@ workflow wf_atac {
 
         # Filter-specific inputs
         ## Biological
-        Int? filter_minimum_fragments_cutoff = 1
+        Int? filter_minimum_fragments_cutoff
         Int? filter_shift_plus = 4
         Int? filter_shift_minus = -4
         ## Runtime
@@ -93,6 +93,7 @@ workflow wf_atac {
         input:
             fastq_R1 = select_first([trim.fastq_R1_trimmed, read1]),
             fastq_R2 = select_first([trim.fastq_R2_trimmed, read2]),
+            chemistry= chemistry,
             genome_name = genome_name,
             genome_index_tar = genome_index_tar,
             multimappers = align_multimappers,

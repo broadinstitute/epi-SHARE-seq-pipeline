@@ -47,7 +47,7 @@ task generate_h5 {
         tar xzvf ${tar}
 
         # Generate h5 file
-        python3 $(which generate_h5_rna.py) ./matrix.mtx.gz ./features.tsv.gz ./barcodes.tsv.gz ${default="share-seq" pkr} ${h5}
+        python3 $(which generate_h5_rna.py) ./matrix.mtx.gz ./features.tsv.gz ./barcodes.tsv.gz ${h5} ${pkr}
     }
 
     output {

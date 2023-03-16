@@ -14,9 +14,9 @@ task share_atac_align {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Array[File] fastq_R1
         Array[File] fastq_R2
-        Boolean encode_mode = false
-        Int? multimappers = 1
+        Int? multimappers = 5
         File genome_index_tar       # This is a tar.gz folder with all the index files.
+        String chemistry
         String genome_name          # GRCh38, mm10
         String prefix = "sample-share"
 
@@ -89,7 +89,7 @@ task share_atac_align {
                 -o ~{unsorted_bam}
 
 
-        if ( ~{encode_mode} ) then
+        if [ '~{chemistry}' != 'shareseq' ] then
             samtools sort \
                 -@ ~{samtools_threads} \
                 -m ~{samtools_memory_per_thread}M \
