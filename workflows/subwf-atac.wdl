@@ -24,6 +24,7 @@ workflow wf_atac {
         Int? mapq_threshold = 30
         String? barcode_tag = "CB"
         String? barcode_tag_fragments
+        String chemistry
         String? prefix = "sample"
         String genome_name
         Int? cutoff
@@ -34,6 +35,7 @@ workflow wf_atac {
         ## Biological
         Array[File] read1
         Array[File] read2
+        Boolean? append_comment = false
         Int? align_multimappers
         File genome_index_tar
         ## Runtime

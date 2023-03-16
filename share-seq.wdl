@@ -14,6 +14,7 @@ workflow ShareSeq {
     input {
         # Common inputs
         Boolean trim_fastqs = true
+        Boolean append_comment = false
         String chemistry
         String prefix = "shareseq-project"
         String? pkr=""
@@ -111,7 +112,9 @@ workflow ShareSeq {
                 input:
                     read1 = read1_atac,
                     read2 = read2_atac,
+                    chemistry = chemistry,
                     trim_fastqs = trim_fastqs,
+                    append_comment = append_comment,
                     chrom_sizes = chrom_sizes_,
                     genome_index_tar = idx_tar_atac_,
                     tss_bed = tss_bed_,
@@ -119,7 +122,7 @@ workflow ShareSeq {
                     prefix = prefix,
                     genome_name = genome_name,
                     count_only = count_only
-						}
+            }
         }
     }
 
