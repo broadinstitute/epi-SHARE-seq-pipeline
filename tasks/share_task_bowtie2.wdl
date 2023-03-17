@@ -89,7 +89,7 @@ task share_atac_align {
                 -o ~{unsorted_bam}
 
 
-        if [ '~{chemistry}' != 'shareseq' ] then
+        if [ '~{chemistry}' != 'shareseq' ]; then
             samtools sort \
                 -@ ~{samtools_threads} \
                 -m ~{samtools_memory_per_thread}M \

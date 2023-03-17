@@ -19,7 +19,7 @@ def parse_arguments():
     parser.add_argument("features_file", help="Filename for STARsolo features tsv file")
     parser.add_argument("barcodes_file", help="Filename for STARsolo barcodes tsv file")
     parser.add_argument("output_file", help="Filename for output h5 file")
-    parser.add_argument("pkr", help="Experiment prefix")
+    parser.add_argument("pkr", help="Experiment prefix", nargs = '?')
 
     return parser.parse_args()
 
@@ -81,11 +81,6 @@ def main():
     pkr = getattr(args, "pkr", None)
     output_file = getattr(args, "output_file")
 
-    if pkr:
-        pkr_suffix = "_" + pkr
-    else:
-        pkr_suffix = ""
-
     # read input files
     logging.info("Reading input files\n")
     # skip first two lines of matrix file (header)
@@ -96,7 +91,11 @@ def main():
     # get barcodes from barcodes file, reformat as R1R2R3_PKR
     barcodes = get_split_lines(barcodes_file, delimiter="\t")
     barcode_list = [line[0] for line in barcodes]
-    formatted_barcode_list = [barcode + "_" + pkr_suffix for barcode in barcode_list]
+
+    if pkr is None:
+        formatted_barcode_list = barcode_list
+    else:
+        formatted_barcode_list = [barcode + "_" + pkr for barcode in barcode_list]
 
     # generate count matrix
     logging.info("Generating count matrix\n")
