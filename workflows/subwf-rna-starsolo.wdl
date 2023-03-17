@@ -18,15 +18,16 @@ workflow wf_rna {
         # RNA Sub-workflow inputs
 
         # Align
-        String chemistry
         Array[File] read1
         Array[File] read2
-        File? whitelist
         File idx_tar
-        String prefix
-        String? pkr
+        String chemistry
         String genome_name
+        String prefix
+        String? barcode_tag
+        String? pkr
         Int? cpus = 16
+        File? whitelist
         String? docker
         # QC
         Int? umi_cutoff
@@ -75,7 +76,8 @@ workflow wf_rna {
             bam = align.output_bam,
             umi_cutoff = umi_cutoff,
             gene_cutoff = gene_cutoff,
-            chemistry = chemistry,
+            pkr = pkr,
+            barcode_tag = barcode_tag,
             genome_name = genome_name,
             prefix = prefix
     }

@@ -15,8 +15,9 @@ task qc_rna {
         File bam
         Int? umi_cutoff = 100
         Int? gene_cutoff = 100
-        String chemistry
         String genome_name
+        String? barcode_tag = "CB"
+        String? pkr
         String? prefix
 
         Int? cpus = 16
@@ -56,8 +57,12 @@ task qc_rna {
         samtools index -@ ~{cpus} ~{bam} ~{bai}
 
         # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
-        python3 $(which rna_barcode_metadata.py) ~{chemistry} ~{bam} ~{bai} ~{barcode_metadata}
-        # Make duplicates log from barcode metadata file
+        python3 $(which rna_barcode_metadata.py) ~{bam} \
+                                                 ~{bai} \
+                                                 ~{barcode_metadata} \
+                                                 ~{"--pkr" + pkr} \
+                                                 ~{"--barcode_tag" + barcode_tag}
+
         awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
@@ -67,6 +72,7 @@ task qc_rna {
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
         File rna_duplicates_log = "~{duplicates_log}"
+        File rna_barcode_metadata_log = "barcode_metadata.log"
         File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
         File? rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
         File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"
@@ -97,10 +103,10 @@ task qc_rna {
                 help: 'Cutoff for number of genes required when making gene barcode rank plot.',
                 example: 10
             }
-        chemistry: {
-                description: 'Experiment chemistry',
-                help: 'Chemistry/method used in the experiment.',
-                examples: ['shareseq', '10x_v2', '10x_v3']
+        pkr: {
+                description: 'Experiment pkr',
+                help: 'Id of the sample pkr (share-seq specific).',
+                examples: ['SS-PKR-000']
             }
         genome_name: {
                 description: 'Reference name',
