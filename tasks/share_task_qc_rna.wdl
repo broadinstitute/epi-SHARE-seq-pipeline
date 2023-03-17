@@ -60,8 +60,8 @@ task qc_rna {
         python3 $(which rna_barcode_metadata.py) ~{bam} \
                                                  ~{bai} \
                                                  ~{barcode_metadata} \
-                                                 ~{"--pkr" + pkr} \
-                                                 ~{"--barcode_tag" + barcode_tag}
+                                                 ~{"--pkr " + pkr} \
+                                                 ~{"--barcode_tag " + barcode_tag}
 
         awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
 

@@ -67,7 +67,7 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
             if read.reference_name == "chrM":
                 mitochondrial_counts[barcode] += 1
         except KeyError:
-            loggin.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing}.")
+            loggin.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing.")
 
     # count unique genes per barcode
     genes_per_barcode = {barcode:len(gene_set) for (barcode, gene_set) in genes.items()}
