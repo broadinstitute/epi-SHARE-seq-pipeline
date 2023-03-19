@@ -94,8 +94,9 @@ workflow ShareSeq {
 
     Map[String, File] whitelists = read_map(whitelists_tsv)
     File? whitelist_ = if chemistry=='shareseq' || chemistry=='10x_multiome' then whitelist else select_first([whitelist, whitelists[chemistry]])
-    File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
     File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
+    File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
+
 
 
 
@@ -121,7 +122,7 @@ workflow ShareSeq {
                     chemistry = chemistry,
                     read1 = read1_rna,
                     read2 = read2_rna,
-                    whitelist = select_first([whitelist_rna_, whitelist_]),
+                    whitelist = if chemistry=='shareseq' then whitelist else select_first([whitelist_rna, whitelist_rna_, whitelist_]),
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
                     pkr = pkr,
