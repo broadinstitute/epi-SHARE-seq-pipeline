@@ -1,6 +1,7 @@
 version 1.0
 
 # Import the sub-workflow for preprocessing the fastqs.
+import "tasks/10x_task_preprocess.wdl" as preprocess_tenx
 import "workflows/subwf-atac.wdl" as share_atac
 import "workflows/subwf-rna-starsolo.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
@@ -13,6 +14,7 @@ workflow ShareSeq {
 
     input {
         # Common inputs
+
         Boolean trim_fastqs = true
         Boolean append_comment = false
         String chemistry
@@ -20,9 +22,15 @@ workflow ShareSeq {
         String? pkr=""
         String genome_name_input
 
+        File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
+        File? whitelist
+        File? whitelist_atac
+        File? whitelist_rna
+
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
+        Array[File] fastq_barcode
         Boolean count_only = false
         File? chrom_sizes
         File? atac_genome_index_tar
@@ -48,8 +56,7 @@ workflow ShareSeq {
         # RNA-specific inputs
         Array[File] read1_rna
         Array[File] read2_rna
-        File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
-        File? whitelist
+
         File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
@@ -80,14 +87,32 @@ workflow ShareSeq {
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
     File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
 
-    Map[String, File] whitelists = read_map(whitelists_tsv)
-    File? whitelist_ = if chemistry=='shareseq' then whitelist else select_first([whitelist, whitelists[chemistry]])
-
     Boolean process_atac = if length(read1_atac)>0 then true else false
     Boolean process_rna = if length(read1_rna)>0 then true else false
 
+
+
     Map[String, File] whitelists = read_map(whitelists_tsv)
-    File? whitelist_ = if chemistry=='shareseq' then whitelist else select_first([whitelist, whitelists[chemistry]])
+    File? whitelist_ = if chemistry=='shareseq' || chemistry=='10x_multiome' then whitelist else select_first([whitelist, whitelists[chemistry]])
+    File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
+    File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
+
+
+
+
+    if ( chemistry != "shareseq" && process_atac) {
+        scatter (idx in range(length(read1_atac))) {
+            call preprocess_tenx.preprocess_tenx as preprocess_tenx{
+                    input:
+                        fastq_R1 = read1_atac[idx],
+                        fastq_R3 = read2_atac[idx],
+                        fastq_R2 = fastq_barcode[idx],
+                        whitelist = select_first([whitelist_atac, whitelist_atac_]),
+                        chemistry = chemistry,
+                        prefix = prefix
+                }
+            }
+    }
 
     if ( process_rna ) {
         if ( read1_rna[0] != "" ) {
@@ -96,7 +121,7 @@ workflow ShareSeq {
                     chemistry = chemistry,
                     read1 = read1_rna,
                     read2 = read2_rna,
-                    whitelist = whitelist_,
+                    whitelist = select_first([whitelist_rna_, whitelist_]),
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
                     pkr = pkr,
@@ -110,8 +135,8 @@ workflow ShareSeq {
         if ( read1_atac[0] != "" ) {
             call share_atac.wf_atac as atac{
                 input:
-                    read1 = read1_atac,
-                    read2 = read2_atac,
+                    read1 = select_first([preprocess_tenx.fastq_R1_preprocessed ,read1_atac]),
+                    read2 = select_first([preprocess_tenx.fastq_R2_preprocessed ,read2_atac]),
                     chemistry = chemistry,
                     trim_fastqs = trim_fastqs,
                     append_comment = append_comment,
