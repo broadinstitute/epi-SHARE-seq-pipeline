@@ -2,6 +2,7 @@ import time
 import itertools
 import gzip
 import heapq
+import sys
 from collections import Counter
 
 import numpy as np
@@ -285,15 +286,15 @@ def main(fragments, barcodes_strict, barcodes_expanded, summary, barcodes_status
 
 if __name__ == '__main__':
     try:
-        fragments = snakemake.input['frag']
+        fragments = sys.argv[1]
 
-        barcodes_strict = snakemake.output['barcode_pairs_strict']
-        barcodes_expanded = snakemake.output['barcode_pairs_expanded']
-        barcodes_status = snakemake.output['barcodes_status']
-        summary = snakemake.output['qc']
-        jac_plot = snakemake.output['multiplets_thresh']
+        barcodes_strict = sys.argv[2]
+        barcodes_expanded = sys.argv[3]
+        barcodes_status = sys.argv[4]
+        summary = sys.argv[5]
+        jac_plot = sys.argv[6]
 
-        main(fragments, barcodes_strict, barcodes_expanded, summary, barcodes_status, jac_plot)
+        main(fragments, barcodes_strict, barcodes_expanded, summary, barcodes_status, jac_plot,min_counts=50, max_beads_per_drop=20, min_cutoff=1e-3)
 
     except NameError:
         main('/dev/stdin', '/dev/stdout', '/dev/null', '/dev/null', '/dev/null')
