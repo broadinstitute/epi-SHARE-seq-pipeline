@@ -160,7 +160,7 @@ task share_rna_align {
             feature_type='Gene'
 
         # 10X v3 (multiome)
-        elif [ '~{chemistry}' == '10x_v3' ]; then
+        elif [ '~{chemistry}' == '10x_multiome' ]; then
             # Check that CB + UMI length is correct
             if [ $cb_umi_length -ne 28 ]; then
                 echo 'CB + UMI length is $cb_umi_length; expected 28'
@@ -168,9 +168,9 @@ task share_rna_align {
             fi
 
             if [[ '~{whitelist}' == *.gz ]]; then
-                gunzip -c ~{whitelist} > 10x_v3_whitelist.txt
+                gunzip -c ~{whitelist} > 10x_multiome_whitelist.txt
             else
-                cat ~{whitelist} > 10x_v3_whitelist.txt
+                cat ~{whitelist} > 10x_multiome_whitelist.txt
             fi
 
             $(which STAR) \
@@ -185,7 +185,7 @@ task share_rna_align {
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
             --soloMultiMappers Unique EM \
-            --soloCBwhitelist 10x_v3_whitelist.txt \
+            --soloCBwhitelist 10x_multiome_whitelist.txt \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 12 \
@@ -212,7 +212,7 @@ task share_rna_align {
             --clipAdapterType CellRanger4 \
 
             feature_type='Gene'
-
+            # TODO: add the final case in which none of the above is passed.
         fi
 
         # tar and gzip barcodes, features, and matrix files
@@ -269,7 +269,7 @@ task share_rna_align {
         whitelist: {
             description: 'Barcode whitelist',
             help: 'TXT file containing list of known possible barcodes',
-            example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/737K-arc-v1-GEX.txt.gz' 
+            example: 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/737K-arc-v1-GEX.txt.gz'
         }
         genome_index_tar: {
             description: 'Genome index files for STARsolo',

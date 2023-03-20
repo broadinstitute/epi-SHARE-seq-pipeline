@@ -94,9 +94,9 @@ task preprocess_tenx {
         File fastq_R2_preprocessed = cleaned_fastq_R2
         File tenx_barcode_complementation_qc = barcode_complementation_qc
         File tenx_barcode_correction_qc = barcode_correction_qc
-        File tenx_trimming_log_json = trimming_log_json
-        File trimming_log_html = trimming_log_html
-        File tenx_trimming_stats = trimming_stats
+        #File tenx_trimming_log_json = trimming_log_json
+        #File trimming_log_html = trimming_log_html
+        #File tenx_trimming_stats = trimming_stats
     }
 
     runtime {
