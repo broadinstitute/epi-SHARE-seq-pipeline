@@ -18,7 +18,7 @@ def parse_arguments():
     parser.add_argument("bam_file", help="Filename for input bam file")
     parser.add_argument("bai_file", help="Filename for bam index file")
     parser.add_argument("barcode_metadata_file", help="Filename for output barcode metadata txt file")
-    parser.add_argument("--pkr", help="PKR id for shareseq", default = None)
+    parser.add_argument("pkr", help="PKR id for shareseq", default = None, nargs='?')
     parser.add_argument("--barcode_tag", help="PKR id for shareseq", default="CB")
 
     return parser.parse_args()
