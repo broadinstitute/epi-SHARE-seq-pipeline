@@ -18,9 +18,8 @@ def parse_arguments():
     parser.add_argument("matrix_file", help="Filename for STARsolo raw matrix mtx file")
     parser.add_argument("features_file", help="Filename for STARsolo features tsv file")
     parser.add_argument("barcodes_file", help="Filename for STARsolo barcodes tsv file")
-    parser.add_argument("pkr", help="Experiment prefix")
     parser.add_argument("output_file", help="Filename for output h5 file")
-
+    parser.add_argument("-p", "--pkr", help="PKR")
     return parser.parse_args()
 
 def get_split_lines(file_name, delimiter, skip=0):
@@ -96,7 +95,10 @@ def main():
     # get barcodes from barcodes file, reformat as R1,R2,R3,PKR
     barcodes = get_split_lines(barcodes_file, delimiter="\t")
     barcode_list = [line[0] for line in barcodes]
-    formatted_barcode_list = [barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + pkr for barcode in barcode_list]
+    if pkr:
+        formatted_barcode_list = [barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + pkr for barcode in barcode_list]
+    else:
+        formatted_barcode_list = [barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] for barcode in barcode_list]
 
     # generate count matrix
     logging.info("Generating count matrix\n")
