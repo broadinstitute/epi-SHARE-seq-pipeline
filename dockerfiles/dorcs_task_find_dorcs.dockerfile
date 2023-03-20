@@ -49,7 +49,7 @@ RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
 
-RUN python3 -m pip install jupyter papermill
+RUN python3 -m pip install --break-system-packages jupyter papermill
 
 RUN chown $USER:$USER /usr/local/lib/R
 

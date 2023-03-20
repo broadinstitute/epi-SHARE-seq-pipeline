@@ -14,7 +14,7 @@ task count_reads_atac {
         # This task takes in input the fragment file and counts the reads per barcode.
         Int? cpus = 2
         Int? memory_gb = 32
-        Int? cutoff = 100
+        Int? cutoff = 10
         File fragments_raw
         String genome_name
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_count_atac"

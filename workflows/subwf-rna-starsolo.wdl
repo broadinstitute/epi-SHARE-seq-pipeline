@@ -25,6 +25,7 @@ workflow wf_rna {
         File? whitelist
         File idx_tar
         String prefix
+        String? pkr
         String genome_name
         Int? cpus = 16
         String? docker
@@ -32,25 +33,25 @@ workflow wf_rna {
         Int? umi_cutoff
         Int? gene_cutoff
         
-        # Proceed to Seurat/CellBender?
-        Boolean count_only = false
-
         # CellBender
         Int? cellbender_expected_cells
         
+        # Seurat
+        Boolean count_only = false
+
         #Seurat filtering parameters
         Int? rna_seurat_min_features
         Float? rna_seurat_percent_mt
         Int? rna_seurat_min_cells
-        
+
         #Seurat UMAP
         Int? rna_seurat_umap_dim
         Float? rna_seurat_umap_resolution
-        
+
         # Seurat runtime parameters
-        Float? rna_seurat_disk_factor 
+        Float? rna_seurat_disk_factor
         Float? rna_seurat_memory_factor
-        
+
     }
 
     call share_task_starsolo.share_rna_align as align {
@@ -69,7 +70,8 @@ workflow wf_rna {
         input:
             tar = align.raw_tar,
             genome_name = genome_name,
-            prefix = prefix
+            prefix = prefix,
+            pkr = pkr
     }
 
     call share_task_qc_rna.qc_rna as qc_rna {

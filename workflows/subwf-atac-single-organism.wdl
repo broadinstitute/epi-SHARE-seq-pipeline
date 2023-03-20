@@ -1,6 +1,7 @@
 version 1.0
 
 # Import the tasks called by the pipeline
+import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
 import "../tasks/share_task_bam2bed.wdl" as share_task_bam2bed
 import "../tasks/share_task_count_atac.wdl" as share_task_count
@@ -21,6 +22,8 @@ workflow wf_atac {
         Array[File] read1
         Array[File] read2
 
+        Boolean trim_fastqs = true
+
         File chrom_sizes
         File idx_tar
         File tss_bed
@@ -33,10 +36,22 @@ workflow wf_atac {
         String? docker
     }
 
+    if ( trim_fastqs ){
+        # Remove dovetail in the ATAC reads.
+        scatter (idx in range(length(read1))) {
+            call share_task_trim.share_trim_fastqs_atac as trim{
+                input:
+                    fastq_R1 = read1[idx],
+                    fastq_R2 = read2[idx]
+            }
+        }
+
+    }
+
     call share_task_align.share_atac_align as align {
         input:
-            fastq_R1 = read1,
-            fastq_R2 = read2,
+            fastq_R1 = select_first([trim.fastq_R1_trimmed, read1]),
+            fastq_R2 = select_first([trim.fastq_R2_trimmed, read2]),
             genome_name = genome_name,
             genome_index = idx_tar,
             prefix = prefix
@@ -128,19 +143,19 @@ workflow wf_atac {
         File share_atac_qc_tss_enrichment = qc_atac.atac_tss_pileup_png
 
         File share_atac_archr_notebook_output = archr.notebook_output
-        File share_atac_archr_notebook_log = archr.notebook_log        
+        File share_atac_archr_notebook_log = archr.notebook_log
         File share_atac_archr_barcode_metadata = archr.archr_barcode_metadata
         File? share_atac_archr_raw_tss_enrichment = archr.archr_raw_tss_by_uniq_frags_plot
         File? share_atac_archr_filtered_tss_enrichment = archr.archr_filtered_tss_by_uniq_frags_plot
         File? share_atac_archr_raw_fragment_size_plot = archr.archr_raw_frag_size_dist_plot
         File? share_atac_archr_filtered_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
-        
+
         File? share_atac_archr_umap_doublets = archr.archr_umap_doublets
         File? share_atac_archr_umap_cluster_plot = archr.archr_umap_cluster_plot
         File? share_atac_archr_umap_num_frags_plot = archr.archr_umap_num_frags_plot
         File? share_atac_archr_umap_tss_score_plot = archr.archr_umap_tss_score_plot
         File? share_atac_archr_umap_frip_plot = archr.archr_umap_frip_plot
-        
+
         File? share_atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_raw_obj
@@ -149,26 +164,26 @@ workflow wf_atac {
         Int share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely
         Int share_atac_unaligned = log_atac.atac_unaligned
         Int share_atac_feature_reads = log_atac.atac_feature_reads
-        Int share_atac_duplicate_reads = log_atac.atac_duplicate_reads 
-        
+        Int share_atac_duplicate_reads = log_atac.atac_duplicate_reads
+
         File share_atac_archr_strict_notebook_output = archr_strict.notebook_output
         File share_atac_archr_strict_notebook_log = archr_strict.notebook_log
-        
+
         File? share_atac_archr_strict_raw_tss_enrichment = archr_strict.archr_raw_tss_by_uniq_frags_plot
         File? share_atac_archr_strict_filtered_tss_enrichment = archr_strict.archr_filtered_tss_by_uniq_frags_plot
         File? share_atac_archr_strict_raw_fragment_size_plot = archr_strict.archr_raw_frag_size_dist_plot
         File? share_atac_archr_strict_filtered_fragment_size_plot = archr_strict.archr_filtered_frag_size_dist_plot
-        
+
         File? share_atac_archr_strict_umap_doublets = archr_strict.archr_umap_doublets
         File? share_atac_archr_strict_umap_cluster_plot = archr_strict.archr_umap_cluster_plot
         File? share_atac_archr_strict_umap_num_frags_plot = archr_strict.archr_umap_num_frags_plot
         File? share_atac_archr_strict_umap_tss_score_plot = archr_strict.archr_umap_tss_score_plot
         File? share_atac_archr_strict_umap_frip_plot = archr_strict.archr_umap_frip_plot
-        
+
         File? share_atac_archr_strict_gene_heatmap_plot = archr_strict.archr_heatmap_plot
         File? share_atac_archr_strict_arrow = archr_strict.archr_arrow
         File? share_atac_archr_strict_obj = archr_strict.archr_raw_obj
         File? share_atac_archr_strict_plots_zip = archr_strict.plots_zip
-        
+
     }
 }
