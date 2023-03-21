@@ -5,7 +5,7 @@
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
 
-ENV STAR_VERSION 2.7.10a
+ENV STAR_VERSION 2.7.10a_alpha_220818
 ENV SAMTOOLS_VERSION 1.9
 
 # To prevent time zone prompt
