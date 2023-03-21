@@ -14,7 +14,7 @@ task share_atac_align {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Array[File] fastq_R1
         Array[File] fastq_R2
-        Int? multimappers = 5
+        Int? multimappers # = 5
         File genome_index_tar       # This is a tar.gz folder with all the index files.
         String chemistry
         String genome_name          # GRCh38, mm10
@@ -72,8 +72,7 @@ task share_atac_align {
         # Aligning and adding the cell barcode to the CB tag and the barcodes plus pkr in the XC tag.
         bowtie2 -X2000 \
             -p ~{cpus} \
-            -k ~{multimappers} \
-            --rg-id ~{prefix + "."}atac \
+            ${if defined(multimappers) then "-k ${multimappers}" else ""} --rg-id ~{prefix + "."}atac \
             --rg "SM:None" \
             --rg "LB:None" \
             --rg "PL:Illumina" \
