@@ -72,7 +72,7 @@ task share_atac_align {
         # Aligning and adding the cell barcode to the CB tag and the barcodes plus pkr in the XC tag.
         bowtie2 -X2000 \
             -p ~{cpus} \
-            ${if defined(multimappers) then "-k ${multimappers}" else ""} --rg-id ~{prefix + "."}atac \
+            ~{if defined(multimappers) then "-k ~{multimappers}" else ""} --rg-id ~{prefix + "."}atac \
             --rg "SM:None" \
             --rg "LB:None" \
             --rg "PL:Illumina" \
