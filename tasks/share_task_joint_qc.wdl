@@ -28,8 +28,7 @@ task joint_qc_plotting {
         String? prefix
         String genome_name
 
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
-        String docker_image = "mknudson/share_task_joint_qc"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
     }
 
     # Determine the size of the input
