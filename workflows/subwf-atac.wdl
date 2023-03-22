@@ -98,6 +98,7 @@ workflow wf_atac {
             chemistry= chemistry,
             genome_name = genome_name,
             genome_index_tar = genome_index_tar,
+            append_comment = append_comment,
             multimappers = align_multimappers,
             prefix = prefix,
             disk_factor = align_disk_factor,
