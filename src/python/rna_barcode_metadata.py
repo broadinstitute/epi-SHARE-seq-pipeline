@@ -41,19 +41,19 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
             # get barcode; skip read if not present
             barcode = read.get_tag(barcode_tag)
             if barcode == "-":
-                logging.warning(f"Skipping {read.qname} because the {barcode_tag} tag is empty")
+                #logging.warning(f"Skipping {read.qname} because the {barcode_tag} tag is empty") slowing down
                 continue
 
             # get gene id; skip read if not present
             gene_id = read.get_tag("GX")
             if gene_id == "-":
-                logging.warning(f"Skipping {read.qname} because the GX tag is empty")
+                #logging.warning(f"Skipping {read.qname} because the GX tag is empty")
                 continue
 
             # get UMI; skip read if not present
             umi = read.get_tag("UB")
             if umi == "-":
-                logging.warning(f"Skipping {read.qname} because the UB tag is empty")
+                #logging.warning(f"Skipping {read.qname} because the UB tag is empty")
                 continue
 
             barcodes.add(barcode)
@@ -67,7 +67,7 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
             if read.reference_name == "chrM":
                 mitochondrial_counts[barcode] += 1
         except KeyError:
-            loggin.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing.")
+            logging.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing.")
 
     # count unique genes per barcode
     genes_per_barcode = {barcode:len(gene_set) for (barcode, gene_set) in genes.items()}
