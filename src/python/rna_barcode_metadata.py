@@ -36,7 +36,7 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
     barcodes = set()
     formatted_barcodes = {}
 
-    for read in bam.fetch():
+    for read in bam:
         try:
             # get barcode; skip read if not present
             barcode = read.get_tag(barcode_tag)
