@@ -151,7 +151,13 @@ def main():
     min_frags = getattr(args, "min_frags")
     plot_file = getattr(args, "plot_file")
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
-    conversion_dict = getattr(args, "conversion_dict", None)
+    conversion_dict_file = getattr(args, "conversion_dict", None)
+
+    conversion_dict = None
+
+    if conversion_dict_file:
+        with open(conversion_dict_file) as fh:
+            conversion_dict = dict(line.rstrip().split(",", 1) for line in fh)
 
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
