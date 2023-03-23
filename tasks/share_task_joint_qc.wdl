@@ -54,7 +54,7 @@ task joint_qc_plotting {
 
         bash $(which monitor_script.sh) > monitoring.log &
 
-        if [ ${if defined(whitelist_atac) then "true" else "false"} == "true"];then
+        if [ ${if defined(whitelist_atac) then "true" else "false"} ];then
             paste -d ',' <(zcat ${whitelist_atac}) <(zcat ${whitelist_rna}) > conversion_dict.csv
         fi
 
