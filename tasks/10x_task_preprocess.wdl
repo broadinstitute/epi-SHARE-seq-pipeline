@@ -20,7 +20,6 @@ task preprocess_tenx {
         Float? threshold_pct_barcode_matching = 0.60
         String chemistry
         String? prefix
-
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
@@ -56,6 +55,8 @@ task preprocess_tenx {
     String trimming_log_html = "${default="10x" prefix}.atac.preprocess.trimming.log.html"
     String trimming_stats = "${default="10x" prefix}.atac.preprocess.trimming.adapter.stats.txt"
 
+    String barcode_conversion_dict = "barcode_conversion_dict.csv"
+
     String monitor_log = 'monitor_10x_preprocessing.log.txt'
 
     command <<<
@@ -73,7 +74,6 @@ task preprocess_tenx {
         else
             ln -s ~{whitelist} whitelist.txt
         fi
-
 
         # auto-detect barcode complementation
         # python3 barcode_revcomp_detect.py barcode_fastq chemistry whitelist qc_out out threshold
@@ -94,6 +94,7 @@ task preprocess_tenx {
         File fastq_R2_preprocessed = cleaned_fastq_R2
         File tenx_barcode_complementation_qc = barcode_complementation_qc
         File tenx_barcode_correction_qc = barcode_correction_qc
+        File? tenx_barcode_conversion_dict = barcode_conversion_dict
         #File tenx_trimming_log_json = trimming_log_json
         #File trimming_log_html = trimming_log_html
         #File tenx_trimming_stats = trimming_stats

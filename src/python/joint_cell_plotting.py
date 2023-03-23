@@ -23,14 +23,8 @@ def parse_arguments():
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
     parser.add_argument("plot_file", help="Filename for plot png file")
-    parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
-    parser.add_argument("conversion_dict", help="Filename for barcode mapping barcode for 10X ATAC->RNA", default=None, nargs='?')
 
     return parser.parse_args()
-
-REV_COMP = str.maketrans("ATGC", "TACG")
-def reverse_complement(seq):
-    return str.translate(seq, REV_COMP)[::-1]
 
 def get_split_lines(file_name, delimiter, skip_header):
     with open(file_name, "r") as f:
@@ -46,7 +40,7 @@ def merge_dicts(dict_1, dict_2):
 
     return(merged)
 
-def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells,conversion_dict=None):
+def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     """Read files and aggregate metrics into Pandas dataframe"""
     rna_metrics_contents = get_split_lines(rna_metrics_file, delimiter="\t", skip_header=True)
     umis = []
@@ -69,11 +63,7 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells,c
         if int(line[6])/2 >= remove_low_yielding_cells:
             tss.append(float(line[4]))
             frags.append(int(line[6])/2)
-            if conversion_dict:
-                # For 10X multiome
-                atac_barcodes.append(conversion_dict[line[0]])
-            else:
-                atac_barcodes.append(line[0])
+            atac_barcodes.append(line[0])
     atac_metrics = dict(zip(atac_barcodes, zip(tss, frags)))
 
     # merge metrics by barcodes
@@ -154,18 +144,10 @@ def main():
     min_tss = getattr(args, "min_tss")
     min_frags = getattr(args, "min_frags")
     plot_file = getattr(args, "plot_file")
-    barcode_metadata_file = getattr(args, "barcode_metadata_file")
-    conversion_dict_file = getattr(args, "conversion_dict", None)
-
-    conversion_dict = None
-
-    if conversion_dict_file:
-        with open(conversion_dict_file) as fh:
-            conversion_dict = dict([reverse_complement(line.rstrip().split(",", 1)[0]),line.rstrip().split(",", 1)[1]] for line in fh)
 
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
-    metrics_df = get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells, conversion_dict)
+    metrics_df = get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells)
 
     # QC cells based on inputted cutoffs
     logging.info("QCing cells\n")

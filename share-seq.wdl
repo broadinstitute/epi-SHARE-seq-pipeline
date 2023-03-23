@@ -2,6 +2,7 @@ version 1.0
 
 # Import the sub-workflow for preprocessing the fastqs.
 import "tasks/10x_task_preprocess.wdl" as preprocess_tenx
+import "tasks/10x_create_barcode_mapping.wdl" as tenx_barcode_map
 import "workflows/subwf-atac.wdl" as share_atac
 import "workflows/subwf-rna-starsolo.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
@@ -111,8 +112,15 @@ workflow ShareSeq {
                         whitelist = select_first([whitelist_atac, whitelist_atac_]),
                         chemistry = chemistry,
                         prefix = prefix
-                }
             }
+        }
+        if ( chemistry == "10x_multiome" ){
+            call tenx_barcode_map.mapping_tenx_barcodes as barcode_mapping{
+                input:
+                    whitelist_atac = select_first([whitelist_atac, whitelist_atac_]),
+                    whitelist_rna = select_first([whitelist_rna, whitelist_rna_, whitelist_]),
+            }
+        }
     }
 
     if ( process_rna ) {
@@ -147,6 +155,7 @@ workflow ShareSeq {
                     peak_set = peak_set_,
                     prefix = prefix,
                     genome_name = genome_name,
+                    barcode_conversion_dict = barcode_mapping.tenx_barcode_conversion_dict,
                     count_only = count_only
             }
         }
@@ -168,8 +177,6 @@ workflow ShareSeq {
                 atac_barcode_metadata = atac.share_atac_barcode_metadata,
                 rna_barcode_metadata = rna.share_rna_barcode_metadata,
                 prefix = prefix,
-                whitelist_rna = if chemistry=='shareseq' then whitelist else select_first([whitelist_rna, whitelist_rna_, whitelist_]),
-                whitelist_atac = select_first([whitelist_atac, whitelist_atac_]),
                 genome_name = genome_name
         }
     }

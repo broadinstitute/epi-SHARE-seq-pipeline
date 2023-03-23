@@ -30,6 +30,7 @@ workflow wf_atac {
         Int? cutoff
         Boolean count_only = false
         Boolean trim_fastqs = true
+        File? barcode_conversion_dict # For 10X multiome
 
         # Align-specific inputs
         ## Biological
@@ -120,6 +121,7 @@ workflow wf_atac {
             genome_name = genome_name,
             minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
             prefix = prefix,
+            barcode_conversion_dict = barcode_conversion_dict,
             cpus = filter_cpus,
             disk_factor = filter_disk_factor,
             docker_image = filter_docker_image,
