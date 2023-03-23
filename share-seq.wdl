@@ -168,6 +168,8 @@ workflow ShareSeq {
                 atac_barcode_metadata = atac.share_atac_barcode_metadata,
                 rna_barcode_metadata = rna.share_rna_barcode_metadata,
                 prefix = prefix,
+                whitelist_rna = if chemistry=='shareseq' then whitelist else select_first([whitelist_rna, whitelist_rna_, whitelist_]),
+                whitelist_atac = select_first([whitelist_atac, whitelist_atac_]),
                 genome_name = genome_name
         }
     }

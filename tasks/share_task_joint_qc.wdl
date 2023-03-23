@@ -16,6 +16,8 @@ task joint_qc_plotting {
         # density plot of all barcodes passing at least one filter.
         File? atac_barcode_metadata
         File? rna_barcode_metadata
+        File? whitelist_rna
+        File? whitelist_atac
         Int remove_low_yielding_cells = 10
         Int min_umis = 100
         Int min_genes = 200
@@ -52,8 +54,12 @@ task joint_qc_plotting {
 
         bash $(which monitor_script.sh) > monitoring.log &
 
+        if [ ${if defined(whitelist_atac) then "true" else "false"} == "true"];then
+            paste -d ',' <(zcat ${whitelist_atac}) <(zcat ${whitelist_rna}) > conversion_dict.csv
+        fi
+
         # Make joint qc plot
-        python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata}
+        python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${if defined(whitelist_atac) then "conversion_dict.csv" else ""}
 
         # Make joint density plot
         Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}
