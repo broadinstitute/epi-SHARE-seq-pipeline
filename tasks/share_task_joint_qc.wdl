@@ -23,6 +23,7 @@ task joint_qc_plotting {
         Int min_genes = 200
         Int min_tss = 4
         Int min_frags = 100
+        Int? reverse_complement
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
@@ -59,7 +60,7 @@ task joint_qc_plotting {
         fi
 
         # Make joint qc plot
-        python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${if defined(whitelist_atac) then "conversion_dict.csv" else ""}
+        python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${if defined(whitelist_atac) then "conversion_dict.csv" else ""} ~{reverse_complement}
 
         # Make joint density plot
         Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}

@@ -28,6 +28,10 @@ def parse_arguments():
 
     return parser.parse_args()
 
+REV_COMP = str.maketrans("ATGC", "TACG")
+def reverse_complement(seq):
+    return str.translate(seq, REV_COMP)[::-1]
+
 def get_split_lines(file_name, delimiter, skip_header):
     with open(file_name, "r") as f:
         if skip_header:
@@ -157,7 +161,7 @@ def main():
 
     if conversion_dict_file:
         with open(conversion_dict_file) as fh:
-            conversion_dict = dict(line.rstrip().split(",", 1) for line in fh)
+            conversion_dict = dict([reverse_complement(line.rstrip().split(",", 1)[0]),line.rstrip().split(",", 1)[1]] for line in fh)
 
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
