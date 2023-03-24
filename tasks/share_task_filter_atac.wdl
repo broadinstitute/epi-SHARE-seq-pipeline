@@ -162,7 +162,7 @@ task share_atac_filter {
         python3 $(which bam_to_fragments.py) --shift_plus ~{shift_plus} --shift_minus ~{shift_minus} --bc_tag ~{barcode_tag_fragments} -o ~{fragments} ~{final_bam}
 
         # Change the ATAC 10x barcodes so they can match RNA
-        if [ ${if defined(barcode_conversion_dict) then "true" else "false"} ];then
+        if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} ];then
             cp ~{fragments} tmp_fragments
             awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}{print $1,$2,$3,map[$4],$5}' ~{barcode_conversion_dict} tmp_fragments > ~{fragments}
         fi
