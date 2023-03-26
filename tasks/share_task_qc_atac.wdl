@@ -127,6 +127,11 @@ task qc_atac {
             --bc_tag ~{barcode_tag} \
             in.wdup.bam
 
+        if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} ];then
+            cp ~{duplicate_stats} tmp_duplicate_stats
+            awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","reads_unique","reads_duplicate","pct_duplicates"}FNR>1{print map[$1],$2,$3,$4}' ~{barcode_conversion_dict} tmp_duplicate_stats > ~{duplicate_stats}
+        fi
+
         # Fragments in peaks
         # "~{prefix}.reads.in.peak.tsv"
         python3 $(which qc_atac_compute_reads_in_peaks.py) \
