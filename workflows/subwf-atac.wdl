@@ -141,6 +141,7 @@ workflow wf_atac {
             mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
             fragments = filter.atac_filter_fragments,
             fragments_index = filter.atac_filter_fragments_index,
+            barcode_conversion_dict = barcode_conversion_dict,
             peaks = peak_set,
             tss = tss_bed,
             fragment_cutoff = qc_fragment_cutoff,

@@ -27,6 +27,8 @@ task qc_atac {
         File? mito_metrics_barcode # From filter step
         File? peaks
         File? tss
+        File? barcode_conversion_dict
+
         Int? mapq_threshold = 30
         Int? fragment_cutoff = 10
         String? barcode_tag = "CB"
