@@ -95,6 +95,8 @@ task qc_atac {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
+        cp ~{mito_metrics_barcode} mito_metrics
+
         ln -s ~{raw_bam} in.raw.bam
         ln -s ~{raw_bam_index} in.raw.bam.bai
         ln -s ~{filtered_bam} in.filtered.bam
@@ -132,6 +134,10 @@ task qc_atac {
         if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} ];then
             cp ~{duplicate_stats} tmp_duplicate_stats
             awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","reads_unique","reads_duplicate","pct_duplicates"}FNR>1{print map[$1],$2,$3,$4}' ~{barcode_conversion_dict} tmp_duplicate_stats > ~{duplicate_stats}
+
+            cp mito_metrics tmp_mito_metrics
+            awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","raw_reads_nonmito","raw_reads_mito"}FNR>1{print map[$1],$2,$3}' ~{barcode_conversion_dict} tmp_mito_metrics > mito_metrics
+
         fi
 
         # Fragments in peaks
@@ -160,7 +166,7 @@ task qc_atac {
 
         join -j 1  <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q;sort -k1,1)) <(cat ~{duplicate_stats} | (sed -u 1q;sort -k1,1)) | \
         join -j 1 - <(cat ~{prefix}.atac.qc.~{genome_name}.reads.in.peak.tsv | (sed -u 1q;sort -k1,1)) | \
-        join -j 1 - <(cat ~{mito_metrics_barcode}| (sed -u 1q;sort -k1,1)) | \
+        join -j 1 - <(cat mito_metrics| (sed -u 1q;sort -k1,1)) | \
         awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_reads_promoter","pct_reads_peaks","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
 
         # Barcode rank plot
