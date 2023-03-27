@@ -14,7 +14,6 @@ from plotnine import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Plot barcodes by RNA and ATAC QC status")
-    parser.add_argument("pkr", help="PKR name")
     parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv file")
     parser.add_argument("atac_metrics_file", help="Filename for ATAC metrics tsv file")
     parser.add_argument("remove_low_yielding_cells", type=int, help="Minimum number of UMIs/fragments required for a cell to be plotted")
@@ -23,6 +22,8 @@ def parse_arguments():
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
     parser.add_argument("plot_file", help="Filename for plot png file")
+    parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
+    parser.add_argument("pkr", help="PKR name", nargs='?', default="")
 
     return parser.parse_args()
 
