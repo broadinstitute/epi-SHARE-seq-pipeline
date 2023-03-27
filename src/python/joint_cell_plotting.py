@@ -140,6 +140,7 @@ def main():
     rna_metrics_file = getattr(args, "rna_metrics_file")
     atac_metrics_file = getattr(args, "atac_metrics_file")
     remove_low_yielding_cells = getattr(args, "remove_low_yielding_cells")
+    barcode_metadata_file = getattr(args, "barcode_metadata_file")
     min_umis = getattr(args, "min_umis")
     min_genes = getattr(args, "min_genes")
     min_tss = getattr(args, "min_tss")
