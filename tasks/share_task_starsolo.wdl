@@ -21,8 +21,7 @@ task share_rna_align {
         File genome_index_tar
         String genome_name
         String prefix
-        #String docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star'
-        String docker_image = 'polumechanos/share_task_star'
+        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star'
         Int cpus = 16
         Float? disk_factor = 50.0
         Float? memory_factor = 2.0

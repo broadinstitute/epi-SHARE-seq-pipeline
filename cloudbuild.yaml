@@ -26,6 +26,16 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-archr'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_filter_atac:latest',
+          '-f',
+          'dockerfiles/share_task_filter_atac.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
   id: 'task-trim-fastqs-atac'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_trim_fastqs_atac:latest',
@@ -151,6 +161,11 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_trim_fastqs_atac:latest']
   waitFor: ['task-trim-fastqs-atac']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_filter_atac:latest']
+  waitFor: ['task-trim-filter-atac']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
