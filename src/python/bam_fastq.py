@@ -132,6 +132,13 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
     exact = good = bad = poly_barcode = poly_umi = 0 # QC counters
     poly_g = 'GGGGGGGG'
     poly_g_umi = 'GGGGGGGGGG'
+    match_codes = ['E', 'M', 'S', 'F']
+    match_combos = {}
+    # Dictionary of combinations of match codes:
+    for i in match_codes:
+        for j in match_codes:
+            for k in match_codes:
+                match_combos[i+j+k] = 0
 
     for read in bam:
         if read.is_read1:
@@ -148,13 +155,20 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
                 quality_tag = read.get_tag("QX")
                 Q1str,Q2str,Q3str = quality_tag.split("-",2)
                 R1 = R2 = R3 = None
-                R1,Q1,exact1 = check_putative_barcode(R1str, r1_barcode_dict_exact, 
-                                                      r1_barcode_dict_mismatch, Q1str)
-                R2,Q2,exact2 = check_putative_barcode(R2str, r2_barcode_dict_exact, 
-                                                      r2_barcode_dict_mismatch, Q2str)
-                R3,Q3,exact3 = check_putative_barcode(R3str, r3_barcode_dict_exact, 
-                                                      r3_barcode_dict_mismatch, Q3str)
+                R1,Q1,mismatch1,shift1 = check_putative_barcode(R1str, r1_barcode_dict_exact, 
+                                                                r1_barcode_dict_mismatch, Q1str)
+                R2,Q2,mismatch2,shift2 = check_putative_barcode(R2str, r2_barcode_dict_exact, 
+                                                                r2_barcode_dict_mismatch, Q2str)
+                R3,Q3,mismatch3,shift3 = check_putative_barcode(R3str, r3_barcode_dict_exact, 
+                                                                r3_barcode_dict_mismatch, Q3str)
                 
+                # Determine match types
+                code1 = get_match_code(mismatch1, shift1)
+                code2 = get_match_code(mismatch2, shift2)
+                code3 = get_match_code(mismatch3, shift3)
+
+                match_combos[code1+code2+code3] += 1
+
                 # examine "umi" region
                 read_right = read
                 umi = read_right.query_sequence[0:10]
@@ -163,7 +177,7 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
                 if umi == poly_g_umi:
                     poly_umi += 1
                 elif R1 and R2 and R3:
-                    if exact1 and exact2 and exact3:
+                    if code1 == 'E' and code2 == 'E' and code3 == 'E':
                         exact += 1
                     else:
                         good += 1
@@ -197,16 +211,20 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
     with open("qc.txt", 'w') as f:
         print("%s\t%s\t%s\t%s\t%s\t%s" % (file_prefix, exact, good, bad, poly_barcode, poly_umi), file=f)
 
+    with open("matches.txt", 'w') as f2:
+        for (k, v) in match_combos.items():
+            print("%s\t%s" % (k, v), file = f2)
+
 def check_putative_barcode(barcode_str, barcode_dict_exact, barcode_dict_mismatch, quality_str):
     '''
     Procedure: check exact match of barcode, then 1 mismatch, then 1bp left/right
-     shift
+    shift
     '''
-    exact = True
+    mismatch = shift = True
     value = barcode_dict_exact.get(barcode_str[1:9]) # check exact location first
     quality = quality_str[1:9]
     if value is None:
-        exact = False
+        mismatch = shift = False
         value = barcode_dict_mismatch.get(barcode_str[1:9])
         if value is None:
             value = barcode_dict_exact.get(barcode_str[:8]) # check 1bp shift left
@@ -220,8 +238,20 @@ def check_putative_barcode(barcode_str, barcode_dict_exact, barcode_dict_mismatc
                 else:
                     value = barcode_dict_exact.get(barcode_str[2:])
                     quality = quality_str[2:]
-    return value, quality, exact
+            if value is not None:
+                shift = True
+        else:
+            mismatch = True
+    return value, quality, mismatch, shift
 
+def get_match_code(mismatch, shift):
+    if mismatch and shift:
+        return 'E'
+    if mismatch:
+        return 'M'
+    if shift:
+        return 'S'
+    return 'F'
 
 def write_read(fastq, read):
     """
