@@ -114,6 +114,8 @@ workflow wf_preprocess {
 	call AggregateBarcodeQC {
 		input:
 			barcodeQCs = flatten(BamToFastq.qc)
+			matches = flatten(BamToFastq.matches)
+			keys = flatten(BamToFastq.keys)
 	}
 
 	call QC {
@@ -475,6 +477,7 @@ task BamToFastq {
 		}
 
 		File qc = 'qc.txt'
+		File matches = 'matches.txt'
 		# Array[File] fastqs = glob("*.fastq")
 	}
 	runtime {
@@ -487,16 +490,25 @@ task BamToFastq {
 task AggregateBarcodeQC {
 	input {
 		Array[File] barcodeQCs
+		Array[File] keys
+		Array[File] matches
 	}
+
+	File key = keys[0]
 
 	command <<<
 		echo -e "LIB_BARCODE\tEXACT\tPASS\tFAIL_MISMATCH\tFAIL_HOMOPOLYMER\tFAIL_UMI" > final.txt
 		cat ~{sep=" " barcodeQCs} >> final.txt
 		# awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}' combined.txt > final.txt
+
+		paste ~{key} ~{sep=" " matches} > matches.txt 
+		# Transpose if desired
+		# awk '{ for (i=1; i<=NF; i++) a[i]= (a[i]? a[i] FS $i: $i) } END{ for (i in a) print a[i] }' matches.txt > matches_t.txt
 	>>>
 	
 	output {
 		File laneQC = 'final.txt'
+		File matchQC = 'matches.txt'
 	}
 	
 	runtime {

@@ -212,8 +212,14 @@ def process_bam(bam, left, right, r1_barcode_dict_exact, r1_barcode_dict_mismatc
         print("%s\t%s\t%s\t%s\t%s\t%s" % (file_prefix, exact, good, bad, poly_barcode, poly_umi), file=f)
 
     with open("matches.txt", 'w') as f2:
-        for (k, v) in match_combos.items():
-            print("%s\t%s" % (k, v), file = f2)
+        print(file_prefix, file=f2)
+        for v in match_combos.values():
+            print(v, file = f2)
+    
+    with open("keys.txt", 'w') as f3:
+        print('MATCH_CODE', file=f3)
+        for k in match_combos.keys():
+            print(k, file = f3)
 
 def check_putative_barcode(barcode_str, barcode_dict_exact, barcode_dict_mismatch, quality_str):
     '''
