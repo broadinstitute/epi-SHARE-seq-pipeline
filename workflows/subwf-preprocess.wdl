@@ -478,6 +478,7 @@ task BamToFastq {
 
 		File qc = 'qc.txt'
 		File matches = 'matches.txt'
+		File keys = 'keys.txt'
 		# Array[File] fastqs = glob("*.fastq")
 	}
 	runtime {
