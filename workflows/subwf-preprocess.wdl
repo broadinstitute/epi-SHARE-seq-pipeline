@@ -113,8 +113,8 @@ workflow wf_preprocess {
 
 	call AggregateBarcodeQC {
 		input:
-			barcodeQCs = flatten(BamToFastq.qc)
-			matches = flatten(BamToFastq.matches)
+			barcodeQCs = flatten(BamToFastq.qc),
+			matches = flatten(BamToFastq.matches),
 			keys = flatten(BamToFastq.keys)
 	}
 
