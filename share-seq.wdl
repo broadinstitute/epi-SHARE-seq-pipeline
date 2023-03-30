@@ -52,8 +52,6 @@ workflow ShareSeq {
         #Int? atac_filter_shift_plus = 4
         #Int? atac_filter_shift_minus = -4
 
-
-
         # RNA-specific inputs
         Array[File] read1_rna
         Array[File] read2_rna

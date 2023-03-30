@@ -106,8 +106,10 @@ def main():
     args = parse_arguments()
     bam_file = getattr(args, "bam_file")
     bai_file = getattr(args, "bai_file")
+
     pkr = getattr(args, "pkr")
     barcode_tag = getattr(args, "barcode_tag")
+
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
 
     # load bam file
