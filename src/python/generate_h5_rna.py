@@ -18,8 +18,8 @@ def parse_arguments():
     parser.add_argument("matrix_file", help="Filename for STARsolo raw matrix mtx file")
     parser.add_argument("features_file", help="Filename for STARsolo features tsv file")
     parser.add_argument("barcodes_file", help="Filename for STARsolo barcodes tsv file")
-    parser.add_argument("pkr", help="Experiment prefix")
     parser.add_argument("output_file", help="Filename for output h5 file")
+    parser.add_argument("pkr", help="Experiment prefix", nargs = '?')
 
     return parser.parse_args()
 
@@ -78,7 +78,7 @@ def main():
     matrix_file = getattr(args, "matrix_file")
     features_file = getattr(args, "features_file")
     barcodes_file = getattr(args, "barcodes_file")
-    pkr = getattr(args, "pkr")
+    pkr = getattr(args, "pkr", None)
     output_file = getattr(args, "output_file")
 
     # read input files
@@ -88,10 +88,14 @@ def main():
     # get genes from features file
     features = get_split_lines(features_file, delimiter="\t")
     gene_list = [line[1] for line in features]
-    # get barcodes from barcodes file, reformat as R1,R2,R3,PKR
+    # get barcodes from barcodes file, reformat as R1R2R3_PKR
     barcodes = get_split_lines(barcodes_file, delimiter="\t")
     barcode_list = [line[0] for line in barcodes]
-    formatted_barcode_list = [barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + pkr for barcode in barcode_list]
+
+    if pkr is None:
+        formatted_barcode_list = barcode_list
+    else:
+        formatted_barcode_list = [barcode + "_" + pkr for barcode in barcode_list]
 
     # generate count matrix
     logging.info("Generating count matrix\n")

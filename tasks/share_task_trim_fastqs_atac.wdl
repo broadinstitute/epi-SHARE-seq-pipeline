@@ -19,8 +19,7 @@ task share_trim_fastqs_atac {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_trim_fastqs_atac"
-        String? docker_image = "polumechanos/share_task_trim_fastqs_atac"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_trim_fastqs_atac"
     }
 
     # Determine the size of the input

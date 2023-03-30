@@ -20,7 +20,7 @@ task generate_h5 {
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
     }
 
     # Determine the size of the input
@@ -47,7 +47,7 @@ task generate_h5 {
         tar xzvf ${tar}
 
         # Generate h5 file
-        python3 $(which generate_h5_rna.py) ./matrix.mtx.gz ./features.tsv.gz ./barcodes.tsv.gz ${default="share-seq" pkr} ${h5}
+        python3 $(which generate_h5_rna.py) ./matrix.mtx.gz ./features.tsv.gz ./barcodes.tsv.gz ${h5} ${pkr}
     }
 
     output {

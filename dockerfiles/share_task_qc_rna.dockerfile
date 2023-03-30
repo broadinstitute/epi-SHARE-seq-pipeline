@@ -32,7 +32,8 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     python3 \
     python3-dev \
-    python3-pip \ 
+    python3-full \
+    python3-pip \
     wget \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
@@ -56,6 +57,7 @@ ENV R_LIBS_USER=/usr/local/lib/R
 
 # Copy scripts
 COPY --chown=$USER:$USER src/python/rna_barcode_metadata.py /usr/local/bin/
+COPY --chown=$USER:$USER src/R/barcode_rank_functions.R /usr/local/bin/
 COPY --chown=$USER:$USER src/R/rna_qc_plots.R /usr/local/bin/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 

@@ -12,21 +12,22 @@ task joint_qc_plotting {
     }
 
     input {
-        # This task generates a plot of barcodes QC'd jointly by RNA and ATAC metrics, as well as a 
+        # This task generates a plot of barcodes QC'd jointly by RNA and ATAC metrics, as well as a
         # density plot of all barcodes passing at least one filter.
         File? atac_barcode_metadata
         File? rna_barcode_metadata
         Int remove_low_yielding_cells = 10
-	Int min_umis = 100
+        Int min_umis = 100
         Int min_genes = 200
         Int min_tss = 4
         Int min_frags = 100
-        
+        Int? reverse_complement
+
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
 
         String? prefix
-        String genome_name 
+        String genome_name
 
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
     }
@@ -53,7 +54,7 @@ task joint_qc_plotting {
         bash $(which monitor_script.sh) > monitoring.log &
 
         # Make joint qc plot
-        python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata}
+        python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${default="share-seq" prefix}
 
         # Make joint density plot
         Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}

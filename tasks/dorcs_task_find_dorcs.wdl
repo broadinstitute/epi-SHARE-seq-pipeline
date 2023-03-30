@@ -34,13 +34,15 @@ task find_dorcs {
         Float numBackgroundPairs = 100000
 
         #DORC genes parameter
+        # Regulatory region around TSS. Default is +/- 50Kb
         Int windowPadSize = 50000
         Int dorcGeneCutOff = 10
         Float corrPVal = 0.05
         Int topNGene = 20
 
         String output_filename = "${prefix}.dorcs.notebook.${genome}.ipynb"
-        String docker_image = "swekhande/shareseq-prod:share-task-dorcs"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
+        #String docker_image = "swekhande/shareseq-prod:share-task-dorcs"
         Int mem_gb = 64
         Int disk_gb = 100
     }

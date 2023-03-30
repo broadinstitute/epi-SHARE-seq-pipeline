@@ -1,9 +1,9 @@
 version 1.0
 
 import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
+import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
-import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
 
 # Import the tasks called by the pipeline
@@ -18,15 +18,16 @@ workflow wf_rna {
         # RNA Sub-workflow inputs
 
         # Align
-        String chemistry
         Array[File] read1
         Array[File] read2
-        File? whitelist
         File idx_tar
-        String prefix
-        String? pkr
+        String chemistry
         String genome_name
+        String prefix
+        String? barcode_tag
+        String? pkr
         Int? cpus = 16
+        File? whitelist
         String? docker
         # QC
         Int? umi_cutoff
@@ -75,7 +76,8 @@ workflow wf_rna {
             bam = align.output_bam,
             umi_cutoff = umi_cutoff,
             gene_cutoff = gene_cutoff,
-            chemistry = chemistry,
+            pkr = pkr,
+            barcode_tag = barcode_tag,
             genome_name = genome_name,
             prefix = prefix
     }
