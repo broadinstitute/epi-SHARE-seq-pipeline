@@ -152,7 +152,7 @@ steps:
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest']
   waitFor: ['task-archr']
 
-  - name: 'gcr.io/cloud-builders/docker'
+- name: 'gcr.io/cloud-builders/docker'
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/10x_task_preprocess:latest']
   waitFor: ['task-10x-preprocess']
