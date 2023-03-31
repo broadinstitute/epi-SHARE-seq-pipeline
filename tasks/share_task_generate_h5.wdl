@@ -57,7 +57,7 @@ task generate_h5 {
     runtime {
         memory : "${mem_gb} GB"
         disks: "local-disk ${disk_gb} ${disk_type}"
-        docker : docker_image
+        docker : "${docker_image}"
     }
 
     parameter_meta {
