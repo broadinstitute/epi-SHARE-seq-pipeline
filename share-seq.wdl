@@ -1,4 +1,4 @@
-version 1.0
+version 1.1
 
 # Import the sub-workflow for preprocessing the fastqs.
 import "tasks/10x_task_preprocess.wdl" as preprocess_tenx
