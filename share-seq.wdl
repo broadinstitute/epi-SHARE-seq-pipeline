@@ -31,7 +31,7 @@ workflow ShareSeq {
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
-        Array[File] fastq_barcode
+        Array[File] fastq_barcode_10X
         Boolean count_only = false
         File? chrom_sizes
         File? atac_genome_index_tar
@@ -106,7 +106,7 @@ workflow ShareSeq {
                     input:
                         fastq_R1 = read1_atac[idx],
                         fastq_R3 = read2_atac[idx],
-                        fastq_R2 = fastq_barcode[idx],
+                        fastq_R2 = fastq_barcode_10X[idx],
                         whitelist = select_first([whitelist_atac, whitelist_atac_]),
                         chemistry = chemistry,
                         prefix = prefix
