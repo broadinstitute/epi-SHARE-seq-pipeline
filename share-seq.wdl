@@ -33,7 +33,7 @@ workflow ShareSeq {
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
-        Array[File]? fastq_barcode_10X = []
+        Array[File]? fastq_barcode_10X
         Boolean count_only = false
         File? chrom_sizes
         File? atac_genome_index_tar
