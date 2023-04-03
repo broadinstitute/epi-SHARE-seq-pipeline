@@ -1,25 +1,18 @@
-# From https://github.com/ENCODE-DCC/chip-seq-pipeline2/blob/master/chip.wdl
+version 1.0
 
-
-task raise_exception {
+task exception {
     input {
-        String msg
-        Array[String]? vals
+        Boolean fail
     }
-    command {
-        echo -e "\n* Error: ${msg}\n" >&2
-        echo -e "* Vals: ${sep=',' vals}\n" >&2
-        exit 2
-    }
-    output {
-        String error_msg = '${msg}'
-    }
-    runtime {
-        maxRetries : 0
-        cpu : 1
-        memory : '2 GB'
-        time : 1
-        disks : 'local-disk 10 SSD'
-    	docker : 'encodedcc/chip-seq-pipeline:v2.2.1'
-    }
+    command <<<
+        >&2 echo 'Hello!!!! }{}"'
+        if [ "~{fail}" == "true" ]; then
+            echo '{"wdl_error_message": "this is the end, my only friend, the end", "meaning": 420}' > wdl_failure_message.json
+            exit 42
+        fi
+    >>>
+
+   runtime {
+     failureMessageFile: "wdl_failure_message.json"
+   }
 }
