@@ -98,7 +98,7 @@ workflow ShareSeq {
     File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
     File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
 
-    if ( chemistry == "10x_multiome" && length(fastq_barcode_10X) == 0 ){
+    if ( chemistry == "10x_multiome" && select_first([ fastq_barcode_10X, []]) == [] ){
         call exception_handler.exception {
             input:
                 fail = true
