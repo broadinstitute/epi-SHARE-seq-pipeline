@@ -15,7 +15,8 @@ workflows:
              - barcode_plot_annotations
              - trim-fastqs-atac
              - atac-refactoring
-             - main-rebase 
+             - main-rebase
+             - sw-default-changes
          tags:
              - /.*/
 

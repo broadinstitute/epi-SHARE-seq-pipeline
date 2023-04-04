@@ -8,6 +8,8 @@ import "workflows/subwf-rna-starsolo.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report
+import "tasks/raise_exception.wdl" as exception_handler
+
 
 # WDL workflow for SHARE-seq
 
@@ -31,7 +33,7 @@ workflow ShareSeq {
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
-        Array[File] fastq_barcode
+        Array[File] fastq_barcode_10X = []
         Boolean count_only = false
         File? chrom_sizes
         File? atac_genome_index_tar
@@ -96,17 +98,13 @@ workflow ShareSeq {
     File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
     File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
 
-
-
-
-
     if ( chemistry != "shareseq" && process_atac) {
         scatter (idx in range(length(read1_atac))) {
             call preprocess_tenx.preprocess_tenx as preprocess_tenx{
                     input:
                         fastq_R1 = read1_atac[idx],
                         fastq_R3 = read2_atac[idx],
-                        fastq_R2 = fastq_barcode[idx],
+                        fastq_R2 = fastq_barcode_10X[idx],
                         whitelist = select_first([whitelist_atac, whitelist_atac_]),
                         chemistry = chemistry,
                         prefix = prefix
