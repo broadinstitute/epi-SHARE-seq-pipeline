@@ -146,7 +146,7 @@ workflow wf_atac {
             tss = tss_bed,
             fragment_cutoff = qc_fragment_cutoff,
             mapq_threshold = mapq_threshold,
-            barcode_tag = select_first([barcode_tag_fragments,barcode_tag]),
+            barcode_tag = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag]),
             genome_name = genome_name,
             prefix = prefix,
             cpus = qc_cpus,
