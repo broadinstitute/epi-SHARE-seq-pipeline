@@ -31,7 +31,7 @@ RUN git clone --branch 1.9 --single-branch https://github.com/samtools/samtools.
     cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
 # Install system/math python packages (python3)
-RUN pip3 install --no-cache-dir python-Levenshtein==0.12.2 pysam requests oauth2client
+RUN pip3 install --no-cache-dir pysam requests oauth2client
 
 # Install Picard 2.26.11
 RUN wget https://github.com/broadinstitute/picard/releases/download/2.26.11/picard.jar && chmod +x picard.jar
