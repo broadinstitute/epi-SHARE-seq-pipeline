@@ -16,7 +16,6 @@ workflows:
              - trim-fastqs-atac
              - atac-refactoring
              - main-rebase
-             - sw-default-changes
          tags:
              - /.*/
 
