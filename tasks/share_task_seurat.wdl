@@ -13,7 +13,7 @@ task seurat {
         String genome_name
 
         Int? min_features = 200
-        Float? percent_mt = 5.0
+        Float? percent_mt = 50.0
         Int? min_cells = 3
 
         String? normalization_method = "LogNormalize"
