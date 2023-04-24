@@ -16,7 +16,7 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-archr'
+  id: 'task-10x-preprocess'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/10x_task_preprocess:latest',
           '-f',
@@ -26,7 +26,7 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-archr'
+  id: 'task-trim-filter-atac'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_filter_atac:latest',
           '-f',
@@ -152,7 +152,7 @@ steps:
          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest']
   waitFor: ['task-archr']
 
-  - name: 'gcr.io/cloud-builders/docker'
+- name: 'gcr.io/cloud-builders/docker'
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/10x_task_preprocess:latest']
   waitFor: ['task-10x-preprocess']
