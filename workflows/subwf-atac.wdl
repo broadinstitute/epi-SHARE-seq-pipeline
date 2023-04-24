@@ -77,6 +77,8 @@ workflow wf_atac {
         String? trim_docker_image
     }
 
+		String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
+
     if ( trim_fastqs ){
         # Remove dovetail in the ATAC reads.
         scatter (idx in range(length(read1))) {
@@ -116,7 +118,7 @@ workflow wf_atac {
             shift_plus = filter_shift_plus,
             shift_minus = filter_shift_minus,
             barcode_tag = barcode_tag,
-            barcode_tag_fragments = select_first([barcode_tag_fragments,barcode_tag]),
+						barcode_tag_fragments = barcode_tag_fragments_,
             mapq_threshold = mapq_threshold,
             genome_name = genome_name,
             minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
@@ -146,7 +148,7 @@ workflow wf_atac {
             tss = tss_bed,
             fragment_cutoff = qc_fragment_cutoff,
             mapq_threshold = mapq_threshold,
-            barcode_tag = select_first([barcode_tag_fragments,barcode_tag]),
+						barcode_tag = barcode_tag_fragments_,
             genome_name = genome_name,
             prefix = prefix,
             cpus = qc_cpus,
