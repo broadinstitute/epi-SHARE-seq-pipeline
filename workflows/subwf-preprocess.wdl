@@ -92,7 +92,7 @@ workflow wf_preprocess {
 					metaCsv = metaCsv,
 			}
 
-			call BamToFastq { 
+			call BamToRawFastq { 
 				input: 
 					bam=bam,
 					pkrId = BamLookUp.pkrId,
@@ -106,14 +106,9 @@ workflow wf_preprocess {
 
 			call WriteTsvRow {
 				input:
-					fastq = BamToFastq.out
+					fastq = BamToRawFastq.out
 			}
 		}
-	}
-
-	call AggregateBarcodeQC {
-		input:
-			barcodeQCs = flatten(BamToFastq.qc)
 	}
 
 	call QC {
@@ -145,9 +140,6 @@ workflow wf_preprocess {
 		Array[String] terraResponse = TerraUpsert.upsert_response
 		Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
 		Array[File] monitoringLogsBasecalls = BasecallsToBams.monitoringLog		
-	        File BarcodeQC = AggregateBarcodeQC.laneQC
-		# Array[Fastq] fastqs = flatten(BamToFastq.out)
-		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
 	}
 }
 
@@ -409,11 +401,8 @@ task BamLookUp {
 	}
 }
 
-task BamToFastq {
-	# Convert unmapped, library-separated bams to fastqs
-	# will assign cell barcode to read name 
-	# assigns UMI for RNA to read name and adapter trims for ATAC
-
+task BamToRawFastq {
+	# Convert unmapped, library-separated bams to raw (uncorrected) FASTQs
 	# Defaults to file R1.txt in the src/python directory if no round barcodes given
 	input {
 		File bam
@@ -422,12 +411,7 @@ task BamToFastq {
 		String sampleType
 		String genome
 		String notes
-		# Array[Array[String]] R1barcodeSet
-		# Array[Array[String]]? R2barcodes
-		# Array[Array[String]]? R3barcodes
 		File R1barcodeSet
-		File? R2barcodes
-		File? R3barcodes
 		String dockerImage
 	}
 
@@ -440,19 +424,6 @@ task BamToFastq {
 
 	Float memory = ceil(1.5 * bamSize + 1) * 2
 
-
-	# Workaround since write_tsv does not take type "?", must be defined
-	# Array[Array[String]] R2_if_defined = select_first([R2barcodes, []])
-	# Array[Array[String]] R3_if_defined = select_first([R3barcodes, []])
-
-	# Use round 1 default barcode set in rounds 2 and 3 if not sent in
-	File R1file = R1barcodeSet #write_tsv(R1barcodeSet)
-	File R2file = if defined(R2barcodes)
-					# then write_tsv(R2_if_defined) else R1file
-					then R2barcodes else R1barcodeSet
-	File R3file = if defined(R3barcodes)
-					# then write_tsv(R3_if_defined) else R1file
-					then R3barcodes else R1barcodeSet
 	String monitor_log = "monitor.log"
 
 	command <<<
@@ -462,7 +433,7 @@ task BamToFastq {
 
 		samtools addreplacerg -r '@RG\tID:~{pkrId}' ~{bam} -o tmp.bam
 
-		python3 /software/bam_to_raw_fastq.py tmp.bam ~{R1file}
+		python3 /software/bam_to_raw_fastq.py tmp.bam ~{R1barcodeSet}
 
 		gzip *.fastq
 	>>>
@@ -478,9 +449,6 @@ task BamToFastq {
 			read1: glob("*R1.fastq.gz"),
 			read2: glob("*R2.fastq.gz")
 		}
-
-		File qc = 'qc.txt'
-		# Array[File] fastqs = glob("*.fastq")
 	}
 	runtime {
 		docker: dockerImage
