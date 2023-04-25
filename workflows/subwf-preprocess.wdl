@@ -23,7 +23,7 @@ workflow wf_preprocess {
 		String dockerImage = "nchernia/share_task_preprocess:18"
 	}
 
-	String barcodeStructure = "99M"
+	String barcodeStructure = "14S10M28S10M28S9M8B"
 	String sequencingCenter = "BI"
 	String tar_flags = if zipped then 'xzf' else 'xf'
 	String untarBcl =
@@ -145,7 +145,7 @@ workflow wf_preprocess {
 		Array[String] terraResponse = TerraUpsert.upsert_response
 		Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
 		Array[File] monitoringLogsBasecalls = BasecallsToBams.monitoringLog		
-        File BarcodeQC = AggregateBarcodeQC.laneQC
+	        File BarcodeQC = AggregateBarcodeQC.laneQC
 		# Array[Fastq] fastqs = flatten(BamToFastq.out)
 		# Array[Array[Array[File]]] fastqs = BamToFastq.fastqs
 	}
