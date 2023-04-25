@@ -3,19 +3,21 @@ import argparse
 import os 
 
 class SubTableRow:
-	def __init__(self, pkr, lib, r1, fq1, fq2, genome, notes):
+	def __init__(self, pkr, lib, r1, r1_file, fq1, fq2, genome, notes):
 		self.pkr = pkr
 		self.lib = lib
 		self.r1 = r1
+		self.r1_file = r1_file
 		self.fq1 = fq1
 		self.fq2 = fq2
 		self.genome = genome
 		self.notes = notes
 
 class MainTableRow:
-	def __init__(self, pkr, r1, genome, rna_lib = None, rna_fq1 = None, rna_fq2 = None, atac_lib = None, atac_fq1 = None, atac_fq2 = None):
+	def __init__(self, pkr, r1, r1_file, genome, rna_lib = None, rna_fq1 = None, rna_fq2 = None, atac_lib = None, atac_fq1 = None, atac_fq2 = None):
 		self.pkr = pkr
 		self.r1 = r1
+		self.r1_file = r1_file
 		self.genome = genome
 		self.rna_lib = rna_lib if rna_lib is not None else []
 		self.rna_fq1 = rna_fq1 if rna_fq1 is not None else []
@@ -37,46 +39,46 @@ def get_subset_names(fqs):
 	# Subset name is between Lane number and Read number
 	return [x.split('_L')[1].split('_R')[0].split('_')[1] for x in basenames]
 
-def update_sub_dict(key, pkr, lib, r1, fq1, fq2, typ, genome, notes):
+def update_sub_dict(key, pkr, lib, r1, r1_file, fq1, fq2, typ, genome, notes):
 	if typ == 'ATAC':
 		if key not in atac:
-			atac[key] = SubTableRow(pkr, lib, r1, [fq1], [fq2], genome, notes)
+			atac[key] = SubTableRow(pkr, lib, r1, r1_file, [fq1], [fq2], genome, notes)
 		else:
 			atac[key].fq1.append(fq1)
 			atac[key].fq2.append(fq2)
 	if typ == 'RNA':
 		if key not in rna:
-			rna[key] = SubTableRow(pkr, lib, r1, [fq1], [fq2], genome, notes)
+			rna[key] = SubTableRow(pkr, lib, r1, r1_file, [fq1], [fq2], genome, notes)
 		else:
 			rna[key].fq1.append(fq1)
 			rna[key].fq2.append(fq2)
 	if typ == 'RNA-no-align':
 		if key not in rna_no:
-			rna_no[key] = SubTableRow(pkr, lib, r1, [fq1], [fq2], genome, notes)
+			rna_no[key] = SubTableRow(pkr, lib, r1, r1_file, [fq1], [fq2], genome, notes)
 		else:
 			rna_no[key].fq1.append(fq1)
 			rna_no[key].fq2.append(fq2)
 
-def update_main_dict(key, pkr, r1, genome, rna_lib = None, rna_fq1 = None, rna_fq2 = None, atac_lib = None, atac_fq1 = None, atac_fq2 = None):
+def update_main_dict(key, pkr, r1, r1_file, genome, rna_lib = None, rna_fq1 = None, rna_fq2 = None, atac_lib = None, atac_fq1 = None, atac_fq2 = None):
 	if rna_lib is None:
 		if key not in main:
-			main[key] = MainTableRow(pkr, [r1], genome, atac_lib = [atac_lib], atac_fq1 = atac_fq1, atac_fq2 = atac_fq2)
+			main[key] = MainTableRow(pkr, [r1], r1_file, genome, atac_lib = [atac_lib], atac_fq1 = atac_fq1, atac_fq2 = atac_fq2)
 		else:
 			main[key].atac_lib.append(atac_lib)
 			main[key].atac_fq1 += atac_fq1
 			main[key].atac_fq2 += atac_fq2
 	if atac_lib is None:
 		if key not in main:
-			main[key] = MainTableRow(pkr, [r1], genome, rna_lib = [rna_lib], rna_fq1 = rna_fq1, rna_fq2 = rna_fq2)
+			main[key] = MainTableRow(pkr, [r1], r1_file, genome, rna_lib = [rna_lib], rna_fq1 = rna_fq1, rna_fq2 = rna_fq2)
 		else:
 			main[key].rna_lib.append(rna_lib)
 			main[key].rna_fq1 += rna_fq1
 			main[key].rna_fq2 += rna_fq2
 
-def update_main_subsets(key, pkr, r1, rna_lib = None, rna_fq1 = None, rna_fq2 = None, atac_lib = None, atac_fq1 = None, atac_fq2 = None):
+def update_main_subsets(key, pkr, r1, r1_file, rna_lib = None, rna_fq1 = None, rna_fq2 = None, atac_lib = None, atac_fq1 = None, atac_fq2 = None):
 	if len(rna_lib) == 0:
 		if key not in main:
-			main[key] = MainTableRow(pkr, r1, genome, atac_lib = atac_lib, atac_fq1 = atac_fq1, atac_fq2 = atac_fq2)
+			main[key] = MainTableRow(pkr, r1, r1_file, genome, atac_lib = atac_lib, atac_fq1 = atac_fq1, atac_fq2 = atac_fq2)
 		else:
 			main[key].r1 += r1
 			main[key].atac_lib += atac_lib
@@ -84,7 +86,7 @@ def update_main_subsets(key, pkr, r1, rna_lib = None, rna_fq1 = None, rna_fq2 = 
 			main[key].atac_fq2 += atac_fq2
 	elif len(atac_lib) == 0:
 		if key not in main:
-			main[key] = MainTableRow(pkr, r1, genome, rna_lib = rna_lib, rna_fq1 = rna_fq1, rna_fq2 = rna_fq2)
+			main[key] = MainTableRow(pkr, r1, r1_file, genome, rna_lib = rna_lib, rna_fq1 = rna_fq1, rna_fq2 = rna_fq2)
 		else:
 			main[key].r1 += r1
 			main[key].rna_lib += rna_lib
@@ -92,7 +94,7 @@ def update_main_subsets(key, pkr, r1, rna_lib = None, rna_fq1 = None, rna_fq2 = 
 			main[key].rna_fq2 += rna_fq2
 	else:
 		if key not in main:
-			main[key] = MainTableRow(pkr, r1, genome, rna_lib = rna_lib, rna_fq1 = rna_fq1, rna_fq2 = rna_fq2, atac_lib = atac_lib, atac_fq1 = atac_fq1, atac_fq2 = atac_fq2)
+			main[key] = MainTableRow(pkr, r1, r1_file, genome, rna_lib = rna_lib, rna_fq1 = rna_fq1, rna_fq2 = rna_fq2, atac_lib = atac_lib, atac_fq1 = atac_fq1, atac_fq2 = atac_fq2)
 		else:
 			main[key].r1 += r1
 			main[key].atac_lib += atac_lib
@@ -122,56 +124,61 @@ for record in csv_reader:
 	fq1 = sorted(record['fastq_R1'].split(','))
 	fq2 = sorted(record['fastq_R2'].split(','))
 	r1 = get_subset_names(fq1)
+	r1_file = record['R1_subset']
 	typ = record['Type']
 	genome = record['Genome']
 	notes = record['Notes']
 	for i in range(len(r1)):
 		key = make_sub_key(lib, r1[i], args.name)
-		update_sub_dict(key, pkr, lib, r1[i], fq1[i], fq2[i], typ, genome, notes)
+		update_sub_dict(key, pkr, lib, r1[i], r1_file, fq1[i], fq2[i], typ, genome, notes)
 
 with open('atac.tsv', 'wt') as outfile:
 	tsv_writer = csv.writer(outfile, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)
-	tsv_writer.writerow(['entity:scATAC_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'fastq_R1', 'fastq_R2', 'Genome', 'Notes'])
+	tsv_writer.writerow(['entity:scATAC_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'R1_barcode_file', 'fastq_R1', 'fastq_R2', 'Genome', 'Notes'])
 	for key in atac.keys():
 		pkr = atac[key].pkr
 		lib = atac[key].lib
 		r1 = atac[key].r1
+		r1_file = atac[key].r1_file
 		fq1 = list(atac[key].fq1)
 		fq2 = list(atac[key].fq2)
 		genome = atac[key].genome
-		tsv_writer.writerow([key, args.name, pkr, lib, r1, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', genome, atac[key].notes])
+		tsv_writer.writerow([key, args.name, pkr, lib, r1, r1_file, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', genome, atac[key].notes])
 		main_key = make_main_key(pkr, r1)
-		update_main_dict(main_key, pkr, r1, genome, atac_lib=lib, atac_fq1=fq1, atac_fq2=fq2)
+		update_main_dict(main_key, pkr, r1, r1_file, genome, atac_lib=lib, atac_fq1=fq1, atac_fq2=fq2)
 
 with open('rna.tsv', 'wt') as outfile:
 	tsv_writer = csv.writer(outfile, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)
-	tsv_writer.writerow(['entity:scRNA_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'fastq_R1', 'fastq_R2', 'Genome', 'Notes'])
+	tsv_writer.writerow(['entity:scRNA_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'R1_barcode_file', 'fastq_R1', 'fastq_R2', 'Genome', 'Notes'])
 	for key in rna.keys():
 		pkr = rna[key].pkr
 		lib = rna[key].lib
 		r1 = rna[key].r1
+		r1_file = rna[key].r1_file
 		fq1 = list(rna[key].fq1)
 		fq2 = list(rna[key].fq2)
 		genome = rna[key].genome
-		tsv_writer.writerow([key, args.name, pkr, lib, r1, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', genome, rna[key].notes])
+		tsv_writer.writerow([key, args.name, pkr, lib, r1, r1_file, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', genome, rna[key].notes])
 		main_key = make_main_key(pkr, r1)
-		update_main_dict(main_key, pkr, r1, genome, rna_lib=lib, rna_fq1=fq1, rna_fq2=fq2)
+		update_main_dict(main_key, pkr, r1, r1_file, genome, rna_lib=lib, rna_fq1=fq1, rna_fq2=fq2)
 
 with open('rna_no.tsv', 'wt') as outfile:
 	tsv_writer = csv.writer(outfile, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)
-	tsv_writer.writerow(['entity:scRNA-no-align_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'fastq_R1', 'fastq_R2', 'Genome', 'Notes'])
+	tsv_writer.writerow(['entity:scRNA-no-align_libraries_id', 'BCL', 'PKR', 'Library', 'R1_Subset', 'R1_barcode_file', 'fastq_R1', 'fastq_R2', 'Genome', 'Notes'])
 	for key in rna_no.keys():
 		pkr = rna_no[key].pkr
 		lib = rna_no[key].lib
 		r1 = rna_no[key].r1
+		r1_file = rna_no[key].r1_file
 		fq1 = list(rna_no[key].fq1)
 		fq2 = list(rna_no[key].fq2)
 		genome = rna_no[key].genome
-		tsv_writer.writerow([key, args.name, pkr, lib, r1, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', genome, rna_no[key].notes])
+		tsv_writer.writerow([key, args.name, pkr, lib, r1, r1_file, '["' + '","'.join(fq1) + '"]', '["' + '","'.join(fq2) + '"]', genome, rna_no[key].notes])
 
 # Merge all subsets together
 for key in list(main.keys()):
 	pkr = main[key].pkr
+	r1_file = main[key].r1_file
 	r1 = list(main[key].r1)
 	if len(r1) == 1:
 		continue
@@ -181,20 +188,21 @@ for key in list(main.keys()):
 	atac_lib = list(main[key].atac_lib)
 	atac_fq1 = list(main[key].atac_fq1)
 	atac_fq2 = list(main[key].atac_fq2)
-	update_main_subsets(pkr.replace(' ', '_'), pkr, r1, rna_lib=rna_lib, rna_fq1=rna_fq1, rna_fq2=rna_fq2, atac_lib=atac_lib, atac_fq1=atac_fq1, atac_fq2=atac_fq2)
+	update_main_subsets(pkr.replace(' ', '_'), pkr, r1, r1_file, rna_lib=rna_lib, rna_fq1=rna_fq1, rna_fq2=rna_fq2, atac_lib=atac_lib, atac_fq1=atac_fq1, atac_fq2=atac_fq2)
 
 with open('run.tsv', 'wt') as outfile:
 	tsv_writer = csv.writer(outfile, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)
-	tsv_writer.writerow(['entity:' + args.name + '_id', 'PKR', 'Genome', 'R1_Subset', 'ATAC_Lib', 'ATAC_fastq_R1', 'ATAC_fastq_R2', 'RNA_Lib', 'RNA_fastq_R1', 'RNA_fastq_R2'])
+	tsv_writer.writerow(['entity:' + args.name + '_id', 'PKR', 'Genome', 'R1_Subset', 'R1_barcode_file', 'ATAC_Lib', 'ATAC_fastq_R1', 'ATAC_fastq_R2', 'RNA_Lib', 'RNA_fastq_R1', 'RNA_fastq_R2'])
 	for key in sorted(main.keys()):
 		print(key)
 		pkr = main[key].pkr
 		genome = main[key].genome
 		r1 = '["' + '","'.join(main[key].r1) + '"]'
+		r1_file = main[key].r1_file
 		atac_lib = '["' + '","'.join(set(main[key].atac_lib)) + '"]'
 		atac_fq1 = '["' + '","'.join(main[key].atac_fq1) + '"]'
 		atac_fq2 = '["' + '","'.join(main[key].atac_fq2) + '"]'
 		rna_lib = '["' + '","'.join(set(main[key].rna_lib)) + '"]'
 		rna_fq1 = '["' + '","'.join(main[key].rna_fq1) + '"]'
 		rna_fq2 = '["' + '","'.join(main[key].rna_fq2) + '"]'
-		tsv_writer.writerow([key.replace(" ", "_"), pkr, genome, r1, atac_lib, atac_fq1, atac_fq2, rna_lib, rna_fq1, rna_fq2])
+		tsv_writer.writerow([key.replace(" ", "_"), pkr, genome, r1, r1_file, atac_lib, atac_fq1, atac_fq2, rna_lib, rna_fq1, rna_fq2])

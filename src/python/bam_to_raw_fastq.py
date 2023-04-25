@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Make uncorrected R1 and R2 FASTQs from unmapped BAM file.
+"""
+
+import argparse
+import pysam
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Make R1 and R2 FASTQs from unmapped BAM file")
+    parser.add_argument("bam_file", help="Filename for unmapped BAM file")
+    parser.add_argument("r1_barcode_set_file", help="File containing biosample splits in R1 barcodes, one split per lane")
+    
+    return parser.parse_args()
+
+# DNA base complements
+COMPLEMENT = {'A': 'T',
+              'T': 'A',
+              'C': 'G',
+              'G': 'C',
+              'N': 'N'}
+
+def reverse_complement(sequence):
+    """
+    Return reverse complement of DNA sequence.
+    """
+    return ''.join(COMPLEMENT[b] for b in sequence[::-1])
+
+def write_read(fastq, read):
+    """
+    Write read to open FASTQ file.
+    """
+    info = {'index': int(not read.is_read1) + 1,
+            'name':  read.query_name}
+                        
+    if read.is_reverse:
+        info.update({'quality':  read.qual[::-1],
+                     'sequence': reverse_complement(read.query_sequence)})
+    else:
+        info.update({'quality':  read.qual,
+                     'sequence': read.query_sequence})
+        
+    fastq.write('@{name}\n{sequence}\n+\n{quality}\n'.format(**info))
+    
+def check_putative_barcode(barcode_str, barcode_matching_dict):
+    """
+    Procedure: check exact match of barcode, then 1 mismatch, then 1bp left/right shift
+    """
+    # check exact location first
+    corrected_barcode = barcode_matching_dict.get(barcode_str[1:9]) 
+    if corrected_barcode is None:
+        # check 1bp shift left
+        corrected_barcode = barcode_matching_dict.get(barcode_str[:8]) 
+        if corrected_barcode is None:
+            # check 1bp shift right
+            corrected_barcode = barcode_matching_dict.get(barcode_str[2:])
+    return corrected_barcode
+
+def create_barcode_matching_dict(barcode_list):
+    """
+    Create dictionary mapping barcodes to themselves (exact matches), as well as
+    to their 1bp mismatch possibilities
+    """
+    barcode_matching_dict  = dict() # {potential match: original barcode}
+    for barcode in barcode_list:
+        barcode_matching_dict[barcode] = barcode # exact match
+        for i, base in enumerate(barcode):
+            for x in 'ACGTN':
+                if base != x:
+                    # add mismatch possibilities at pos i
+                    mismatch = barcode[:i] + x + barcode[i+1:]
+                    barcode_matching_dict[mismatch] = barcode
+    return barcode_matching_dict
+
+def create_barcode_subset_dict(file_path):
+    """
+    Create dictionary mapping barcodes to their R1 barcode subsets
+    """    
+    with open(file_path) as f:
+        barcode_subset_dict = dict() # {barcode: subset}
+        for line in f:
+            line = line.strip().split()
+            subset = line[0] # first entry of line is subset name  
+            for barcode in line[1:]:
+                barcode_subset_dict[barcode] = subset
+    return barcode_subset_dict
+
+def write_fastqs(bam_file, read_1_pointers, read_2_pointers, r1_barcode_subset_dict, r1_barcode_matches):
+    """
+    Get reads from BAM file and error-correct R1 barcode to determine which R1 barcode subset's
+    FASTQ to write the read to. Barcodes written into FASTQs are not error-corrected. 
+    
+    read_1_pointers is a dictionary mapping R1 barcode subset names to corresponding
+    R1 FASTQ filenames to write to.
+    read_2_pointers is a dictionary mapping R1 barcode subset names to corresponding 
+    R2 FASTQ filenames to write to. 
+    r1_barcode_matches is a dictionary mapping R1 barcodes to their potential matches 
+    (exact and 1bp mismatch)
+    """ 
+    bam = pysam.Samfile(bam_file, "rb", check_sq=False)
+    query_name = read_1 = read_2 = None
+
+    for read in bam:
+        if read.is_read1:
+            # save and continue processing
+            read_1 = read
+            query_name = read_1.query_name
+            
+        else:
+            # check that query names are the same
+            if read.query_name == query_name:
+                read_2 = read
+                barcode_tag = read.get_tag("RX")
+                quality_tag = read.get_tag("QX")
+                
+                # append barcode and corresponding quality to read 2
+                read_2_quality = read_2.qual # save to variable; defaults to NoneType once sequence is modified
+                read_2.query_sequence += barcode_tag
+                read_2.qual = read_2_quality + quality_tag
+
+                # get 10bp sequence containing R1 barcode (additional 1bp padding used for checking shifts)
+                r1_barcode_window = barcode_tag[14:24] 
+                # get error-corrected R1 barcode
+                r1_barcode = check_putative_barcode(r1_barcode_window, r1_barcode_matches)
+                 
+                # write reads to appropriate FASTQ files by checking which R1 barcode subset the corrected R1 barcode belongs to
+                if r1_barcode in r1_barcode_subset_dict.keys():
+                    write_read(read_1_pointers[r1_barcode_subset_dict[r1_barcode]], read_1)
+                    write_read(read_2_pointers[r1_barcode_subset_dict[r1_barcode]], read_2)
+    
+
+def main():
+    args = parse_arguments()
+    bam_file = getattr(args, "bam_file")
+    r1_barcode_set_file = getattr(args, "r1_barcode_set_file")
+    file_prefix = bam_file.split(".bam")[0]
+    
+    # create dictionary mapping R1 barcodes to their R1 barcode subsets
+    r1_barcode_subset_dict = create_barcode_subset_dict(r1_barcode_set_file)
+    # create dictionaries of R1 barcode exact matches and 1bp mismatches
+    r1_barcode_matches = create_barcode_matching_dict(r1_barcode_subset_dict.keys())
+    
+    # reads are written into one R1 FASTQ and one R2 FASTQ per R1 barcode subset;
+    # create dictionaries of file pointers associated with each R1 barcode subset
+    read_1_pointers = dict()
+    read_2_pointers = dict()
+    for subset in set(r1_barcode_subset_dict.values()):
+        fp = open(file_prefix + "_" + subset + "_R1.fastq", "w")
+        read_1_pointers[subset] = fp
+        fp = open(file_prefix + "_" + subset + "_R2.fastq", "w")
+        read_2_pointers[subset] = fp
+    
+    # write reads to FASTQs
+    write_fastqs(bam_file, read_1_pointers, read_2_pointers, r1_barcode_subset_dict, r1_barcode_matches)
+            
+if __name__ == "__main__":
+    main()
+    

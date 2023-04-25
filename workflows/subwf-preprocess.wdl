@@ -23,7 +23,7 @@ workflow wf_preprocess {
 		String dockerImage = "nchernia/share_task_preprocess:18"
 	}
 
-	String barcodeStructure = "14S10M28S10M28S9M8B"
+	String barcodeStructure = "99M"
 	String sequencingCenter = "BI"
 	String tar_flags = if zipped then 'xzf' else 'xf'
 	String untarBcl =
@@ -453,11 +453,16 @@ task BamToFastq {
 	File R3file = if defined(R3barcodes)
 					# then write_tsv(R3_if_defined) else R1file
 					then R3barcodes else R1barcodeSet
-
+	String monitor_log = "monitor.log"
 
 	command <<<
+		set -e
+		
+		bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+
 		samtools addreplacerg -r '@RG\tID:~{pkrId}' ~{bam} -o tmp.bam
-		python3 /software/bam_fastq.py tmp.bam ~{R1file} ~{R2file} ~{R3file} -p ~{prefix} -s ~{sampleType}
+
+		python3 /software/bam_to_raw_fastq.py tmp.bam ~{R1file}
 
 		gzip *.fastq
 	>>>
@@ -563,7 +568,7 @@ task GatherOutputs {
 	}
 
 	command <<<
-		echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tGenome\tNotes" > fastq.tsv
+		echo -e "Library\tPKR\tR1_subset\tR1_barcode_file\tType\traw_fastq_R1\traw_fastq_R2\tGenome\tNotes" > fastq.tsv
 		cat ~{sep=' ' rows} >> fastq.tsv
 
 		python3 /software/write_terra_tables.py --input 'fastq.tsv' --name ~{name} --meta ~{metaCsv}

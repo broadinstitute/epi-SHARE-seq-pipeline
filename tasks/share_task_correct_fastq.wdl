@@ -1,0 +1,55 @@
+version 1.0
+
+# TASK
+# SHARE-correct-fastqs
+
+task correct_fastqs {
+    meta {
+        version: 'v0.1'
+        author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Correct FASTQs task'
+    }
+
+    input {
+        File fastq_R1
+        File fastq_R2
+        File R1_barcodes
+        File? R2_barcodes
+        File? R3_barcodes
+        String R1_subset
+        String sample_type
+        String? pkr
+        String prefix = "shareseq"
+        Float? disk_factor = 8.0
+        Float? memory_factor = 0.15
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_correct_fastqs"
+    }
+
+    # Determine the size of the input
+    Float input_file_size_gb = size(fastq_R1, "G") + size(fastq_R2, "G")
+
+    # Determining memory size base on the size of the input files.
+    Float mem_gb = 5.0 + memory_factor * input_file_size_gb
+
+    # Determining disk size base on the size of the input files.
+    Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
+
+    # Determining disk type base on the size of disk.
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
+
+    String corrected_fastq_R1 = basename(fastq_R1, ".fastq.gz") + "corrected.fastq"
+    String corrected_fastq_R2 = basename(fastq_R2, ".fastq.gz") + "corrected.fastq"
+    String monitor_log = "correct_fastqs_monitor.log"
+
+    command <<<
+        set -e
+
+        bash $(which monitor_script.sh) > ~{monitor_log} 2>&1 &
+
+        python3 $(which correct_fastq.py) \
+            ~{fastq_R1} \
+            ~{fastq_R2} \
+            ~{corrected_fastq_R1} \
+            ~{corrected_fastq_R2} \
+            ~{R1_barcodes} 
+    >>>
