@@ -1,6 +1,7 @@
 version 1.0
 
 # Import the tasks called by the pipeline
+import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
 import "../tasks/share_task_filter_atac.wdl" as share_task_filter
@@ -31,6 +32,19 @@ workflow wf_atac {
         Boolean count_only = false
         Boolean trim_fastqs = true
         File? barcode_conversion_dict # For 10X multiome
+
+        # Correct-specific inputs
+        ## Biological
+        File R1_barcodes
+        File? R2_barcodes
+        File? R3_barcodes
+        String R1_subset
+        String? pkr
+        ## Runtime
+        Int? correct_cpus = 1
+        Float? correct_disk_factor = 8.0
+        Float? correct_memory_factor = 0.15
+        String? correct_docker_image
 
         # Align-specific inputs
         ## Biological
@@ -77,13 +91,33 @@ workflow wf_atac {
         String? trim_docker_image
     }
 
+    # Perform barcode error correction on FASTQs.
+    scatter (read_pair in zip(read1, read2)) {
+        call share_task_correct_fastq.share_correct_fastq as correct {
+            input:
+                fastq_R1 = read_pair.left,
+                fastq_R2 = read_pair.right,
+                R1_barcodes = R1_barcodes,
+                R2_barcodes = R2_barcodes,
+                R3_barcodes = R3_barcodes,
+                R1_subset = R1_subset,
+                sample_type = "ATAC",
+                pkr = pkr,
+                prefix = prefix,
+                cpus = correct_cpus,
+                disk_factor = correct_disk_factor,
+                memory_factor = correct_memory_factor,
+                docker_image = correct_docker_image
+        }
+    }
+
     if ( trim_fastqs ){
         # Remove dovetail in the ATAC reads.
-        scatter (idx in range(length(read1))) {
-            call share_task_trim.share_trim_fastqs_atac as trim{
+        scatter (read_pair in zip(correct.corrected_fastq_R1, correct.corrected_fastq_R2)) {
+            call share_task_trim.share_trim_fastqs_atac as trim {
                 input:
-                    fastq_R1 = read1[idx],
-                    fastq_R2 = read2[idx],
+                    fastq_R1 = read_pair.left,
+                    fastq_R2 = read_pair.right,
                     cpus = trim_cpus,
                     disk_factor = trim_disk_factor,
                     memory_factor = trim_memory_factor,
@@ -94,8 +128,8 @@ workflow wf_atac {
 
     call share_task_align.share_atac_align as align {
         input:
-            fastq_R1 = select_first([trim.fastq_R1_trimmed, read1]),
-            fastq_R2 = select_first([trim.fastq_R2_trimmed, read2]),
+            fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1]),
+            fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R1]),
             chemistry= chemistry,
             genome_name = genome_name,
             genome_index_tar = genome_index_tar,

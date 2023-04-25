@@ -24,6 +24,10 @@ workflow ShareSeq {
         String prefix = "shareseq-project"
         String? pkr=""
         String genome_name_input
+        String R1_subset
+        File R1_barcodes
+        File? R2_barcodes
+        File? R3_barcodes
 
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         File? whitelist
@@ -143,6 +147,11 @@ workflow ShareSeq {
                     read1 = select_first([preprocess_tenx.fastq_R1_preprocessed ,read1_atac]),
                     read2 = select_first([preprocess_tenx.fastq_R2_preprocessed ,read2_atac]),
                     chemistry = chemistry,
+                    pkr = pkr,
+                    R1_subset = R1_subset,
+                    R1_barcodes = R1_barcodes,
+                    R2_barcodes = R2_barcodes,
+                    R3_barcodes = R3_barcodes,
                     trim_fastqs = trim_fastqs,
                     append_comment = append_comment,
                     chrom_sizes = chrom_sizes_,

@@ -1,9 +1,9 @@
 version 1.0
 
 # TASK
-# SHARE-correct-fastqs
+# SHARE-correct-fastq
 
-task correct_fastqs {
+task share_correct_fastq {
     meta {
         version: 'v0.1'
         author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
@@ -19,7 +19,9 @@ task correct_fastqs {
         String R1_subset
         String sample_type
         String? pkr
-        String prefix = "shareseq"
+        String? prefix
+        
+        Int? cpus = 1
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
         String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_correct_fastqs"
@@ -46,10 +48,35 @@ task correct_fastqs {
 
         bash $(which monitor_script.sh) > ~{monitor_log} 2>&1 &
 
+        # Get R1 barcodes corresponding to R1 subset
+        grep '~{R1_subset}' ~{R1_barcodes} | cut -f 2- -d ' ' > R1_barcodes.txt
+
+        # Perform barcode error correction on FASTQs
         python3 $(which correct_fastq.py) \
             ~{fastq_R1} \
             ~{fastq_R2} \
             ~{corrected_fastq_R1} \
             ~{corrected_fastq_R2} \
-            ~{R1_barcodes} 
+            R1_barcodes.txt \
+            ~{if defined(R2_barcodes) then R2_barcodes else "R1_barcodes.txt"} \
+            ~{if defined(R3_barcodes) then R3_barcodes else "R1_barcodes.txt"} \ 
+            ~{sample_type} \ 
+            ~{pkr} \ 
+            ~{prefix}
+
+        gzip *.fastq
     >>>
+
+    output {
+        File corrected_fastq_R1 = "~{corrected_fastq_R1}.gz"
+        File corrected_fastq_R2 = "~{corrected_fastq_R2}.gz"
+        File barcode_qc = "~{prefix}_qc.txt"
+    }
+
+    runtime {
+        cpu : cpus
+        memory : "~{mem_gb} GB"
+        disks: "local-disk ~{disk_gb} ~{disk_type}"
+        docker : docker_image
+    }
+}

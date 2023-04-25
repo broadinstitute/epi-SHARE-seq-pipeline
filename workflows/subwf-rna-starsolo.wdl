@@ -1,5 +1,6 @@
 version 1.0
 
+import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
@@ -16,6 +17,16 @@ workflow wf_rna {
 
     input {
         # RNA Sub-workflow inputs
+
+        # Correct
+        File R1_barcodes
+        File? R2_barcodes
+        File? R3_barcodes
+        String R1_subset
+        Int? correct_cpus = 1
+        Float? correct_disk_factor = 8.0
+        Float? correct_memory_factor = 0.15
+        String? correct_docker_image
 
         # Align
         Array[File] read1
@@ -51,11 +62,30 @@ workflow wf_rna {
 
     }
 
+    scatter (read_pair in zip(read1, read2)) {
+        call share_task_correct_fastq.share_correct_fastq as correct {
+            input:
+                fastq_R1 = read_pair.left,
+                fastq_R2 = read_pair.right,
+                R1_barcodes = R1_barcodes,
+                R2_barcodes = R2_barcodes,
+                R3_barcodes = R3_barcodes,
+                R1_subset = R1_subset,
+                sample_type = "RNA",
+                pkr = pkr,
+                prefix = prefix,
+                cpus = correct_cpus,
+                disk_factor = correct_disk_factor,
+                memory_factor = correct_memory_factor,
+                docker_image = correct_docker_image
+        }
+    }
+
     call share_task_starsolo.share_rna_align as align {
         input:
             chemistry = chemistry,
-            fastq_R1 = read1,
-            fastq_R2 = read2,
+            fastq_R1 = correct.corrected_fastq_R1,
+            fastq_R2 = correct.corrected_fastq_R2,
             whitelist = whitelist,
             genome_name = genome_name,
             genome_index_tar = idx_tar,
