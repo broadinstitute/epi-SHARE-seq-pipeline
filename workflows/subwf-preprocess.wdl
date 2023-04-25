@@ -245,8 +245,9 @@ task ExtractBarcodes {
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
 
-		readLength=$(xmlstarlet sel -t -v "/RunInfo/Run/Reads/Read/@NumCycles" RunInfo.xml | head -n 1)T
-		readStructure=${readLength}"~{barcodeStructure}"${readLength}
+		read1Length=$(xmlstarlet sel -t -v "/RunInfo/Run/Reads/Read/@NumCycles" RunInfo.xml | head -n 1)
+		read2Length=$(xmlstarlet sel -t -v "/RunInfo/Run/Reads/Read/@NumCycles" RunInfo.xml | tail -n 1)
+		readStructure=${read1Length}T"~{barcodeStructure}"${read2Length}T
 		echo ${readStructure} > readStructure.txt
 
 		printf "barcode_name\tbarcode_sequence1" | tee "~{barcodeParamsFile}"
@@ -429,17 +430,16 @@ task BamToFastq {
 		File? R2barcodes
 		File? R3barcodes
 		String dockerImage
+		Float? diskFactor = 5
+		Float? memory = 16
 	}
 
 	String prefix = basename(bam, ".bam")
 	
 	Float bamSize = size(bam, 'G')
 
-	Int diskSize = ceil(bamSize + 5)
+	Int diskSize = ceil(diskFactor * bamSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
-
-	Float memory = ceil(1.5 * bamSize + 1) * 2
-
 
 	# Workaround since write_tsv does not take type "?", must be defined
 	# Array[Array[String]] R2_if_defined = select_first([R2barcodes, []])
@@ -453,9 +453,13 @@ task BamToFastq {
 	File R3file = if defined(R3barcodes)
 					# then write_tsv(R3_if_defined) else R1file
 					then R3barcodes else R1barcodeSet
-
+	String monitor_log = "monitor.log"
 
 	command <<<
+		set -e 
+
+		bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+
 		samtools addreplacerg -r '@RG\tID:~{pkrId}' ~{bam} -o tmp.bam
 		python3 /software/bam_fastq.py tmp.bam ~{R1file} ~{R2file} ~{R3file} -p ~{prefix} -s ~{sampleType}
 
