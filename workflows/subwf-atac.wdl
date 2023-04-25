@@ -91,6 +91,8 @@ workflow wf_atac {
         String? trim_docker_image
     }
 
+    String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
+
     # Perform barcode error correction on FASTQs.
     scatter (read_pair in zip(read1, read2)) {
         call share_task_correct_fastq.share_correct_fastq as correct {
@@ -150,7 +152,7 @@ workflow wf_atac {
             shift_plus = filter_shift_plus,
             shift_minus = filter_shift_minus,
             barcode_tag = barcode_tag,
-            barcode_tag_fragments = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag]),
+            barcode_tag_fragments = barcode_tag_fragments_,
             mapq_threshold = mapq_threshold,
             genome_name = genome_name,
             minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
@@ -180,7 +182,7 @@ workflow wf_atac {
             tss = tss_bed,
             fragment_cutoff = qc_fragment_cutoff,
             mapq_threshold = mapq_threshold,
-            barcode_tag = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag]),
+            barcode_tag = barcode_tag_fragments_,
             genome_name = genome_name,
             prefix = prefix,
             cpus = qc_cpus,

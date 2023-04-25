@@ -37,7 +37,7 @@ workflow ShareSeq {
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
-        Array[File] fastq_barcode_10X = []
+        Array[File] fastq_barcode = []
         Boolean count_only = false
         File? chrom_sizes
         File? atac_genome_index_tar
@@ -176,14 +176,15 @@ workflow ShareSeq {
                     genome = genome_name,
                     prefix = prefix
             }
-        }
-        call joint_qc.joint_qc_plotting as joint_qc {
-            input:
-                atac_barcode_metadata = atac.share_atac_barcode_metadata,
-                rna_barcode_metadata = rna.share_rna_barcode_metadata,
-                prefix = prefix,
-                genome_name = genome_name
-        }
+        
+						call joint_qc.joint_qc_plotting as joint_qc {
+								input:
+										atac_barcode_metadata = atac.share_atac_barcode_metadata,
+										rna_barcode_metadata = rna.share_rna_barcode_metadata,
+										prefix = prefix,
+										genome_name = genome_name
+					}	
+				}
     }
 
     call html_report.html_report as html_report {

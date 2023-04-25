@@ -237,8 +237,9 @@ task ExtractBarcodes {
 		# append terminating line feed
 		sed -i -e '$a\' ~{barcodesMap}
 
-		readLength=$(xmlstarlet sel -t -v "/RunInfo/Run/Reads/Read/@NumCycles" RunInfo.xml | head -n 1)T
-		readStructure=${readLength}"~{barcodeStructure}"${readLength}
+		read1Length=$(xmlstarlet sel -t -v "/RunInfo/Run/Reads/Read/@NumCycles" RunInfo.xml | head -n 1)
+		read2Length=$(xmlstarlet sel -t -v "/RunInfo/Run/Reads/Read/@NumCycles" RunInfo.xml | tail -n 1)
+		readStructure=${read1Length}T"~{barcodeStructure}"${read2Length}T
 		echo ${readStructure} > readStructure.txt
 
 		printf "barcode_name\tbarcode_sequence1" | tee "~{barcodeParamsFile}"
@@ -413,13 +414,15 @@ task BamToRawFastq {
 		String notes
 		File R1barcodeSet
 		String dockerImage
+		Float? diskFactor = 5
+		Float? memory = 16
 	}
 
 	String prefix = basename(bam, ".bam")
 	
 	Float bamSize = size(bam, 'G')
 
-	Int diskSize = ceil(bamSize + 5)
+	Int diskSize = ceil(diskFactor * bamSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
 	Float memory = ceil(1.5 * bamSize + 1) * 2
@@ -449,6 +452,8 @@ task BamToRawFastq {
 			read1: glob("*R1.fastq.gz"),
 			read2: glob("*R2.fastq.gz")
 		}
+
+		File monitor_log = "~{monitor_log}"
 	}
 	runtime {
 		docker: dockerImage
