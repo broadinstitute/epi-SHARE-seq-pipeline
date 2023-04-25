@@ -121,8 +121,8 @@ csv_reader = csv.DictReader(in_fh, delimiter='\t')
 for record in csv_reader:
 	pkr = record['PKR']
 	lib = record['Library']
-	fq1 = sorted(record['fastq_R1'].split(','))
-	fq2 = sorted(record['fastq_R2'].split(','))
+	fq1 = sorted(record['raw_fastq_R1'].split(','))
+	fq2 = sorted(record['raw_fastq_R2'].split(','))
 	r1 = get_subset_names(fq1)
 	r1_file = record['R1_subset']
 	typ = record['Type']

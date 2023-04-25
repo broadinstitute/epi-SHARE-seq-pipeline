@@ -58,8 +58,8 @@ task share_correct_fastq {
             ~{corrected_fastq_R1} \
             ~{corrected_fastq_R2} \
             R1_barcodes.txt \
-            ~{if defined(R2_barcodes) then R2_barcodes else "R1_barcodes.txt"} \
-            ~{if defined(R3_barcodes) then R3_barcodes else "R1_barcodes.txt"} \ 
+            ~{if defined(R2_barcodes) then R2_barcodes else R1_barcodes} \
+            ~{if defined(R3_barcodes) then R3_barcodes else R1_barcodes} \ 
             ~{sample_type} \ 
             ~{pkr} \ 
             ~{prefix}
@@ -70,7 +70,7 @@ task share_correct_fastq {
     output {
         File corrected_fastq_R1 = "~{corrected_fastq_R1}.gz"
         File corrected_fastq_R2 = "~{corrected_fastq_R2}.gz"
-        File barcode_qc = "~{prefix}_qc.txt"
+        File barcode_qc = "~{prefix}_barcode_qc.txt"
     }
 
     runtime {

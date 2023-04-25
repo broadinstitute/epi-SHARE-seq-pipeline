@@ -141,7 +141,7 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                 nonmatch += 1
     
     # write QC stats
-    with open(f"{prefix}_qc.txt", "w") as f:
+    with open(f"{prefix}_barcode_qc.txt", "w") as f:
         fields = ["library", "exact_match", "nonexact_match", "nonmatch", "poly_G_barcode", "poly_G_in_first_10bp"]
         f.write("\t".join(fields) + "\n")
         f.write("%s\t%s\t%s\t%s\t%s\t%s" % (prefix, exact_match, nonexact_match, nonmatch, poly_g_barcode, poly_g_start))

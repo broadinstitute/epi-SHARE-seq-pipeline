@@ -457,26 +457,6 @@ task BamToRawFastq {
 	}
 }
 
-task AggregateBarcodeQC {
-	input {
-		Array[File] barcodeQCs
-	}
-
-	command <<<
-		echo -e "LIB_BARCODE\tEXACT\tPASS\tFAIL_MISMATCH\tFAIL_HOMOPOLYMER\tFAIL_UMI" > final.txt
-		cat ~{sep=" " barcodeQCs} >> final.txt
-		# awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}' combined.txt > final.txt
-	>>>
-	
-	output {
-		File laneQC = 'final.txt'
-	}
-	
-	runtime {
-		docker: "ubuntu:latest"
-	}
-}
-
 task QC {
 	input {
 		Array[File] barcodeMetrics

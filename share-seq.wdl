@@ -134,6 +134,8 @@ workflow ShareSeq {
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
                     pkr = pkr,
+                    R1_subset = R1_subset,
+                    R1_barcodes = R1_barcodes,
                     genome_name = genome_name,
                     count_only = count_only
             }
@@ -150,8 +152,6 @@ workflow ShareSeq {
                     pkr = pkr,
                     R1_subset = R1_subset,
                     R1_barcodes = R1_barcodes,
-                    R2_barcodes = R2_barcodes,
-                    R3_barcodes = R3_barcodes,
                     trim_fastqs = trim_fastqs,
                     append_comment = append_comment,
                     chrom_sizes = chrom_sizes_,
