@@ -479,6 +479,7 @@ task BamToFastq {
 		}
 
 		File qc = 'qc.txt'
+		File monitor_log = "~{monitor_log}"
 		# Array[File] fastqs = glob("*.fastq")
 	}
 	runtime {
