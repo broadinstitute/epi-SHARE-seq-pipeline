@@ -23,7 +23,7 @@ workflow wf_preprocess {
 		String dockerImage = "nchernia/share_task_preprocess:18"
 	}
 
-	String barcodeStructure = "99M"
+	String barcodeStructure = "99M8B"
 	String sequencingCenter = "BI"
 	String tar_flags = if zipped then 'xzf' else 'xf'
 	String untarBcl =
