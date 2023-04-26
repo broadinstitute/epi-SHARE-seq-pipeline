@@ -125,11 +125,18 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                 elif sample_type == "ATAC":
                     # add corrected barcodes and PKR to header 
                     corrected_header = read_1.name + "_" + ",".join([r1, r2, r3, pkr])
-                    # create SequenceRecord object for read 1: use corrected header
-                    corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)                
-                    # create SequenceRecord object for read 2: use corrected header, 50bp read
-                    corrected_read_2 = dnaio.SequenceRecord(corrected_header, read_2.sequence[:50], read_2.qualities[:50])
-                
+                    # trim adapters for ATAC
+                    where = trim(read_1.sequence, read_2.sequence)
+                    if where > -1:
+                         # create SequenceRecord object for read 1: use corrected header
+                         corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence[:where], read_1.qualities[:where])                
+                         # create SequenceRecord object for read 2: use corrected header, 50bp read
+                         corrected_read_2 = dnaio.SequenceRecord(corrected_header, read_2.sequence[:where], read_2.qualities[:where])
+                    else:
+                         # create SequenceRecord object for read 1: use corrected header
+                         corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)
+                         # create SequenceRecord object for read 2: use corrected header, 50bp read
+                         corrected_read_2 = dnaio.SequenceRecord(corrected_header, read_2.sequence, read_2.qualities)
                 # write to corrected FASTQ files
                 writer.write(corrected_read_1, corrected_read_2)
                 
@@ -146,6 +153,36 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
         f.write("\t".join(fields) + "\n")
         f.write("%s\t%s\t%s\t%s\t%s\t%s" % (prefix, exact_match, nonexact_match, nonmatch, poly_g_barcode, poly_g_start))
         
+def trim(seq1,seq2):
+    '''
+    Trim dovetail in ATAC reads
+    '''
+    query = reverse_complement(seq2[0:20])
+    idx = seq1.rfind(query) # look for perfect match
+    if idx == -1:
+        idx = fuzz_align(query,seq1)
+    # found it, return everything through match
+    if idx > -1:
+        idx = idx+20
+    else:
+        idx = -1
+    return idx
+
+def fuzz_align(s_seq,l_seq):
+    '''
+    Check tradeoff using Hamming instead of Levenshtein
+    This iteration should go from the right end of l_seq
+    since we want to do a rfind 
+    '''
+    for i, base in enumerate(l_seq):  # loop through equal size windows
+        l_subset = l_seq[i:i+len(s_seq)]
+        dist = Levenshtein.distance(l_subset, s_seq)
+        if dist <= 1:  # find first then break
+            return i
+    return -1
+
+
+
 
 def main():
     args = parse_arguments()
