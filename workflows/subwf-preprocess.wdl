@@ -422,6 +422,7 @@ task BamToRawFastq {
 	}
 
 	String monitor_log = "monitor.log"
+	String prefix = basename(bam, ".bam")
 	File R2file = if defined(R2barcodes) then R2barcodes else R1barcodeSet
 	File R3file = if defined(R3barcodes) then R3barcodes else R1barcodeSet
 	
@@ -436,7 +437,7 @@ task BamToRawFastq {
 		bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
 		# Create raw FASTQs from unaligned bam
-		python3 /software/bam_to_raw_fastq.py ~{bam} ~{pkrId} ~{R1barcodeSet} ~{R2file} ~{R3file}
+		python3 /software/bam_to_raw_fastq.py ~{bam} ~{pkrId} ~{prefix} ~{R1barcodeSet} ~{R2file} ~{R3file}
 		gzip *.fastq
 	>>>
 
