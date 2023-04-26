@@ -9,6 +9,7 @@ struct Fastq {
 	String notes
 	Array[String] read1
 	Array[String] read2
+	Array[String] whitelist
 }
 
 workflow wf_preprocess {
@@ -413,21 +414,22 @@ task BamToRawFastq {
 		String genome
 		String notes
 		File R1barcodeSet
+		File? R2barcodes
+		File? R3barcodes
 		String dockerImage
 		Float? diskFactor = 5
 		Float? memory = 16
 	}
 
 	String prefix = basename(bam, ".bam")
+	String monitor_log = "monitor.log"
+	File R2file = if defined(R2barcodes) then R2barcodes else R1barcodeSet
+	File R3file = if defined(R3barcodes) then R3barcodes else R1barcodeSet
 	
 	Float bamSize = size(bam, 'G')
-
 	Int diskSize = ceil(diskFactor * bamSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
-
 	Float memory = ceil(1.5 * bamSize + 1) * 2
-
-	String monitor_log = "monitor.log"
 
 	command <<<
 		set -e
@@ -435,9 +437,9 @@ task BamToRawFastq {
 		bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
 		samtools addreplacerg -r '@RG\tID:~{pkrId}' ~{bam} -o tmp.bam
-
-		python3 /software/bam_to_raw_fastq.py tmp.bam ~{R1barcodeSet}
-
+		
+		# Create raw FASTQs from unaligned bam
+		python3 /software/bam_to_raw_fastq.py tmp.bam ~{R1barcodeSet} ~{R2file} ~{R3file}
 		gzip *.fastq
 	>>>
 
@@ -450,7 +452,8 @@ task BamToRawFastq {
 			genome: genome,
 			notes: notes,
 			read1: glob("*R1.fastq.gz"),
-			read2: glob("*R2.fastq.gz")
+			read2: glob("*R2.fastq.gz"),
+			whitelist: glob("*whitelist.txt")
 		}
 
 		File monitor_log = "~{monitor_log}"
@@ -499,7 +502,7 @@ task WriteTsvRow {
 
 	command <<<
 		# echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tGenome\tNotes" > fastq.tsv
-		echo -e "~{fastq.library}\t~{fastq.pkrId}\t~{fastq.R1}\t~{fastq.sampleType}\t~{sep=',' read1}\t~{sep=',' read2}\t~{fastq.genome}\t~{fastq.notes}" > row.tsv
+		echo -e "~{fastq.library}\t~{fastq.pkrId}\t~{fastq.R1}\t~{fastq.sampleType}\t~{sep=',' whitelist}\t~{sep=',' read1}\t~{sep=',' read2}\t~{fastq.genome}\t~{fastq.notes}" > row.tsv
 	>>>
 
 	output {
@@ -521,7 +524,7 @@ task GatherOutputs {
 	}
 
 	command <<<
-		echo -e "Library\tPKR\tR1_subset\tR1_barcode_file\tType\traw_fastq_R1\traw_fastq_R2\tGenome\tNotes" > fastq.tsv
+		echo -e "Library\tPKR\tR1_subset\tType\tWhitelist\tRaw_FASTQ_R1\tRaw_FASTQ_R2\tGenome\tNotes" > fastq.tsv
 		cat ~{sep=' ' rows} >> fastq.tsv
 
 		python3 /software/write_terra_tables.py --input 'fastq.tsv' --name ~{name} --meta ~{metaCsv}
