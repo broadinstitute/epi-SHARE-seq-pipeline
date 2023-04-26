@@ -499,6 +499,7 @@ task WriteTsvRow {
         String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 	Array[String] read1 = fastq.read1
 	Array[String] read2 = fastq.read2
+	Array[String] whitelist = fastq.whitelist
 
 	command <<<
 		# echo -e "Library\tPKR\tR1_subset\tType\tfastq_R1\tfastq_R2\tGenome\tNotes" > fastq.tsv
