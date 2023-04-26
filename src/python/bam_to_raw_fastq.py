@@ -10,6 +10,7 @@ import pysam
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Make R1 and R2 FASTQs from unmapped BAM file")
     parser.add_argument("bam_file", help="Filename for unmapped BAM file")
+    parser.add_argument("pkr", help="PKR name")
     parser.add_argument("r1_barcode_set_file", help="File containing biosample splits in R1 barcodes, one split per lane")
     parser.add_argument("r2_barcode_file", help= "File containing R2 barcodes, one line")
     parser.add_argument("r3_barcode_file", help= "File containing R3 barcodes, one line")
@@ -135,6 +136,7 @@ def write_fastqs(bam_file, read_1_pointers, read_2_pointers, r1_barcode_subset_d
 def main():
     args = parse_arguments()
     bam_file = getattr(args, "bam_file")
+    pkr = getattr(args, "pkr")
     r1_barcode_set_file = getattr(args, "r1_barcode_set_file")
     r2_barcode_file = getattr(args, "r2_barcode_file")
     r3_barcode_file = getattr(args, "r3_barcode_file")
@@ -156,14 +158,14 @@ def main():
     read_1_pointers = dict()
     read_2_pointers = dict()
     for subset in set(r1_barcode_subset_dict.values()):
-        fp = open(file_prefix + "_" + subset + "_R1.fastq", "w")
+        fp = open(file_prefix + "_" + pkr + "_" + subset + "_R1.fastq", "w")
         read_1_pointers[subset] = fp
-        fp = open(file_prefix + "_" + subset + "_R2.fastq", "w")
+        fp = open(file_prefix + "_" + pkr + "_" + subset + "_R2.fastq", "w")
         read_2_pointers[subset] = fp
         # get possible combinations of R1R2R3, write to whitelist
         r1_barcodes = [k for k,v in r1_barcode_subset_dict.items() if v == subset]
         whitelist_barcodes = [r1+r2+r3 for r1 in r1_barcodes for r2 in r2_barcodes for r3 in r3_barcodes]
-        with open(file_prefix + "_" + subset + "_whitelist.txt", "w") as f:
+        with open(file_prefix + "_" + pkr + "_" + subset + "_whitelist.txt", "w") as f:
             f.write("\n".join(whitelist_barcodes))
     
     # write reads to FASTQs
