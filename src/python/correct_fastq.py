@@ -6,6 +6,7 @@ Correct fastq
 
 import argparse
 import dnaio
+import Levenshtein
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Perform barcode error correction on read 2 FASTQ file; write corrected barcodes into read names of both read 1 and read 2 FASTQ files; generate QC statistics file.")
@@ -13,14 +14,38 @@ def parse_arguments():
     parser.add_argument("input_r2_fastq_file", help="Filename for uncorrected input read 2 FASTQ file")
     parser.add_argument("output_r1_fastq_file", help="Filename for corrected output read 1 FASTQ file")
     parser.add_argument("output_r2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
-    parser.add_argument("r1_barcode_file", help="File containing R1 barcodes, one line")
-    parser.add_argument("r2_barcode_file", help="File containing R2 barcodes, one line")
-    parser.add_argument("r3_barcode_file", help="File containing R3 barcodes, one line")
+    parser.add_argument("whitelist_file", help="Filename for whitelisted combinations of R1R2R3 barcodes, one per line")
     parser.add_argument("sample_type", choices=["ATAC", "RNA"], help="Sample modality")
     parser.add_argument("pkr", help="PKR name")
     parser.add_argument("prefix", help="Prefix for naming output QC txt file")
     
     return parser.parse_args()
+
+# DNA base complements
+COMPLEMENT = {'A': 'T',
+              'T': 'A',
+              'C': 'G',
+              'G': 'C',
+              'N': 'N'}
+
+def reverse_complement(sequence):
+    """
+    Return reverse complement of DNA sequence.
+    """
+    return ''.join(COMPLEMENT[b] for b in sequence[::-1])
+
+def get_barcodes(whitelist_file):
+    """
+    Read barcode whitelist file, split into R1, R2, and R3 barcodes
+    """
+    r1_barcodes = r2_barcodes = r3_barcodes = []
+    with open(whitelist_file) as f:
+        for line in f:
+            r1_barcodes.append(line[:8])
+            r2_barcodes.append(line[8:16])
+            r3_barcodes.append(line[16:24])
+    
+    return r1_barcodes, r2_barcodes, r3_barcodes
 
 def create_barcode_dicts(barcode_list):
     """
@@ -181,31 +206,24 @@ def fuzz_align(s_seq,l_seq):
             return i
     return -1
 
-
-
-
 def main():
     args = parse_arguments()
     input_r1_fastq_file = getattr(args, "input_r1_fastq_file")
     input_r2_fastq_file = getattr(args, "input_r2_fastq_file")
     output_r1_fastq_file = getattr(args, "output_r1_fastq_file")
     output_r2_fastq_file = getattr(args, "output_r2_fastq_file")
-    r1_barcode_file = getattr(args, "r1_barcode_file")
-    r2_barcode_file = getattr(args, "r2_barcode_file")
-    r3_barcode_file = getattr(args, "r3_barcode_file")
+    whitelist_file = getattr(args, "whitelist_file")
     sample_type = getattr(args, "sample_type")
     pkr = getattr(args, "pkr")
     prefix = getattr(args, "prefix")
     
-    # read in barcodes, create dictionary including mismatches
-    with open(r1_barcode_file) as f:
-        (r1_barcode_dict_exact, r1_barcode_dict_mismatch) = create_barcode_dicts(f.read().strip().split())
-
-    with open(r2_barcode_file) as f:
-        (r2_barcode_dict_exact, r2_barcode_dict_mismatch) = create_barcode_dicts(f.read().strip().split())
-        
-    with open(r3_barcode_file) as f:
-        (r3_barcode_dict_exact, r3_barcode_dict_mismatch) = create_barcode_dicts(f.read().strip().split())
+    # read whitelist, get lists of barcodes
+    (r1_barcodes, r2_barcodes, r3_barcodes) = get_barcodes(whitelist_file)
+    
+    # create dictionaries for exact barcode matches and barcode mismatches
+    (r1_barcode_dict_exact, r1_barcode_dict_mismatch) = create_barcode_dicts(r1_barcodes)
+    (r2_barcode_dict_exact, r2_barcode_dict_mismatch) = create_barcode_dicts(r2_barcodes)
+    (r3_barcode_dict_exact, r3_barcode_dict_mismatch) = create_barcode_dicts(r3_barcodes)
 
     # write corrected FASTQs and QC stats
     process_fastqs(input_r1_fastq_file, input_r2_fastq_file,

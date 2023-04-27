@@ -19,10 +19,7 @@ workflow wf_rna {
         # RNA Sub-workflow inputs
 
         # Correct
-        File R1_barcodes
-        File? R2_barcodes
-        File? R3_barcodes
-        String R1_subset
+        File barcode_whitelist
         Int? correct_cpus = 1
         Float? correct_disk_factor = 8.0
         Float? correct_memory_factor = 0.15
@@ -67,10 +64,7 @@ workflow wf_rna {
             input:
                 fastq_R1 = read_pair.left,
                 fastq_R2 = read_pair.right,
-                R1_barcodes = R1_barcodes,
-                R2_barcodes = R2_barcodes,
-                R3_barcodes = R3_barcodes,
-                R1_subset = R1_subset,
+                barcode_whitelist = barcode_whitelist,
                 sample_type = "RNA",
                 pkr = pkr,
                 prefix = prefix,

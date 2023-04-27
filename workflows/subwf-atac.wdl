@@ -35,10 +35,7 @@ workflow wf_atac {
 
         # Correct-specific inputs
         ## Biological
-        File R1_barcodes
-        File? R2_barcodes
-        File? R3_barcodes
-        String R1_subset
+        File barcode_whitelist
         String? pkr
         ## Runtime
         Int? correct_cpus = 1
@@ -99,10 +96,7 @@ workflow wf_atac {
             input:
                 fastq_R1 = read_pair.left,
                 fastq_R2 = read_pair.right,
-                R1_barcodes = R1_barcodes,
-                R2_barcodes = R2_barcodes,
-                R3_barcodes = R3_barcodes,
-                R1_subset = R1_subset,
+                barcode_whitelist = barcode_whitelist,
                 sample_type = "ATAC",
                 pkr = pkr,
                 prefix = prefix,

@@ -13,10 +13,7 @@ task share_correct_fastq {
     input {
         File fastq_R1
         File fastq_R2
-        File R1_barcodes
-        File? R2_barcodes
-        File? R3_barcodes
-        String R1_subset
+        File barcode_whitelist
         String sample_type
         String? pkr
         String? prefix
@@ -48,18 +45,13 @@ task share_correct_fastq {
 
         bash $(which monitor_script.sh) > ~{monitor_log} 2>&1 &
 
-        # Get R1 barcodes corresponding to R1 subset
-        grep '~{R1_subset}' ~{R1_barcodes} | cut -f 2- -d ' ' > R1_barcodes.txt
-
         # Perform barcode error correction on FASTQs
         python3 $(which correct_fastq.py) \
             ~{fastq_R1} \
             ~{fastq_R2} \
             ~{corrected_fastq_R1} \
             ~{corrected_fastq_R2} \
-            R1_barcodes.txt \
-            ~{if defined(R2_barcodes) then R2_barcodes else R1_barcodes} \
-            ~{if defined(R3_barcodes) then R3_barcodes else R1_barcodes} \ 
+            ~{barcode_whitelist} \
             ~{sample_type} \ 
             ~{pkr} \ 
             ~{prefix}
