@@ -6,7 +6,6 @@ Correct fastq
 
 import argparse
 import dnaio
-import Levenshtein
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Perform barcode error correction on read 2 FASTQ file; write corrected barcodes into read names of both read 1 and read 2 FASTQ files; generate QC statistics file.")
@@ -21,31 +20,18 @@ def parse_arguments():
     
     return parser.parse_args()
 
-# DNA base complements
-COMPLEMENT = {'A': 'T',
-              'T': 'A',
-              'C': 'G',
-              'G': 'C',
-              'N': 'N'}
-
-def reverse_complement(sequence):
-    """
-    Return reverse complement of DNA sequence.
-    """
-    return ''.join(COMPLEMENT[b] for b in sequence[::-1])
-
 def get_barcodes(whitelist_file):
     """
     Read barcode whitelist file, split into R1, R2, and R3 barcodes
     """
-    r1_barcodes = r2_barcodes = r3_barcodes = []
+    r1_barcodes = r2_barcodes = r3_barcodes = set()
     with open(whitelist_file) as f:
         for line in f:
-            r1_barcodes.append(line[:8])
-            r2_barcodes.append(line[8:16])
-            r3_barcodes.append(line[16:24])
+            r1_barcodes.add(line[:8])
+            r2_barcodes.add(line[8:16])
+            r3_barcodes.add(line[16:24])
     
-    return r1_barcodes, r2_barcodes, r3_barcodes
+    return list(r1_barcodes), list(r2_barcodes), list(r3_barcodes)
 
 def create_barcode_dicts(barcode_list):
     """
@@ -150,18 +136,10 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                 elif sample_type == "ATAC":
                     # add corrected barcodes and PKR to header 
                     corrected_header = read_1.name + "_" + ",".join([r1, r2, r3, pkr])
-                    # trim adapters for ATAC
-                    where = trim(read_1.sequence, read_2.sequence)
-                    if where > -1:
-                         # create SequenceRecord object for read 1: use corrected header
-                         corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence[:where], read_1.qualities[:where])                
-                         # create SequenceRecord object for read 2: use corrected header, 50bp read
-                         corrected_read_2 = dnaio.SequenceRecord(corrected_header, read_2.sequence[:where], read_2.qualities[:where])
-                    else:
-                         # create SequenceRecord object for read 1: use corrected header
-                         corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)
-                         # create SequenceRecord object for read 2: use corrected header, 50bp read
-                         corrected_read_2 = dnaio.SequenceRecord(corrected_header, read_2.sequence, read_2.qualities)
+                    # create SequenceRecord object for read 1: use corrected header
+                    corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)
+                    # create SequenceRecord object for read 2: use corrected header, remove 99bp barcode
+                    corrected_read_2 = dnaio.SequenceRecord(corrected_header, read_2.sequence[:-99], read_2.qualities[:-99])
                 # write to corrected FASTQ files
                 writer.write(corrected_read_1, corrected_read_2)
                 
@@ -177,34 +155,6 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
         fields = ["library", "exact_match", "nonexact_match", "nonmatch", "poly_G_barcode", "poly_G_in_first_10bp"]
         f.write("\t".join(fields) + "\n")
         f.write("%s\t%s\t%s\t%s\t%s\t%s" % (prefix, exact_match, nonexact_match, nonmatch, poly_g_barcode, poly_g_start))
-        
-def trim(seq1,seq2):
-    '''
-    Trim dovetail in ATAC reads
-    '''
-    query = reverse_complement(seq2[0:20])
-    idx = seq1.rfind(query) # look for perfect match
-    if idx == -1:
-        idx = fuzz_align(query,seq1)
-    # found it, return everything through match
-    if idx > -1:
-        idx = idx+20
-    else:
-        idx = -1
-    return idx
-
-def fuzz_align(s_seq,l_seq):
-    '''
-    Check tradeoff using Hamming instead of Levenshtein
-    This iteration should go from the right end of l_seq
-    since we want to do a rfind 
-    '''
-    for i, base in enumerate(l_seq):  # loop through equal size windows
-        l_subset = l_seq[i:i+len(s_seq)]
-        dist = Levenshtein.distance(l_subset, s_seq)
-        if dist <= 1:  # find first then break
-            return i
-    return -1
 
 def main():
     args = parse_arguments()
