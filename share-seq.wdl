@@ -108,7 +108,7 @@ workflow ShareSeq {
                     input:
                         fastq_R1 = read1_atac[idx],
                         fastq_R3 = read2_atac[idx],
-                        fastq_R2 = fastq_barcode_10X[idx],
+                        fastq_R2 = fastq_barcode[idx],
                         whitelist = select_first([whitelist_atac, whitelist_atac_]),
                         chemistry = chemistry,
                         prefix = prefix
