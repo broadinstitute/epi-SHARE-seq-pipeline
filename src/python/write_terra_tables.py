@@ -37,7 +37,7 @@ def make_main_key(pkr,r1):
 def get_subset_names(fqs):
 	basenames = [os.path.basename(x) for x in fqs]
 	# Subset name is between Lane number and Read number
-	return [x.split('_L')[1].split('_R')[0].split('_')[1] for x in basenames]
+	return [x.split('_L')[1].split('_R')[0].split('_')[2] for x in basenames]
 
 def update_sub_dict(key, pkr, lib, r1, whitelist, fq1, fq2, typ, genome, notes):
 	if typ == 'ATAC':
