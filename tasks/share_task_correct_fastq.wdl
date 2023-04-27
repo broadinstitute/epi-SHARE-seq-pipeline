@@ -69,6 +69,6 @@ task share_correct_fastq {
         cpu : cpus
         memory : "~{mem_gb} GB"
         disks: "local-disk ~{disk_gb} ~{disk_type}"
-        docker : docker_image
+        docker : "~{docker_image}"
     }
 }
