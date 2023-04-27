@@ -21,7 +21,7 @@ workflow wf_preprocess {
 		File metaCsv
 		String terra_project # set to none or make optional
 		String workspace_name
-		String dockerImage = "nchernia/share_task_preprocess:18"
+		String dockerImage = "us.gcr.io/buenrostro-share-seq/share_task_preprocess"
 	}
 
 	String barcodeStructure = "99M8B"
@@ -423,8 +423,6 @@ task BamToRawFastq {
 
 	String monitor_log = "monitor.log"
 	String prefix = basename(bam, ".bam")
-	File R2file = if defined(R2barcodes) then R2barcodes else R1barcodeSet
-	File R3file = if defined(R3barcodes) then R3barcodes else R1barcodeSet
 	
 	Float bamSize = size(bam, 'G')
 	Int diskSize = ceil(diskFactor * bamSize)
@@ -437,7 +435,14 @@ task BamToRawFastq {
 		bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
 		# Create raw FASTQs from unaligned bam
-		python3 /software/bam_to_raw_fastq.py ~{bam} ~{pkrId} ~{prefix} ~{R1barcodeSet} ~{R2file} ~{R3file}
+		python3 /software/bam_to_raw_fastq.py \
+			~{bam} \
+			~{pkrId} \
+			~{prefix} \
+			~{R1barcodeSet} \
+			~{if defined(R2barcodes) then "--r2_barcode_file ~{R2barcodes}" else ""} \
+			~{if defined(R3barcodes) then "--r3_barcode_file ~{R3barcodes}" else ""}
+
 		gzip *.fastq
 	>>>
 
@@ -453,7 +458,7 @@ task BamToRawFastq {
 			read2: glob("*R2.fastq.gz"),
 			whitelist: glob("*whitelist.txt")
 		}
-
+		File R1barcodeQC = "~{prefix}_R1_barcode_qc.txt"
 		File monitor_log = "~{monitor_log}"
 	}
 	runtime {
