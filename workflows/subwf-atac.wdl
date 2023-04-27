@@ -35,7 +35,8 @@ workflow wf_atac {
 
         # Correct-specific inputs
         ## Biological
-        File barcode_whitelist
+        Boolean correct_barcodes = true
+        File whitelist
         String? pkr
         ## Runtime
         Int? correct_cpus = 1
@@ -91,25 +92,27 @@ workflow wf_atac {
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
 
     # Perform barcode error correction on FASTQs.
-    scatter (read_pair in zip(read1, read2)) {
-        call share_task_correct_fastq.share_correct_fastq as correct {
-            input:
-                fastq_R1 = read_pair.left,
-                fastq_R2 = read_pair.right,
-                barcode_whitelist = barcode_whitelist,
-                sample_type = "ATAC",
-                pkr = pkr,
-                prefix = prefix,
-                cpus = correct_cpus,
-                disk_factor = correct_disk_factor,
-                memory_factor = correct_memory_factor,
-                docker_image = correct_docker_image
+    if ( chemistry == "shareseq" && correct_barcodes ) {
+        scatter (read_pair in zip(read1, read2)) {
+            call share_task_correct_fastq.share_correct_fastq as correct {
+                input:
+                    fastq_R1 = read_pair.left,
+                    fastq_R2 = read_pair.right,
+                    whitelist = whitelist,
+                    sample_type = "ATAC",
+                    pkr = pkr,
+                    prefix = prefix,
+                    cpus = correct_cpus,
+                    disk_factor = correct_disk_factor,
+                    memory_factor = correct_memory_factor,
+                    docker_image = correct_docker_image
+            }
         }
     }
 
     if ( trim_fastqs ){
         # Remove dovetail in the ATAC reads.
-        scatter (read_pair in zip(correct.corrected_fastq_R1, correct.corrected_fastq_R2)) {
+        scatter (read_pair in zip(select_first([correct.corrected_fastq_R1, read1]), select_first([correct.corrected_fastq_R2, read2]))) {
             call share_task_trim.share_trim_fastqs_atac as trim {
                 input:
                     fastq_R1 = read_pair.left,
@@ -124,8 +127,8 @@ workflow wf_atac {
 
     call share_task_align.share_atac_align as align {
         input:
-            fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1]),
-            fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R1]),
+            fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
+            fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
             chemistry= chemistry,
             genome_name = genome_name,
             genome_index_tar = genome_index_tar,

@@ -13,11 +13,11 @@ task share_correct_fastq {
     input {
         File fastq_R1
         File fastq_R2
-        File barcode_whitelist
+        File whitelist
         String sample_type
         String? pkr
         String? prefix
-        
+
         Int? cpus = 1
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
@@ -51,9 +51,9 @@ task share_correct_fastq {
             ~{fastq_R2} \
             ~{corrected_fastq_R1} \
             ~{corrected_fastq_R2} \
-            ~{barcode_whitelist} \
-            ~{sample_type} \ 
-            ~{pkr} \ 
+            ~{whitelist} \
+            ~{sample_type} \
+            ~{pkr} \
             ~{prefix}
 
         gzip *.fastq

@@ -17,7 +17,7 @@ task share_rna_align {
         Array[File] fastq_R1
         Array[File] fastq_R2
         String chemistry
-        File? whitelist
+        File whitelist
         File genome_index_tar
         String genome_name
         String prefix
