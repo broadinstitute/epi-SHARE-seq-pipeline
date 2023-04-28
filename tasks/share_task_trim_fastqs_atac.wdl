@@ -33,8 +33,8 @@ task share_trim_fastqs_atac {
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     # read trimming outfiles
-    String fastq_R1_trimmed = basename(fastq_R1, ".fastq.gz") + "trimmed.fastq"
-    String fastq_R2_trimmed = basename(fastq_R2, ".fastq.gz") + "trimmed.fastq"
+    String fastq_R1_trimmed = basename(fastq_R1, ".fastq.gz") + "_trimmed.fastq"
+    String fastq_R2_trimmed = basename(fastq_R2, ".fastq.gz") + "_trimmed.fastq"
 
     String monitor_log = 'trim_fastqs_atac_monitor.log'
 

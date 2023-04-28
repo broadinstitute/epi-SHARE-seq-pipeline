@@ -36,8 +36,8 @@ task share_correct_fastq {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String corrected_fastq_R1 = basename(fastq_R1, ".fastq.gz") + "corrected.fastq"
-    String corrected_fastq_R2 = basename(fastq_R2, ".fastq.gz") + "corrected.fastq"
+    String corrected_fastq_R1 = basename(fastq_R1, ".fastq.gz") + "_corrected.fastq"
+    String corrected_fastq_R2 = basename(fastq_R2, ".fastq.gz") + "_corrected.fastq"
     String monitor_log = "correct_fastqs_monitor.log"
 
     command <<<
