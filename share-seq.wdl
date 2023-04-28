@@ -24,7 +24,6 @@ workflow ShareSeq {
         String prefix = "shareseq-project"
         String? pkr=""
         String genome_name_input
-        File barcode_whitelist
 
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         File? whitelist
