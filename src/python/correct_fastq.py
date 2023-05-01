@@ -62,10 +62,10 @@ def check_putative_barcode(barcode_str, barcode_dict, quality_str):
             # check 1bp shift right
             # round 3 is shorter so add "N" for those
             if len(barcode_str) < 10: 
-                value = barcode_dict_exact.get(barcode_str[2:]+"N")
+                value = barcode_dict.get(barcode_str[2:]+"N")
                 quality = quality_str[2:]+"F"
             else:
-                value = barcode_dict_exact.get(barcode_str[2:])
+                value = barcode_dict.get(barcode_str[2:])
                 quality = quality_str[2:]
                     
     return value, quality
@@ -106,7 +106,7 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
             
             # check first ten base pairs of read 2 for homopolymer G
             if read_2.sequence[:10] == "G"*10:
-                read_2_start_poly_g += 1
+                read2_start_poly_g += 1
                 
             # if corrected barcodes found, write to both R1 and R2 FASTQ files
             elif r1 and r2 and r3:
@@ -143,7 +143,7 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
     with open(f"{prefix}_barcode_qc.txt", "w") as f:
         fields = ["library", "match", "mismatch", "poly_G_barcode", "poly_G_in_first_10bp"]
         f.write("\t".join(fields) + "\n")
-        f.write("%s\t%s\t%s\t%s\t%s\t%s" % (prefix, cellbarcode_match, cellbarcode_mismatch, cellbarcode_poly_g, read2_start_poly_g))
+        f.write("%s\t%s\t%s\t%s\t%s" % (prefix, cellbarcode_match, cellbarcode_mismatch, cellbarcode_poly_g, read2_start_poly_g))
 
 def main():
     args = parse_arguments()
@@ -160,9 +160,9 @@ def main():
     (r1_barcodes, r2_barcodes, r3_barcodes) = get_barcodes(whitelist_file)
     
     # create dictionaries for exact barcode matches and barcode mismatches
-    r1_barcode_dict = create_barcode_dicts(r1_barcodes)
-    r2_barcode_dict = create_barcode_dicts(r2_barcodes)
-    r3_barcode_dict = create_barcode_dicts(r3_barcodes)
+    r1_barcode_dict = create_barcode_dict(r1_barcodes)
+    r2_barcode_dict = create_barcode_dict(r2_barcodes)
+    r3_barcode_dict = create_barcode_dict(r3_barcodes)
 
     # write corrected FASTQs and QC stats
     process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
