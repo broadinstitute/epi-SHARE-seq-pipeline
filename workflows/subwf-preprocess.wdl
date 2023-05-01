@@ -112,6 +112,11 @@ workflow wf_preprocess {
 		}
 	}
 
+	call AggregateBarcodeQC {
+		input:
+			barcodeQCs = flatten(BamToRawFastq.R1barcodeQC)
+	}
+
 	call QC {
 		input:
 			barcodeMetrics = ExtractBarcodes.barcodeMetrics
@@ -427,7 +432,6 @@ task BamToRawFastq {
 	Float bamSize = size(bam, 'G')
 	Int diskSize = ceil(diskFactor * bamSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
-	Float memory = ceil(1.5 * bamSize + 1) * 2
 
 	command <<<
 		set -e
@@ -465,6 +469,26 @@ task BamToRawFastq {
 		docker: dockerImage
 		disks: "local-disk ~{diskSize} ~{diskType}"
 		memory: memory + 'G'
+	}
+}
+
+task AggregateBarcodeQC {
+	input {
+		Array[File] barcodeQCs
+	}
+
+	command <<<
+		echo -e "LIB_BARCODE\tEXACT\tPASS\tFAIL_MISMATCH\tFAIL_HOMOPOLYMER" > R1_barcode_stats.txt
+		cat ~{sep=" " barcodeQCs} >> R1_barcode_stats.txt
+		# awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}' combined.txt > final.txt
+	>>>
+	
+	output {
+		File laneQC = 'R1_barcode_stats.txt'
+	}
+	
+	runtime {
+		docker: "ubuntu:latest"
 	}
 }
 
