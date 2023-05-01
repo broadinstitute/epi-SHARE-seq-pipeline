@@ -1,12 +1,12 @@
 version 1.0
 
 # Import the tasks called by the pipeline
-import "../tasks/share_task_seurat.wdl" as share_task_seurat
+import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
 
 workflow wf_rna {
     meta {
         version: 'v0.1'
-        author: 'Eugenio Mattei (emattei@broadinstitute.org) and Sai Ma @ Broad Institute of MIT and Harvard'
+        author: 'Zhijian Li (lizhijia@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Sub-workflow to process the RNA portion of SHARE-seq libraries.'
     }
 
@@ -18,11 +18,6 @@ workflow wf_rna {
         String? docker
         File h5_matrix
         
-        #Seurat filtering parameters
-        Int? min_features 
-        Float? percent_mt 
-        Int? min_cells 
-        
         # Seurat UMAP parameters
         Int? umap_dim 
         Float? umap_resolution 
@@ -32,7 +27,7 @@ workflow wf_rna {
         Float? memory_factor
     }
 
-    call share_task_seurat.seurat as seurat{
+    call share_task_seurat.cell_annotation as cell_annotation{
         input:
             rna_matrix = h5_matrix,
             genome_name = genome_name,
