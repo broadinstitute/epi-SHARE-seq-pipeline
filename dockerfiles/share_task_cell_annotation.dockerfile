@@ -60,6 +60,6 @@ COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 RUN python3 -m pip install --break-system-packages jupyter papermill
 
-COPY src/jupyter_nb/seurat_notebook.ipynb /usr/local/bin/
+COPY src/jupyter_nb/cell_annotation_notebook.ipynb.ipynb /usr/local/bin/
 
 RUN R -e "IRkernel::installspec()"
