@@ -12,7 +12,6 @@ workflow wf_rna {
 
     input {
         # RNA Seurat inputs
-
         String prefix
         String genome_name
         String? docker
@@ -27,7 +26,7 @@ workflow wf_rna {
         Float? memory_factor
     }
 
-    call share_task_seurat.cell_annotation as cell_annotation{
+    call share_task_cell_annotation.cell_annotation as cell_annotation{
         input:
             rna_matrix = h5_matrix,
             genome_name = genome_name,

@@ -9,12 +9,9 @@ task cell_annotation {
 
     input {
         #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
-        File rna_matrix
+        File reference_data
+        File query_data
         String genome_name
-
-        Int? min_features = 200
-        Float? percent_mt = 50.0
-        Int? min_cells = 3
 
         String? normalization_method = "LogNormalize"
         Float? normalization_scale_factor = 10000
@@ -22,28 +19,18 @@ task cell_annotation {
         String? variable_features_method = "vst"
         Int? variable_features_num = 2000
 
-        Int? dim_loadings_dim = 2
-
-        Int? jackstraw_replicates = 100
-        Int? jackstraw_score_dim = 20
-        Int? jackstraw_plot_dim = 15
-
-        Int? heatmap_dim = 1
-        Int? heatmap_cells = 500
-        String? heatmap_balanced = "TRUE"
-
-        Int? umap_dim = 10
-        Float? umap_resolution = 0.5
+        String? weight_reduction = "pca"
+        Int? n_dims = 30
 
         String prefix = "prefix"
         Int? threads = 8
 
         String papermill = "TRUE"
         
-        String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
-        String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
+        String output_filename = "${prefix}.rna.cell.annotation.notebook.${genome_name}.ipynb"
+        String log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome_name}.txt"
         
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_cell_annotation"
         
         #Int mem_gb = 128
         
@@ -227,42 +214,6 @@ task cell_annotation {
             description: 'Number of dimensions to display in PCA',
             help: 'Parameter used in Seurat::VizDimLoadings()',
             example: 2
-        }
-
-        jackstraw_replicates: {
-            description: 'Number of replicate samplings to perform',
-            help: 'Parameter used in Seurat::JackStraw()',
-            example: 100
-        }
-
-        jackstraw_score_dim: {
-            description: 'Number of dimensions to examine in JackStraw Plot',
-            help: 'Parameter used in Seurat::ScoreJackStraw(), in default case, 1:20',
-            example: 20
-        }
-
-        jackstraw_plot_dim: {
-            description: 'Number of dimensions to plot in JackStraw Plot',
-            help: 'Parameter used in Seurat::JackStrawPlot(), in default case, 1:15',
-            example: 15
-        }
-
-        heatmap_dim: {
-            description: 'Number of dimensions to use for heatmap',
-            help: 'Parameter used in Seurat::DimHeatmap()',
-            example: 1
-        }
-
-        heatmap_cells: {
-            description: 'A list of cells to plot. If numeric, just plots the top cells.',
-            help: 'Parameter used in Seurat::DimHeatmap()',
-            example: 500
-        }
-
-        heatmap_balanced: {
-            description: 'Plot an equal number of genes with both + and - scores.',
-            help: 'Parameter used in Seurat::DimHeatmap()',
-            example: "TRUE"
         }
 
         umap_dim: {
