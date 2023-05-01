@@ -43,7 +43,7 @@ task share_correct_fastq {
     command <<<
         set -e
 
-        bash $(which monitor_script.sh) > ~{monitor_log} 2>&1 &
+        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Perform barcode error correction on FASTQs
         python3 $(which correct_fastq.py) \
