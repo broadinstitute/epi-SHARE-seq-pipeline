@@ -28,9 +28,7 @@ task cell_annotation {
         
         String output_filename = "${prefix}.rna.cell.annotation.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome_name}.txt"
-        
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_cell_annotation"
-        
+
         #Int mem_gb = 128
         
         Float? disk_factor = 0.1

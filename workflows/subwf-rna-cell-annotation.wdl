@@ -30,6 +30,7 @@ workflow wf_rna {
             prefix = prefix,
             reference_data = reference_data,
             query_data = query_data,
+            genome_name = genome_name,
             docker_image = docker,
             disk_factor = disk_factor,
             memory_factor = memory_factor
