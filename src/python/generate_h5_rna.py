@@ -34,6 +34,19 @@ def get_split_lines(file_name, delimiter, skip=0):
         for line in f:
             yield line.rstrip().split(sep=delimiter)
 
+def rename_duplicates(duplicate_list):
+    """Rename duplicate entries as entry, entry.1, entry.2, etc."""
+    seen = {}
+    renamed_list = []
+    for entry in duplicate_list:
+        if entry in seen:
+            seen[entry] += 1
+            renamed_list.append("%s.%d" % (entry, seen[entry]))
+        else:
+            seen[entry] = 0 
+            renamed_list.append(entry)
+    return renamed_list
+
 def build_count_matrix(matrix):
     """Convert contents of mtx file to csc matrix"""
     # first line of matrix contains dimensions
@@ -94,8 +107,10 @@ def main():
     if ensembl:
         gene_list = [line[0] for line in features]
     else:
-        gene_list = [line[1] for line in features]
-    
+        gene_list_duplicated = [line[1] for line in features]
+        # append .1, .2, etc. for duplicated genes
+        gene_list = rename_duplicates(gene_list_duplicated)
+
     # get barcodes from barcodes file, reformat as R1R2R3_PKR
     barcodes = get_split_lines(barcodes_file, delimiter="\t")
     barcode_list = [line[0] for line in barcodes]
