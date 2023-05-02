@@ -16,7 +16,7 @@ workflow wf_rna {
         # RNA Seurat inputs
         String prefix
         String genome_name
-        String? docker="lzj1769/cell-annotation"
+        String? docker_image="lzj1769/cell-annotation"
         File reference_data
         File query_data
         
@@ -31,7 +31,7 @@ workflow wf_rna {
             reference_data = reference_data,
             query_data = query_data,
             genome_name = genome_name,
-            docker_image = docker,
+            docker_image = docker_image,
             disk_factor = disk_factor,
             memory_factor = memory_factor
     }
