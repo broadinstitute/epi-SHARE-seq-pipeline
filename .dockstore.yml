@@ -10,12 +10,10 @@ workflows:
              - neva
              - minimal-inputs
              - dynamic-memory
-             - knudson
-             - insert_size_hist
-             - barcode_plot_annotations
              - trim-fastqs-atac
              - atac-refactoring
-             - main-rebase 
+             - main-rebase
+             - gene-names
          tags:
              - /.*/
 

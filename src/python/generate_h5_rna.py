@@ -20,6 +20,7 @@ def parse_arguments():
     parser.add_argument("barcodes_file", help="Filename for STARsolo barcodes tsv file")
     parser.add_argument("output_file", help="Filename for output h5 file")
     parser.add_argument("pkr", help="Experiment prefix", nargs = '?')
+    parser.add_argument("--ensembl", help="Flag for outputting genes using ENSEMBL ID, rather than gene name", action="store_true")
 
     return parser.parse_args()
 
@@ -80,18 +81,24 @@ def main():
     barcodes_file = getattr(args, "barcodes_file")
     pkr = getattr(args, "pkr", None)
     output_file = getattr(args, "output_file")
+    ensembl = getattr(args, "ensembl")
 
     # read input files
     logging.info("Reading input files\n")
-    # skip first two lines of matrix file (header)
+    
+    # get indices and counts from matrix file; skip first two lines of matrix file (header)
     matrix = get_split_lines(matrix_file, delimiter=" ", skip=2)
+    
     # get genes from features file
     features = get_split_lines(features_file, delimiter="\t")
-    gene_list = [line[1] for line in features]
+    if ensembl:
+        gene_list = [line[0] for line in features]
+    else:
+        gene_list = [line[1] for line in features]
+    
     # get barcodes from barcodes file, reformat as R1R2R3_PKR
     barcodes = get_split_lines(barcodes_file, delimiter="\t")
     barcode_list = [line[0] for line in barcodes]
-
     if pkr is None:
         formatted_barcode_list = barcode_list
     else:
