@@ -49,14 +49,18 @@ RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
 
-RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','IRkernel','logr','BiocManager'))"
-
+RUN R --no-echo --no-restore --no-save -e "install.packages('hdf5r')"
+RUN R --no-echo --no-restore --no-save -e "install.packages('remotes')"
+RUN R --no-echo --no-restore --no-save -e "install.packages('IRkernel')"
+RUN R --no-echo --no-restore --no-save -e "install.packages('logr')"
+RUN R --no-echo --no-restore --no-save -e "install.packages('BiocManager')"
+RUN R --no-echo --no-restore --no-save -e "install.packages('glue')"
 RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
-
-RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('rhdf5'), update=F, ask=F)"
+RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=F, ask=F)"
+RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
+RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
 
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
-
 
 RUN python3 -m pip install --break-system-packages jupyter papermill
 
