@@ -6,7 +6,9 @@ import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
 workflow wf_cell_annotation {
     meta {
         version: 'v0.1'
-        author: 'Zhijian Li (lizhijia@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        author: 'Zhijian Li'
+        affiliation: 'Broad Institute of MIT and Harvard'
+        email: 'lizhijia@broadinstitute.org'
         description: 'SHARE-Seq pipeline: cell type annotation using RNA-seq data.'
     }
 
