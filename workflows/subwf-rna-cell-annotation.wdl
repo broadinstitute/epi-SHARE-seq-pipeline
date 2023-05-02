@@ -3,7 +3,7 @@ version 1.0
 # Import the tasks called by the pipeline
 import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
 
-workflow wf_cell_annotation {
+workflow wf_rna {
     meta {
         version: 'v0.1'
         author: 'Zhijian Li'

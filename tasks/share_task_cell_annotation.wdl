@@ -11,7 +11,6 @@ task cell_annotation {
         #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
         File reference_data
         File query_data
-        String genome_name
 
         String? normalization_method = "LogNormalize"
         Float? normalization_scale_factor = 10000
