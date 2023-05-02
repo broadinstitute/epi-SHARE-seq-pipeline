@@ -83,7 +83,6 @@ task cell_annotation {
         -p papermill ${papermill}
     }
 
-
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
