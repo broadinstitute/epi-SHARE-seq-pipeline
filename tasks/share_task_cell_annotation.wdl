@@ -50,24 +50,12 @@ task cell_annotation {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
     
-    String monitor_log = "rna_seurat_monitor.log"
+    String monitor_log = "rna_cell_annotation_monitor.log"
 
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.seurat.plots.${genome_name}'
     String raw_violin_plot = '${plots_filepath}/${prefix}.rna.seurat.prefiltered_violin.${genome_name}.png'
     String filtered_violin_plot = '${plots_filepath}/${prefix}.rna.seurat.postfiltered_violin.${genome_name}.png'
-    String raw_qc_scatter_plot = '${plots_filepath}/${prefix}.rna.seurat.prefiltered_qc_scatterplots.${genome_name}.png'
-    String filtered_qc_scatter_plot = '${plots_filepath}/${prefix}.rna.seurat.postfiltered_qc_scatterplots.${genome_name}.png'
-    String variable_genes_plot = '${plots_filepath}/${prefix}.rna.seurat.variable_genes.${genome_name}.png'
-    String PCA_dim_loadings_plot = '${plots_filepath}/${prefix}.rna.seurat.pca_dim_loadings.${genome_name}.png'
-    String PCA_plot = '${plots_filepath}/${prefix}.rna.seurat.pca.${genome_name}.png'
-    String heatmap_plot = '${plots_filepath}/${prefix}.rna.seurat.heatmap.${genome_name}.png'
-    String jackstraw_plot = '${plots_filepath}/${prefix}.rna.seurat.jackstraw.${genome_name}.png'
-    String elbow_plot = '${plots_filepath}/${prefix}.rna.seurat.elbow.${genome_name}.png'
-    String umap_cluster_plot = '${plots_filepath}/${prefix}.rna.seurat.umap.${genome_name}.png'
-    String umap_rna_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_rna_count.${genome_name}.png'
-    String umap_gene_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_gene_count.${genome_name}.png'
-    String umap_mito_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_mito.${genome_name}.png'
 
     #Other filepaths
     String raw_seurat_rds = '${prefix}.rna.seurat.raw_rds.${genome_name}.rds'
@@ -150,7 +138,7 @@ task cell_annotation {
             help: 'Parameter used in Seurat::FindVariableFeatures()',
             example: 2000
         }
-        
+
         papermill: {
             description: 'Boolean papermill flag',
             help: 'Flag to notebook run in papermill mode',
