@@ -36,7 +36,7 @@ workflow wf_rna {
         
         # Generate h5-specific inputs
         ## Biological 
-        Boolean? ensembl = false
+        Boolean ensembl = false
         ## Runtime
         Float? generate_h5_disk_factor = 8.0
         Float? generate_h5_memory_factor = 2.0
