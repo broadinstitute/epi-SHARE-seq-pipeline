@@ -98,3 +98,14 @@ workflows:
              - starsolo
          tags:
              - /.*/
+
+   - name: "SHARE-seq-rna-cell-annotation"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-rna-cell-annotation.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+             - dev
+             - cell-annotation
+         tags:
+             - /.*/
