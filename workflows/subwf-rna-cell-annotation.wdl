@@ -15,7 +15,8 @@ workflow wf_rna {
         String prefix
         String genome_name
         String? docker="lzj1769/cell-annotation"
-        File h5_matrix
+        File reference_data
+        File query_data
         
         # Seurat UMAP parameters
         Int? umap_dim 
