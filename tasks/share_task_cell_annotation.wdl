@@ -3,8 +3,10 @@ version 1.0
 task cell_annotation {
     meta {
         version: 'v0.1'
-        author: 'Zhijian Li (lizhijia@broadinstitute.org) at Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: cell type annotation'
+        author: 'Zhijian Li'
+        affiliation: 'Broad Institute of MIT and Harvard'
+        email: 'lizhijia@broadinstitute.org'
+        description: 'SHARE-Seq pipeline: cell type annotation using RNA-seq data.'    
     }
 
     input {
@@ -32,7 +34,7 @@ task cell_annotation {
         String log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome_name}.txt"
 
         #Int mem_gb = 128
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
+        String docker_image = "lzj1769/cell-annotation"
         
         Float? disk_factor = 0.1
         Float? memory_factor = 0.15
@@ -56,9 +58,6 @@ task cell_annotation {
     String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome_name}'
 
     #Other filepaths
-    String raw_seurat_rds = '${prefix}.rna.seurat.raw_rds.${genome_name}.rds'
-    String filtered_seurat_rds = '${prefix}.rna.seurat.filtered_rds.${genome_name}.rds'
-    String raw_seurat_h5 = '${prefix}.rna.seurat.raw_matrix.${genome_name}.h5'
     String filtered_seurat_h5 = '${prefix}.rna.seurat.filtered_matrix.${genome_name}.h5'
     String barcode_metadata = '${prefix}.rna.seurat.barcode_metadata.${genome_name}.tsv'
     String plots_zip_dir = '${plots_filepath}.zip'
@@ -105,6 +104,18 @@ task cell_annotation {
             description: 'Boolean papermill flag',
             help: 'Flag to notebook run in papermill mode',
             example: 'TRUE'
+        }
+
+        query_data: {
+            description: 'Query data',
+            help: 'The name genome_name reference used to align.',
+            examples: ['hg38', 'mm10', 'hg19', 'mm9']
+        }
+
+        reference_data: {
+            description: 'Reference data',
+            help: 'The name genome_name reference used to align.',
+            examples: ['hg38', 'mm10', 'hg19', 'mm9']
         }
 
         genome_name: {
