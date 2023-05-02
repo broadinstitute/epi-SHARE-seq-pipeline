@@ -13,7 +13,6 @@ workflows:
              - trim-fastqs-atac
              - atac-refactoring
              - main-rebase
-             - gene-names
          tags:
              - /.*/
 
