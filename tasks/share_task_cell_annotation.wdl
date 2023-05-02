@@ -39,7 +39,7 @@ task cell_annotation {
     }
     
     # Determine the size of the input
-    Float input_file_size_mb = size(rna_matrix, "M")
+    Float input_file_size_mb = size(query_data, "M")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 32.0 + memory_factor * input_file_size_mb
