@@ -56,12 +56,11 @@ task cell_annotation {
 
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome_name}'
+    String predicted_labels_plot = '${plots_filepath}/{prefix}.rna.cell.annotation.predicted.labels.{genome}.png'
+    String predicted_scores_plot = '${plots_filepath}/{prefix}.rna.cell.annotation.predicted.scores.{genome}.png'
 
     #Other filepaths
-    String filtered_seurat_h5 = '${prefix}.rna.seurat.filtered_matrix.${genome_name}.h5'
-    String barcode_metadata = '${prefix}.rna.seurat.barcode_metadata.${genome_name}.tsv'
-    String plots_zip_dir = '${plots_filepath}.zip'
-    #String papermill_log_filename = 'papermill.logfile.txt'
+    String prediction = '${prefix}.rna.cell.annotation.prediction.${genome_name}.csv'
 
     command {
     
@@ -86,8 +85,10 @@ task cell_annotation {
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
-        File? plots_zip = plots_zip_dir
-        File? cell_annotation_monitor_log = monitor_log
+        File? monitor_log = monitor_log
+        File? prediction = prediction
+        File? predicted_labels_plot = predicted_labels_plot
+        File? predicted_scores_plot = predicted_scores_plot
     }
 
     runtime {
