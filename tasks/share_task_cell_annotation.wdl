@@ -12,6 +12,8 @@ task cell_annotation {
         File reference_data
         File query_data
 
+        String? genome_name = "hg38"
+
         String? normalization_method = "LogNormalize"
         Float? normalization_scale_factor = 10000
 
