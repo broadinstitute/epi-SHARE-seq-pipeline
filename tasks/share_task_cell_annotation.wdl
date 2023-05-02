@@ -52,9 +52,7 @@ task cell_annotation {
     String monitor_log = "rna_cell_annotation_monitor.log"
 
     #Plot filepaths
-    String plots_filepath = '${prefix}.rna.seurat.plots.${genome_name}'
-    String raw_violin_plot = '${plots_filepath}/${prefix}.rna.seurat.prefiltered_violin.${genome_name}.png'
-    String filtered_violin_plot = '${plots_filepath}/${prefix}.rna.seurat.postfiltered_violin.${genome_name}.png'
+    String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome_name}'
 
     #Other filepaths
     String raw_seurat_rds = '${prefix}.rna.seurat.raw_rds.${genome_name}.rds'
@@ -71,7 +69,7 @@ task cell_annotation {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
-        papermill $(which seurat_notebook.ipynb) ${output_filename} \
+        papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
         -p reference_data ${reference_data} \
         -p query_data ${query_data} \
         -p genome ${genome_name} \
@@ -90,7 +88,7 @@ task cell_annotation {
         File notebook_output = output_filename
         File notebook_log = log_filename
         File? plots_zip = plots_zip_dir
-        File? seurat_monitor_log = monitor_log
+        File? cell_annotation_monitor_log = monitor_log
     }
 
     runtime {
