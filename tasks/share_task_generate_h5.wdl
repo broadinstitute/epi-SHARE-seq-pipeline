@@ -17,7 +17,7 @@ task generate_h5 {
         String genome_name
         String? pkr
         String prefix
-        Boolean? ensembl = false
+        Boolean ensembl
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
@@ -54,7 +54,7 @@ task generate_h5 {
             ./barcodes.tsv.gz \
             ${h5} \
             ${pkr} \
-            $(if ensembl then "--ensembl" else "")
+            ${if ensembl then "--ensembl" else ""}
     }
 
     output {
