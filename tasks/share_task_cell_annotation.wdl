@@ -84,33 +84,17 @@ task cell_annotation {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
-        if [[ ${rna_matrix} == *.tar.gz ]]
-        then
-           tar -xvzf ${rna_matrix} 
-           rna_matrix="./"
-        fi
-        
         papermill $(which seurat_notebook.ipynb) ${output_filename} \
-        -p rna_matrix ${rna_matrix} \
+        -p reference_data ${reference_data} \
+        -p query_data ${query_data} \
         -p genome ${genome_name} \
-        -p min_features ${min_features} \
-        -p percent_MT ${percent_mt} \
-        -p min_cells ${min_cells} \
         -p normalization_method ${normalization_method} \
         -p normalization_scale_factor ${normalization_scale_factor} \
         -p variable_features_method ${variable_features_method} \
         -p variable_features_num ${variable_features_num} \
-        -p dim_loadings_dim ${dim_loadings_dim} \
-        -p jackstraw_replicates ${jackstraw_replicates} \
-        -p jackstraw_score_dim ${jackstraw_score_dim} \
-        -p jackstraw_plot_dim ${jackstraw_plot_dim} \
-        -p heatmap_dim ${heatmap_dim} \
-        -p heatmap_cells ${heatmap_cells} \
-        -p heatmap_balanced ${heatmap_balanced} \
-        -p umap_dim ${umap_dim} \
-        -p umap_resolution ${umap_resolution} \
+        -p weight_reduction ${weight_reduction} \
+        -p n_dims ${n_dims} \
         -p prefix ${prefix} \
-        -p threads ${threads} \
         -p papermill ${papermill}
     }
 
@@ -118,25 +102,6 @@ task cell_annotation {
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
-        File? seurat_barcode_metadata = barcode_metadata
-        #File papermill_log = papermill_log_filename
-        File? seurat_raw_violin_plot = raw_violin_plot
-        File? seurat_filtered_violin_plot = filtered_violin_plot
-        File? seurat_raw_qc_scatter_plot = raw_qc_scatter_plot
-        File? seurat_filtered_qc_scatter_plot = filtered_qc_scatter_plot
-        File? seurat_variable_genes_plot = variable_genes_plot
-        File? seurat_PCA_dim_loadings_plot = PCA_dim_loadings_plot
-        File? seurat_PCA_plot = PCA_plot
-        File? seurat_heatmap_plot = heatmap_plot
-        File? seurat_jackstraw_plot = jackstraw_plot
-        File? seurat_elbow_plot = elbow_plot
-        File? seurat_umap_cluster_plot = umap_cluster_plot
-        File? seurat_umap_rna_count_plot = umap_rna_count_plot
-        File? seurat_umap_gene_count_plot = umap_gene_count_plot
-        File? seurat_umap_mito_plot = umap_mito_plot
-        File? seurat_raw_obj = raw_seurat_rds
-        File? seurat_filtered_obj = filtered_seurat_rds
-        File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
         File? seurat_monitor_log = monitor_log
     }
@@ -150,12 +115,6 @@ task cell_annotation {
     }
 
     parameter_meta {
-        rna_matrix: {
-            description: 'RNA matrix h5',
-            help: 'RNA counts in matrix .h5 format',
-            example: 'rna.h5'
-        }
-
         papermill: {
             description: 'Boolean papermill flag',
             help: 'Flag to notebook run in papermill mode',
@@ -166,24 +125,6 @@ task cell_annotation {
             description: 'Reference name',
             help: 'The name genome_name reference used to align.',
             examples: ['hg38', 'mm10', 'hg19', 'mm9']
-        }
-
-        min_features: {
-            description: 'Minimum num of features',
-            help: 'Seurat QC for number (integer) of min features',
-            example: 200
-        }
-
-        percent_mt: {
-            description: 'Max percentage of MT reads in cell',
-            help: 'Seurat QC for max % (float) of mt',
-            example: 5.0
-        }
-
-        min_cells: {
-            description: 'Feature to be reported if it is in atleast min number of cells',
-            help: 'Seurat QC for min number of cells',
-            example: 3
         }
 
         normalization_method: {
@@ -209,25 +150,7 @@ task cell_annotation {
             help: 'Parameter used in Seurat::FindVariableFeatures()',
             example: 2000
         }
-
-        dim_loadings_dim: {
-            description: 'Number of dimensions to display in PCA',
-            help: 'Parameter used in Seurat::VizDimLoadings()',
-            example: 2
-        }
-
-        umap_dim: {
-            description: 'Dimensions (number of PCs) used to create umap, in the default case, 1:umap_dim = 1:10',
-            help: 'Parameter used in Seurat::FindNeighbors and Seurat::RunUMAP()',
-            example: 10
-        }
-
-        umap_resolution: {
-            description: 'Value of the resolution parameter, use a value below 1.0 if you want to obtain a smaller number of communities.',
-            help: 'Parameter used in Seurat::FindClusters()',
-            example: 0.5
-        }
-
+        
         papermill: {
             description: 'Boolean papermill flag',
             help: 'Flag to notebook run in papermill mode',
