@@ -3,11 +3,11 @@ version 1.0
 # Import the tasks called by the pipeline
 import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
 
-workflow wf_rna {
+workflow wf_cell_annotation {
     meta {
         version: 'v0.1'
         author: 'Zhijian Li (lizhijia@broadinstitute.org) at Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Sub-workflow to process the RNA portion of SHARE-seq libraries.'
+        description: 'SHARE-Seq pipeline: cell type annotation using RNA-seq data.'
     }
 
     input {
