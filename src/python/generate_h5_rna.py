@@ -8,7 +8,7 @@ genes x barcodes count matrix.
 """
 
 import argparse
-from Collections import defaultdict
+from collections import defaultdict
 import gzip
 import h5py
 import logging
