@@ -8,6 +8,7 @@ genes x barcodes count matrix.
 """
 
 import argparse
+from Collections import defaultdict
 import gzip
 import h5py
 import logging
@@ -36,15 +37,13 @@ def get_split_lines(file_name, delimiter, skip=0):
 
 def rename_duplicates(duplicate_list):
     """Rename duplicate entries as entry, entry.1, entry.2, etc."""
-    seen = {}
+    seen = defaultdict(int)
     renamed_list = []
+    
     for entry in duplicate_list:
-        if entry in seen:
-            seen[entry] += 1
-            renamed_list.append("%s.%d" % (entry, seen[entry]))
-        else:
-            seen[entry] = 0 
-            renamed_list.append(entry)
+        renamed_list.append(f"{entry}.{seen[entry]}" if entry in seen else entry)
+        seen[entry] += 1
+        
     return renamed_list
 
 def build_count_matrix(matrix):

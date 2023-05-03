@@ -36,7 +36,7 @@ workflow wf_rna {
         
         # Generate h5-specific inputs
         ## Biological 
-        Boolean ensembl = false
+        String? gene_naming
         ## Runtime
         Float? generate_h5_disk_factor = 8.0
         Float? generate_h5_memory_factor = 2.0
@@ -87,7 +87,7 @@ workflow wf_rna {
             genome_name = genome_name,
             prefix = prefix,
             pkr = pkr,
-            ensembl = ensembl,
+            gene_naming = gene_naming,
             disk_factor = generate_h5_disk_factor,
             memory_factor = generate_h5_memory_factor,
             docker_image = generate_h5_docker_image
