@@ -36,25 +36,26 @@ task generate_h5 {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
+    String ensembl_option = if "${gene_naming}"=="ensembl" then "--ensembl" else ""
     String h5 = "${default="share-seq" prefix}.${genome_name}.rna.h5"
     String monitor_log = "monitor.log"
 
     command <<<
         set -e
 
-        bash $(which monitor_script.sh) | tee ${monitor_log} 1>&2 &
+        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Untar
-        tar xzvf ${tar}
+        tar xzvf ~{tar}
 
         # Generate h5 file
         python3 $(which generate_h5_rna.py) \
             ./matrix.mtx.gz \
             ./features.tsv.gz \
             ./barcodes.tsv.gz \
-            ${h5} \
-            ${pkr} \
-            ${if "${gene_naming}"=="ensembl" then "--ensembl" else ""}
+            ~{h5} \
+            ~{pkr} \
+            ~{ensembl_option}
     >>>
 
     output {
