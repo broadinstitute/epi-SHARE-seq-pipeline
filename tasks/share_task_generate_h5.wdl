@@ -17,6 +17,7 @@ task generate_h5 {
         String genome_name
         String? pkr
         String prefix
+        Boolean ensembl
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
@@ -47,7 +48,13 @@ task generate_h5 {
         tar xzvf ${tar}
 
         # Generate h5 file
-        python3 $(which generate_h5_rna.py) ./matrix.mtx.gz ./features.tsv.gz ./barcodes.tsv.gz ${h5} ${pkr}
+        python3 $(which generate_h5_rna.py) \
+            ./matrix.mtx.gz \
+            ./features.tsv.gz \
+            ./barcodes.tsv.gz \
+            ${h5} \
+            ${pkr} \
+            ${if ensembl then "--ensembl" else ""}
     }
 
     output {
@@ -73,8 +80,12 @@ task generate_h5 {
             }
         prefix: {
                 description: 'Prefix for output files',
-                help: 'Prefix that will be used to name the output files',
+                help: 'Prefix that will be used to name the output files.',
                 example: 'MyExperiment'
+            }
+	ensembl: {
+                description: 'Use ENSEMBL gene IDs in h5 matrix',
+                help: 'Boolean for if ENSEMBL gene IDs should be outputted in h5 matrix (rather than gene names).'
             }
         docker_image: {
                 description: 'Docker image.',
