@@ -73,7 +73,6 @@ workflow ShareSeq {
 
         File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human/GRCh38_genome_files_hg38.tsv"
         File mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/mm10_genome_files_STARsolo.tsv"
-        File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
     }
 
     String genome_name = if genome_name_input == "GRCh38" then "hg38" else genome_name_input
