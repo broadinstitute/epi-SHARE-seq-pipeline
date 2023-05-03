@@ -133,7 +133,8 @@ workflow ShareSeq {
                     prefix = prefix,
                     pkr = pkr,
                     genome_name = genome_name,
-                    count_only = count_only
+                    count_only = count_only,
+                    gene_naming = gene_naming
             }
         }
     }

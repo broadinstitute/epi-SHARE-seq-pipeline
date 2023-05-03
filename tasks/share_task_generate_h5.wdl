@@ -17,7 +17,7 @@ task generate_h5 {
         String genome_name
         String? pkr
         String prefix
-        Boolean ensembl
+        String? gene_naming
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
@@ -39,10 +39,10 @@ task generate_h5 {
     String h5 = "${default="share-seq" prefix}.${genome_name}.rna.h5"
     String monitor_log = "monitor.log"
 
-    command {
+    command <<<
         set -e
 
-        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+        bash $(which monitor_script.sh) | tee ${monitor_log} 1>&2 &
 
         # Untar
         tar xzvf ${tar}
@@ -54,8 +54,8 @@ task generate_h5 {
             ./barcodes.tsv.gz \
             ${h5} \
             ${pkr} \
-            ${if ensembl then "--ensembl" else ""}
-    }
+            ${if "${gene_naming}"=="ensembl" then "--ensembl" else ""}
+    >>>
 
     output {
         File h5_matrix = "${h5}"
@@ -83,9 +83,10 @@ task generate_h5 {
                 help: 'Prefix that will be used to name the output files.',
                 example: 'MyExperiment'
             }
-	ensembl: {
-                description: 'Use ENSEMBL gene IDs in h5 matrix',
-                help: 'Boolean for if ENSEMBL gene IDs should be outputted in h5 matrix (rather than gene names).'
+	gene_naming: {
+                description: 'Gene naming convention',
+                help: 'Convention for gene naming in h5 matrix; either "gene_name" (default) or "ensembl".',
+                example: ['gene_name', 'ensembl']
             }
         docker_image: {
                 description: 'Docker image.',
