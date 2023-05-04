@@ -85,10 +85,10 @@ task cell_annotation {
     output {
         File notebook_output = output_filename
         File notebook_log = log_filename
-        File? monitor_log = monitor_log
-        File? prediction = prediction
-        File? predicted_labels_plot = predicted_labels_plot
-        File? predicted_scores_plot = predicted_scores_plot
+        File monitor_log = monitor_log
+        File prediction = prediction
+        File predicted_labels_plot = predicted_labels_plot
+        File predicted_scores_plot = predicted_scores_plot
     }
 
     runtime {
@@ -181,7 +181,7 @@ task cell_annotation {
         memory_factor: {
             description: 'Memory factor',
             help: 'Multiply this value to input .h5 file size (MB) and add to default 32GB memory to determine RAM (GB)',
-            example: 0.15
+            example: 1.0
         }
     }
 }
