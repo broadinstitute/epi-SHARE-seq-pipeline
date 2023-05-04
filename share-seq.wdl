@@ -56,7 +56,6 @@ workflow ShareSeq {
         Array[File] read1_rna
         Array[File] read2_rna
 
-        File? genes_annotation_bed
         File? gtf
         File? idx_tar_rna
         File? whitelist
@@ -84,20 +83,14 @@ workflow ShareSeq {
 
     File idx_tar_rna_ = select_first([idx_tar_rna, annotations["star_idx_tar"]])
     File gtf_ = select_first([gtf, annotations["genesgtf"]])
-    File genes_annotation_bed_ = select_first([genes_annotation_bed, annotations["genesbed"]])
 
     Boolean process_atac = if length(read1_atac)>0 then true else false
     Boolean process_rna = if length(read1_rna)>0 then true else false
-
-
 
     Map[String, File] whitelists = read_map(whitelists_tsv)
     File? whitelist_ = if chemistry=='shareseq' || chemistry=='10x_multiome' then whitelist else select_first([whitelist, whitelists[chemistry]])
     File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
     File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
-
-
-
 
 
     if ( chemistry != "shareseq" && process_atac) {
@@ -133,7 +126,8 @@ workflow ShareSeq {
                     prefix = prefix,
                     pkr = pkr,
                     genome_name = genome_name,
-                    count_only = count_only
+                    count_only = count_only,
+                    gene_naming = gene_naming
             }
         }
     }
