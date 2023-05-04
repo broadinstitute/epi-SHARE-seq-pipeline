@@ -56,8 +56,8 @@ task cell_annotation {
 
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome}'
-    String predicted_labels_plot = '${plots_filepath}/{prefix}.rna.cell.annotation.predicted.labels.{genome}.png'
-    String predicted_scores_plot = '${plots_filepath}/{prefix}.rna.cell.annotation.predicted.scores.{genome}.png'
+    String predicted_labels_plot = '${plots_filepath}/${prefix}.rna.cell.annotation.predicted.labels.${genome}.png'
+    String predicted_scores_plot = '${plots_filepath}/${prefix}.rna.cell.annotation.predicted.scores.${genome}.png'
 
     #Other filepaths
     String prediction = '${prefix}.rna.cell.annotation.prediction.${genome}.csv'
