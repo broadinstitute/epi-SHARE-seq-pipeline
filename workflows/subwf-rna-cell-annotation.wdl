@@ -15,7 +15,7 @@ workflow wf_rna {
     input {
         # RNA Seurat inputs
         String prefix
-        String genome_name
+        String genome
         File reference_data
         File query_data
         
@@ -31,7 +31,7 @@ workflow wf_rna {
             prefix = prefix,
             reference_data = reference_data,
             query_data = query_data,
-            genome_name = genome_name,
+            genome = genome,
             docker_image = docker_image,
             disk_factor = disk_factor,
             memory_factor = memory_factor

@@ -14,7 +14,7 @@ task cell_annotation {
         File reference_data
         File query_data
 
-        String? genome_name = "hg38"
+        String? genome = "hg38"
 
         String? normalization_method = "LogNormalize"
         Float? normalization_scale_factor = 10000
@@ -30,8 +30,8 @@ task cell_annotation {
 
         String papermill = "TRUE"
         
-        String output_filename = "${prefix}.rna.cell.annotation.notebook.${genome_name}.ipynb"
-        String log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome_name}.txt"
+        String output_filename = "${prefix}.rna.cell.annotation.notebook.${genome}.ipynb"
+        String log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
 
         #Int mem_gb = 128
         String docker_image = "lzj1769/cell-annotation"
@@ -55,12 +55,12 @@ task cell_annotation {
     String monitor_log = "rna_cell_annotation_monitor.log"
 
     #Plot filepaths
-    String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome_name}'
+    String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome}'
     String predicted_labels_plot = '${plots_filepath}/{prefix}.rna.cell.annotation.predicted.labels.{genome}.png'
     String predicted_scores_plot = '${plots_filepath}/{prefix}.rna.cell.annotation.predicted.scores.{genome}.png'
 
     #Other filepaths
-    String prediction = '${prefix}.rna.cell.annotation.prediction.${genome_name}.csv'
+    String prediction = '${prefix}.rna.cell.annotation.prediction.${genome}.csv'
 
     command {
     
@@ -71,7 +71,7 @@ task cell_annotation {
         papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
         -p reference_data ${reference_data} \
         -p query_data ${query_data} \
-        -p genome ${genome_name} \
+        -p genome ${genome} \
         -p normalization_method ${normalization_method} \
         -p normalization_scale_factor ${normalization_scale_factor} \
         -p variable_features_method ${variable_features_method} \
@@ -108,19 +108,19 @@ task cell_annotation {
 
         query_data: {
             description: 'Query data',
-            help: 'The name genome_name reference used to align.',
-            examples: ['hg38', 'mm10', 'hg19', 'mm9']
+            help: 'scRNA-seq data used as query',
+            examples: ['put link to gcr']
         }
 
         reference_data: {
             description: 'Reference data',
-            help: 'The name genome_name reference used to align.',
-            examples: ['hg38', 'mm10', 'hg19', 'mm9']
+            help: 'scRNA-seq data used as reference',
+            examples: ['put link to gcr']
         }
 
-        genome_name: {
+        genome: {
             description: 'Reference name',
-            help: 'The name genome_name reference used to align.',
+            help: 'Reference genome.',
             examples: ['hg38', 'mm10', 'hg19', 'mm9']
         }
 
