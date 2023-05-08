@@ -113,8 +113,8 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                 cellbarcode_match +=1
                 # correct FASTQ reads
                 if sample_type == "RNA":
-                    # add corrected barcodes, PKR, and UMI to header
-                    corrected_header = read_1.name + "_" + ",".join([r1, r2, r3, pkr]) + "_" + read_2.sequence[:10]                
+                    # add corrected barcodes, PKR, and UMI to header; remove any information after a space
+                    corrected_header = read_1.name.split(" ")[0] + "_" + ",".join([r1, r2, r3, pkr]) + "_" + read_2.sequence[:10]                
                     # create SequenceRecord for read 1; use corrected header
                     corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)                
                     # create SequenceRecord for read 2; use corrected header, read has format R1R2R3UMI
@@ -123,8 +123,8 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                     corrected_read_2 = dnaio.SequenceRecord(corrected_header, corrected_read_2_sequence, corrected_read_2_quality)
                     
                 elif sample_type == "ATAC":
-                    # add corrected barcodes and PKR to header 
-                    corrected_header = read_1.name + "_" + ",".join([r1, r2, r3, pkr])
+                    # add corrected barcodes and PKR to header; remove any information after a space
+                    corrected_header = read_1.name.split(" ")[0] + "_" + ",".join([r1, r2, r3, pkr])
                     # create SequenceRecord object for read 1: use corrected header
                     corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)
                     # create SequenceRecord object for read 2: use corrected header, remove 99bp barcode
