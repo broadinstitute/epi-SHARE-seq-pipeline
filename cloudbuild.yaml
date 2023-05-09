@@ -6,6 +6,16 @@ substitutions:
 
 steps:
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-correct-fastq'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_correct_fastq:latest',
+          '-f',
+          'dockerfiles/share_task_correct_fastq.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
   id: 'task-archr'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest',
@@ -146,6 +156,11 @@ steps:
   timeout: 28800s
 
 # Docker Push
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_correct_fastq:latest']
+  waitFor: ['task-correct-fastq']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',

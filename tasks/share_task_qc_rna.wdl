@@ -21,7 +21,7 @@ task qc_rna {
         String? prefix
 
         Int? cpus = 16
-        Float? disk_factor = 8.0
+        Float? disk_factor = 1.0
         Float? memory_factor = 1.5
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
     }
