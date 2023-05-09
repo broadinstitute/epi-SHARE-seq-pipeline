@@ -70,7 +70,7 @@ workflow ShareSeq {
         # Joint qc
         Int remove_low_yielding_cells = 10
 
-        File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human/GRCh38_genome_files_hg38.tsv"
+        File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human_v43/GRCh38_genome_files_hg38_v43.tsv"
         File mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/mm10_genome_files_STARsolo.tsv"
     }
 
