@@ -146,6 +146,7 @@ workflow wf_preprocess {
 		Array[String] terraResponse = TerraUpsert.upsert_response
 		Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
 		Array[File] monitoringLogsBasecalls = BasecallsToBams.monitoringLog		
+		File BarcodeQC = AggregateBarcodeQC.laneQC
 	}
 }
 

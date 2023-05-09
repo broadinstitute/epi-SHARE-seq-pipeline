@@ -29,9 +29,9 @@ workflow wf_rna {
         ## Task parameters
         Boolean correct_barcodes = true
         ## Runtime
-        Int? correct_cpus = 1
-        Float? correct_disk_factor = 8.0
-        Float? correct_memory_factor = 0.15
+        Int? correct_cpus
+        Float? correct_disk_factor
+        Float? correct_memory_factor
         String? correct_docker_image
 
         # Align-specific inputs
@@ -39,17 +39,17 @@ workflow wf_rna {
         File idx_tar
         String? barcode_tag
         ## Runtime
-        Int? align_cpus = 16
-        Float? align_disk_factor = 50.0
-        Float? align_memory_factor = 2.0
+        Int? align_cpus
+        Float? align_disk_factor
+        Float? align_memory_factor
         String? align_docker_image
         
         # Generate h5-specific inputs
         ## Task parameters 
         String? gene_naming
         ## Runtime
-        Float? generate_h5_disk_factor = 8.0
-        Float? generate_h5_memory_factor = 2.0
+        Float? generate_h5_disk_factor
+        Float? generate_h5_memory_factor
         String? generate_h5_docker_image
     
         # QC-specific inputs
@@ -57,9 +57,9 @@ workflow wf_rna {
         Int? umi_cutoff
         Int? gene_cutoff
         ## Runtime
-        Int? qc_cpus = 16
-        Float? qc_disk_factor = 8.0
-        Float? qc_memory_factor = 1.5
+        Int? qc_cpus
+        Float? qc_disk_factor
+        Float? qc_memory_factor
         String? qc_docker_image
 
         # Seurat-specific inputs
@@ -71,8 +71,8 @@ workflow wf_rna {
         Int? seurat_umap_dim
         Float? seurat_umap_resolution
         ## Runtime
-        Float? seurat_disk_factor = 0.1
-        Float? seurat_memory_factor = 0.15
+        Float? seurat_disk_factor
+        Float? seurat_memory_factor
         String? seurat_docker_image
     }
 

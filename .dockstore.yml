@@ -83,7 +83,6 @@ workflows:
              - dev
              - neva
              - kdong
-             - barcode-correction
          tags:
              - /.*/
 
