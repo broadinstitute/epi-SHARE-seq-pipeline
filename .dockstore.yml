@@ -10,12 +10,10 @@ workflows:
              - neva
              - minimal-inputs
              - dynamic-memory
-             - knudson
+             - barcode-correction
              - trim-fastqs-atac
              - atac-refactoring
              - main-rebase
-             - sw-default-changes
-             - barcode-correction
          tags:
              - /.*/
 

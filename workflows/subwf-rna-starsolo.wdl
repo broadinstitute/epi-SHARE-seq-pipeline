@@ -16,47 +16,64 @@ workflow wf_rna {
     }
 
     input {
-        # RNA Sub-workflow inputs
-
-        # Correct
-        Boolean correct_barcodes = true
+        # RNA sub-workflow inputs
+        String? pkr
+        String prefix
+        String genome_name
+        String chemistry
         File whitelist
+        Array[File] read1
+        Array[File] read2
+
+        # Correct-specific inputs
+        ## Task parameters
+        Boolean correct_barcodes = true
+        ## Runtime
         Int? correct_cpus = 1
         Float? correct_disk_factor = 8.0
         Float? correct_memory_factor = 0.15
         String? correct_docker_image
 
-        # Align
-        Array[File] read1
-        Array[File] read2
+        # Align-specific inputs
+        ## Task parameters
         File idx_tar
-        String chemistry
-        String genome_name
-        String prefix
         String? barcode_tag
-        String? pkr
-        Int? cpus = 16
-        String? docker
-        # QC
+        ## Runtime
+        Int? align_cpus = 16
+        Float? align_disk_factor = 50.0
+        Float? align_memory_factor = 2.0
+        String? align_docker_image
+        
+        # Generate h5-specific inputs
+        ## Task parameters 
+        String? gene_naming
+        ## Runtime
+        Float? generate_h5_disk_factor = 8.0
+        Float? generate_h5_memory_factor = 2.0
+        String? generate_h5_docker_image
+    
+        # QC-specific inputs
+        ## Task parameters
         Int? umi_cutoff
         Int? gene_cutoff
+        ## Runtime
+        Int? qc_cpus = 16
+        Float? qc_disk_factor = 8.0
+        Float? qc_memory_factor = 1.5
+        String? qc_docker_image
 
-        # Seurat
+        # Seurat-specific inputs
+        ## Task parameters
         Boolean count_only = false
-
-        #Seurat filtering parameters
-        Int? rna_seurat_min_features
-        Float? rna_seurat_percent_mt
-        Int? rna_seurat_min_cells
-
-        #Seurat UMAP
-        Int? rna_seurat_umap_dim
-        Float? rna_seurat_umap_resolution
-
-        # Seurat runtime parameters
-        Float? rna_seurat_disk_factor
-        Float? rna_seurat_memory_factor
-
+        Int? seurat_min_features
+        Float? seurat_percent_mt
+        Int? seurat_min_cells
+        Int? seurat_umap_dim
+        Float? seurat_umap_resolution
+        ## Runtime
+        Float? seurat_disk_factor = 0.1
+        Float? seurat_memory_factor = 0.15
+        String? seurat_docker_image
     }
 
     if ( chemistry == "shareseq" && correct_barcodes ) {
@@ -86,7 +103,10 @@ workflow wf_rna {
             genome_name = genome_name,
             genome_index_tar = idx_tar,
             prefix = prefix,
-            cpus = cpus
+            cpus = align_cpus,
+            disk_factor = align_disk_factor,
+            memory_factor = align_memory_factor,
+            docker_image = align_docker_image
     }
 
     call share_task_generate_h5.generate_h5 as generate_h5 {
@@ -94,7 +114,11 @@ workflow wf_rna {
             tar = align.raw_tar,
             genome_name = genome_name,
             prefix = prefix,
-            pkr = pkr
+            pkr = pkr,
+            gene_naming = gene_naming,
+            disk_factor = generate_h5_disk_factor,
+            memory_factor = generate_h5_memory_factor,
+            docker_image = generate_h5_docker_image
     }
 
     call share_task_qc_rna.qc_rna as qc_rna {
@@ -105,7 +129,11 @@ workflow wf_rna {
             pkr = pkr,
             barcode_tag = barcode_tag,
             genome_name = genome_name,
-            prefix = prefix
+            prefix = prefix,
+            cpus = qc_cpus,
+            disk_factor = qc_disk_factor,
+            memory_factor = qc_memory_factor,
+            docker_image = qc_docker_image
     }
 
     call share_task_log_rna.log_rna as log_rna {
@@ -119,14 +147,15 @@ workflow wf_rna {
             input:
                 rna_matrix = generate_h5.h5_matrix,
                 genome_name = genome_name,
-                min_features = rna_seurat_min_features,
-                percent_mt = rna_seurat_percent_mt,
-                min_cells = rna_seurat_min_cells,
-                umap_dim = rna_seurat_umap_dim,
-                umap_resolution = rna_seurat_umap_resolution,
+                min_features = seurat_min_features,
+                percent_mt = seurat_percent_mt,
+                min_cells = seurat_min_cells,
+                umap_dim = seurat_umap_dim,
+                umap_resolution = seurat_umap_resolution,
                 prefix = prefix,
-                disk_factor = rna_seurat_disk_factor,
-                memory_factor = rna_seurat_memory_factor
+                disk_factor = seurat_disk_factor,
+                memory_factor = seurat_memory_factor,
+                docker_image = seurat_docker_image
         }
     }
 
