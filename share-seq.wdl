@@ -8,7 +8,6 @@ import "workflows/subwf-rna-starsolo.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report
-import "tasks/raise_exception.wdl" as exception_handler
 
 
 # WDL workflow for SHARE-seq

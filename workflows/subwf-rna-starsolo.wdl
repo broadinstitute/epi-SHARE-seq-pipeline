@@ -26,51 +26,46 @@ workflow wf_rna {
         Array[File] read2
 
         # Correct-specific inputs
-        ## Task parameters
         Boolean correct_barcodes = true
-        ## Runtime
+        # Runtime parameters
         Int? correct_cpus
         Float? correct_disk_factor
         Float? correct_memory_factor
         String? correct_docker_image
 
         # Align-specific inputs
-        ## Task parameters
         File idx_tar
         String? barcode_tag
-        ## Runtime
+        # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor
         Float? align_memory_factor
         String? align_docker_image
         
         # Generate h5-specific inputs
-        ## Task parameters 
         String? gene_naming
-        ## Runtime
+        # Runtime parameters
         Float? generate_h5_disk_factor
         Float? generate_h5_memory_factor
         String? generate_h5_docker_image
     
         # QC-specific inputs
-        ## Task parameters
         Int? umi_cutoff
         Int? gene_cutoff
-        ## Runtime
+        # Runtime parameters
         Int? qc_cpus
         Float? qc_disk_factor
         Float? qc_memory_factor
         String? qc_docker_image
 
         # Seurat-specific inputs
-        ## Task parameters
         Boolean count_only = false
         Int? seurat_min_features
         Float? seurat_percent_mt
         Int? seurat_min_cells
         Int? seurat_umap_dim
         Float? seurat_umap_resolution
-        ## Runtime
+        # Runtime parameters
         Float? seurat_disk_factor
         Float? seurat_memory_factor
         String? seurat_docker_image
