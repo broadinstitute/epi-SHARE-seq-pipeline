@@ -13,6 +13,7 @@ task share_trim_fastqs_atac {
     input {
         File fastq_R1 # Pair 1 reads
         File fastq_R2 # Pair 2 reads
+        String chemistry
 
         Int? cpus = 16
         Float? disk_factor = 8.0
@@ -32,10 +33,12 @@ task share_trim_fastqs_atac {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    # read trimming outfiles
+    # Read trimming outfiles
     String fastq_R1_trimmed = basename(fastq_R1, ".fastq.gz") + "_trimmed.fastq"
     String fastq_R2_trimmed = basename(fastq_R2, ".fastq.gz") + "_trimmed.fastq"
-
+    String trimming_log_json = basename(fastq_R1, "R1.fastq.gz") + ".atac.preprocess.trimming.log.json"
+    String trimming_log_html = basename(fastq_R1, "R1.fastq.gz") + ".atac.preprocess.trimming.log.html"
+    String trimming_stats = basename(fastq_R1, "R1.fastq.gz") + ".atac.preprocess.trimming.adapter.stats.txt"
     String monitor_log = 'trim_fastqs_atac_monitor.log'
 
     command <<<
@@ -43,14 +46,25 @@ task share_trim_fastqs_atac {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        # read trimming
-        python3 $(which trim_fastq.py) ~{fastq_R1} ~{fastq_R2} ~{fastq_R1_trimmed} ~{fastq_R2_trimmed}
+        # Use trim_fastq script for SHARE trimming
+        if [ '~{chemistry}' == 'shareseq' ]; then
+            python3 $(which trim_fastq.py) ~{fastq_R1} ~{fastq_R2} ~{fastq_R1_trimmed} ~{fastq_R2_trimmed} ~{trimming_stats}
+
+        # Use fastp for 10X multiome trimming
+        elif [ '~{chemistry}' == '10x_multiome' ]; then
+            fastp -i ~{fastq_R1} -I ~{fastq_R2} -o ~{fastq_R1_trimmed} -O ~{fastq_R2_trimmed} -h ~{trimming_log_html} -j ~{trimming_log_json} -G -Q -L -w ~{cpus} 2> ~{trimming_stats}
+      
+        fi
+  
         gzip *.fastq
     >>>
 
     output {
         File fastq_R1_trimmed = fastq_R1_trimmed + ".gz"
         File fastq_R2_trimmed = fastq_R2_trimmed + ".gz"
+        File? tenx_trimming_log_json = trimming_log_json
+        File? tenx_trimming_log_html = trimming_log_html
+        File trimming_stats = trimming_stats
         File trim_fastqs_atac_monitor = monitor_log
     }
 

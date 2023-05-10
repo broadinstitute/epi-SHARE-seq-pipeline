@@ -34,55 +34,51 @@ workflow wf_atac {
         File? barcode_conversion_dict # For 10X multiome
 
         # Correct-specific inputs
-        ## Biological
         Boolean correct_barcodes = true
         File whitelist
         String? pkr
-        ## Runtime
+        # Runtime parameters
         Int? correct_cpus = 1
         Float? correct_disk_factor = 8.0
         Float? correct_memory_factor = 0.15
         String? correct_docker_image
 
         # Align-specific inputs
-        ## Biological
         Array[File] read1
         Array[File] read2
         Boolean? append_comment = false
         Int? align_multimappers
         File genome_index_tar
-        ## Runtime
+        # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
         String? align_docker_image
 
         # Filter-specific inputs
-        ## Biological
         Int? filter_minimum_fragments_cutoff
         Int? filter_shift_plus = 4
         Int? filter_shift_minus = -4
-        ## Runtime
+        # Runtime parameters
         Int? filter_cpus = 16
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
         String? filter_docker_image
 
         # QC-specific inputs
-        ## Biological
         File? raw_bam
         File? raw_bam_index
         File? filtered_bam
         File? filtered_bam_index
         Int? qc_fragment_cutoff
-        ## Runtime
+        # Runtime parameters
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
         Float? qc_memory_factor = 0.15
         String? qc_docker_image
 
         # Trim-specific inputs
-        # Runtime
+        # Runtime parameters
         Int? trim_cpus = 16
         Float? trim_disk_factor = 8.0
         Float? trim_memory_factor = 0.15
@@ -117,6 +113,7 @@ workflow wf_atac {
                 input:
                     fastq_R1 = read_pair.left,
                     fastq_R2 = read_pair.right,
+                    chemistry = chemistry,
                     cpus = trim_cpus,
                     disk_factor = trim_disk_factor,
                     memory_factor = trim_memory_factor,

@@ -15,6 +15,7 @@ def parse_arguments():
     parser.add_argument("input_r2_fastq_file", help="Filename for untrimmed input read 2 FASTQ file")
     parser.add_argument("output_r1_fastq_file", help="Filename for corrected output read 1 FASTQ file")
     parser.add_argument("output_r2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
+    parser.add_argument("trimming_stats_file", help="Filename for txt file containing trimming statistics")
     
     return parser.parse_args()
 
@@ -32,16 +33,25 @@ def reverse_complement(sequence):
     return ''.join(COMPLEMENT[b] for b in sequence[::-1])
 
 def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
-                  output_r1_fastq_file, output_r2_fastq_file):
-
+                  output_r1_fastq_file, output_r2_fastq_file,
+                  trimming_stats_file):
+    """
+    Trim reads if overlapping, write reads to output FASTQ files.
+    Produces file enumerating how many reads were processed and trimmed.
+    """
+    # counters
+    total = trimmed = 0
+    
     # process FASTQs together
     with dnaio.open(input_r1_fastq_file, input_r2_fastq_file) as reader, \
          dnaio.open(output_r1_fastq_file, output_r2_fastq_file, mode="w") as writer:
              
         for read_1, read_2 in reader:
-        # trim adapters for ATAC
+            total += 2
+            # trim adapters for ATAC
             where = trim(read_1.sequence, read_2.sequence)
             if where > -1:
+                trimmed += 2
                 # create SequenceRecord object for read 1 with trimmed sequence
                 corrected_read_1 = dnaio.SequenceRecord(read_1.name, read_1.sequence[:where], read_1.qualities[:where])                
                 # create SequenceRecord object for read 2 with trimmed sequence
@@ -52,11 +62,17 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                 corrected_read_2 = read_2
             # write to corrected FASTQ files
             writer.write(corrected_read_1, corrected_read_2)
+    
+    # write trimming statistics output file
+    with open(trimming_stats_file, "w") as f:
+        fields = ["total_reads", "untrimmed_reads", "trimmed_reads", "%trimmed"]
+        f.write("\t".join(fields) + "\n")
+        f.write("%i\t%i\t%i\t%0.1f" % (total, total-trimmed, trimmed, trimmed/total*100))
 
 def trim(seq1,seq2):
-    '''
+    """
     Find overlap between read1 and read2 and return location
-    '''
+    """
     query = reverse_complement(seq2[0:20])
     idx = seq1.rfind(query) # look for perfect match
     if idx == -1:
@@ -69,11 +85,11 @@ def trim(seq1,seq2):
     return idx
 
 def fuzz_align(s_seq,l_seq):
-    '''
+    """
     Align allowing Levenshtein distance of 1
     This iteration should go from the right end of l_seq
     since we want to do a rfind 
-    '''
+    """
     for i, base in enumerate(l_seq):  # loop through equal size windows
         l_subset = l_seq[i:i+len(s_seq)]
         dist = Levenshtein.distance(l_subset, s_seq)
@@ -89,8 +105,11 @@ def main():
     input_r2_fastq_file = getattr(args, "input_r2_fastq_file")
     output_r1_fastq_file = getattr(args, "output_r1_fastq_file")
     output_r2_fastq_file = getattr(args, "output_r2_fastq_file")
+    trimming_stats_file = getattr(args, "trimming_stats_file")
+    
     process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
-                   output_r1_fastq_file, output_r2_fastq_file)
+                   output_r1_fastq_file, output_r2_fastq_file,
+                   trimming_stats_file)
 
 
 if __name__ == "__main__":

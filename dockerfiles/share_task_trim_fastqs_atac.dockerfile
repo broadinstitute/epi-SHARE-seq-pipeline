@@ -26,6 +26,8 @@ RUN apt-get update && apt-get install -y \
 
 # Install python packages
 RUN pip install --no-cache-dir dnaio Levenshtein
+# Install fastp
+RUN wget http://opengene.org/fastp/fastp.0.20.1 && mv fastp.0.20.1 fastp && chmod a+x ./fastp && mv ./fastp /usr/local/bin
 
 # Create and setup new user
 ENV USER=shareseq
