@@ -53,8 +53,8 @@ task share_correct_fastq {
             ~{corrected_fastq_R2} \
             ~{whitelist} \
             ~{sample_type} \
-            ~{pkr} \
-            ~{prefix}
+            ~{prefix} \
+            ~{pkr}
 
         gzip *.fastq
     >>>

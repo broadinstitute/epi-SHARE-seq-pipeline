@@ -15,8 +15,8 @@ def parse_arguments():
     parser.add_argument("output_r2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
     parser.add_argument("whitelist_file", help="Filename for whitelisted combinations of R1R2R3 barcodes, one per line")
     parser.add_argument("sample_type", choices=["ATAC", "RNA"], help="Sample modality")
-    parser.add_argument("pkr", help="PKR name")
     parser.add_argument("prefix", help="Prefix for naming output QC txt file")
+    parser.add_argument("pkr", nargs="?", help="PKR name")
     
     return parser.parse_args()
 
@@ -114,7 +114,7 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                 # correct FASTQ reads
                 if sample_type == "RNA":
                     # add corrected barcodes, PKR, and UMI to header; remove any information after a space
-                    corrected_header = read_1.name.split(" ")[0] + "_" + ",".join([r1, r2, r3, pkr]) + "_" + read_2.sequence[:10]                
+                    corrected_header = read_1.name.split(" ")[0] + "_" + ",".join(filter(None, [r1, r2, r3, pkr])) + "_" + read_2.sequence[:10]                
                     # create SequenceRecord for read 1; use corrected header
                     corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)                
                     # create SequenceRecord for read 2; use corrected header, read has format R1R2R3UMI
@@ -124,7 +124,7 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                     
                 elif sample_type == "ATAC":
                     # add corrected barcodes and PKR to header; remove any information after a space
-                    corrected_header = read_1.name.split(" ")[0] + "_" + ",".join([r1, r2, r3, pkr])
+                    corrected_header = read_1.name.split(" ")[0] + "_" + ",".join(filter(None, [r1, r2, r3, pkr]))
                     # create SequenceRecord object for read 1: use corrected header
                     corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)
                     # create SequenceRecord object for read 2: use corrected header, remove 99bp barcode
@@ -153,8 +153,8 @@ def main():
     output_r2_fastq_file = getattr(args, "output_r2_fastq_file")
     whitelist_file = getattr(args, "whitelist_file")
     sample_type = getattr(args, "sample_type")
-    pkr = getattr(args, "pkr")
     prefix = getattr(args, "prefix")
+    pkr = getattr(args, "pkr")
     
     # read whitelist, get lists of barcodes
     (r1_barcodes, r2_barcodes, r3_barcodes) = get_barcodes(whitelist_file)
