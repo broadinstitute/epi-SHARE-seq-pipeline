@@ -19,7 +19,7 @@ task share_atac_filter {
         Int? shift_plus = 4
         Int? shift_minus = -4
         Int? mapq_threshold = 30
-        Int? multimappers = 5
+        Int? multimappers = 1
         Int? minimum_fragments_cutoff = 10
         File? bam
         File? bam_index
