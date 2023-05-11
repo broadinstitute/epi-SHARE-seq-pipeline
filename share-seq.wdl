@@ -59,7 +59,6 @@ workflow ShareSeq {
 
         File? gtf
         File? idx_tar_rna
-        File? whitelist
 
         String? gene_naming = "gene_name"
 
@@ -139,7 +138,7 @@ workflow ShareSeq {
                     read2 = select_first([preprocess_tenx.fastq_R2_preprocessed ,read2_atac]),
                     chemistry = chemistry,
                     pkr = pkr,
-                    whitelist = select_first([whitelist, whitelist_]),
+                    whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
                     trim_fastqs = trim_fastqs,
                     append_comment = append_comment,
                     chrom_sizes = chrom_sizes_,
