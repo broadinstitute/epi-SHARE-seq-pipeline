@@ -144,8 +144,9 @@ workflow wf_preprocess {
 	output {
 		Array[String] percentMismatch = QC.percentMismatch
 		Array[String] terraResponse = TerraUpsert.upsert_response
-		Array[File] monitoringLogsExtract = ExtractBarcodes.monitoringLog
-		Array[File] monitoringLogsBasecalls = BasecallsToBams.monitoringLog		
+		Array[File] monitorLogsExtract = ExtractBarcodes.monitorLog
+		Array[File] monitorLogsBasecalls = BasecallsToBams.monitorLog
+		Array[Array[File]] monitorLogsBamToRawFastq = BamToRawFastq.monitorLog		
 		File BarcodeQC = AggregateBarcodeQC.laneQC
 	}
 }
@@ -184,9 +185,12 @@ task GetLanes {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 	# Float memory = ceil(5.4 * bclSize + 147) * 0.25
+	String monitorLog = "get_lanes_monitor.log"
 
 	command <<<
 		set -e
+
+		bash $(which monitor_script.sh) | tee ~{monitorLog} 1>&2 &
 
 		~{untarBcl}
 		tail -n+2 SampleSheet.csv | cut -d, -f2
@@ -194,6 +198,7 @@ task GetLanes {
 
 	output {
 		Array[Int] lanes = read_lines(stdout())
+		File monitorLog = monitorLog
 	}
 
 	runtime {
@@ -236,9 +241,14 @@ task ExtractBarcodes {
 	Int javaMemory = ceil((memory - 0.5) * 1000)
 
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
+	
+	String monitorLog = "extract_barcodes_monitor.log"
+
 	command <<<
 		set -e
-		bash /software/monitor_script.sh > monitoring.log &
+		
+		bash $(which monitor_script.sh) > ~{monitorLog} 2>&1 &
+
 		~{laneUntarBcl}
 
 		# append terminating line feed
@@ -281,7 +291,7 @@ task ExtractBarcodes {
 		String readStructure = read_string("readStructure.txt")
 		File barcodeMetrics = barcodeMetricsFile
 		File barcodes = write_lines(glob("*_barcode.txt.gz"))
-		File monitoringLog = "monitoring.log"
+		File monitorLog = monitorLog
 	}
 }
 
@@ -316,9 +326,14 @@ task BasecallsToBams {
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 	Int javaMemory = ceil((memory - 0.5) * 1000)
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
+
+	String monitorLog = "basecalls_to_bams_monitor.log"
+
 	command <<<
 		set -e
-		bash /software/monitor_script.sh > monitoring.log &
+		
+		bash $(which monitor_script.sh) > ~{monitorLog} 2>&1 &
+
 		~{laneUntarBcl}
 		time gsutil -m cp -I . < "~{barcodes}"
 		
@@ -370,7 +385,7 @@ task BasecallsToBams {
 
 	output {
 		Array[File] bams = glob("*.bam")
-                File monitoringLog = "monitoring.log"
+                File monitorLog = monitorLog
 	}
 }
 
@@ -424,10 +439,10 @@ task BamToRawFastq {
 		File? R3barcodes
 		String dockerImage
 		Float? diskFactor = 5
-		Float? memory = 16
+		Float? memory = 8
 	}
 
-	String monitor_log = "monitor.log"
+	String monitorLog = "bam_to_raw_fastq_monitor.log"
 	String prefix = basename(bam, ".bam")
 	
 	Float bamSize = size(bam, 'G')
@@ -437,7 +452,7 @@ task BamToRawFastq {
 	command <<<
 		set -e
 		
-		bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+		bash $(which monitor_script.sh) | tee ~{monitorLog} 1>&2 &
 
 		# Create raw FASTQs from unaligned bam
 		python3 /software/bam_to_raw_fastq.py \
@@ -464,7 +479,7 @@ task BamToRawFastq {
 			whitelist: glob("*whitelist.txt")
 		}
 		File R1barcodeQC = "~{prefix}_R1_barcode_qc.txt"
-		File monitor_log = "~{monitor_log}"
+		File monitorLog = monitorLog
 	}
 	runtime {
 		docker: dockerImage
