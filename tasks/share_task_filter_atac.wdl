@@ -103,7 +103,7 @@ task share_atac_filter {
         # "{prefix}.mito.bulk-metrics.tsv"
         # "{prefix}.mito.bc-metrics.tsv"
 
-        echo ------ START: Filtering out mito reads ------' 1>&2
+        echo '------ START: Filtering out mito reads ------' 1>&2
         # The script removes the mithocondrial reads and creates two log file with bulk and barcode statistics.
         time python3 $(which filter_mito_reads.py) -o ~{non_mito_bam} -p ~{cpus} --cutoff ~{minimum_fragments_cutoff} --prefix ~{prefix} --bc_tag ~{barcode_tag_fragments} in.bam
 
@@ -122,7 +122,7 @@ task share_atac_filter {
         # Only keep properly paired reads
         # Obtain name sorted BAM file
         # =============================
-        echo ------ START: Filter bam -F 524 -f 2 and sort ------' 1>&2
+        echo '------ START: Filter bam -F 524 -f 2 and sort ------' 1>&2
         time samtools view -h -@ ~{samtools_threads} -F 524 -f 2 -u ~{non_mito_bam} $(echo ${chrs}) | \
         samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n /dev/stdin -o ~{tmp_filtered_bam}
 
@@ -143,7 +143,7 @@ task share_atac_filter {
         # =============
         # Mark duplicates
         # =============
-        echo ------ START: Mark Duplicates ------' 1>&2
+        echo '------ START: Mark Duplicates ------' 1>&2
         time java -Xmx~{picard_java_memory}G -jar $(which picard.jar) MarkDuplicates \
         --INPUT ~{tmp_fixmate_bam} --OUTPUT ~{final_bam_wdup_tmp} \
         --METRICS_FILE ~{picard_mark_duplicates_metrics} \
@@ -154,30 +154,30 @@ task share_atac_filter {
         --BARCODE_TAG ~{barcode_tag} 2> ~{picard_mark_duplicates_log}
 
         # Create the final bam removing the duplicates
-                echo ------ START: Remove duplicates ------' 1>&2
+        echo '------ START: Remove duplicates ------' 1>&2
         time samtools view -h -F 1804 -f 2 -b -o ~{queryname_final_bam} ~{final_bam_wdup_tmp}
 
-        echo ------ START: Sort bam with duplicates by coordinates ------' 1>&2
+        echo '------ START: Sort bam with duplicates by coordinates ------' 1>&2
         time samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{final_bam_wdup_tmp} -o ~{final_bam_wdup}
         samtools index ~{final_bam_wdup}
 
-        echo ------ START: Sort bam without duplicates by coordinates ------' 1>&2
+        echo '------ START: Sort bam without duplicates by coordinates ------' 1>&2
         time samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{queryname_final_bam} -o ~{final_bam}
         time samtools index ~{final_bam}
 
         rm ~{tmp_fixmate_bam}
 
-        echo ------ START: Create fragment file ------' 1>&2
+        echo '------ START: Create fragment file ------' 1>&2
         time python3 $(which bam_to_fragments.py) --shift_plus ~{shift_plus} --shift_minus ~{shift_minus} --bc_tag ~{barcode_tag_fragments} -o ~{fragments} ~{final_bam}
 
         # Change the ATAC 10x barcodes so they can match RNA
         if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} == "true" ];then
             cp ~{fragments} tmp_fragments
-            echo ------ START: Convert barcode names for 10x ------' 1>&2
+            echo '------ START: Convert barcode names for 10x ------' 1>&2
             time awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}{print $1,$2,$3,map[$4],$5}' ~{barcode_conversion_dict} tmp_fragments > ~{fragments}
         fi
 
-        echo ------ START: Compress fragments ------' 1>&2
+        echo '------ START: Compress fragments ------' 1>&2
         time bgzip -c ~{fragments} > ~{fragments}.gz
 
         # ~{prefix}.fragments.tsv.gz.tbi
