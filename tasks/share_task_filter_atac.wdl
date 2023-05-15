@@ -128,10 +128,10 @@ task share_atac_filter {
 
         # Assign multimappers if necessary
         if [ ~{multimappers} -le 1 ]; then
-            echo ------ START: Fixmate step ------' 1>&2
+            echo '------ START: Fixmate step ------' 1>&2
             time samtools view -h ~{tmp_filtered_bam}  | samtools fixmate -@ ~{samtools_threads} -r /dev/stdin ~{tmp_fixmate_bam}
         else
-                    echo ------ START: Assinging multimappers ------' 1>&2
+                    echo '------ START: Assinging multimappers ------' 1>&2
             time samtools view -h ~{tmp_filtered_bam} | \
             python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | samtools view -u - | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
         fi
