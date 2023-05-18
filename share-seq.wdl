@@ -9,6 +9,7 @@ import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report
 
+
 # WDL workflow for SHARE-seq
 
 workflow ShareSeq {
@@ -58,7 +59,6 @@ workflow ShareSeq {
 
         File? gtf
         File? idx_tar_rna
-        File? whitelist
 
         String? gene_naming = "gene_name"
 
@@ -68,9 +68,8 @@ workflow ShareSeq {
         # Joint qc
         Int remove_low_yielding_cells = 10
 
-        File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human/GRCh38_genome_files_hg38.tsv"
+        File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human_v43/GRCh38_genome_files_hg38_v43.tsv"
         File mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/mm10_genome_files_STARsolo.tsv"
-        File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
     }
 
     String genome_name = if genome_name_input == "GRCh38" then "hg38" else genome_name_input
@@ -88,10 +87,9 @@ workflow ShareSeq {
     Boolean process_rna = if length(read1_rna)>0 then true else false
 
     Map[String, File] whitelists = read_map(whitelists_tsv)
-    File? whitelist_ = if chemistry=='shareseq' || chemistry=='10x_multiome' then whitelist else select_first([whitelist, whitelists[chemistry]])
+    File? whitelist_ = if chemistry=='10x_multiome' then whitelist else select_first([whitelist, whitelists[chemistry]])
     File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
     File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
-
 
     if ( chemistry != "shareseq" && process_atac) {
         scatter (idx in range(length(read1_atac))) {
@@ -121,7 +119,7 @@ workflow ShareSeq {
                     chemistry = chemistry,
                     read1 = read1_rna,
                     read2 = read2_rna,
-                    whitelist = if chemistry=='shareseq' then whitelist else select_first([whitelist_rna, whitelist_rna_, whitelist_]),
+                    whitelist = select_first([whitelist_rna, whitelist_rna_, whitelist, whitelist_]),
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
                     pkr = pkr,
@@ -139,6 +137,8 @@ workflow ShareSeq {
                     read1 = select_first([preprocess_tenx.fastq_R1_preprocessed ,read1_atac]),
                     read2 = select_first([preprocess_tenx.fastq_R2_preprocessed ,read2_atac]),
                     chemistry = chemistry,
+                    pkr = pkr,
+                    whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
                     trim_fastqs = trim_fastqs,
                     append_comment = append_comment,
                     chrom_sizes = chrom_sizes_,
@@ -163,15 +163,15 @@ workflow ShareSeq {
                     genome = genome_name,
                     prefix = prefix
             }
-        
-						call joint_qc.joint_qc_plotting as joint_qc {
-								input:
-										atac_barcode_metadata = atac.share_atac_barcode_metadata,
-										rna_barcode_metadata = rna.share_rna_barcode_metadata,
-										prefix = prefix,
-										genome_name = genome_name
-					}	
-				}
+
+            call joint_qc.joint_qc_plotting as joint_qc {
+                input:
+                    atac_barcode_metadata = atac.share_atac_barcode_metadata,
+                    rna_barcode_metadata = rna.share_rna_barcode_metadata,
+                    prefix = prefix,
+                    genome_name = genome_name
+            }
+        }
     }
 
     call html_report.html_report as html_report {

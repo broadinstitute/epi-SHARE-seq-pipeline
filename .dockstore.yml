@@ -10,6 +10,7 @@ workflows:
              - neva
              - minimal-inputs
              - dynamic-memory
+             - barcode-correction
              - trim-fastqs-atac
              - atac-refactoring
              - main-rebase

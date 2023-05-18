@@ -1,5 +1,6 @@
 version 1.0
 
+import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
@@ -15,62 +16,84 @@ workflow wf_rna {
     }
 
     input {
-        # RNA Sub-workflow inputs
+        # RNA sub-workflow inputs
         String? pkr
         String prefix
         String genome_name
-
-        # Align-specific inputs
-        ## Biological
+        String chemistry
+        File whitelist
         Array[File] read1
         Array[File] read2
+
+        # Correct-specific inputs
+        Boolean correct_barcodes = true
+        # Runtime parameters
+        Int? correct_cpus
+        Float? correct_disk_factor
+        Float? correct_memory_factor
+        String? correct_docker_image
+
+        # Align-specific inputs
         File idx_tar
-        String chemistry
         String? barcode_tag
-        File? whitelist
-        ## Runtime
-        Int? align_cpus = 16
-        Float? align_disk_factor = 50.0
-        Float? align_memory_factor = 2.0
+        # Runtime parameters
+        Int? align_cpus
+        Float? align_disk_factor
+        Float? align_memory_factor
         String? align_docker_image
         
         # Generate h5-specific inputs
-        ## Biological 
         String? gene_naming
-        ## Runtime
-        Float? generate_h5_disk_factor = 8.0
-        Float? generate_h5_memory_factor = 2.0
+        # Runtime parameters
+        Float? generate_h5_disk_factor
+        Float? generate_h5_memory_factor
         String? generate_h5_docker_image
     
         # QC-specific inputs
-        ## Biological
         Int? umi_cutoff
         Int? gene_cutoff
-        ## Runtime
-        Int? qc_cpus = 16
-        Float? qc_disk_factor = 8.0
-        Float? qc_memory_factor = 1.5
+        # Runtime parameters
+        Int? qc_cpus
+        Float? qc_disk_factor
+        Float? qc_memory_factor
         String? qc_docker_image
 
         # Seurat-specific inputs
-        ## Biological
         Boolean count_only = false
         Int? seurat_min_features
         Float? seurat_percent_mt
         Int? seurat_min_cells
         Int? seurat_umap_dim
         Float? seurat_umap_resolution
-        ## Runtime
-        Float? seurat_disk_factor = 0.1
-        Float? seurat_memory_factor = 0.15
+        # Runtime parameters
+        Float? seurat_disk_factor
+        Float? seurat_memory_factor
         String? seurat_docker_image
+    }
+
+    if ( chemistry == "shareseq" && correct_barcodes ) {
+        scatter (read_pair in zip(read1, read2)) {
+            call share_task_correct_fastq.share_correct_fastq as correct {
+                input:
+                    fastq_R1 = read_pair.left,
+                    fastq_R2 = read_pair.right,
+                    whitelist = whitelist,
+                    sample_type = "RNA",
+                    pkr = pkr,
+                    prefix = prefix,
+                    cpus = correct_cpus,
+                    disk_factor = correct_disk_factor,
+                    memory_factor = correct_memory_factor,
+                    docker_image = correct_docker_image
+            }
+        }
     }
 
     call share_task_starsolo.share_rna_align as align {
         input:
             chemistry = chemistry,
-            fastq_R1 = read1,
-            fastq_R2 = read2,
+            fastq_R1 = select_first([correct.corrected_fastq_R1, read1]),
+            fastq_R2 = select_first([correct.corrected_fastq_R2, read2]),
             whitelist = whitelist,
             genome_name = genome_name,
             genome_index_tar = idx_tar,
