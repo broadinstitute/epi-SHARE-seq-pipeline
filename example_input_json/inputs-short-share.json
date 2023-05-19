@@ -1,0 +1,37 @@
+{
+  "share.chemistry": "String",
+  "share.read1_atac": "Array[File]",
+  "share.read2_atac": "Array[File]",
+  "share.read1_rna": "Array[File]",
+  "share.read2_rna": "Array[File]",
+  "share.genome_name_input": "String",
+
+  
+  "share.pkr": "String? (optional, default = \"\")",
+  "share.prefix": "String (optional, default = \"shareseq-project\")",
+  "share.atac.align_multimappers": "Int? (optional)",
+  "share.whitelist": "File? (optional)",
+  "share.atac.barcode_tag_fragments": "String? (optional)",
+
+  "share.trim_fastqs": "Boolean (optional, default = true)",
+  "share.count_only": "Boolean (optional, default = false)",
+
+  "share.append_comment": "Boolean (optional, default = false)",
+  "share.fastq_barcode": "Array[File] (optional, default = [])",
+  "share.preprocess_tenx.barcode_dist": "Int? (optional, default = 2)",
+  "share.preprocess_tenx.threshold_pct_barcode_matching": "Float? (optional, default = 0.6)",
+  "share.whitelist_atac": "File? (optional)",
+  "share.whitelist_rna": "File? (optional)",
+  
+  
+  "share.atac.barcode_tag": "String? (optional, default = \"CB\")",
+
+  "share.atac_genome_index_tar": "File? (optional)",
+  "share.idx_tar_rna": "File? (optional)",
+  "share.gtf": "File? (optional)",
+  "share.tss_bed": "File? (optional)",
+  "share.peak_set": "File? (optional)",
+  "share.chrom_sizes": "File? (optional)"
+  
+}
+

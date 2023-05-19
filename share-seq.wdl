@@ -12,7 +12,7 @@ import "tasks/share_task_html_report.wdl" as html_report
 
 # WDL workflow for SHARE-seq
 
-workflow ShareSeq {
+workflow share {
 
     input {
         # Common inputs
