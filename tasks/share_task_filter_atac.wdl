@@ -92,7 +92,8 @@ task share_atac_filter {
     command<<<
         set -e
 
-       bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+        # I am not writing to a file anymore because Google keeps track of it automatically.
+       bash $(which monitor_script.sh) 1>&2 &
 
 
         # I need to do this because the bam and bai need to be in the same folder but WDL doesn't allow you to

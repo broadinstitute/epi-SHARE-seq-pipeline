@@ -92,7 +92,8 @@ task qc_atac {
     command<<<
         set -e
 
-        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+        # I am not writing to a file anymore because Google keeps track of it automatically.
+        bash $(which monitor_script.sh) 1>&2 &
 
         cp ~{mito_metrics_barcode} mito_metrics
 
