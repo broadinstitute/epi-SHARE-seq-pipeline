@@ -5,6 +5,7 @@
   "share.read1_rna": "Array[File]",
   "share.read2_rna": "Array[File]",
   "share.genome_name_input": "String",
+  "share.pipeline_type": "['full', 'count_only', 'no-align']",
 
   
   "share.pkr": "String? (optional, default = \"\")",
@@ -14,7 +15,7 @@
   "share.atac.barcode_tag_fragments": "String? (optional)",
 
   "share.trim_fastqs": "Boolean (optional, default = true)",
-  "share.count_only": "Boolean (optional, default = false)",
+  
 
   "share.append_comment": "Boolean (optional, default = false)",
   "share.fastq_barcode": "Array[File] (optional, default = [])",

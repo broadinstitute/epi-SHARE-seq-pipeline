@@ -17,7 +17,7 @@
   "share.joint_qc.docker_image": "String (optional, default = \"us.gcr.io/buenrostro-share-seq/share_task_joint_qc\")",
   "share.dorcs.percentMT_RNA": "Float (optional, default = 5)",
   "share.rna.seurat_docker_image": "String? (optional)",
-  "share.count_only": "Boolean (optional, default = false)",
+  "share.pipeline_modality": "String (['full', 'count_only', 'no-align'], default = 'full')",
   "share.read1_rna": "Array[File]",
   "share.atac.qc_memory_factor": "Float? (optional, default = 0.15)",
   "share.preprocess_tenx.barcode_dist": "Int? (optional, default = 2)",

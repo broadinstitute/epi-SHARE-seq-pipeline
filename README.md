@@ -125,7 +125,6 @@ QC metrics for each experiment (`qc.json`) will be split into multiple rows (1 f
 <br>
 TODO:\
 Sambamba\
-no-align\
 fix seurat and archr workflows\
 add track generation \
 only one genome tsv

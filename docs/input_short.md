@@ -15,10 +15,17 @@ The input JSONs used to run the SHARE-seq and 10x samples can be found at the fo
 
 Mandatory parameters.
 
-1) Chemistry
+1) Modality
+    * `share.pipeline_modality`:
+        * `full`: the **default**. Will run the entire pipeline.
+        * `count_only`: Will stop after generating the `fragment` file and/or the `barcode x gene` matrix.
+        * `no-align`: Will perform pre-processing of the raw FASTQs and stop. 
+
+2) Chemistry
     * `share.chemistry`:`shareseq` for SHARE-seq, `10x_multiome` for 10x multiome and `10x_v2` for not multiomic 10x.
 
-2) Reference genome name
+
+3) Reference genome name
     * `share.genome_name_input`: Define the organism to use. The possible options are `[hg38, mm10, mm39]`. 
     * This input is used to populate the `share.mouse_genome_tsv` or the `share.human_genome_tsv` input pointing to the genome annotations necessary to run the pipeline. 
     * The **bolded** options in the table below represents the defaults for the two organisms.
@@ -40,10 +47,10 @@ Mandatory parameters.
         }
         ```
 
-3) [Input files](#input-files)
+4) [Input files](#input-files)
     * See [this](#input-files) for how to define FASTQs for your sample.
 
-4) Important parameters
+5) Important parameters
     * If you are running samples generated from `cellular/nuclear subpools` it is recommended to define the following parameters.
         * `share.pkr`: Cellular/nuclear subpool identifier. The pipeline will add this parameter to the cell barcode in order to prevent mixing barcode from different subpools.
         >IMPORTANT: Processing `subpools` at the moment is a two-step process. Each `subpool` needs to be processed independently with the `share.pkr` to track the `subpools` provenance and only after aggregated.
