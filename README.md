@@ -1,4 +1,4 @@
-# Broad Institute of MIT and Harvard single-cell/nucleus multiomic processing pipeline
+# Broad Institute of MIT and Harvard Single-Cell/Nucleus Multiomic Processing Pipeline
 
 Pipeline specifications can be found [here](https://docs.google.com/document/d/1J-NWpDLkEGLsLjVe6h6-Rx4nxzTdgy1TJZvuMnYiiyg/edit?usp=sharing).
 
@@ -9,9 +9,9 @@ Pipeline main page on [dockstore](https://dockstore.org/workflows/github.com/bro
 </p>
 
 ### Structure of this repo
-* The **tasks** directory contains the tasks called from the main workflow share-seq.wdl. Each task corresponds to a different step of the pipeline: *align*; *filter*; *etc*.
-* The **src** directory contains bash, python, R, and notebooks scripts called within the tasks.
-* The **dockerfiles** directory contains the dockerfiles used to build the docker images used by the pipeline.
+* The **tasks** directory contains the tasks called from the main workflow share-seq.wdl. Each task corresponds to a different step of the pipeline: *align*, *filter*, etc.
+* The **src** directory contains bash, Python, R, and notebook scripts called within the tasks.
+* The **dockerfiles** directory contains the Dockerfiles used to build the Docker images used by the pipeline.
 
 ## Introduction
 
@@ -21,9 +21,9 @@ This **10X** single-cell multiomic pipeline is based off the ENCODE (phase-3) si
 
 ### Features
 
-* **Portability**: The pipeline run can be performed across different cloud platforms such as Google, AWS and DNAnexus, as well as on cluster engines such as SLURM, SGE and PBS.
+* **Portability**: The pipeline can be run on different cloud platforms such as Google, AWS and DNAnexus, as well as on cluster engines such as SLURM, SGE and PBS.
 * **User-friendly HTML report**: In addition to the standard outputs, the pipeline generates an HTML report that consists of quality metrics including alignment statistics along with many useful plots. An example of the [HTML report](). # TODO: add an example html.
-* **Supported genomes**: Pipeline needs genome specific data such as aligner indices, chromosome sizes file and blacklist. We provide a genome references for hg38, mm10, mm39.
+* **Supported genomes**: The pipeline requires genome-specific data such as aligner indices, chromosome sizes, and blacklisted regions. We provide genome references for hg38, mm10, mm39.
 
 ## Installation
 
@@ -32,7 +32,7 @@ This **10X** single-cell multiomic pipeline is based off the ENCODE (phase-3) si
 	$ pip install caper
 	```
 
-2) **IMPORTANT**: Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instruction in the configuration file.
+2) **IMPORTANT**: Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instructions in the configuration file.
 	```bash
 	# backend: local or your HPC type (e.g. slurm, sge, pbs, lsf). read Caper's README carefully.
 	$ caper init [YOUR_BACKEND]
@@ -52,7 +52,7 @@ This **10X** single-cell multiomic pipeline is based off the ENCODE (phase-3) si
 	INPUT_JSON="" #TODO: We need a test dataset available for everyone
 	```
 
-5) If you have Docker and want to run pipelines locally on your laptop. `--max-concurrent-tasks 1` is to limit number of concurrent tasks to test-run the pipeline on a laptop. Uncomment it if run it on a workstation/HPC.
+5) If you have Docker and want to run the pipelines locally on your laptop, `--max-concurrent-tasks 1` limits the number of concurrent tasks to test-run on a laptop. Uncomment if running on a workstation/HPC.
 	```bash
 	# check if Docker works on your machine
 	$ docker run ubuntu:latest echo hello
@@ -61,7 +61,7 @@ This **10X** single-cell multiomic pipeline is based off the ENCODE (phase-3) si
 	$ caper run share-seq.wdl -i "${INPUT_JSON}" --docker --max-concurrent-tasks 1
 	```
 
-6) Otherwise, install Singularity on your system. Please follow [this instruction](https://neuro.debian.net/install_pkg.html?p=singularity-container) to install Singularity on a Debian-based OS. Or ask your system administrator to install Singularity on your HPC.
+6) Otherwise, install Singularity on your system. Please follow [these instructions](https://neuro.debian.net/install_pkg.html?p=singularity-container) to install Singularity on a Debian-based OS. Or ask your system administrator to install Singularity on your HPC.
 	```bash
 	# check if Singularity works on your machine
 	$ singularity exec docker://ubuntu:latest echo hello
@@ -86,7 +86,7 @@ This **10X** single-cell multiomic pipeline is based off the ENCODE (phase-3) si
 
 > **IMPORTANT**: DO NOT BLINDLY USE A TEMPLATE/EXAMPLE INPUT JSON. READ THROUGH THE FOLLOWING GUIDE TO MAKE A CORRECT INPUT JSON FILE.
 
-An input JSON file specifies all the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data fastq file. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
+An input JSON file specifies all of the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data FASTQ files. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
 
 1) [Input JSON file specification (short)](docs/input_short.md)
 2) [Input JSON file specification (long)](docs/input.md)
@@ -94,11 +94,11 @@ An input JSON file specifies all the input parameters and files that are necessa
 
 ## Running on Terra/Anvil (using Dockstore)
 
-Visit our pipeline repo on [Dockstore](https://dockstore.org/my-workflows/github.com/broadinstitute/epi-SHARE-seq-pipeline/SHARE-seq). Click on `Terra` or `Anvil`. Follow Terra's instruction to create a workspace on Terra and add Terra's billing bot to your Google Cloud account.
+Visit our pipeline repo on [Dockstore](https://dockstore.org/my-workflows/github.com/broadinstitute/epi-SHARE-seq-pipeline/SHARE-seq). Click on `Terra` or `Anvil`. Follow Terra's instructions to create a workspace on Terra and add Terra's billing bot to your Google Cloud account.
 
-Download this [test input JSON for Terra](we don't have one at the moment) and upload it to Terra's UI and then run analysis.
+Download this [test input JSON for Terra](we don't have one at the moment), upload it to Terra's UI, and then run the analysis.
 
-If you want to use your own input JSON file, then make sure that all files in the input JSON are on a Google Cloud Storage bucket (`gs://`). URLs will not work.
+If you would like to use your own input JSON file, make sure that all files in the input JSON are on a Google Cloud Storage bucket (`gs://`). URLs will not work.
 
 ## How to organize outputs
 
@@ -111,9 +111,9 @@ $ croo [METADATA_JSON_FILE]
 
 ## How to make a spreadsheet of QC metrics
 
-Install [qc2tsv](https://github.com/ENCODE-DCC/qc2tsv#installation). Make sure that you have python3(> 3.4.1) installed on your system. 
+Install [qc2tsv](https://github.com/ENCODE-DCC/qc2tsv#installation). Make sure that you have Python 3 (>3.4.1) installed on your system. 
 
-Once you have [organized output with Croo](#how-to-organize-outputs), you will be able to find pipeline's final output file `qc/qc.json` which has all QC metrics in it. Simply feed `qc2tsv` with multiple `qc.json` files. It can take various URIs like local path, `gs://` and `s3://`.
+Once you have [organized the output with Croo](#how-to-organize-outputs), you will be able to find the pipeline's final output file `qc/qc.json` which contains all the QC metrics. Simply feed `qc2tsv` with multiple `qc.json` files. It can take various URIs such as local paths, `gs://`, and `s3://`.
 
 ```bash
 $ pip install qc2tsv
@@ -129,4 +129,4 @@ fix seurat and archr workflows\
 add track generation \
 only one genome tsv
 
-Thank you to the **ENCODE DAC** for writing excellent documentation for their pipelines that we used as template to generate this one.
+Thank you to the **ENCODE DAC** for writing excellent documentation for their pipelines that we used as templates.
