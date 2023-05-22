@@ -21,7 +21,6 @@ workflow share {
         String chemistry
         String prefix = "shareseq-project"
         String? pkr=""
-        String genome_name_input
         String pipeline_modality = "full" # "full": run everything; "count_only": stops after producing fragment file and count matrix; "no_align": correct and trim raw fastqs.
 
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
@@ -68,13 +67,12 @@ workflow share {
         # Joint qc
         Int remove_low_yielding_cells = 10
 
-        File human_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human_v43/GRCh38_genome_files_hg38_v43.tsv"
-        File mouse_genome_tsv = "gs://broad-buenrostro-pipeline-genome-annotations/mm10/mm10_genome_files_STARsolo.tsv"
+        File genome_tsv
+        String? genome_name
     }
 
-    String genome_name = if genome_name_input == "GRCh38" then "hg38" else genome_name_input
-
-    Map[String, File] annotations = if genome_name == "mm10" then read_map(mouse_genome_tsv) else read_map(human_genome_tsv)
+    Map[String, File] annotations = read_map(genome_tsv)
+    String genome_name_ =  select_first([genome_name, annotations["genome_name"]])
     File peak_set_ = select_first([peak_set, annotations["ccre"]])
     File idx_tar_atac_ = select_first([atac_genome_index_tar, annotations["bowtie2_idx_tar"]])
     File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
@@ -123,7 +121,7 @@ workflow share {
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
                     pkr = pkr,
-                    genome_name = genome_name,
+                    genome_name = genome_name_,
                     pipeline_modality = pipeline_modality,
                     gene_naming = gene_naming
             }
@@ -145,7 +143,7 @@ workflow share {
                     tss_bed = tss_bed_,
                     peak_set = peak_set_,
                     prefix = prefix,
-                    genome_name = genome_name,
+                    genome_name = genome_name_,
                     barcode_conversion_dict = barcode_mapping.tenx_barcode_conversion_dict,
                     pipeline_modality = pipeline_modality
             }
@@ -160,7 +158,7 @@ workflow share {
                         rna_matrix = rna.share_rna_h5,
                         atac_fragments = atac.share_atac_filter_fragments,
                         peak_file = peak_set_,
-                        genome = genome_name,
+                        genome = genome_name_,
                         prefix = prefix
                 }
             }
@@ -171,7 +169,7 @@ workflow share {
                         atac_barcode_metadata = atac.share_atac_barcode_metadata,
                         rna_barcode_metadata = rna.share_rna_barcode_metadata,
                         prefix = prefix,
-                        genome_name = genome_name
+                        genome_name = genome_name_
                 }
             }
         }

@@ -125,8 +125,6 @@ QC metrics for each experiment (`qc.json`) will be split into multiple rows (1 f
 <br>
 TODO:\
 Sambamba\
-fix seurat and archr workflows\
 add track generation \
-only one genome tsv
 
 Thank you to the **ENCODE DAC** for writing excellent documentation for their pipelines that we used as templates.
