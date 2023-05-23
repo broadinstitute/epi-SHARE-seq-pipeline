@@ -38,6 +38,12 @@ ENV PATH="/software:${PATH}"
 RUN git clone --branch ${BEDTOOLS_VERSION} --single-branch https://github.com/arq5x/bedtools2.git && \
     cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
 
+# Install sambamba 0.6.6
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && \
+    tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && \
+    mv sambamba_v0.6.6 /usr/local/bin/sambamba && \
+    rm -rf sambamba_*
+
 # Install samtools 1.9
 RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
     git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \

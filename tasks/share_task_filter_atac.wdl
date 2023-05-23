@@ -55,6 +55,8 @@ task share_atac_filter {
     Int samtools_threads_ = floor(samtools_memory_gb / 4)
     Int samtools_threads =  if samtools_threads_ == 0 then 1 else samtools_threads_
 
+    Int sambamba_threads = floor(cpus/2)
+
     # Now that we know how many threads we can use to assure 4GB of memory per thread
     # we assign any remaining memory to the threads.
     Int samtools_memory_per_thread_ = floor(samtools_memory_gb * 1024 / samtools_threads) # Computing the memory per thread for samtools in MB.
@@ -93,7 +95,7 @@ task share_atac_filter {
         set -e
 
         # I am not writing to a file anymore because Google keeps track of it automatically.
-       bash $(which monitor_script.sh) 1>&2 &
+        bash $(which monitor_script.sh) 1>&2 &
 
 
         # I need to do this because the bam and bai need to be in the same folder but WDL doesn't allow you to
@@ -108,7 +110,7 @@ task share_atac_filter {
         # The script removes the mithocondrial reads and creates two log file with bulk and barcode statistics.
         time python3 $(which filter_mito_reads.py) -o ~{non_mito_bam} -p ~{cpus} --cutoff ~{minimum_fragments_cutoff} --prefix ~{prefix} --bc_tag ~{barcode_tag_fragments} in.bam
 
-        samtools index ~{non_mito_bam}
+        sambamba index -t ~{cpus} ~{non_mito_bam}
 
         # Keep only assembled chromosomes
         chrs=$(samtools view -H ~{non_mito_bam}| \
@@ -124,17 +126,17 @@ task share_atac_filter {
         # Obtain name sorted BAM file
         # =============================
         echo '------ START: Filter bam -F 524 -f 2 and sort ------' 1>&2
-        time samtools view -h -@ ~{samtools_threads} -F 524 -f 2 -u ~{non_mito_bam} $(echo ${chrs}) | \
-        samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n /dev/stdin -o ~{tmp_filtered_bam}
+        time sambamba view -h -t ~{sambamba_threads} --num-filter 2/524 -f bam ~{non_mito_bam} $(echo ${chrs}) | \
+        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -f bam -n -o ~{tmp_filtered_bam} /dev/stdin
 
         # Assign multimappers if necessary
         if [ ~{multimappers} -le 1 ]; then
             echo '------ START: Fixmate step ------' 1>&2
-            time samtools view -h ~{tmp_filtered_bam}  | samtools fixmate -@ ~{samtools_threads} -r /dev/stdin ~{tmp_fixmate_bam}
+            time sambamba view -t ~{sambamba_threads} -h -f sam ~{tmp_filtered_bam}  | samtools fixmate -@ ~{sambamba_threads} -r /dev/stdin ~{tmp_fixmate_bam}
         else
-                    echo '------ START: Assinging multimappers ------' 1>&2
-            time samtools view -h ~{tmp_filtered_bam} | \
-            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | samtools view -u - | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
+            echo '------ START: Assinging multimappers ------' 1>&2
+            time sambamba view -t ~{sambamba_threads} -h -f sam ~{tmp_filtered_bam} | \
+            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | sambamba view -t ~{sambamba_threads} -f sam /dev/stdin | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
         fi
 
         # Cleaning up bams we don't need anymore
@@ -152,19 +154,21 @@ task share_atac_filter {
         --ASSUME_SORT_ORDER queryname \
         --REMOVE_DUPLICATES false \
         --TAG_DUPLICATE_SET_MEMBERS true \
+        --READ_NAME_REGEX NULL \
+        --MAX_OPTICAL_DUPLICATE_SET_SIZE -1 \
         --BARCODE_TAG ~{barcode_tag} 2> ~{picard_mark_duplicates_log}
 
         # Create the final bam removing the duplicates
         echo '------ START: Remove duplicates ------' 1>&2
-        time samtools view -h -F 1804 -f 2 -b -o ~{queryname_final_bam} ~{final_bam_wdup_tmp}
+        time sambamba view -t ~{cpus} -h --num-filter 2/1804 -f bam -o ~{queryname_final_bam} ~{final_bam_wdup_tmp}
 
         echo '------ START: Sort bam with duplicates by coordinates ------' 1>&2
-        time samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{final_bam_wdup_tmp} -o ~{final_bam_wdup}
-        samtools index ~{final_bam_wdup}
+        time sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M  -f bam -o ~{final_bam_wdup} ~{final_bam_wdup_tmp}
+        sambamba index -t ~{cpus} ~{final_bam_wdup}
 
         echo '------ START: Sort bam without duplicates by coordinates ------' 1>&2
-        time samtools sort -@ ~{samtools_threads} -m ~{samtools_memory_per_thread}M ~{queryname_final_bam} -o ~{final_bam}
-        time samtools index ~{final_bam}
+        time sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -f bam -o ~{final_bam} ~{queryname_final_bam}
+        sambamba index -t ~{cpus} ~{final_bam}
 
         rm ~{tmp_fixmate_bam}
 
