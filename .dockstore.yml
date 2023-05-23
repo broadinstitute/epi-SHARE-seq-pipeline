@@ -79,9 +79,7 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - dev
-             - neva
-             - kdong
+             - release
          tags:
              - /.*/
 
