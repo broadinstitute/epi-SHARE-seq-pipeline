@@ -121,26 +121,38 @@ workflow wf_atac {
         }
     }
 
+    Array[File] read1_final = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]
+    Array[File] read2_final = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]
+
     if (  "~{pipeline_modality}" != "no_align" ) {
-        call share_task_align.share_atac_align as align {
-            input:
-                fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
-                fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
-                chemistry= chemistry,
-                genome_name = genome_name,
-                genome_index_tar = genome_index_tar,
-                multimappers = align_multimappers,
-                prefix = prefix,
-                disk_factor = align_disk_factor,
-                memory_factor = align_memory_factor,
-                cpus = align_cpus,
-                docker_image = align_docker_image
+        scatter(idx in range(length(read1_final)))) {
+            call share_task_align.share_atac_align as align {
+                input:
+                    fastq_R1 = [read1_final[idx]],
+                    fastq_R2 = [read2_final[idx]],
+                    chemistry= chemistry,
+                    genome_name = genome_name,
+                    genome_index_tar = genome_index_tar,
+                    multimappers = align_multimappers,
+                    prefix = prefix,
+                    disk_factor = align_disk_factor,
+                    memory_factor = align_memory_factor,
+                    cpus = align_cpus,
+                    docker_image = align_docker_image
+            }
         }
+        
+        call share_task_merge_bams.share_task_merge_bams as merge{
+            input:
+                bams = align.atac_alignment
+        }
+
+
 
         call share_task_filter.share_atac_filter as filter {
             input:
-                bam = align.atac_alignment,
-                bam_index = align.atac_alignment_index,
+                bam = merge.merged_alignment,
+                bam_index = align.merged_alignment_index,
                 multimappers = align_multimappers,
                 shift_plus = filter_shift_plus,
                 shift_minus = filter_shift_minus,
