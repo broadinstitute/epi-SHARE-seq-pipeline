@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install python packages
-RUN pip install --no-cache-dir dnaio Levenshtein
+RUN pip install --no-cache-dir xopen Levenshtein
 
 # Create and setup new user
 ENV USER=shareseq
