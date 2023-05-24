@@ -6,15 +6,16 @@ Removes dovetail (overlap) between R1 and R2
 """
 
 import argparse
-import dnaio
 import Levenshtein
+import xopen
+from collections import deque
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Trim dovetail (overlap) between read1 and read2")
-    parser.add_argument("input_r1_fastq_file", help="Filename for untrimmed input read 1 FASTQ file")
-    parser.add_argument("input_r2_fastq_file", help="Filename for untrimmed input read 2 FASTQ file")
-    parser.add_argument("output_r1_fastq_file", help="Filename for corrected output read 1 FASTQ file")
-    parser.add_argument("output_r2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
+    parser.add_argument("input_read1_fastq_file", help="Filename for untrimmed input read 1 FASTQ file")
+    parser.add_argument("input_read2_fastq_file", help="Filename for untrimmed input read 2 FASTQ file")
+    parser.add_argument("output_read1_fastq_file", help="Filename for corrected output read 1 FASTQ file")
+    parser.add_argument("output_read2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
     parser.add_argument("trimming_stats_file", help="Filename for txt file containing trimming statistics")
     
     return parser.parse_args()
@@ -32,9 +33,9 @@ def reverse_complement(sequence):
     """
     return ''.join(COMPLEMENT[b] for b in sequence[::-1])
 
-def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
-                  output_r1_fastq_file, output_r2_fastq_file,
-                  trimming_stats_file):
+def trim_fastqs(input_read1_fastq_file, input_read2_fastq_file,
+                output_read1_fastq_file, output_read2_fastq_file,
+                trimming_stats_file):
     """
     Trim reads if overlapping, write reads to output FASTQ files.
     Produces file enumerating how many reads were processed and trimmed.
@@ -42,26 +43,78 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
     # counters
     total = trimmed = 0
     
+    read1_out_writer = xopen.xopen(output_read1_fastq_file, mode="w")
+    read2_out_writer = xopen.xopen(output_read2_fastq_file, mode="w")
+
+    buffer1 = deque()
+    buffer2 = deque()
+    buffer_counter = 0
+    
     # process FASTQs together
-    with dnaio.open(input_r1_fastq_file, input_r2_fastq_file) as reader, \
-         dnaio.open(output_r1_fastq_file, output_r2_fastq_file, mode="w") as writer:
-             
-        for read_1, read_2 in reader:
+    with xopen.xopen(input_read1_fastq_file, mode= "r", threads= 8) as read1_fh, xopen.xopen(input_read2_fastq_file, mode= "r", threads= 8) as read2_fh:
+        for readline1, readline2 in zip(read1_fh, read2_fh):
             total += 2
+            
+            name1 = readline1.strip()
+            name2 = readline2.strip()
+
+            readline1 = next(read1_fh)
+            readline2 = next(read2_fh)
+
+            sequence1 = readline1.strip()
+            sequence2 = readline2.strip()
+
+            next(read1_fh)
+            next(read2_fh)
+
+            readline1 = next(read1_fh)
+            readline2 = next(read2_fh)
+
+            quality1 = readline1.strip()
+            quality2 = readline2.strip()
+             
             # trim adapters for ATAC
-            where = trim(read_1.sequence, read_2.sequence)
+            where = trim(sequence1, sequence2)
+            
             if where > -1:
                 trimmed += 2
-                # create SequenceRecord object for read 1 with trimmed sequence
-                corrected_read_1 = dnaio.SequenceRecord(read_1.name, read_1.sequence[:where], read_1.qualities[:where])                
-                # create SequenceRecord object for read 2 with trimmed sequence
-                corrected_read_2 = dnaio.SequenceRecord(read_2.name, read_2.sequence[:where], read_2.qualities[:where])
+                
+                # add trimmed read 1 to buffer
+                trimmed_read1 = f"{name1}\n{sequence1[:where]}\n+\n{quality1[:where]}\n"
+                buffer1.append(trimmed_read1)
+                
+                # add trimmed read 2 to buffer
+                trimmed_read2 = f"{name2}\n{sequence2[:where]}\n+\n{quality2[:where]}\n"
+                buffer2.append(trimmed_read2)
+                
+                buffer_counter += 1
+                
             else:
-                # no overlap, remains the same
-                corrected_read_1 = read_1
-                corrected_read_2 = read_2
-            # write to corrected FASTQ files
-            writer.write(corrected_read_1, corrected_read_2)
+                # add original read 1 to buffer
+                read1 = f"{name1}\n{sequence1}\n+\n{quality1}\n"
+                buffer1.append(read1)
+                
+                # add original read 1 to buffer
+                read2 = f"{name2}\n{sequence2}\n+\n{quality2}\n"
+                buffer2.append(read2)
+                
+                buffer_counter += 1
+                
+            # write reads to trimmed FASTQ files 
+            if buffer_counter == 10000000:
+                read1_out_writer.write("".join(buffer1))
+                buffer1.clear()
+                read2_out_writer.write("".join(buffer2))
+                buffer2.clear()
+                buffer_counter = 0
+    
+    # write out remaining reads
+    if buffer_counter > 0:
+        read1_out_writer.write("".join(buffer1))
+        buffer1.clear()
+        read2_out_writer.write("".join(buffer2))
+        buffer2.clear()
+        buffer_counter = 0
     
     # write trimming statistics output file
     with open(trimming_stats_file, "w") as f:
@@ -69,7 +122,7 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
         f.write("\t".join(fields) + "\n")
         f.write("%i\t%i\t%i\t%0.1f" % (total, total-trimmed, trimmed, trimmed/total*100))
 
-def trim(seq1,seq2):
+def trim(seq1, seq2):
     """
     Find overlap between read1 and read2 and return location
     """
@@ -84,7 +137,7 @@ def trim(seq1,seq2):
         idx = -1
     return idx
 
-def fuzz_align(s_seq,l_seq):
+def fuzz_align(s_seq, l_seq):
     """
     Align allowing Levenshtein distance of 1
     This iteration should go from the right end of l_seq
@@ -97,19 +150,17 @@ def fuzz_align(s_seq,l_seq):
             return i
     return -1
 
-
-
 def main():
     args = parse_arguments()
-    input_r1_fastq_file = getattr(args, "input_r1_fastq_file")
-    input_r2_fastq_file = getattr(args, "input_r2_fastq_file")
-    output_r1_fastq_file = getattr(args, "output_r1_fastq_file")
-    output_r2_fastq_file = getattr(args, "output_r2_fastq_file")
+    input_read1_fastq_file = getattr(args, "input_read1_fastq_file")
+    input_read2_fastq_file = getattr(args, "input_read2_fastq_file")
+    output_read1_fastq_file = getattr(args, "output_read1_fastq_file")
+    output_read2_fastq_file = getattr(args, "output_read2_fastq_file")
     trimming_stats_file = getattr(args, "trimming_stats_file")
     
-    process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
-                   output_r1_fastq_file, output_r2_fastq_file,
-                   trimming_stats_file)
+    trim_fastqs(input_read1_fastq_file, input_read2_fastq_file,
+                output_read1_fastq_file, output_read2_fastq_file,
+                trimming_stats_file)
 
 
 if __name__ == "__main__":

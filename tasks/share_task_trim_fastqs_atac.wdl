@@ -46,17 +46,17 @@ task share_trim_fastqs_atac {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        # Use trim_fastq script for SHARE trimming
+        # Use trim_fastq script for SHARE ATAC trimming
         if [ '~{chemistry}' == 'shareseq' ]; then
             python3 $(which trim_fastq.py) ~{fastq_R1} ~{fastq_R2} ~{fastq_R1_trimmed} ~{fastq_R2_trimmed} ~{trimming_stats}
 
-        # Use fastp for 10X multiome trimming
-        elif [ '~{chemistry}' == '10x_multiome' ]; then
+        # Use fastp for 10X ATAC trimming
+        else
             fastp -i ~{fastq_R1} -I ~{fastq_R2} -o ~{fastq_R1_trimmed} -O ~{fastq_R2_trimmed} -h ~{trimming_log_html} -j ~{trimming_log_json} -G -Q -L -w ~{cpus} 2> ~{trimming_stats}
       
         fi
   
-        gzip *.fastq
+        pigz -p ~{cpus} *.fastq
     >>>
 
     output {
