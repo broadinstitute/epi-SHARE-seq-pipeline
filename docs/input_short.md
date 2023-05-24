@@ -20,23 +20,24 @@ Mandatory parameters.
         * `full`: the **default**. Will run the entire pipeline.
         * `count_only`: Will stop after generating the `fragment` file and/or the `barcode x gene` matrix.
         * `no-align`: Will perform pre-processing of the raw FASTQs and stop. 
+    > **IMPORTANT**: Because a bug in ArchR the `full` mode will not work with `mm39`
 
 2) Chemistry
     * `share.chemistry`:`shareseq` for SHARE-seq, `10x_multiome` for 10x multiome and `10x_v2` for not multiomic 10x data.
 
 
-3) Reference genome name
-    * `share.genome_name_input`: Define the organism to use. The possible options are `[hg38, mm10, mm39]`. 
-    * This input is used to populate the `share.mouse_genome_tsv` or the `share.human_genome_tsv` input pointing to the genome annotations necessary to run the pipeline. 
-    * The **bolded** options in the table below represent the defaults for the two organisms.
-    * If `share.mouse_genome_tsv` or `share.human_genome_tsv` is defined by the user, this value will override the defaults.
-    
+3) Reference genome tsv
+    * `share.genome_tsv`: Define the TSV file containing the genome annotations necessary to run the pipeline. 
+    * The **bolded** options in the table below represent the defaults for the two organisms and the different GENCODE and assembly versions.
+
         Genome|URL
         -|-
         **hg38_gencode_v43**|`gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human_v43/Homo_sapiens_genome_files_hg38_v43.tsv`
-        hg38_gencode_v42|`gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human_v43/Homo_sapiens_genome_files_hg38_v43.tsv`
+        hg38_gencode_v42|`gs://broad-buenrostro-pipeline-genome-annotations/IGVF_human/GRCh38_genome_files_hg38.tsv`
         **mm10**|`gs://broad-buenrostro-pipeline-genome-annotations/mm10/mm10_genome_files_STARsolo.tsv`
         mm39_IGVF_gencode_v32|`gs://broad-buenrostro-pipeline-genome-annotations/IGVF_mouse_v32/Mus_musculus_genome_files_mm39_v32.tsv`
+
+        > **IMPORTANT**: Because a bug in ArchR the `full` mode will not work with `mm39` and `mm39_IGVF_gencode_v32`
 
     * To build a new TSV file from use your own FASTA (`.fa` and `.2bit`), see [here](https://github.com/ENCODE-DCC/chip-seq-pipeline2/blob/master/docs/build_genome_database.md).
     * You can also define genome-specific parameters (defined in a genome TSV file) in an input JSON file. Parameters defined in an input JSON file will override those defined in a genome TSV file. For example, you can simply replace a blacklist file while keeping all other parameters in a genome TSV file for `hg38`.

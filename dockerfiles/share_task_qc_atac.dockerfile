@@ -44,6 +44,12 @@ RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/sa
     cd samtools && make && make install && cd ../ && rm -rf samtools* && \
     cd htslib && autoreconf -i && make && make install && cd ../ && rm -rf htslib*
 
+# Install sambamba 0.6.6
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && \
+    tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && \
+    mv sambamba_v0.6.6 /usr/local/bin/sambamba && \
+    rm -rf sambamba_*
+
 # Install Picard 2.20.7
 RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
 
