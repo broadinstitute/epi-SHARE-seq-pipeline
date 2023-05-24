@@ -19,7 +19,7 @@ Mandatory parameters.
     * `share.pipeline_modality`:
         * `full`: the **default**. Will run the entire pipeline.
         * `count_only`: Will stop after generating the `fragment` file and/or the `barcode x gene` matrix.
-        * `no-align`: Will perform pre-processing of the raw FASTQs and stop. 
+        * `no_align`: Will perform pre-processing of the raw FASTQs and stop. 
     > **IMPORTANT**: Because a bug in ArchR the `full` mode will not work with `mm39`
 
 2) Chemistry

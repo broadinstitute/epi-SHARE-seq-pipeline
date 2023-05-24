@@ -38,9 +38,9 @@ workflow wf_atac {
         File whitelist
         String? pkr
         # Runtime parameters
-        Int? correct_cpus = 1
+        Int? correct_cpus = 16
         Float? correct_disk_factor = 8.0
-        Float? correct_memory_factor = 0.15
+        Float? correct_memory_factor = 0.08
         String? correct_docker_image
 
         # Align-specific inputs
