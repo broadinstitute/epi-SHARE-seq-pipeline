@@ -178,7 +178,7 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
             else:
                 cellbarcode_mismatch += 1
 
-    if len(buffer1) > 0:
+    if buffer_counter > 0:
         read1_out_writer.write("".join(buffer1))
         buffer1.clear()
         read2_out_writer.write("".join(buffer2))

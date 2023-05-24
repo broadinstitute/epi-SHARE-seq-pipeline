@@ -4,6 +4,7 @@ version 1.0
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
+import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
 import "../tasks/share_task_filter_atac.wdl" as share_task_filter
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
@@ -53,6 +54,13 @@ workflow wf_atac {
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
         String? align_docker_image
+
+        # Merge-specific inputs
+        # Runtime parameters
+        Int? merge_cpus
+        Float? merge_disk_factor = 8.0
+        Float? merge_memory_factor = 0.15
+        String? merge_docker_image
 
         # Filter-specific inputs
         Int? filter_minimum_fragments_cutoff
@@ -142,17 +150,22 @@ workflow wf_atac {
             }
         }
         
-        call share_task_merge_bams.share_task_merge_bams as merge{
+        call share_task_merge_bams.share_atac_merge_bams as merge{
             input:
-                bams = align.atac_alignment
+                bams = align.atac_alignment,
+                logs = align.atac_alignment_log
+                prefix = prefix,
+                cpus = merge_cpus,
+                memory_factor = merge_memory_factor,
+                disk_factor = align_disk_factor,
+                docker_image = merge_docker_image
         }
-
 
 
         call share_task_filter.share_atac_filter as filter {
             input:
                 bam = merge.merged_alignment,
-                bam_index = align.merged_alignment_index,
+                bam_index = merge.merged_alignment_index,
                 multimappers = align_multimappers,
                 shift_plus = filter_shift_plus,
                 shift_minus = filter_shift_minus,
@@ -171,8 +184,8 @@ workflow wf_atac {
 
         call share_task_qc_atac.qc_atac as qc_atac{
             input:
-                raw_bam = align.atac_alignment,
-                raw_bam_index = align.atac_alignment_index,
+                raw_bam = merge.merged_alignment,
+                raw_bam_index = merge.merged_alignment_index,
                 filtered_bam = filter.atac_filter_alignment_dedup,
                 filtered_bam_index = filter.atac_filter_alignment_dedup_index,
                 queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
@@ -198,7 +211,7 @@ workflow wf_atac {
 
         call share_task_log_atac.log_atac as log_atac {
         input:
-            alignment_log = align.atac_alignment_log,
+            alignment_log = merge.atac_merged_alignment_log,
             dups_log = qc_atac.atac_qc_duplicate_stats,
             pbc_log = qc_atac.atac_qc_pbc_stats
         }
@@ -229,10 +242,9 @@ workflow wf_atac {
         Array[File]? atac_read2_processed = if defined(trim.fastq_R1_trimmed) then trim.fastq_R2_trimmed else correct.corrected_fastq_R2
 
         # Align
-        File? share_atac_alignment_raw = align.atac_alignment
-        File? share_atac_alignment_raw_index = align.atac_alignment_index
-        File? share_atac_alignment_log = align.atac_alignment_log
-        File? share_atac_alignment_monitor_log = align.atac_alignment_monitor_log
+        File? share_atac_alignment_raw = merge.merged_alignment
+        File? share_atac_alignment_raw_index = merge.merged_alignment_index
+        File? share_atac_alignment_log = merge.atac_merged_alignment_log
 
         # Filter
         File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
