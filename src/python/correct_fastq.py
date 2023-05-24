@@ -148,7 +148,7 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                     # create SequenceRecord for read 2; use corrected header, read has format R1R2R3UMI
                     corrected_read_2_sequence = r1 + r2 + r3 + sequence2[:10]
                     corrected_read_2_quality = q1 + q2 + q3 + quality2[:10]
-                    corrected_read_2 = f"{corrected_header}\n{corrected_read_2}\n+\n{corrected_read_2}\n"
+                    corrected_read_2 = f"{corrected_header}\n{corrected_read_2_sequence}\n+\n{corrected_read_2_quality}\n"
                     buffer2.append(corrected_read_2)
                     buffer_counter += 1
                     
