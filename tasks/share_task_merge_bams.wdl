@@ -14,7 +14,9 @@ task share_atac_merge_bams {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Array[File] bams
         Array[File] logs
+        String genome_name
         String prefix = "sample-share"
+        Int? multimappers # = 5
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
@@ -65,7 +67,7 @@ task share_atac_merge_bams {
 
         sambamba merge -t ~{cpus} ~{unsorted_bam} ~{sep=" " bams}
 
-        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_threads} -o ~{merged_bam} unsorted
+        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread} -o ~{merged_bam} unsorted
         
         sambamba index -t ~{cpus} ~{merged_bam}
 
@@ -74,8 +76,8 @@ task share_atac_merge_bams {
     >>>
 
     output {
-        File atac_merged_bam = merged.bam
-        File atac_merged_index = merged_bai
+        File atac_merged_alignment = merged_bam
+        File atac_merged_alignment_index = merged_bai
         File atac_merged_alignment_log = alignment_log
         File atac_merge_monitor_log = monitor_log
     }

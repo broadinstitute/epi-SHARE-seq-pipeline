@@ -129,15 +129,12 @@ workflow wf_atac {
         }
     }
 
-    Array[File] read1_final = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]
-    Array[File] read2_final = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]
-
     if (  "~{pipeline_modality}" != "no_align" ) {
-        scatter(idx in range(length(read1_final)))) {
+        scatter(read_pair in zip(select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]), select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]))) {
             call share_task_align.share_atac_align as align {
                 input:
-                    fastq_R1 = [read1_final[idx]],
-                    fastq_R2 = [read2_final[idx]],
+                    fastq_R1 = [read_pair.left],
+                    fastq_R2 = [read_pair.right],
                     chemistry= chemistry,
                     genome_name = genome_name,
                     genome_index_tar = genome_index_tar,
@@ -153,7 +150,9 @@ workflow wf_atac {
         call share_task_merge_bams.share_atac_merge_bams as merge{
             input:
                 bams = align.atac_alignment,
-                logs = align.atac_alignment_log
+                logs = align.atac_alignment_log,
+                multimappers = align_multimappers,
+                genome_name = genome_name,
                 prefix = prefix,
                 cpus = merge_cpus,
                 memory_factor = merge_memory_factor,
@@ -164,8 +163,8 @@ workflow wf_atac {
 
         call share_task_filter.share_atac_filter as filter {
             input:
-                bam = merge.merged_alignment,
-                bam_index = merge.merged_alignment_index,
+                bam = merge.atac_merged_alignment,
+                bam_index = merge.atac_merged_alignment_index,
                 multimappers = align_multimappers,
                 shift_plus = filter_shift_plus,
                 shift_minus = filter_shift_minus,
@@ -184,8 +183,8 @@ workflow wf_atac {
 
         call share_task_qc_atac.qc_atac as qc_atac{
             input:
-                raw_bam = merge.merged_alignment,
-                raw_bam_index = merge.merged_alignment_index,
+                raw_bam = merge.atac_merged_alignment,
+                raw_bam_index = merge.atac_merged_alignment_index,
                 filtered_bam = filter.atac_filter_alignment_dedup,
                 filtered_bam_index = filter.atac_filter_alignment_dedup_index,
                 queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
@@ -242,8 +241,8 @@ workflow wf_atac {
         Array[File]? atac_read2_processed = if defined(trim.fastq_R1_trimmed) then trim.fastq_R2_trimmed else correct.corrected_fastq_R2
 
         # Align
-        File? share_atac_alignment_raw = merge.merged_alignment
-        File? share_atac_alignment_raw_index = merge.merged_alignment_index
+        File? share_atac_alignment_raw = merge.atac_merged_alignment
+        File? share_atac_alignment_raw_index = merge.atac_merged_alignment_index
         File? share_atac_alignment_log = merge.atac_merged_alignment_log
 
         # Filter
