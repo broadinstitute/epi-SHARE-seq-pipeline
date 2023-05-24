@@ -20,18 +20,9 @@ def parse_arguments():
     
     return parser.parse_args()
 
-# DNA base complements
-COMPLEMENT = {'A': 'T',
-              'T': 'A',
-              'C': 'G',
-              'G': 'C',
-              'N': 'N'}
-
-def reverse_complement(sequence):
-    """
-    Return reverse complement of DNA sequence.
-    """
-    return ''.join(COMPLEMENT[b] for b in sequence[::-1])
+REV_COMP = str.maketrans("ATGC", "TACG")
+def reverse_complement(seq):
+    return str.translate(seq, REV_COMP)[::-1]
 
 def trim_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                 output_read1_fastq_file, output_read2_fastq_file,
@@ -87,8 +78,6 @@ def trim_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                 trimmed_read2 = f"{name2}\n{sequence2[:where]}\n+\n{quality2[:where]}\n"
                 buffer2.append(trimmed_read2)
                 
-                buffer_counter += 1
-                
             else:
                 # add original read 1 to buffer
                 read1 = f"{name1}\n{sequence1}\n+\n{quality1}\n"
@@ -98,10 +87,10 @@ def trim_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                 read2 = f"{name2}\n{sequence2}\n+\n{quality2}\n"
                 buffer2.append(read2)
                 
-                buffer_counter += 1
+            buffer_counter += 1    
                 
             # write reads to trimmed FASTQ files 
-            if buffer_counter == 10000000:
+            if buffer_counter == 7000000:
                 read1_out_writer.write("".join(buffer1))
                 buffer1.clear()
                 read2_out_writer.write("".join(buffer2))
@@ -127,9 +116,12 @@ def trim(seq1, seq2):
     Find overlap between read1 and read2 and return location
     """
     query = reverse_complement(seq2[0:20])
+
     idx = seq1.rfind(query) # look for perfect match
+
     if idx == -1:
         idx = fuzz_align(query,seq1)
+    
     # found it, return everything through match
     if idx > -1:
         idx = idx+20
@@ -145,7 +137,7 @@ def fuzz_align(s_seq, l_seq):
     """
     for i, base in enumerate(l_seq):  # loop through equal size windows
         l_subset = l_seq[i:i+len(s_seq)]
-        dist = Levenshtein.distance(l_subset, s_seq)
+        dist = Levenshtein.distance(l_subset, s_seq, score_cutoff= 1)
         if dist <= 1:  # find first then break
             return i
     return -1
