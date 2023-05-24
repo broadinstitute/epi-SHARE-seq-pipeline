@@ -127,7 +127,7 @@ task share_atac_filter {
         # =============================
         echo '------ START: Filter bam -F 524 -f 2 and sort ------' 1>&2
         time sambamba view -h -t ~{sambamba_threads} --num-filter 2/524 -f bam ~{non_mito_bam} $(echo ${chrs}) | \
-        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -f bam -n -o ~{tmp_filtered_bam} /dev/stdin
+        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n -o ~{tmp_filtered_bam} /dev/stdin
 
         # Assign multimappers if necessary
         if [ ~{multimappers} -le 1 ]; then
@@ -163,11 +163,11 @@ task share_atac_filter {
         time sambamba view -t ~{cpus} -h --num-filter 2/1804 -f bam -o ~{queryname_final_bam} ~{final_bam_wdup_tmp}
 
         echo '------ START: Sort bam with duplicates by coordinates ------' 1>&2
-        time sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M  -f bam -o ~{final_bam_wdup} ~{final_bam_wdup_tmp}
+        time sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M  -o ~{final_bam_wdup} ~{final_bam_wdup_tmp}
         sambamba index -t ~{cpus} ~{final_bam_wdup}
 
         echo '------ START: Sort bam without duplicates by coordinates ------' 1>&2
-        time sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -f bam -o ~{final_bam} ~{queryname_final_bam}
+        time sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -o ~{final_bam} ~{queryname_final_bam}
         sambamba index -t ~{cpus} ~{final_bam}
 
         rm ~{tmp_fixmate_bam}
