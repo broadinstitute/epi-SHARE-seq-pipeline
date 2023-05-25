@@ -5,7 +5,8 @@
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
 
-ENV SAMTOOLS_VERSION 1.9
+ENV SAMBAMBA_VERSION 0.6.6
+ENV PICARD_VERSION 2.27.5
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -33,11 +34,13 @@ WORKDIR /software
 ENV PATH="/software:${PATH}"
 
 # Install sambamba 0.6.6
-RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && \
-    tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && \
-    mv sambamba_v0.6.6 /usr/local/bin/sambamba && \
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v${SAMBAMBA_VERSION}/sambamba_v0.6.6_linux.tar.bz2 && \
+    tar -xvjf sambamba_v${SAMBAMBA_VERSION}_linux.tar.bz2 && \
+    mv sambamba_v${SAMBAMBA_VERSION} /usr/local/bin/sambamba && \
     rm -rf sambamba_*
 
+# Install Picard 2.20.7
+RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
 
@@ -47,6 +50,10 @@ LABEL software.version="0.0.1"
 LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
 LABEL software.task="merge"
+
+RUN apt-get update && apt-get install -y \
+    openjdk-11-jre &&\
+    rm -rf /var/lib/apt/lists/*
 
 # Create and setup new user
 ENV USER=shareseq
