@@ -7,7 +7,7 @@ workflows:
          branches:
              - main
              - release
-             - sambamba
+             - bowtie2-sambamba
          tags:
              - /.*/
 

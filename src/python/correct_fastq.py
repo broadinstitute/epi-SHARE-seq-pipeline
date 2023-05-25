@@ -142,6 +142,7 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                 if sample_type == "RNA":
                     # add corrected barcodes, PKR, and UMI to header; remove any information after a space
                     corrected_header = name1.split(" ")[0] + "_" + ",".join(filter(None, [r1, r2, r3, pkr])) + "_" + sequence2[:10]                
+
                     # add corrected read 1 to buffer; use corrected header
                     corrected_read1 = f"{corrected_header}\n{sequence1}\n+\n{quality1}\n"
                     buffer1.append(corrected_read1)

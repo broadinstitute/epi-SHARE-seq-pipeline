@@ -4,6 +4,7 @@ version 1.0
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
+import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
 import "../tasks/share_task_filter_atac.wdl" as share_task_filter
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
@@ -53,6 +54,13 @@ workflow wf_atac {
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
         String? align_docker_image
+
+        # Merge-specific inputs
+        # Runtime parameters
+        Int? merge_cpus
+        Float? merge_disk_factor = 8.0
+        Float? merge_memory_factor = 0.15
+        String? merge_docker_image
 
         # Filter-specific inputs
         Int? filter_minimum_fragments_cutoff
@@ -122,25 +130,41 @@ workflow wf_atac {
     }
 
     if (  "~{pipeline_modality}" != "no_align" ) {
-        call share_task_align.share_atac_align as align {
-            input:
-                fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
-                fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
-                chemistry= chemistry,
-                genome_name = genome_name,
-                genome_index_tar = genome_index_tar,
-                multimappers = align_multimappers,
-                prefix = prefix,
-                disk_factor = align_disk_factor,
-                memory_factor = align_memory_factor,
-                cpus = align_cpus,
-                docker_image = align_docker_image
+        scatter(read_pair in zip(select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]), select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]))) {
+            call share_task_align.share_atac_align as align {
+                input:
+                    fastq_R1 = [read_pair.left],
+                    fastq_R2 = [read_pair.right],
+                    chemistry= chemistry,
+                    genome_name = genome_name,
+                    genome_index_tar = genome_index_tar,
+                    multimappers = align_multimappers,
+                    prefix = prefix,
+                    disk_factor = align_disk_factor,
+                    memory_factor = align_memory_factor,
+                    cpus = align_cpus,
+                    docker_image = align_docker_image
+            }
         }
+        
+        call share_task_merge_bams.share_atac_merge_bams as merge{
+            input:
+                bams = align.atac_alignment,
+                logs = align.atac_alignment_log,
+                multimappers = align_multimappers,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = merge_cpus,
+                memory_factor = merge_memory_factor,
+                disk_factor = align_disk_factor,
+                docker_image = merge_docker_image
+        }
+
 
         call share_task_filter.share_atac_filter as filter {
             input:
-                bam = align.atac_alignment,
-                bam_index = align.atac_alignment_index,
+                bam = merge.atac_merged_alignment,
+                bam_index = merge.atac_merged_alignment_index,
                 multimappers = align_multimappers,
                 shift_plus = filter_shift_plus,
                 shift_minus = filter_shift_minus,
@@ -159,8 +183,8 @@ workflow wf_atac {
 
         call share_task_qc_atac.qc_atac as qc_atac{
             input:
-                raw_bam = align.atac_alignment,
-                raw_bam_index = align.atac_alignment_index,
+                raw_bam = merge.atac_merged_alignment,
+                raw_bam_index = merge.atac_merged_alignment_index,
                 filtered_bam = filter.atac_filter_alignment_dedup,
                 filtered_bam_index = filter.atac_filter_alignment_dedup_index,
                 queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
@@ -186,7 +210,7 @@ workflow wf_atac {
 
         call share_task_log_atac.log_atac as log_atac {
         input:
-            alignment_log = align.atac_alignment_log,
+            alignment_log = merge.atac_merged_alignment_log,
             dups_log = qc_atac.atac_qc_duplicate_stats,
             pbc_log = qc_atac.atac_qc_pbc_stats
         }
@@ -217,10 +241,9 @@ workflow wf_atac {
         Array[File]? atac_read2_processed = if defined(trim.fastq_R1_trimmed) then trim.fastq_R2_trimmed else correct.corrected_fastq_R2
 
         # Align
-        File? share_atac_alignment_raw = align.atac_alignment
-        File? share_atac_alignment_raw_index = align.atac_alignment_index
-        File? share_atac_alignment_log = align.atac_alignment_log
-        File? share_atac_alignment_monitor_log = align.atac_alignment_monitor_log
+        File? share_atac_alignment_raw = merge.atac_merged_alignment
+        File? share_atac_alignment_raw_index = merge.atac_merged_alignment_index
+        File? share_atac_alignment_log = merge.atac_merged_alignment_log
 
         # Filter
         File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
