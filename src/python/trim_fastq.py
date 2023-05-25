@@ -116,12 +116,10 @@ def trim(seq1, seq2):
     Find overlap between read1 and read2 and return location
     """
     query = reverse_complement(seq2[0:20])
-
     idx = seq1.rfind(query) # look for perfect match
-
     if idx == -1:
         idx = fuzz_align(query,seq1)
-    
+
     # found it, return everything through match
     if idx > -1:
         idx = idx+20
