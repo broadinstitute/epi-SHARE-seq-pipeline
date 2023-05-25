@@ -80,11 +80,11 @@ task share_atac_merge_bams {
 
         # Trying picard
         
-        java -Dsamjdk.compression_level=${compression_level} -Xms${command_mem_mb}m -Xmx${command_mem_mb}m -jar /usr/local/bin/picard.jar \
+        java -Dsamjdk.compression_level=~{compression_level} -Xms~{command_mem_mb}m -Xmx~{command_mem_mb}m -jar /usr/local/bin/picard.jar \
         MergeSamFiles \
         USE_THREADING=true \
         SORT_ORDER="coordinate" \
-        INPUT=${sep=' INPUT=' bams} \
+        INPUT=~{sep=' INPUT=' bams} \
         OUTPUT=~{merged_bam} \
 
 
