@@ -8,6 +8,7 @@ workflows:
              - main
              - release
              - bowtie2-sambamba
+             - sambamba
          tags:
              - /.*/
 
