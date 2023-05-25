@@ -85,8 +85,9 @@ task share_atac_merge_bams {
         USE_THREADING=true \
         SORT_ORDER="coordinate" \
         INPUT=~{sep=' INPUT=' bams} \
-        OUTPUT=~{merged_bam} \
+        OUTPUT=~{merged_bam}
 
+        sambamba index -t ~{cpus} ~{merged_bam}
 
         awk '{ sum[FNR%15]+=$1 } END { for(idx in sum) if (idx>0) {print sum[idx]}}' ~{sep=" " logs} > ~{alignment_log}
 
