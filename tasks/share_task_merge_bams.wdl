@@ -63,11 +63,11 @@ task share_atac_merge_bams {
     command <<<
         set -e
 
-        bash $(which monitor_script.sh) > ~{monitor_log} 2>&1 &
+        bash $(which monitor_script.sh)  2>&1 &
 
         sambamba merge -t ~{cpus} ~{unsorted_bam} ~{sep=" " bams}
 
-        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread} -o ~{merged_bam} unsorted
+        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -o ~{merged_bam} unsorted
         
         sambamba index -t ~{cpus} ~{merged_bam}
 
