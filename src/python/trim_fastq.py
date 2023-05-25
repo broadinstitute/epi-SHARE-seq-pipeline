@@ -14,8 +14,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Trim dovetail (overlap) between read1 and read2")
     parser.add_argument("input_read1_fastq_file", help="Filename for untrimmed input read 1 FASTQ file")
     parser.add_argument("input_read2_fastq_file", help="Filename for untrimmed input read 2 FASTQ file")
-    parser.add_argument("output_read1_fastq_file", help="Filename for trimmed output read 1 FASTQ file")
-    parser.add_argument("output_read2_fastq_file", help="Filename for trimmed output read 2 FASTQ file")
+    parser.add_argument("output_read1_fastq_file", help="Filename for corrected output read 1 FASTQ file")
+    parser.add_argument("output_read2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
     parser.add_argument("trimming_stats_file", help="Filename for txt file containing trimming statistics")
     
     return parser.parse_args()
