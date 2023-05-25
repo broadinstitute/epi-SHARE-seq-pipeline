@@ -49,6 +49,13 @@ task share_atac_merge_bams {
     Int samtools_memory_per_thread_ = floor(samtools_memory_gb * 1024 / samtools_threads) # Computing the memory per thread for samtools in MB.
     Int samtools_memory_per_thread = if samtools_memory_per_thread_ < 768 then 768 else samtools_memory_per_thread_
 
+    # Tim parameters
+    Int machine_mem_mb = 18150
+    Int cpu = 1
+    Int compression_level = 5
+    # default to 500GiB of space
+    Int disk = 500
+    Int command_mem_mb = machine_mem_mb - 500
 
     # Define tmp file name
     String unsorted_bam = "${prefix}.atac.merge.${genome_name}.bam"
@@ -65,11 +72,21 @@ task share_atac_merge_bams {
 
         bash $(which monitor_script.sh) 2>&1 &
 
-        sambamba merge -t ~{cpus} ~{unsorted_bam} ~{sep=" " bams}
+        #sambamba merge -t ~{cpus} ~{unsorted_bam} ~{sep=" " bams}
 
-        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -o ~{merged_bam} ~{unsorted_bam}
+        #sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -o ~{merged_bam} ~{unsorted_bam}
         
-        sambamba index -t ~{cpus} ~{merged_bam}
+        #sambamba index -t ~{cpus} ~{merged_bam}
+
+        # Trying picard
+        
+        java -Dsamjdk.compression_level=${compression_level} -Xms${command_mem_mb}m -Xmx${command_mem_mb}m -jar /usr/picard/picard.jar \
+        MergeSamFiles \
+        USE_THREADING=true \
+        SORT_ORDER="coordinate" \
+        INPUT=${sep=' INPUT=' bams} \
+        OUTPUT=~{merged_bam} \
+
 
         awk '{ sum[FNR%15]+=$1 } END { for(idx in sum) if (idx>0) {print sum[idx]}}' ~{sep=" " logs} > ~{alignment_log}
 
@@ -79,15 +96,17 @@ task share_atac_merge_bams {
         File atac_merged_alignment = merged_bam
         File atac_merged_alignment_index = merged_bai
         File atac_merged_alignment_log = alignment_log
-        File atac_merge_monitor_log = monitor_log
     }
 
     runtime {
-        cpu: cpus
+        cpu: cpu
         docker: "${docker_image}"
-        disks: "local-disk ${disk_gb} ${disk_type}"
+        disks: "local-disk ${disk} HDD"
+        disk: disk + " GB" # TES
+        #disks: "local-disk ${disk_gb} ${disk_type}"
         maxRetries:1
-        memory: "${mem_gb} GB"
+        memory: "${machine_mem_mb} MiB"
+        #memory: "${mem_gb} GB"
         memory_retry_multiplier: 2
     }
 
