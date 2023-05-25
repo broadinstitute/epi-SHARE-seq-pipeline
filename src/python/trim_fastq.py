@@ -90,7 +90,7 @@ def trim_fastqs(input_read1_fastq_file, input_read2_fastq_file,
             buffer_counter += 1    
                 
             # write reads to trimmed FASTQ files 
-            if buffer_counter == 7000000:
+            if buffer_counter == 10000000:
                 read1_out_writer.write("".join(buffer1))
                 buffer1.clear()
                 read2_out_writer.write("".join(buffer2))
