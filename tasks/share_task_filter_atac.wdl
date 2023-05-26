@@ -40,7 +40,7 @@ task share_atac_filter {
     Float input_file_size_gb = size(bam, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 6.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 32.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
@@ -49,7 +49,7 @@ task share_atac_filter {
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     # Determining memory for samtools.
-    Float samtools_memory_gb = 0.8 * mem_gb # Samtools has overheads so reducing the memory to 80% of the total.
+    Float samtools_memory_gb = 0.9 * mem_gb # Samtools has overheads so reducing the memory to 80% of the total.
 
     # Number of threads to beable to use 4GB of memory per thread seems to be the fastest way
     Int samtools_threads_ = floor(samtools_memory_gb / 4)
@@ -127,16 +127,16 @@ task share_atac_filter {
         # =============================
         echo '------ START: Filter bam -F 524 -f 2 and sort ------' 1>&2
         time sambamba view -h -t ~{sambamba_threads} --num-filter 2/524 -f bam ~{non_mito_bam} $(echo ${chrs}) | \
-        sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -n -o ~{tmp_filtered_bam} /dev/stdin
+        sambamba sort -t ~{cpus} -m ~{samtools_memory_gb}G -n -o ~{tmp_filtered_bam} /dev/stdin
 
         # Assign multimappers if necessary
         if [ ~{multimappers} -le 1 ]; then
             echo '------ START: Fixmate step ------' 1>&2
-            time sambamba view -t ~{sambamba_threads} -h -f sam ~{tmp_filtered_bam}  | samtools fixmate -@ ~{sambamba_threads} -r /dev/stdin ~{tmp_fixmate_bam}
+            time sambamba view -t ~{cpus} -h -f sam ~{tmp_filtered_bam}  | samtools fixmate -@ ~{cpus} -r /dev/stdin ~{tmp_fixmate_bam}
         else
             echo '------ START: Assinging multimappers ------' 1>&2
-            time sambamba view -t ~{sambamba_threads} -h -f sam ~{tmp_filtered_bam} | \
-            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | sambamba view -t ~{sambamba_threads} -f sam /dev/stdin | samtools fixmate -r /dev/stdin ~{tmp_fixmate_bam}
+            time sambamba view -t ~{cpus} -h -f sam ~{tmp_filtered_bam} | \
+            python3 $(which assign_multimappers.py) -k ~{multimappers} --paired-end | sambamba view -t ~{cpus} -f sam /dev/stdin | samtools fixmate -@ ~{cpus} -r /dev/stdin ~{tmp_fixmate_bam}
         fi
 
         # Cleaning up bams we don't need anymore
@@ -147,7 +147,7 @@ task share_atac_filter {
         # Mark duplicates
         # =============
         echo '------ START: Mark Duplicates ------' 1>&2
-        time java -Xmx~{picard_java_memory}G -jar $(which picard.jar) MarkDuplicates \
+        time java -Dsamjdk.compression_level=5 -Xms~{picard_java_memory}G -Xmx~{picard_java_memory}G -jar $(which picard.jar) MarkDuplicates \
         --INPUT ~{tmp_fixmate_bam} --OUTPUT ~{final_bam_wdup_tmp} \
         --METRICS_FILE ~{picard_mark_duplicates_metrics} \
         --VALIDATION_STRINGENCY LENIENT \
@@ -163,11 +163,11 @@ task share_atac_filter {
         time sambamba view -t ~{cpus} -h --num-filter 2/1804 -f bam -o ~{queryname_final_bam} ~{final_bam_wdup_tmp}
 
         echo '------ START: Sort bam with duplicates by coordinates ------' 1>&2
-        time sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M  -o ~{final_bam_wdup} ~{final_bam_wdup_tmp}
+        time sambamba sort -t ~{cpus} -m ~{samtools_memory_gb}G  -o ~{final_bam_wdup} ~{final_bam_wdup_tmp}
         sambamba index -t ~{cpus} ~{final_bam_wdup}
 
         echo '------ START: Sort bam without duplicates by coordinates ------' 1>&2
-        time sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -o ~{final_bam} ~{queryname_final_bam}
+        time sambamba sort -t ~{cpus} -m ~{samtools_memory_gb}G -o ~{final_bam} ~{queryname_final_bam}
         sambamba index -t ~{cpus} ~{final_bam}
 
         rm ~{tmp_fixmate_bam}
