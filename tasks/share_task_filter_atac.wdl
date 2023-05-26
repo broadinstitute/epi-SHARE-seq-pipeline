@@ -49,7 +49,7 @@ task share_atac_filter {
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     # Determining memory for samtools.
-    Float samtools_memory_gb = floor(0.9 * mem_gb) # Samtools has overheads so reducing the memory to 80% of the total.
+    Int samtools_memory_gb = floor(0.9 * mem_gb) # Samtools has overheads so reducing the memory to 80% of the total.
 
     # Number of threads to beable to use 4GB of memory per thread seems to be the fastest way
     Int samtools_threads_ = floor(samtools_memory_gb / 4)
