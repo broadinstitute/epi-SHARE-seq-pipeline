@@ -5,9 +5,10 @@
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
 
-ENV SAMTOOLS_VERSION 1.9
 ENV BEDTOOLS_VERSION v2.29.0
 ENV PICARD_VERSION 2.27.5
+ENV SAMTOOLS_VERSION 1.16
+ENV SAMBAMBA_VERSION 0.6.6
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -15,19 +16,22 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
     autoconf \
+    automake \
     build-essential \
     git \
     libcurl4-openssl-dev \
     liblz4-dev \
     liblzma-dev \
     libncurses5-dev \
+    libncursesw5-dev \
     libbz2-dev \
+    perl \
     python \
     unzip \
+    xz-utils \
     wget \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
-
 
 # Make directory for all softwares
 RUN mkdir /software
@@ -38,17 +42,27 @@ ENV PATH="/software:${PATH}"
 RUN git clone --branch ${BEDTOOLS_VERSION} --single-branch https://github.com/arq5x/bedtools2.git && \
     cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
 
+# Install sambamba 1.32.2
+#RUN wget https://github.com/ldc-developers/ldc/releases/download/v${SAMBAMBA_VERSION}/ldc2-${SAMBAMBA_VERSION}-linux-x86_64.tar.xz && \
+#    tar -xvf ldc2-${SAMBAMBA_VERSION}-linux-x86_64.tar.xz && \
+#    echo "export LIBRARY_PATH=${PWD}/ldc2-1.7.0-linux-x86_64/lib" >> ${HOME}/.bashrc && \
+#    echo "export LIBRARY_PATH=${PWD}/ldc2-1.7.0-linux-x86_64/lib" >> ${HOME}/.bashrc && \
+#    source ${HOME}/.bashrc \
+#    git clone --branch v${SAMBAMBA_VERSION} --recursive https://github.com/biod/sambamba.git && \
+#    cd sambamba && make && make install && cd .. &&  rm -rf sambamba_* && rm -rf ldc2-${SAMBAMBA_VERSION}-linux-x86_64
+
 # Install sambamba 0.6.6
-RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && \
-    tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && \
-    mv sambamba_v0.6.6 /usr/local/bin/sambamba && \
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v${SAMBAMBA_VERSION}/sambamba_v${SAMBAMBA_VERSION}_linux.tar.bz2 && \
+    tar -xvjf sambamba_v${SAMBAMBA_VERSION}_linux.tar.bz2 && \
+    mv sambamba_v${SAMBAMBA_VERSION} /usr/local/bin/sambamba && \
     rm -rf sambamba_*
 
-# Install samtools 1.9
-RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
-    git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
-    cd samtools && make && make install && cd ../ && rm -rf samtools* && \
-    cd htslib && autoreconf -i && make && make install && cd ../ && rm -rf htslib*
+# Install samtools 1.16
+RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
+    cd htslib && git submodule update --init --recursive && autoreconf -i && make && make install && cd ../ && \
+    git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
+    cd samtools && make && make install && cd ../ && rm -rf samtools* && rm -rf htslib*
+    
 
 # Install Picard 2.20.7
 RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
@@ -66,6 +80,7 @@ LABEL software.task="filter"
 
 RUN apt-get update && apt-get install -y \
     gcc \
+    libcurl4-openssl-dev \
     python3 \
     python3-dev \
     python3-pip \

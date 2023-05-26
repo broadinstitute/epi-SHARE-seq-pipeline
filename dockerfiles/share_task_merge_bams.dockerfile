@@ -34,7 +34,7 @@ WORKDIR /software
 ENV PATH="/software:${PATH}"
 
 # Install sambamba 0.6.6
-RUN wget https://github.com/lomereiter/sambamba/releases/download/v${SAMBAMBA_VERSION}/sambamba_v0.6.6_linux.tar.bz2 && \
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v${SAMBAMBA_VERSION}/sambamba_v${SAMBAMBA_VERSION}_linux.tar.bz2 && \
     tar -xvjf sambamba_v${SAMBAMBA_VERSION}_linux.tar.bz2 && \
     mv sambamba_v${SAMBAMBA_VERSION} /usr/local/bin/sambamba && \
     rm -rf sambamba_*

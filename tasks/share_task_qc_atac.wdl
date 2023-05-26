@@ -108,13 +108,13 @@ task qc_atac {
 
         # samstats raw
         # output of bowtie2
-        echo '------ START: SAMstats for raw bam ------' 1>&2
-        time sambamba view -t ~{cpus} in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
+        echo '------ SKIPPING: SAMstats for raw bam ------' 1>&2
+        #time sambamba view -t ~{cpus} in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
 
         # SAMstat final filtered file
         # final bam
-        echo '------ START: SAMstats for final bam ------' 1>&2
-        time sambamba view -t ~{cpus}  in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
+        echo '------ SKIPPING: SAMstats for final bam ------' 1>&2
+        #time sambamba view -t ~{cpus}  in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
 
         # library complexity
         # queryname_final_bam from filter
@@ -187,8 +187,8 @@ task qc_atac {
     >>>
 
     output {
-        File atac_qc_samstats_raw = samstats_raw_out
-        File atac_qc_samstats_filtered = samstats_filtered_out
+        File? atac_qc_samstats_raw = samstats_raw_out
+        File? atac_qc_samstats_filtered = samstats_filtered_out
         File atac_qc_pbc_stats = pbc_stats
 
         File atac_qc_final_stats = stats_log

@@ -74,7 +74,7 @@ task share_atac_merge_bams {
 
         #sambamba merge -t ~{cpus} ~{unsorted_bam} ~{sep=" " bams}
 
-        #sambamba sort -t ~{samtools_threads} -m ~{samtools_memory_per_thread}M -o ~{merged_bam} ~{unsorted_bam}
+        #sambamba sort -t ~{cpus} -m ~{command_mem_mb}M -o ~{merged_bam} ~{unsorted_bam}
       
         #sambamba index -t ~{cpus} ~{merged_bam}
 
