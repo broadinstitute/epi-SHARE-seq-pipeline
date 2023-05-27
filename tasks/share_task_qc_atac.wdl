@@ -109,17 +109,17 @@ task qc_atac {
         # samstats raw
         # output of bowtie2
         echo '------ SKIPPING: SAMstats for raw bam ------' 1>&2
-        time sambamba view -t ~{cpus} in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
+        #time sambamba view -t ~{cpus} in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
 
         # SAMstat final filtered file
         # final bam
         echo '------ SKIPPING: SAMstats for final bam ------' 1>&2
-        time sambamba view -t ~{cpus}  in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
+        #time sambamba view -t ~{cpus}  in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
 
         # library complexity
         # queryname_final_bam from filter
         echo '------ START: Compute library complexity ------' 1>&2
-        time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
+        #time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2
@@ -189,7 +189,7 @@ task qc_atac {
     output {
         File? atac_qc_samstats_raw = samstats_raw_out
         File? atac_qc_samstats_filtered = samstats_filtered_out
-        File atac_qc_pbc_stats = pbc_stats
+        File? atac_qc_pbc_stats = pbc_stats
 
         File atac_qc_final_stats = stats_log
         File atac_qc_final_hist_png = hist_log_png
@@ -205,7 +205,7 @@ task qc_atac {
 
         File? atac_qc_barcode_rank_plot = fragment_barcode_rank_plot
 
-        File atac_qc_monitor_log = monitor_log
+        #File? atac_qc_monitor_log = monitor_log
     }
 
     runtime {
