@@ -63,7 +63,7 @@ task share_atac_filter {
     Int samtools_memory_per_thread = if samtools_memory_per_thread_ < 768 then 768 else samtools_memory_per_thread_
 
     # Memory for picard
-    Float picard_java_heap_factor = 0.9
+    Float picard_java_heap_factor = 0.8
     Int picard_java_memory = round(mem_gb * picard_java_heap_factor)
 
     #String filtering_params = if multimappers == 0 then "-q ${mapq_threshold} -F 1804" else "-F 524"
