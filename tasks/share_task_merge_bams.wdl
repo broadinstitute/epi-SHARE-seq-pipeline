@@ -89,7 +89,7 @@ task share_atac_merge_bams {
 
         sambamba index -t ~{cpus} ~{merged_bam}
 
-        sed 's/^[[:space:]]*//g' ~{sep="" logs} | cut -f 1 -d ' ' | awk '{ sum[FNR%15]+=$1 } END { for(idx in sum) if (idx>0) {print sum[idx]}}' > ~{alignment_log}
+        sed 's/^[[:space:]]*//g' ~{sep="" logs} | cut -f 1 -d ' ' | awk '{ sum[FNR%15]+=$1 } END { for (idx=1; idx<=length(sum); idx++){print sum[idx]}}' > ~{alignment_log}
 
     >>>
 
