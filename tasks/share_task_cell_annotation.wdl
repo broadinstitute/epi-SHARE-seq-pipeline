@@ -58,7 +58,6 @@ task cell_annotation {
         
         papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
         -p reference_data_id ${reference_data_id} \
-        -p reference_data ${reference_data} \
         -p query_data ${query_data} \
         -p genome ${genome} \
         -p prefix ${prefix} \
