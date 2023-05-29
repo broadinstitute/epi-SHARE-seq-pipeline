@@ -61,10 +61,13 @@ RUN R --no-echo --no-restore --no-save -e "remotes::install_github('satijalab/se
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
+RUN R --no-echo --no-restore --no-save -e "install.packages('devtools')"
+RUN R --no-echo --no-restore --no-save -e "devtools::install_github('chanzuckerberg/cellxgene-census/api/r/cellxgene.census')"
+
 
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
-RUN python3 -m pip install --break-system-packages jupyter papermill
+RUN python3 -m pip install --break-system-packages jupyter papermill anndata
 
 COPY src/jupyter_nb/cell_annotation_notebook.ipynb /usr/local/bin/
 
