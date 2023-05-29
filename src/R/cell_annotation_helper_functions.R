@@ -1,3 +1,11 @@
+#!/usr/bin/Rscript
+
+## ---------------------------
+## Helper functions for cell annotation
+## Author: Zhijian Li
+## Date Created: 2023-05-29
+## Email: lzj1769@gmail.com
+## ---------------------------
 library(reticulate)
 
 read_h5ad <- function(
