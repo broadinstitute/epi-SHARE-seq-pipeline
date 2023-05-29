@@ -37,7 +37,7 @@ task qc_atac {
 
         # Runtime
         Int? cpus = 8
-        Float? disk_factor = 8.0
+        Float? disk_factor = 10.0
         Float? memory_factor = 0.3
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
     }

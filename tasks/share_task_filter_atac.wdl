@@ -30,7 +30,7 @@ task share_atac_filter {
         String? prefix = "sample"
         ## Runtime
         Int? cpus = 16
-        Float? disk_factor = 8.0
+        Float? disk_factor = 10.0
         Float? memory_factor = 0.15
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter_atac"
     }
@@ -197,6 +197,7 @@ task share_atac_filter {
         File? atac_filter_alignment_dedup_queryname = queryname_final_bam
         File atac_filter_fragments = "~{fragments}.gz"
         File? atac_filter_fragments_index = "~{fragments}.gz.tbi"
+        
         File? atac_filter_monitor_log = monitor_log
         File? atac_filter_picard_duplicates_metrics = picard_mark_duplicates_metrics
         File? atac_filter_picard_duplicates_log = picard_mark_duplicates_log
