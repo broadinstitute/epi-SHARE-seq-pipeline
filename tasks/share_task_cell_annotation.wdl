@@ -12,6 +12,7 @@ task cell_annotation {
     input {
         #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
         String reference_data_id
+        String reference_label
         File query_data
 
         String genome = "hg38"
@@ -58,6 +59,7 @@ task cell_annotation {
         
         papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
         -p reference_data_id ${reference_data_id} \
+        -p reference_label ${reference_label} \
         -p query_data ${query_data} \
         -p genome ${genome} \
         -p prefix ${prefix} \

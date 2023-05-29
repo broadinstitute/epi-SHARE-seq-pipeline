@@ -70,5 +70,6 @@ COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 RUN python3 -m pip install --break-system-packages jupyter papermill anndata
 
 COPY src/jupyter_nb/cell_annotation_notebook.ipynb /usr/local/bin/
+COPY src/R/cell_annotation_helper_functions.R /usr/local/bin/
 
 RUN R -e "IRkernel::installspec()"

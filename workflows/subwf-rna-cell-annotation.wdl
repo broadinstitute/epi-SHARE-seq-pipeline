@@ -14,22 +14,24 @@ workflow wf_rna {
 
     input {
         String reference_data_id
-        File query_data
+        String reference_label
 
-        # RNA Seurat inputs
-        String prefix
+        File query_data
         String genome
-        
-        String? docker_image="lzj1769/cell-annotation"
+
+        String? prefix="prefix"
 
         #Seurat runtime parameters
         Float? disk_factor = 0.1
         Float? memory_factor = 0.15
+                
+        String? docker_image="lzj1769/cell-annotation"
     }
 
     call share_task_cell_annotation.cell_annotation as cell_annotation{
         input:
             reference_data_id = reference_data_id,
+            reference_label = reference_label,
             query_data = query_data,
             genome = genome,
             prefix = prefix,
