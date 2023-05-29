@@ -57,14 +57,17 @@ RUN R --no-echo --no-restore --no-save -e "install.packages('BiocManager')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('glue')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('Matrix')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('SeuratObject')"
-RUN R --no-echo --no-restore --no-save -e "remotes::install_github('satijalab/seurat', 'seurat5')"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
+RUN R --no-echo --no-restore --no-save -e "install.packages('devtools')"
+RUN R --no-echo --no-restore --no-save -e "devtools::install_github('chanzuckerberg/cellxgene-census/api/r/cellxgene.census')"
+
 
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
-RUN python3 -m pip install --break-system-packages jupyter papermill
+RUN python3 -m pip install --break-system-packages jupyter papermill anndata
 
 COPY src/jupyter_nb/cell_annotation_notebook.ipynb /usr/local/bin/
 

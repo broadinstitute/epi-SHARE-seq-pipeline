@@ -11,24 +11,11 @@ task cell_annotation {
 
     input {
         #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
-        File reference_data
+        String reference_data_id
         File query_data
 
-        String? genome = "hg38"
-
-        String? normalization_method = "LogNormalize"
-        Float? normalization_scale_factor = 10000
-
-        String? variable_features_method = "vst"
-        Int? variable_features_num = 2000
-
-        String? weight_reduction = "pca"
-        Int? n_dims = 30
-
+        String genome = "hg38"
         String prefix = "prefix"
-        Int? threads = 8
-
-        String papermill = "TRUE"
         
         String output_filename = "${prefix}.rna.cell.annotation.notebook.${genome}.ipynb"
         String log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
@@ -38,6 +25,8 @@ task cell_annotation {
         
         Float? disk_factor = 0.1
         Float? memory_factor = 0.15
+
+        String? papermill = "TRUE"
     }
     
     # Determine the size of the input
@@ -63,21 +52,14 @@ task cell_annotation {
     String prediction = '${prefix}.rna.cell.annotation.prediction.${genome}.csv'
 
     command {
-    
         set -e
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
         papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
-        -p reference_data ${reference_data} \
+        -p reference_data_id ${reference_data_id} \
         -p query_data ${query_data} \
         -p genome ${genome} \
-        -p normalization_method ${normalization_method} \
-        -p normalization_scale_factor ${normalization_scale_factor} \
-        -p variable_features_method ${variable_features_method} \
-        -p variable_features_num ${variable_features_num} \
-        -p weight_reduction ${weight_reduction} \
-        -p n_dims ${n_dims} \
         -p prefix ${prefix} \
         -p papermill ${papermill}
     }
@@ -100,21 +82,15 @@ task cell_annotation {
     }
 
     parameter_meta {
-        papermill: {
-            description: 'Boolean papermill flag',
-            help: 'Flag to notebook run in papermill mode',
-            example: 'TRUE'
+        reference_data_id: {
+            description: 'Reference dataset id',
+            help: 'The dataset id from cellxgene data base.',
+            examples: ['3bbb6cf9-72b9-41be-b568-656de6eb18b5']
         }
-
+        
         query_data: {
             description: 'Query data',
             help: 'scRNA-seq data used as query',
-            examples: ['put link to gcr']
-        }
-
-        reference_data: {
-            description: 'Reference data',
-            help: 'scRNA-seq data used as reference',
             examples: ['put link to gcr']
         }
 
@@ -124,40 +100,16 @@ task cell_annotation {
             examples: ['hg38', 'mm10', 'hg19', 'mm9']
         }
 
-        normalization_method: {
-            description: 'Normalization method used in Seurat',
-            help: 'Seurat normalization method used in Seurat::NormalizeData()',
-            examples: ["LogNormalize","CLR","RC"]
-        }
-
-        normalization_scale_factor: {
-            description: 'Scaling factor used in Seurat normalization',
-            help: 'Scaling factor parameter used in Seurat::NormalizeData()',
-            example: 10000
-        }
-
-        variable_features_method: {
-            description: 'Method used to select variable features',
-            help: 'Parameter used in Seurat::FindVariableFeatures()',
-            example: "vst"
-        }
-
-        variable_features_num: {
-            description: 'Number of variable features used to find',
-            help: 'Parameter used in Seurat::FindVariableFeatures()',
-            example: 2000
+        prefix: {
+            description: 'Project name',
+            help: 'String used to name your project and associated file names',
+            example: "shareseq"
         }
 
         papermill: {
             description: 'Boolean papermill flag',
             help: 'Flag to notebook run in papermill mode',
             example: 'TRUE'
-        }
-
-        prefix: {
-            description: 'Project name',
-            help: 'String used to name your project and associated file names',
-            example: "shareseq"
         }
 
         output_filename: {

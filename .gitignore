@@ -17,3 +17,4 @@ Cargo.lock
 
 src/jupyter_nb/log/
 src/jupyter_nb/prefix.rna.cell.annotation.plots.mm10/
+build_docker.sh
