@@ -46,6 +46,5 @@ workflow wf_rna {
         File share_rna_cell_annotation_monitor_log = cell_annotation.monitor_log
         File share_rna_cell_annotation_prediction = cell_annotation.prediction
         File share_rna_cell_annotation_predicted_labels_plot = cell_annotation.predicted_labels_plot
-        File share_rna_cell_annotation_predicted_scores_plot = cell_annotation.predicted_scores_plot
     }
 }

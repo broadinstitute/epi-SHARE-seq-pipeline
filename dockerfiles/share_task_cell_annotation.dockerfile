@@ -19,6 +19,8 @@ ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
     apt-get install -y -qq --no-install-recommends\
+    cmake \
+    git \
     binutils \
     gtk-doc-tools \
     libcairo2-dev \
@@ -57,13 +59,14 @@ RUN R --no-echo --no-restore --no-save -e "install.packages('BiocManager')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('glue')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('Matrix')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('SeuratObject')"
-RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.3.0')"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
-RUN R --no-echo --no-restore --no-save -e "install.packages('devtools')"
-RUN R --no-echo --no-restore --no-save -e "devtools::install_github('chanzuckerberg/cellxgene-census/api/r/cellxgene.census')"
-
+RUN R --no-echo --no-restore --no-save -e "install.packages('anndata')"
+RUN R --no-echo --no-restore --no-save -e "install.packages('arrow', repos = 'https://packagemanager.rstudio.com/all/__linux__/focal/latest')"
+RUN R --no-echo --no-restore --no-save -e "install.packages('tiledbsoma', repos = c('https://tiledb-inc.r-universe.dev', 'https://cloud.r-project.org'))"
+#RUN R --no-echo --no-restore --no-save -e "remotes::install_github('chanzuckerberg/cellxgene-census/api/r/cellxgene.census')"
 
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
