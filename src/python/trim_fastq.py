@@ -109,7 +109,7 @@ def trim_fastqs(input_read1_fastq_file, input_read2_fastq_file,
     with open(trimming_stats_file, "w") as f:
         fields = ["total_reads", "untrimmed_reads", "trimmed_reads", "%trimmed"]
         f.write("\t".join(fields) + "\n")
-        f.write("%i\t%i\t%i\t%0.1f" % (total, total-trimmed, trimmed, trimmed/total*100))
+        f.write("%i\t%i\t%i\t%0.1f" % (total, total-trimmed, trimmed, trimmed/total*100 if total > 0 else 0))
 
 def trim(seq1, seq2):
     """
