@@ -62,12 +62,6 @@ task get_cellxgene_data {
             help: 'String used to name the reference data.',
             examples: ['reference']
         }
-    
-        prefix: {
-            description: 'Project name',
-            help: 'String used to name your project and associated file names',
-            example: "shareseq"
-        }
 
         docker_image: {
             description: 'Docker image.',
