@@ -22,7 +22,7 @@ task get_cellxgene_data {
     Float mem_gb = 32.0
 
     # Determining disk size base on the size of the input files.
-    Int disk_gb = 100.0
+    Float disk_gb = 100.0
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
@@ -56,24 +56,24 @@ task get_cellxgene_data {
         maxRetries:1
     }
 
-    # parameter_meta {
-    #     reference_data_id: {
-    #         description: 'Reference dataset id',
-    #         help: 'The dataset id from cellxgene server.',
-    #         examples: ['3bbb6cf9-72b9-41be-b568-656de6eb18b5']
-    #     }
+    parameter_meta {
+        reference_data_id: {
+            description: 'Reference dataset id',
+            help: 'The dataset id from cellxgene server.',
+            examples: ['3bbb6cf9-72b9-41be-b568-656de6eb18b5']
+        }
 
-    #     reference_data_name: {
-    #         description: 'Reference dataset name',
-    #         help: 'String used to name the reference data.',
-    #         examples: ['reference']
-    #     }
+        reference_data_name: {
+            description: 'Reference dataset name',
+            help: 'String used to name the reference data.',
+            examples: ['reference']
+        }
 
-    #     docker_image: {
-    #         description: 'Docker image.',
-    #         help: 'Docker image for preprocessing step.',
-    #         example: ['put link to gcr or dockerhub']
-    #     }
+        docker_image: {
+            description: 'Docker image.',
+            help: 'Docker image for preprocessing step.',
+            example: ['put link to gcr or dockerhub']
+        }
         
-    # }
+    }
 }
