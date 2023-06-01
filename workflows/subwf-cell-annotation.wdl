@@ -14,13 +14,15 @@ workflow wf_cell_annotation {
     }
 
     input {
+        String genome
+
         String reference_data_id
         String reference_data_name
         String reference_label
 
         File query_data
-        String genome
-
+        
+        # Project prefix
         String? prefix="prefix"
         
         # Docker images
