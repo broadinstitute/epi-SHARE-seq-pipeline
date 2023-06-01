@@ -38,8 +38,7 @@ workflow wf_cell_annotation {
         input:
             reference_data_id = reference_data_id,
             reference_data_name = reference_data_name,
-            docker_image = docker_image_get_cellxgene_data,
-            disk_factor = disk_factor
+            docker_image = docker_image_get_cellxgene_data
     }
 
     call share_task_cell_annotation.cell_annotation as cell_annotation{
