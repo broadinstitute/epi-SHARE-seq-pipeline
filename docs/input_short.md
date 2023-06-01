@@ -105,9 +105,11 @@ For each task of the pipeline it is possible to fine-tune the resources used by 
 * `share.atac.[task_name]_cpus`
 * `share.atac.[task_name]_memory_factor`
 * `share.atac.[task_name]_disk_factor`
+* `share.atac.[task_name]_docker_image`
 
 
 For example, to change `align` runtimes parameters modify the following inputs:
-*  `share.atac.align_cpus`
+* `share.atac.align_cpus`
 * `share.atac.align_memory_factor`
-*  `share.atac.align_disk_factor`
+* `share.atac.align_disk_factor`
+* `share.atac.align_docker_image`
