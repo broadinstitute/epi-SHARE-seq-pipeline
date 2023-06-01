@@ -15,6 +15,7 @@ task get_cellxgene_data {
         String reference_data_name
 
         String? docker_image = "lzj1769/get_cellxgene_data"
+
     }
     
     # Determining memory size base on the size of the input files.
@@ -25,6 +26,9 @@ task get_cellxgene_data {
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
+
+    String monitor_log = "monitoring.log"
+    String get_cellxgene_data_log = "get_cellxgene_data.log"
 
     command {
         set -e
@@ -38,8 +42,8 @@ task get_cellxgene_data {
     }
 
     output {
-        File joint_calling_monitor = "monitoring.log"
-        File joint_calling_log = "get_cellxgene_data.log"
+        File get_cellxgene_data_monitor = monitor_log
+        File get_cellxgene_data_log = get_cellxgene_data_log
     }
 
     runtime {
