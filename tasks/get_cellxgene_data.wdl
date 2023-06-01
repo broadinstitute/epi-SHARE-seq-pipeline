@@ -10,11 +10,12 @@ task get_cellxgene_data {
     }
 
     input {
-        #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
+        # Reference data id and name
         String reference_data_id
         String reference_data_name
 
-        String? docker_image = "lzj1769/get_cellxgene_data"
+        # Docker image
+        String docker_image
 
     }
     
@@ -54,24 +55,24 @@ task get_cellxgene_data {
         maxRetries:1
     }
 
-    parameter_meta {
-        reference_data_id: {
-            description: 'Reference dataset id',
-            help: 'The dataset id from cellxgene server.',
-            examples: ['3bbb6cf9-72b9-41be-b568-656de6eb18b5']
-        }
+    # parameter_meta {
+    #     reference_data_id: {
+    #         description: 'Reference dataset id',
+    #         help: 'The dataset id from cellxgene server.',
+    #         examples: ['3bbb6cf9-72b9-41be-b568-656de6eb18b5']
+    #     }
 
-        reference_data_name: {
-            description: 'Reference dataset name',
-            help: 'String used to name the reference data.',
-            examples: ['reference']
-        }
+    #     reference_data_name: {
+    #         description: 'Reference dataset name',
+    #         help: 'String used to name the reference data.',
+    #         examples: ['reference']
+    #     }
 
-        docker_image: {
-            description: 'Docker image.',
-            help: 'Docker image for preprocessing step.',
-            example: ['put link to gcr or dockerhub']
-        }
+    #     docker_image: {
+    #         description: 'Docker image.',
+    #         help: 'Docker image for preprocessing step.',
+    #         example: ['put link to gcr or dockerhub']
+    #     }
         
-    }
+    # }
 }

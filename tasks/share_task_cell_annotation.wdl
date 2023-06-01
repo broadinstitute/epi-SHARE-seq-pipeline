@@ -10,20 +10,26 @@ task cell_annotation {
     }
 
     input {
-        #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
+        # 
+        String genome
+
+        # Input
         String reference_data_id
+        String reference_data_name
         String reference_label
         File query_data
 
-        String genome = "hg38"
-        String prefix = "prefix"
+
+        # Output
+        String prefix
         
         String output_filename = "${prefix}.rna.cell.annotation.notebook.${genome}.ipynb"
         String log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
 
-        #Int mem_gb = 128
-        String docker_image = "lzj1769/cell-annotation"
+        # Docker image
+        String docker_image
         
+        # Runtime parameter
         Float? disk_factor = 0.1
         Float? memory_factor = 0.15
 
