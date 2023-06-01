@@ -37,8 +37,7 @@ task get_cellxgene_data {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
         # Download data from cellxgene
-        python3 $(which get_cellxgene_data.py) \
-        ${reference_data_id} ${reference_data_name}
+        python3 $(which get_cellxgene_data.py) ${reference_data_id} ${reference_data_name}
 
     }
 

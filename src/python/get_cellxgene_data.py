@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# coding=utf8
-
 """
 This script takes dataset id as input and download an h5ad file 
 from cellxgene server using cellxgene_census API.
@@ -19,7 +16,6 @@ def parse_arguments():
 
 
 if __name__ == '__main__':
-    
     # create log file
     logging.basicConfig(filename="get_cellxgene_data.log", level=logging.INFO)
 
