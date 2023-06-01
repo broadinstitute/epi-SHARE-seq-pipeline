@@ -18,24 +18,18 @@ ENV DEBIAN_FRONTEND=noninteractive
 ## Create new user 
 ENV USER=shareseq
 WORKDIR /home/$USER
-RUN groupadd -r $USER &&\
+RUN groupadd -r $USER && \
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
 
-# Install other libraries
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    gcc \
-    git \
-    python3 \
-    python3-dev \
-    python3-pip && \
-    rm -rf /var/lib/apt/lists/*
+# Install python 3
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends python3 python3-pip
+RUN rm -rf /var/lib/apt/lists/*
 
-RUN python3 -m pip install tiledb tiledbsoma
-# cellxgene-census
+# Install cellxgene package
+RUN python3 -m pip install cellxgene-census
 
-# COPY --chown=$USER:$USER src/python/get_cellxgene_data.py /usr/local/bin
-# COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
-
-# USER ${USER}
+# Copy script to /use/local/bin
+COPY src/python/get_cellxgene_data.py /usr/local/bin
+COPY src/bash/monitor_script.sh /usr/local/bin
