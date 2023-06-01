@@ -16,14 +16,14 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-id: 'task-merge-bams'
-args: [ 'build', '-t',
-      '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_merge_bams:latest',
-      '-f',
-      'dockerfiles/share_task_merge_bams.dockerfile',
-      '.' ]
-waitFor: ['-']
-timeout: 28800s
+  id: 'task-merge-bams'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_merge_bams:latest',
+          '-f',
+          'dockerfiles/share_task_merge_bams.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-archr'
