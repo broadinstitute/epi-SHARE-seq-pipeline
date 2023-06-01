@@ -42,15 +42,6 @@ ENV PATH="/software:${PATH}"
 RUN git clone --branch ${BEDTOOLS_VERSION} --single-branch https://github.com/arq5x/bedtools2.git && \
     cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
 
-# Install sambamba 1.32.2
-#RUN wget https://github.com/ldc-developers/ldc/releases/download/v${SAMBAMBA_VERSION}/ldc2-${SAMBAMBA_VERSION}-linux-x86_64.tar.xz && \
-#    tar -xvf ldc2-${SAMBAMBA_VERSION}-linux-x86_64.tar.xz && \
-#    echo "export LIBRARY_PATH=${PWD}/ldc2-1.7.0-linux-x86_64/lib" >> ${HOME}/.bashrc && \
-#    echo "export LIBRARY_PATH=${PWD}/ldc2-1.7.0-linux-x86_64/lib" >> ${HOME}/.bashrc && \
-#    source ${HOME}/.bashrc \
-#    git clone --branch v${SAMBAMBA_VERSION} --recursive https://github.com/biod/sambamba.git && \
-#    cd sambamba && make && make install && cd .. &&  rm -rf sambamba_* && rm -rf ldc2-${SAMBAMBA_VERSION}-linux-x86_64
-
 # Install sambamba 0.6.6
 RUN wget https://github.com/lomereiter/sambamba/releases/download/v${SAMBAMBA_VERSION}/sambamba_v${SAMBAMBA_VERSION}_linux.tar.bz2 && \
     tar -xvjf sambamba_v${SAMBAMBA_VERSION}_linux.tar.bz2 && \
