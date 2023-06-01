@@ -22,7 +22,7 @@ task get_cellxgene_data {
     Float mem_gb = 32.0
 
     # Determining disk size base on the size of the input files.
-    Float disk_gb = 100.0
+    Int disk_gb = 100
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
