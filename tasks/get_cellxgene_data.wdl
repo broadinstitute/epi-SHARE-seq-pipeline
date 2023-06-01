@@ -29,7 +29,7 @@ task get_cellxgene_data {
 
     String reference_h5ad = "${reference_data_name}.h5ad"
     String monitor_log = "monitoring.log"
-    String get_cellxgene_data_log = "get_cellxgene_data.log"
+    String running_log = "get_cellxgene_data.log"
     
     command {
         set -e
@@ -44,8 +44,8 @@ task get_cellxgene_data {
 
     output {
         File reference_h5ad = reference_h5ad
-        File get_cellxgene_data_monitor = monitor_log
-        File get_cellxgene_data_log = get_cellxgene_data_log
+        File monitor_log = monitor_log
+        File running_log = running_log
     }
 
     runtime {
