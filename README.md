@@ -43,8 +43,8 @@ This **10X** single-cell multiomic pipeline is based off the ENCODE (phase-3) si
 
 3) Git clone this pipeline.
 	```bash
-	$ cd
 	$ git clone https://github.com/broadinstitute/epi-SHARE-seq-pipeline/ #TODO: This should point to the release
+	$ cd epi-SHARE-seq-pipeline
 	```
 
 4) Define test input JSON.
@@ -52,7 +52,7 @@ This **10X** single-cell multiomic pipeline is based off the ENCODE (phase-3) si
 	INPUT_JSON="" #TODO: We need a test dataset available for everyone
 	```
 
-5) If you have Docker and want to run the pipelines locally on your laptop, `--max-concurrent-tasks 1` limits the number of concurrent tasks to test-run on a laptop. Uncomment if running on a workstation/HPC.
+5) If you have Docker and want to run the pipelines locally on your laptop, `--max-concurrent-tasks 1` limits the number of concurrent tasks to test-run on a laptop. Comment if running on a workstation/HPC.
 	```bash
 	# check if Docker works on your machine
 	$ docker run ubuntu:latest echo hello
@@ -124,7 +124,6 @@ QC metrics for each experiment (`qc.json`) will be split into multiple rows (1 f
 
 <br>
 TODO:\
-Sambamba\
 add track generation \
 
 Thank you to the **ENCODE DAC** for writing excellent documentation for their pipelines that we used as templates.
