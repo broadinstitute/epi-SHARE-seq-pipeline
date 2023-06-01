@@ -1,7 +1,7 @@
 version 1.0
 
 # Import the tasks called by the pipeline
-import "../tasks/get_cellxgene_data" as get_cellxgene_data
+import "../tasks/get_cellxgene_data.wdl" as get_cellxgene_data
 import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
 
 workflow wf_cell_annotation {
