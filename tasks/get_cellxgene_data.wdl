@@ -15,7 +15,6 @@ task get_cellxgene_data {
         String reference_data_name
 
         String? docker_image = "lzj1769/get_cellxgene_data"
-        Float? disk_factor = 0.1
     }
     
     # Determining memory size base on the size of the input files.
@@ -34,7 +33,7 @@ task get_cellxgene_data {
         
         # Download data from cellxgene
         python3 $(which get_cellxgene_data.py) \
-        --dataset_id ${reference_data_id} --save_path ${reference_data_name}
+        --dataset_id ${reference_data_id} --output_finame ${reference_data_name}
 
     }
 
@@ -57,6 +56,12 @@ task get_cellxgene_data {
             help: 'The dataset id from cellxgene server.',
             examples: ['3bbb6cf9-72b9-41be-b568-656de6eb18b5']
         }
+
+        reference_data_name: {
+            description: 'Reference dataset name',
+            help: 'String used to name the reference data.',
+            examples: ['reference']
+        }
     
         prefix: {
             description: 'Project name',
@@ -70,16 +75,5 @@ task get_cellxgene_data {
             example: ['put link to gcr or dockerhub']
         }
         
-        disk_factor: {
-            description: 'Disk factor',
-            help: 'Multiply this value to input .h5 file size (MB) to determine disk space (GB)',
-            example: 16.0
-        }
-        
-        memory_factor: {
-            description: 'Memory factor',
-            help: 'Multiply this value to input .h5 file size (MB) and add to default 32GB memory to determine RAM (GB)',
-            example: 1.0
-        }
     }
 }

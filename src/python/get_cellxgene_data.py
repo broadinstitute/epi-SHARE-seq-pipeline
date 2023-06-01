@@ -13,7 +13,7 @@ import cellxgene_census
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Download data from cellxgene server")
     parser.add_argument("dataset_id", help="Filename for STARsolo raw matrix mtx file")
-    parser.add_argument("save_path", help="Path for saving data")
+    parser.add_argument("output_filename", help="Path for saving data")
     
     return parser.parse_args()
 
@@ -29,6 +29,6 @@ if __name__ == '__main__':
     logging.info("Downloading data\n")
     cellxgene_census.download_source_h5ad(
         args.dataset_id, 
-        to_path=args.save_path)
+        to_path=f"{args.output_filename}.h5ad")
     
     logging.info("All done!")
