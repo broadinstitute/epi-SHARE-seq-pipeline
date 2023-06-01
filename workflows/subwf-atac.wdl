@@ -4,6 +4,7 @@ version 1.0
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
+import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
 import "../tasks/share_task_filter_atac.wdl" as share_task_filter
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
@@ -29,7 +30,7 @@ workflow wf_atac {
         String? prefix = "sample"
         String genome_name
         Int? cutoff
-        Boolean count_only = false
+        String pipeline_modality = "full"
         Boolean trim_fastqs = true
         File? barcode_conversion_dict # For 10X multiome
 
@@ -38,15 +39,14 @@ workflow wf_atac {
         File whitelist
         String? pkr
         # Runtime parameters
-        Int? correct_cpus = 1
+        Int? correct_cpus = 16
         Float? correct_disk_factor = 8.0
-        Float? correct_memory_factor = 0.15
+        Float? correct_memory_factor = 0.08
         String? correct_docker_image
 
         # Align-specific inputs
         Array[File] read1
         Array[File] read2
-        Boolean? append_comment = false
         Int? align_multimappers
         File genome_index_tar
         # Runtime parameters
@@ -54,6 +54,13 @@ workflow wf_atac {
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
         String? align_docker_image
+
+        # Merge-specific inputs
+        # Runtime parameters
+        Int? merge_cpus
+        Float? merge_disk_factor = 8.0
+        Float? merge_memory_factor = 0.15
+        String? merge_docker_image
 
         # Filter-specific inputs
         Int? filter_minimum_fragments_cutoff
@@ -122,101 +129,121 @@ workflow wf_atac {
         }
     }
 
-    call share_task_align.share_atac_align as align {
-        input:
-            fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
-            fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
-            chemistry= chemistry,
-            genome_name = genome_name,
-            genome_index_tar = genome_index_tar,
-            append_comment = append_comment,
-            multimappers = align_multimappers,
-            prefix = prefix,
-            disk_factor = align_disk_factor,
-            memory_factor = align_memory_factor,
-            cpus = align_cpus,
-            docker_image = align_docker_image
-    }
-
-    call share_task_filter.share_atac_filter as filter {
-        input:
-            bam = align.atac_alignment,
-            bam_index = align.atac_alignment_index,
-            multimappers = align_multimappers,
-            shift_plus = filter_shift_plus,
-            shift_minus = filter_shift_minus,
-            barcode_tag = barcode_tag,
-            barcode_tag_fragments = barcode_tag_fragments_,
-            mapq_threshold = mapq_threshold,
-            genome_name = genome_name,
-            minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
-            prefix = prefix,
-            barcode_conversion_dict = barcode_conversion_dict,
-            cpus = filter_cpus,
-            disk_factor = filter_disk_factor,
-            docker_image = filter_docker_image,
-            memory_factor = filter_memory_factor
-    }
-
-    call share_task_qc_atac.qc_atac as qc_atac{
-        input:
-            raw_bam = align.atac_alignment,
-            raw_bam_index = align.atac_alignment_index,
-            filtered_bam = filter.atac_filter_alignment_dedup,
-            filtered_bam_index = filter.atac_filter_alignment_dedup_index,
-            queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
-            wdup_bam = filter.atac_filter_alignment_wdup,
-            wdup_bam_index = filter.atac_filter_alignment_wdup_index,
-            mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
-            mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
-            fragments = filter.atac_filter_fragments,
-            fragments_index = filter.atac_filter_fragments_index,
-            barcode_conversion_dict = barcode_conversion_dict,
-            peaks = peak_set,
-            tss = tss_bed,
-            fragment_cutoff = qc_fragment_cutoff,
-            mapq_threshold = mapq_threshold,
-            barcode_tag = barcode_tag_fragments_,
-            genome_name = genome_name,
-            prefix = prefix,
-            cpus = qc_cpus,
-            disk_factor = qc_disk_factor,
-            docker_image = qc_docker_image,
-            memory_factor = qc_memory_factor
-    }
-
-    call share_task_log_atac.log_atac as log_atac {
-       input:
-           alignment_log = align.atac_alignment_log,
-           dups_log = qc_atac.atac_qc_duplicate_stats,
-           pbc_log = qc_atac.atac_qc_pbc_stats
-    }
-
-    if (!count_only) {
-        call share_task_archr.archr as archr{
-            input:
-                atac_frag = filter.atac_filter_fragments,
-                genome = genome_name,
-                peak_set = peak_set,
-                prefix = prefix
+    if (  "~{pipeline_modality}" != "no_align" ) {
+        scatter(read_pair in zip(select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]), select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]))) {
+            call share_task_align.share_atac_align as align {
+                input:
+                    fastq_R1 = [read_pair.left],
+                    fastq_R2 = [read_pair.right],
+                    chemistry= chemistry,
+                    genome_name = genome_name,
+                    genome_index_tar = genome_index_tar,
+                    multimappers = align_multimappers,
+                    prefix = prefix,
+                    disk_factor = align_disk_factor,
+                    memory_factor = align_memory_factor,
+                    cpus = align_cpus,
+                    docker_image = align_docker_image
+            }
         }
-        call share_task_archr.archr as archr_strict{
+        
+        call share_task_merge_bams.share_atac_merge_bams as merge{
             input:
-                atac_frag = filter.atac_filter_fragments,
-                genome = genome_name,
-                peak_set = peak_set,
-                prefix = '${prefix}_strict',
-                min_tss = 5,
-                min_frags = 1000
+                bams = align.atac_alignment,
+                logs = align.atac_alignment_log,
+                multimappers = align_multimappers,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = merge_cpus,
+                memory_factor = merge_memory_factor,
+                disk_factor = align_disk_factor,
+                docker_image = merge_docker_image
+        }
+
+
+        call share_task_filter.share_atac_filter as filter {
+            input:
+                bam = merge.atac_merged_alignment,
+                bam_index = merge.atac_merged_alignment_index,
+                multimappers = align_multimappers,
+                shift_plus = filter_shift_plus,
+                shift_minus = filter_shift_minus,
+                barcode_tag = barcode_tag,
+                barcode_tag_fragments = barcode_tag_fragments_,
+                mapq_threshold = mapq_threshold,
+                genome_name = genome_name,
+                minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
+                prefix = prefix,
+                barcode_conversion_dict = barcode_conversion_dict,
+                cpus = filter_cpus,
+                disk_factor = filter_disk_factor,
+                docker_image = filter_docker_image,
+                memory_factor = filter_memory_factor
+        }
+
+        call share_task_qc_atac.qc_atac as qc_atac{
+            input:
+                raw_bam = merge.atac_merged_alignment,
+                raw_bam_index = merge.atac_merged_alignment_index,
+                filtered_bam = filter.atac_filter_alignment_dedup,
+                filtered_bam_index = filter.atac_filter_alignment_dedup_index,
+                queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
+                wdup_bam = filter.atac_filter_alignment_wdup,
+                wdup_bam_index = filter.atac_filter_alignment_wdup_index,
+                mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
+                mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
+                fragments = filter.atac_filter_fragments,
+                fragments_index = filter.atac_filter_fragments_index,
+                barcode_conversion_dict = barcode_conversion_dict,
+                peaks = peak_set,
+                tss = tss_bed,
+                fragment_cutoff = qc_fragment_cutoff,
+                mapq_threshold = mapq_threshold,
+                barcode_tag = barcode_tag_fragments_,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = qc_cpus,
+                disk_factor = qc_disk_factor,
+                docker_image = qc_docker_image,
+                memory_factor = qc_memory_factor
+        }
+
+        call share_task_log_atac.log_atac as log_atac {
+        input:
+            alignment_log = merge.atac_merged_alignment_log,
+            dups_log = qc_atac.atac_qc_duplicate_stats,
+            pbc_log = qc_atac.atac_qc_pbc_stats
+        }
+
+        if (  "~{pipeline_modality}" == "full" ) {
+            call share_task_archr.archr as archr{
+                input:
+                    atac_frag = filter.atac_filter_fragments,
+                    genome = genome_name,
+                    peak_set = peak_set,
+                    prefix = prefix
+            }
+            call share_task_archr.archr as archr_strict{
+                input:
+                    atac_frag = filter.atac_filter_fragments,
+                    genome = genome_name,
+                    peak_set = peak_set,
+                    prefix = '${prefix}_strict',
+                    min_tss = 5,
+                    min_frags = 1000
+            }
         }
     }
 
     output {
+        # Correction/trimming
+        Array[File]? atac_read1_processed = if defined(trim.fastq_R1_trimmed) then trim.fastq_R1_trimmed else correct.corrected_fastq_R1
+        Array[File]? atac_read2_processed = if defined(trim.fastq_R1_trimmed) then trim.fastq_R2_trimmed else correct.corrected_fastq_R2
+
         # Align
-        File? share_atac_alignment_raw = align.atac_alignment
-        File? share_atac_alignment_raw_index = align.atac_alignment_index
-        File? share_atac_alignment_log = align.atac_alignment_log
-        File? share_atac_alignment_monitor_log = align.atac_alignment_monitor_log
+        File? share_atac_alignment_raw = merge.atac_merged_alignment
+        File? share_atac_alignment_raw_index = merge.atac_merged_alignment_index
+        File? share_atac_alignment_log = merge.atac_merged_alignment_log
 
         # Filter
         File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
@@ -238,15 +265,15 @@ workflow wf_atac {
         File? share_atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
 
         # Log
-        Int share_atac_total_reads = log_atac.atac_total_reads
-        Int share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely
-        Int share_atac_unaligned = log_atac.atac_unaligned
-        Int share_atac_feature_reads = log_atac.atac_feature_reads
-        Int share_atac_duplicate_reads = log_atac.atac_duplicate_reads
-        Float share_atac_nrf = log_atac.atac_nrf
-        Float share_atac_pbc1 = log_atac.atac_pbc1
-        Float share_atac_pbc2 = log_atac.atac_pbc2
-        Float share_atac_percent_duplicates = log_atac.atac_pct_dup
+        Int? share_atac_total_reads = log_atac.atac_total_reads
+        Int? share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely
+        Int? share_atac_unaligned = log_atac.atac_unaligned
+        Int? share_atac_feature_reads = log_atac.atac_feature_reads
+        Int? share_atac_duplicate_reads = log_atac.atac_duplicate_reads
+        Float? share_atac_nrf = log_atac.atac_nrf
+        Float? share_atac_pbc1 = log_atac.atac_pbc1
+        Float? share_atac_pbc2 = log_atac.atac_pbc2
+        Float? share_atac_percent_duplicates = log_atac.atac_pct_dup
 
         # ArchR
         File? share_atac_archr_notebook_output = archr.notebook_output

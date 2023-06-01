@@ -36,8 +36,8 @@ task qc_atac {
         String? prefix
 
         # Runtime
-        Int? cpus = 2
-        Float? disk_factor = 8.0
+        Int? cpus = 8
+        Float? disk_factor = 10.0
         Float? memory_factor = 0.3
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
     }
@@ -46,7 +46,7 @@ task qc_atac {
     Float input_file_size_gb = size(raw_bam, "G") + size(filtered_bam, "G") + size(queryname_final_bam, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 6.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 24.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
@@ -92,7 +92,8 @@ task qc_atac {
     command<<<
         set -e
 
-        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+        # I am not writing to a file anymore because Google keeps track of it automatically.
+        bash $(which monitor_script.sh) 1>&2 &
 
         cp ~{mito_metrics_barcode} mito_metrics
 
@@ -107,18 +108,18 @@ task qc_atac {
 
         # samstats raw
         # output of bowtie2
-        echo '------ START: SAMstats for raw bam ------' 1>&2
-        time samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
+        echo '------ SKIPPING: SAMstats for raw bam ------' 1>&2
+        #time sambamba view -t ~{cpus} in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
 
         # SAMstat final filtered file
         # final bam
-        echo '------ START: SAMstats for final bam ------' 1>&2
-        time samtools view in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
+        echo '------ SKIPPING: SAMstats for final bam ------' 1>&2
+        #time sambamba view -t ~{cpus}  in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
 
         # library complexity
         # queryname_final_bam from filter
         echo '------ START: Compute library complexity ------' 1>&2
-        time samtools view ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
+        time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2
@@ -155,11 +156,11 @@ task qc_atac {
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ~{stats_log}
         echo '------ START: Samtools idxstats on raw ------' 1>&2
-        time samtools idxstats -@ ~{samtools_threads} in.raw.bam >> ~{stats_log}
+        time samtools idxstats -@ ~{cpus} in.raw.bam >> ~{stats_log}
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ~{stats_log}
         echo '------ START: Samtools idxstats on final ------' 1>&2
-        time samtools idxstats -@ ~{samtools_threads} in.filtered.bam >> ~{stats_log}
+        time samtools idxstats -@ ~{cpus} in.filtered.bam >> ~{stats_log}
 
         echo '' > ~{hist_log}
         echo '------ START: Picard CollectInsertSizeMetrics ------' 1>&2
@@ -186,8 +187,8 @@ task qc_atac {
     >>>
 
     output {
-        File atac_qc_samstats_raw = samstats_raw_out
-        File atac_qc_samstats_filtered = samstats_filtered_out
+        File? atac_qc_samstats_raw = samstats_raw_out
+        File? atac_qc_samstats_filtered = samstats_filtered_out
         File atac_qc_pbc_stats = pbc_stats
 
         File atac_qc_final_stats = stats_log
@@ -204,7 +205,7 @@ task qc_atac {
 
         File? atac_qc_barcode_rank_plot = fragment_barcode_rank_plot
 
-        File atac_qc_monitor_log = monitor_log
+        #File? atac_qc_monitor_log = monitor_log
     }
 
     runtime {

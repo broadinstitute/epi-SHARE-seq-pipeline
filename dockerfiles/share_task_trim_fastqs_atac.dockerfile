@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     libncurses5-dev \
     libbz2-dev \
+    pigz \
     python3-dev \
     python3-pip \ 
     wget \

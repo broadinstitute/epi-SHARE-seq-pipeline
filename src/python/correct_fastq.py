@@ -5,14 +5,15 @@ Correct fastq
 """
 
 import argparse
-import dnaio
+import xopen
+from collections import deque
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Perform barcode error correction on read 2 FASTQ file; write corrected barcodes into read names of both read 1 and read 2 FASTQ files; generate QC statistics file.")
-    parser.add_argument("input_r1_fastq_file", help="Filename for uncorrected input read 1 FASTQ file")
-    parser.add_argument("input_r2_fastq_file", help="Filename for uncorrected input read 2 FASTQ file")
-    parser.add_argument("output_r1_fastq_file", help="Filename for corrected output read 1 FASTQ file")
-    parser.add_argument("output_r2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
+    parser.add_argument("input_read1_fastq_file", help="Filename for uncorrected input read 1 FASTQ file")
+    parser.add_argument("input_read2_fastq_file", help="Filename for uncorrected input read 2 FASTQ file")
+    parser.add_argument("output_read1_fastq_file", help="Filename for corrected output read 1 FASTQ file")
+    parser.add_argument("output_read2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
     parser.add_argument("whitelist_file", help="Filename for whitelisted combinations of R1R2R3 barcodes, one per line")
     parser.add_argument("sample_type", choices=["ATAC", "RNA"], help="Sample modality")
     parser.add_argument("prefix", help="Prefix for naming output QC txt file")
@@ -70,8 +71,8 @@ def check_putative_barcode(barcode_str, barcode_dict, quality_str):
                     
     return value, quality
 
-def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
-                  output_r1_fastq_file, output_r2_fastq_file,
+def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
+                  output_read1_fastq_file, output_read2_fastq_file,
                   r1_barcode_dict, r2_barcode_dict, r3_barcode_dict,
                   sample_type, pkr, prefix):
     """
@@ -85,15 +86,41 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
     """
     # QC counters
     cellbarcode_match = cellbarcode_mismatch = cellbarcode_poly_g = read2_start_poly_g = 0
+
+    read1_out_writer = xopen.xopen(output_read1_fastq_file, mode = 'w')
+    read2_out_writer = xopen.xopen(output_read2_fastq_file, mode ='w')
+
+    buffer1 = deque()
+    buffer2 = deque()
+    buffer_counter = 0
     
     # process FASTQs together
-    with dnaio.open(input_r1_fastq_file, input_r2_fastq_file) as reader, \
-         dnaio.open(output_r1_fastq_file, output_r2_fastq_file, mode="w") as writer:
-             
-        for read_1, read_2 in reader:
+    with xopen.xopen(input_read1_fastq_file, mode= "r", threads= 8) as read1_fh, xopen.xopen(input_read2_fastq_file, mode= "r", threads= 8) as read2_fh:
+        for readline1, readline2 in zip(read1_fh, read2_fh):
+            
+            name1 = readline1.strip()
+            name2 = readline2.strip()
+
+            readline1 = next(read1_fh)
+            readline2 = next(read2_fh)
+
+
+            sequence1 = readline1.strip()
+            sequence2 = readline2.strip()
+
+            next(read1_fh)
+            next(read2_fh)
+
+            readline1 = next(read1_fh)
+            readline2 = next(read2_fh)
+
+            quality1 = readline1.strip()
+            quality2 = readline2.strip()
+
+
             # last 99bp of read 2 contains barcode sequences
-            read_2_barcode_sequence = read_2.sequence[-99:]
-            read_2_barcode_quality = read_2.qualities[-99:]
+            read_2_barcode_sequence = sequence2[-99:]
+            read_2_barcode_quality = quality2[-99:]
             # extract 10bp sequence containing R1 barcode, 10bp sequence containing R2 barcode, 
             # 9bp sequence containing R3 barcode, and corresponding quality strings
             r1_str, r2_str, r3_str = read_2_barcode_sequence[14:24], read_2_barcode_sequence[52:62], read_2_barcode_sequence[90:99]
@@ -105,32 +132,45 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
             r3, q3 = check_putative_barcode(r3_str, r3_barcode_dict, q3_str)
             
             # check first ten base pairs of read 2 for homopolymer G
-            if read_2.sequence[:10] == "G"*10:
+            if sequence2[:10] == "G"*10:
                 read2_start_poly_g += 1
                 
-            # if corrected barcodes found, write to both R1 and R2 FASTQ files
+            # if corrected barcodes found, write to both read 1 and read 2 FASTQ files
             elif r1 and r2 and r3:
                 cellbarcode_match +=1
                 # correct FASTQ reads
                 if sample_type == "RNA":
                     # add corrected barcodes, PKR, and UMI to header; remove any information after a space
-                    corrected_header = read_1.name.split(" ")[0] + "_" + ",".join(filter(None, [r1, r2, r3, pkr])) + "_" + read_2.sequence[:10]                
-                    # create SequenceRecord for read 1; use corrected header
-                    corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)                
-                    # create SequenceRecord for read 2; use corrected header, read has format R1R2R3UMI
-                    corrected_read_2_sequence = r1 + r2 + r3 + read_2.sequence[:10]
-                    corrected_read_2_quality = q1 + q2 + q3 + read_2.qualities[:10]
-                    corrected_read_2 = dnaio.SequenceRecord(corrected_header, corrected_read_2_sequence, corrected_read_2_quality)
+                    corrected_header = name1.split(" ")[0] + "_" + ",".join(filter(None, [r1, r2, r3, pkr])) + "_" + sequence2[:10]                
+
+                    # add corrected read 1 to buffer; use corrected header
+                    corrected_read1 = f"{corrected_header}\n{sequence1}\n+\n{quality1}\n"
+                    buffer1.append(corrected_read1)
+                    # add corrected read 2 to buffer; use corrected header, read has format R1R2R3UMI
+                    corrected_sequence2 = r1 + r2 + r3 + sequence2[:10]
+                    corrected_quality2 = q1 + q2 + q3 + quality2[:10]
+                    corrected_read2 = f"{corrected_header}\n{corrected_sequence2}\n+\n{corrected_quality2}\n"
+                    buffer2.append(corrected_read2)
+                    buffer_counter += 1
                     
                 elif sample_type == "ATAC":
                     # add corrected barcodes and PKR to header; remove any information after a space
-                    corrected_header = read_1.name.split(" ")[0] + "_" + ",".join(filter(None, [r1, r2, r3, pkr]))
-                    # create SequenceRecord object for read 1: use corrected header
-                    corrected_read_1 = dnaio.SequenceRecord(corrected_header, read_1.sequence, read_1.qualities)
-                    # create SequenceRecord object for read 2: use corrected header, remove 99bp barcode
-                    corrected_read_2 = dnaio.SequenceRecord(corrected_header, read_2.sequence[:-99], read_2.qualities[:-99])
+                    corrected_header = name1.split(" ")[0] + "_" + ",".join(filter(None, [r1, r2, r3, pkr]))
+                    # add corrected read 1 to buffer; use corrected header
+                    corrected_read1 = f"{corrected_header}\n{sequence1}\n+\n{quality1}\n"
+                    buffer1.append(corrected_read1)
+                    # add corrected read 2 to buffer; use corrected header, remove 99bp barcode
+                    corrected_read2 = f"{corrected_header}\n{sequence2[:-99]}\n+\n{quality2[:-99]}\n"
+                    buffer2.append(corrected_read2)
+                    buffer_counter += 1
+
                 # write to corrected FASTQ files
-                writer.write(corrected_read_1, corrected_read_2)
+                if buffer_counter == 10000000:
+                    read1_out_writer.write("".join(buffer1))
+                    buffer1.clear()
+                    read2_out_writer.write("".join(buffer2))
+                    buffer2.clear()
+                    buffer_counter = 0
                 
             # check for homopolymer G in uncorrected barcode windows
             elif "G"*8 in r1_str and "G"*8 in r2_str and "G"*8 in r3_str:
@@ -138,6 +178,14 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
                 
             else:
                 cellbarcode_mismatch += 1
+
+    if buffer_counter > 0:
+        read1_out_writer.write("".join(buffer1))
+        buffer1.clear()
+        read2_out_writer.write("".join(buffer2))
+        buffer2.clear()
+        buffer_counter = 0
+
     
     # write QC stats
     with open(f"{prefix}_barcode_qc.txt", "w") as f:
@@ -147,10 +195,10 @@ def process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
 
 def main():
     args = parse_arguments()
-    input_r1_fastq_file = getattr(args, "input_r1_fastq_file")
-    input_r2_fastq_file = getattr(args, "input_r2_fastq_file")
-    output_r1_fastq_file = getattr(args, "output_r1_fastq_file")
-    output_r2_fastq_file = getattr(args, "output_r2_fastq_file")
+    input_read1_fastq_file = getattr(args, "input_read1_fastq_file")
+    input_read2_fastq_file = getattr(args, "input_read2_fastq_file")
+    output_read1_fastq_file = getattr(args, "output_read1_fastq_file")
+    output_read2_fastq_file = getattr(args, "output_read2_fastq_file")
     whitelist_file = getattr(args, "whitelist_file")
     sample_type = getattr(args, "sample_type")
     prefix = getattr(args, "prefix")
@@ -165,8 +213,8 @@ def main():
     r3_barcode_dict = create_barcode_dict(r3_barcodes)
 
     # write corrected FASTQs and QC stats
-    process_fastqs(input_r1_fastq_file, input_r2_fastq_file,
-                   output_r1_fastq_file, output_r2_fastq_file,
+    process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
+                   output_read1_fastq_file, output_read2_fastq_file,
                    r1_barcode_dict, r2_barcode_dict, r3_barcode_dict,
                    sample_type, pkr, prefix)
 
