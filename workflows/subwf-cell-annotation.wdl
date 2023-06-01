@@ -30,7 +30,7 @@ workflow wf_cell_annotation {
         
         # Docker images
         String? docker_image_get_cellxgene_data="lzj1769/get_cellxgene_data"
-        String? docker_image_cell_annotation="lzj1769/cell-annotation"
+        String? docker_image_cell_annotation="lzj1769/cell_annotation"
     
         # Runtime parameters
         Float? disk_factor = 0.1
