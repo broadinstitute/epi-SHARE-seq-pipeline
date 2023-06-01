@@ -40,10 +40,12 @@ task cell_annotation {
     Float input_file_size_mb = size(query_data, "M")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 32.0 + memory_factor * input_file_size_mb
+    #Float mem_gb = 32.0 + memory_factor * input_file_size_mb
+    Float mem_gb = 100
 
     # Determining disk size base on the size of the input files.
-    Int disk_gb = round(disk_factor * input_file_size_mb)
+    #Int disk_gb = round(disk_factor * input_file_size_mb)
+    Int disk_gb = 100
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
