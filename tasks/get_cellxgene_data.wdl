@@ -10,12 +10,15 @@ task get_cellxgene_data {
     }
 
     input {
+        # Prefix
+        String prefix="prefix"
+        
         # Reference data id and name
         String reference_data_id
         String reference_data_name
 
         # Docker image
-        String? docker_image
+        String docker_image
     }
     
     # Determining memory size base on the size of the input files.

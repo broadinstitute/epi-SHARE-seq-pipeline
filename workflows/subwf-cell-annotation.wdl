@@ -23,11 +23,11 @@ workflow wf_cell_annotation {
         File query_data
         
         # Project prefix
-        String? prefix="prefix"
+        String prefix="prefix"
         
         # Docker images
-        String? docker_image_get_cellxgene_data="lzj1769/get_cellxgene_data"
-        String? docker_image_cell_annotation="lzj1769/cell-annotation"
+        String docker_image_get_cellxgene_data="lzj1769/get_cellxgene_data"
+        String docker_image_cell_annotation="lzj1769/cell-annotation"
     
         # Runtime parameters
         Float? disk_factor = 0.1
