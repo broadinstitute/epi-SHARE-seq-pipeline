@@ -1,9 +1,10 @@
 version 1.0
 
 # Import the tasks called by the pipeline
+import "../tasks/get_cellxgene_data" as get_cellxgene_data
 import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
 
-workflow wf_rna {
+workflow wf_cell_annotation {
     meta {
         version: 'v0.1'
         author: 'Zhijian Li'
@@ -14,28 +15,40 @@ workflow wf_rna {
 
     input {
         String reference_data_id
+        String reference_data_name
         String reference_label
 
         File query_data
         String genome
 
         String? prefix="prefix"
-
-        #Seurat runtime parameters
+        
+        # Docker images
+        String? docker_image_get_cellxgene_data="lzj1769/get_cellxgene_data"
+        String? docker_image_cell_annotation="lzj1769/cell-annotation"
+    
+        # Runtime parameters
         Float? disk_factor = 0.1
         Float? memory_factor = 0.15
-                
-        String? docker_image="lzj1769/cell-annotation"
+    }
+
+    call get_cellxgene_data.get_cellxgene_data as get_cellxgene_data{
+        input:
+            reference_data_id = reference_data_id,
+            reference_data_name = reference_data_name,
+            docker_image = docker_image_get_cellxgene_data,
+            disk_factor = disk_factor
     }
 
     call share_task_cell_annotation.cell_annotation as cell_annotation{
         input:
             reference_data_id = reference_data_id,
+            reference_data_name = reference_data_name,
             reference_label = reference_label,
             query_data = query_data,
             genome = genome,
             prefix = prefix,
-            docker_image = docker_image,
+            docker_image = docker_image_cell_annotation,
             disk_factor = disk_factor,
             memory_factor = memory_factor
     }
