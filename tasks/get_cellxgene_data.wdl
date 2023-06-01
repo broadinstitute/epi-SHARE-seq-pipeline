@@ -27,7 +27,7 @@ task get_cellxgene_data {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String reference_h5ad = "${reference_data_name}.h5ad"
+    String reference_h5ad = "${reference_data_name}"
     String monitor_log = "monitoring.log"
     String running_log = "get_cellxgene_data.log"
     
@@ -38,7 +38,7 @@ task get_cellxgene_data {
         
         # Download data from cellxgene
         python3 $(which get_cellxgene_data.py) \
-        --dataset_id ${reference_data_id} --output_finame ${reference_data_name}
+        ${reference_data_id} ${reference_data_name}
 
     }
 
@@ -66,7 +66,7 @@ task get_cellxgene_data {
         reference_data_name: {
             description: 'Reference dataset name',
             help: 'String used to name the reference data.',
-            examples: ['reference']
+            examples: ['reference.h5ad']
         }
 
         docker_image: {

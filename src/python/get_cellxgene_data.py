@@ -12,8 +12,8 @@ import cellxgene_census
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Download data from cellxgene server")
-    parser.add_argument("--dataset_id", help="Dataset id to download")
-    parser.add_argument("--output_filename", help="Output filename")
+    parser.add_argument("dataset_id", help="Dataset id to download")
+    parser.add_argument("output_filename", help="Output filename")
     
     return parser.parse_args()
 
