@@ -10,28 +10,24 @@ task cell_annotation {
     }
 
     input {
-        # 
         String genome
 
-        # Input
         String reference_data_id
         String reference_data_name
         String reference_label
         File query_data
 
-
-        # Output
         String prefix
         
-        String output_filename = "${prefix}.rna.cell.annotation.notebook.${genome}.ipynb"
-        String log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
+        String? output_filename = "${prefix}.rna.cell.annotation.notebook.${genome}.ipynb"
+        String? log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
 
         # Docker image
-        String docker_image
+        String? docker_image
         
         # Runtime parameter
-        Float? disk_factor = 0.1
-        Float? memory_factor = 0.15
+        Float? disk_factor
+        Float? memory_factor
 
         String? papermill = "TRUE"
     }

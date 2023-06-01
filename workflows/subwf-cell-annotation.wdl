@@ -2,7 +2,7 @@ version 1.0
 
 # Import the tasks called by the pipeline
 import "../tasks/get_cellxgene_data.wdl" as get_cellxgene_data
-import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
+#import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
 
 workflow wf_cell_annotation {
     meta {
@@ -41,24 +41,24 @@ workflow wf_cell_annotation {
             docker_image = docker_image_get_cellxgene_data
     }
 
-    call share_task_cell_annotation.cell_annotation as cell_annotation{
-        input:
-            reference_data_id = reference_data_id,
-            reference_data_name = reference_data_name,
-            reference_label = reference_label,
-            query_data = query_data,
-            genome = genome,
-            prefix = prefix,
-            docker_image = docker_image_cell_annotation,
-            disk_factor = disk_factor,
-            memory_factor = memory_factor
-    }
+    # call share_task_cell_annotation.cell_annotation as cell_annotation{
+    #     input:
+    #         reference_data_id = reference_data_id,
+    #         reference_data_name = reference_data_name,
+    #         reference_label = reference_label,
+    #         query_data = query_data,
+    #         genome = genome,
+    #         prefix = prefix,
+    #         docker_image = docker_image_cell_annotation,
+    #         disk_factor = disk_factor,
+    #         memory_factor = memory_factor
+    # }
 
-    output {
-        File share_rna_cell_annotation_notebook_output = cell_annotation.notebook_output
-        File share_rna_cell_annotation_notebook_log = cell_annotation.notebook_log
-        File share_rna_cell_annotation_monitor_log = cell_annotation.monitor_log
-        File share_rna_cell_annotation_prediction = cell_annotation.prediction
-        File share_rna_cell_annotation_predicted_labels_plot = cell_annotation.predicted_labels_plot
-    }
+    # output {
+    #     File share_rna_cell_annotation_notebook_output = cell_annotation.notebook_output
+    #     File share_rna_cell_annotation_notebook_log = cell_annotation.notebook_log
+    #     File share_rna_cell_annotation_monitor_log = cell_annotation.monitor_log
+    #     File share_rna_cell_annotation_prediction = cell_annotation.prediction
+    #     File share_rna_cell_annotation_predicted_labels_plot = cell_annotation.predicted_labels_plot
+    # }
 }
