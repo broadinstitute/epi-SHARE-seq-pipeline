@@ -54,11 +54,17 @@ workflow wf_cell_annotation {
     #         memory_factor = memory_factor
     # }
 
-    # output {
-    #     File share_rna_cell_annotation_notebook_output = cell_annotation.notebook_output
-    #     File share_rna_cell_annotation_notebook_log = cell_annotation.notebook_log
-    #     File share_rna_cell_annotation_monitor_log = cell_annotation.monitor_log
-    #     File share_rna_cell_annotation_prediction = cell_annotation.prediction
-    #     File share_rna_cell_annotation_predicted_labels_plot = cell_annotation.predicted_labels_plot
-    # }
+    output {
+        # Output from get_cellxgene_data
+        File reference_h5ad = reference_h5ad
+        File get_cellxgene_data_monitor = get_cellxgene_data_monitor
+        File get_cellxgene_data_log = get_cellxgene_data_log
+        
+        # Output from cell_annotation
+        # File share_rna_cell_annotation_notebook_output = cell_annotation.notebook_output
+        # File share_rna_cell_annotation_notebook_log = cell_annotation.notebook_log
+        # File share_rna_cell_annotation_monitor_log = cell_annotation.monitor_log
+        # File share_rna_cell_annotation_prediction = cell_annotation.prediction
+        # File share_rna_cell_annotation_predicted_labels_plot = cell_annotation.predicted_labels_plot
+    }
 }

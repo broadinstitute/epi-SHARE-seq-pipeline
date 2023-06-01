@@ -96,7 +96,7 @@ workflows:
          tags:
              - /.*/
 
-   - name: "SHARE-seq-rna-cell-annotation"
+   - name: "SHARE-seq-cell-annotation"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-cell-annotation.wdl
      filters:  # Only develop or master branches and localAligner/** tags
