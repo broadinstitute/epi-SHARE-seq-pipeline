@@ -65,10 +65,9 @@ RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "install.packages('anndata')"
 
-COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
-
 RUN python3 -m pip install --break-system-packages jupyter papermill anndata
 
+COPY src/bash/monitor_script.sh /usr/local/bin
 COPY src/jupyter_nb/cell_annotation_notebook.ipynb /usr/local/bin/
 COPY src/R/cell_annotation_helper_functions.R /usr/local/bin/
 

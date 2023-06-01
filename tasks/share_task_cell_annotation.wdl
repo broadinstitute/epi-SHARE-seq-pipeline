@@ -10,15 +10,19 @@ task cell_annotation {
     }
 
     input {
+        # Sample name
+        String prefix
+
+        # Reference genome
         String genome
 
-        String reference_data_id
+        # Reference data name and id
         String reference_data_name
         String reference_label
+
+        # Query data
         File query_data
 
-        String prefix
-        
         String? output_filename = "${prefix}.rna.cell.annotation.notebook.${genome}.ipynb"
         String? log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
 
@@ -60,7 +64,7 @@ task cell_annotation {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
         papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
-        -p reference_data_id ${reference_data_id} \
+        -p reference_data_name ${reference_data_name} \
         -p reference_label ${reference_label} \
         -p query_data ${query_data} \
         -p genome ${genome} \
@@ -86,10 +90,10 @@ task cell_annotation {
     }
 
     parameter_meta {
-        reference_data_id: {
-            description: 'Reference dataset id',
-            help: 'The dataset id from cellxgene data base.',
-            examples: ['3bbb6cf9-72b9-41be-b568-656de6eb18b5']
+        reference_data_name: {
+            description: 'Reference data',
+            help: 'This file will be used as reference',
+            examples: ['reference.h5ad']
         }
         
         query_data: {
