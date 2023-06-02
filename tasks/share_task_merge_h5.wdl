@@ -42,7 +42,7 @@ task share_merge_h5 {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        if [ '~{pkrs}' == '' ]; then
+        if [ '~{sep='' pkrs}' == '' ]; then
             pkr = ''
         else
             pkr = '--pkr ~{sep=' ' pkrs}'
