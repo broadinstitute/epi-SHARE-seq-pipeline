@@ -122,12 +122,6 @@ task cell_annotation {
             example: "shareseq"
         }
 
-        papermill: {
-            description: 'Boolean papermill flag',
-            help: 'Flag to notebook run in papermill mode',
-            example: 'TRUE'
-        }
-
         docker_image: {
             description: 'Docker image.',
             help: 'Docker image for preprocessing step.',
