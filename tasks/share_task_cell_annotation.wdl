@@ -48,6 +48,7 @@ task cell_annotation {
     
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome}'
+    String monitor_log = "cell_annotation_monitor.log"
 
     command {
         set -e
@@ -71,7 +72,7 @@ task cell_annotation {
 
     output {
         File reference_h5ad = "${reference_data_name}"
-        File monitor_log = "cell_annotation_monitor.log"
+        File monitor_log = "${monitor_log}"
         File notebook_log = "log/${prefix}.cell.annotation.logfile.${genome}.txt"
         File prediction = '${prefix}.cell.annotation.prediction.${genome}.csv'
     }
