@@ -31,7 +31,7 @@ task cell_annotation {
         Float? disk_factor
         Float? memory_factor
 
-        String? papermill = "TRUE"
+        String? gene_id_to_symbol = "TRUE"
     }
     
     # Determine the size of the input
