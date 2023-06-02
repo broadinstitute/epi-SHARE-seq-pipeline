@@ -20,6 +20,7 @@ suppressMessages(library(patchwork))
 suppressMessages(library(cowplot))
 suppressMessages(library(EnsDb.Mmusculus.v79))
 suppressMessages(library(EnsDb.Hsapiens.v86))
+suppressMessages(library(optparse))
 
 options("logr.notes" = FALSE)
 options(future.globals.maxSize=10e9)

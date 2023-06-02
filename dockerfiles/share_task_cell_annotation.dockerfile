@@ -73,7 +73,7 @@ RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "install.packages('anndata')"
 
-RUN python3 -m pip install --break-system-packages anndata cellxgene-census
+RUN python3 -m pip install anndata cellxgene-census
 
 COPY src/bash/monitor_script.sh /usr/local/bin
 COPY src/python/get_cellxgene_data.py /usr/local/bin

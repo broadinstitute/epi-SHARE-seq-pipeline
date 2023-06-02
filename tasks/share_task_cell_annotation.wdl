@@ -24,14 +24,14 @@ task cell_annotation {
         # Query data
         File query_data
  
+        String? gene_id_to_symbol = "TRUE"
+
         # Docker image
         String? docker_image
         
         # Runtime parameter
         Float? disk_factor
         Float? memory_factor
-
-        String? gene_id_to_symbol = "TRUE"
     }
     
     # Determine the size of the input
