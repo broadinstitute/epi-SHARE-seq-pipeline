@@ -42,7 +42,7 @@ option_list = list(
     make_option(c("--genome"), type="character", default=NULL, 
                 help="Reference genome. Should be either hg38 or mm10", 
                 metavar="Reference genome"),
-    make_option(c("--gene_id_to_symbol"), type="logical", default=TRUE, 
+    make_option(c("--gene_id_to_symbol"), type="character", default="TRUE", 
                 help="Set true if the reference data uses gene id as feature name. 
                 This is usually true for data downloaded from cellxgene server", 
                 metavar="character")
@@ -57,8 +57,7 @@ reference_data_name = opt$reference_data_name
 reference_label = opt$reference_label
 query_data = opt$query_data
 genome = opt$genome
-gene_id_to_symbol = opt$gene_id_to_symbol
-
+gene_id_to_symbol = as.logical(opt$gene_id_to_symbol)
 
 # Function to save plots
 plot_filename = glue::glue("{prefix}.cell.annotation.plots.{genome}")

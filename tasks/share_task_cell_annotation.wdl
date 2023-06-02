@@ -24,18 +24,18 @@ task cell_annotation {
         # Query data
         File query_data
  
-        String? gene_id_to_symbol = "TRUE"
+        String? gene_id_to_symbol 
 
         # Docker image
         String? docker_image
         
         # Runtime parameter
-        Float? disk_factor
         Float? memory_factor
+        Float? disk_factor
     }
     
     # Determine the size of the input
-    Float input_file_size_mb = size(query_data, "M")
+    Float input_file_size_mb = size(query_data, "G")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 32.0 + memory_factor * input_file_size_mb

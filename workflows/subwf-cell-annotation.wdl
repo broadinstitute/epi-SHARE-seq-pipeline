@@ -24,6 +24,10 @@ workflow wf_cell_annotation {
         String reference_data_name
         String reference_label
 
+        # Set true if the reference data uses gene id as feature name. 
+        # This is usually true for data downloaded from cellxgene server
+        String? gene_id_to_symbol = "TRUE"
+
         # Query data
         File query_data
         
@@ -31,8 +35,8 @@ workflow wf_cell_annotation {
         String? docker_image="lzj1769/cell_annotation"
     
         # Runtime parameters
-        Float? disk_factor = 0.1
-        Float? memory_factor = 0.15
+        Float? memory_factor = 5
+        Float? disk_factor = 10
     }
 
     call share_task_cell_annotation.cell_annotation as cell_annotation{
@@ -42,6 +46,7 @@ workflow wf_cell_annotation {
             reference_label = reference_label,
             query_data = query_data,
             genome = genome,
+            gene_id_to_symbol = gene_id_to_symbol,
             prefix = prefix,
             docker_image = docker_image,
             disk_factor = disk_factor,
