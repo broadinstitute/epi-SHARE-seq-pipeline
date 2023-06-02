@@ -34,7 +34,7 @@ task share_merge_h5 {
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
     String output_file = '${default='aggregated' prefix}.h5'
-    String pkr_option = if '${pkrs}'=='' then '${pkrs}' else '--pkrs ${pkrs}'
+    String pkr_option = if '${pkrs}'=='' then '' else '--pkrs ${sep=' ' pkrs}'
     String ensembl_option = if '${gene_naming}'=='ensembl' then '--ensembl' else ''
     String monitor_log = 'monitor.log'
 
@@ -44,7 +44,7 @@ task share_merge_h5 {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Create merged h5 matrix
-        python3 $(which merge_h5.py) ~{output_file} ~{tars} ~{pkr_option} ~{ensembl_option}
+        python3 $(which merge_h5.py) ~{output_file} ~{sep=' ' tars} ~{pkr_option} ~{ensembl_option}
     >>>
 
     output {
