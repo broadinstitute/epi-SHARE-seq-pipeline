@@ -43,9 +43,9 @@ task share_merge_h5 {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         if [ '~{sep='' pkrs}' == '' ]; then
-            pkr = ''
+            pkr=''
         else
-            pkr = '--pkr ~{sep=' ' pkrs}'
+            pkr='--pkr ~{sep=' ' pkrs}'
         fi
 
         # Create merged h5 matrix
