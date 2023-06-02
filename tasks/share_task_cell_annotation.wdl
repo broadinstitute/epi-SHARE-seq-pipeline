@@ -67,13 +67,6 @@ task cell_annotation {
         ${genome} \
         ${gene_id_to_symbol}
         
-        # papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
-        # -p reference_data_name ${reference_data_name} \
-        # -p reference_label ${reference_label} \
-        # -p query_data ${query_data} \
-        # -p genome ${genome} \
-        # -p prefix ${prefix} \
-        # -p papermill ${papermill}
     }
 
     output {
