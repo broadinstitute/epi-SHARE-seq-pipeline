@@ -49,7 +49,8 @@ RUN apt-get install -y --no-install-recommends \
     libgeos-dev \
     meson \
     libblas-dev \
-    liblapack-dev
+    liblapack-dev \
+    libbz2-dev
     
 # Install python and R
 RUN apt-get install -y --no-install-recommends python3 python3-pip r-base

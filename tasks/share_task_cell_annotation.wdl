@@ -11,7 +11,7 @@ task cell_annotation {
 
     input {
         # Sample or project name
-        String prefix
+        String? prefix = "prefix"
 
         # Reference genome
         String genome
@@ -66,7 +66,7 @@ task cell_annotation {
         ${query_data} \
         ${genome} \
         ${gene_id_to_symbol}
-        
+
     }
 
     output {
