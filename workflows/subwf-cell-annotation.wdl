@@ -50,10 +50,8 @@ workflow wf_cell_annotation {
 
     output {
         File share_cell_annotation_reference_h5ad = cell_annotation.reference_h5ad
-        File share_cell_annotation_notebook_output = cell_annotation.notebook_output
         File share_cell_annotation_notebook_log = cell_annotation.notebook_log
         File share_cell_annotation_monitor_log = cell_annotation.monitor_log
         File share_cell_annotation_prediction = cell_annotation.prediction
-        File share_cell_annotation_predicted_labels_plot = cell_annotation.predicted_labels_plot
     }
 }
