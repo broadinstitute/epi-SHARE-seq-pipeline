@@ -60,11 +60,11 @@ gene_id_to_symbol = opt$gene_id_to_symbol
 
 
 # Function to save plots
-plot_filename = glue::glue("{prefix}.rna.cell.annotation.plots.{genome}")
+plot_filename = glue::glue("{prefix}.cell.annotation.plots.{genome}")
 dir.create(plot_filename, showWarnings=F)
 
 printPNG <- function(name, plot, papermill, width = 22, height = 11){
-    filename = glue::glue("{plot_filename}/{prefix}.rna.cell.annotation.{name}.{genome}.png")
+    filename = glue::glue("{plot_filename}/{prefix}.cell.annotation.{name}.{genome}.png")
     
     if(papermill){
         ggsave(plot = plot, filename = filename, width = width, height = height)
@@ -72,7 +72,7 @@ printPNG <- function(name, plot, papermill, width = 22, height = 11){
 }
 
 # Create log file
-logfile <- file.path(glue::glue("{prefix}.rna.cell.annotation.logfile.{genome}.txt"))
+logfile <- file.path(glue::glue("{prefix}.cell.annotation.logfile.{genome}.txt"))
 lf <- log_open(logfile)
 
 
@@ -228,7 +228,7 @@ tryCatch(
         obj.query <- AddMetaData(obj.query, metadata = predictions)
 
         write.csv(predictions, 
-                  file = glue::glue("{prefix}.rna.cell.annotation.prediction.{genome}.csv"),
+                  file = glue::glue("{prefix}.cell.annotation.prediction.{genome}.csv"),
                   quote = FALSE)
         
         log_print("SUCCESSFUL: Predicting labels for query data")

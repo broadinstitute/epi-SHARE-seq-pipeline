@@ -57,7 +57,16 @@ task cell_annotation {
         # Download data from cellxgene
         python3 $(which get_cellxgene_data.py) ${reference_data_id} ${reference_data_name}
 
-        # # Perform cell annotation
+
+        # Perform cell annotation
+        Rscript $(which cell_annotation.R) \
+        ${prefix} \
+        ${reference_data_name} \
+        ${reference_label} \
+        ${query_data} \
+        ${genome} \
+        ${gene_id_to_symbol}
+        
         # papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
         # -p reference_data_name ${reference_data_name} \
         # -p reference_label ${reference_label} \
@@ -69,10 +78,9 @@ task cell_annotation {
 
     output {
         File reference_h5ad = "${reference_data_name}"
-        # File notebook_output = output_filename
-        File notebook_log = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
         File monitor_log = "cell_annotation_monitor.log"
-        File prediction = '${prefix}.rna.cell.annotation.prediction.${genome}.csv'
+        File notebook_log = "log/${prefix}.cell.annotation.logfile.${genome}.txt"
+        File prediction = '${prefix}.cell.annotation.prediction.${genome}.csv'
     }
 
     runtime {
