@@ -91,7 +91,7 @@ workflows:
          tags:
              - /.*/
 
-    - name: "SHARE-seq-aggregate-counts"
+   - name: "SHARE-seq-aggregate-counts"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-aggregate-counts.wdl
      filters:  # Only develop or master branches and localAligner/** tags
