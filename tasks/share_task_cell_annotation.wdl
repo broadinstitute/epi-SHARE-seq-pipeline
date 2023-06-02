@@ -128,12 +128,6 @@ task cell_annotation {
             example: 'TRUE'
         }
 
-        output_filename: {
-            description: 'Output jupyter notebook name',
-            help: 'The name assigned to output jupyter notebook',
-            examples: 'output.ipynb'
-        }
-
         docker_image: {
             description: 'Docker image.',
             help: 'Docker image for preprocessing step.',
