@@ -3,7 +3,7 @@
 # Based on Debian slim
 ############################################################
 
-FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79 as builder
+FROM ubuntu@sha256:2fdb1cf4995abb74c035e5f520c0f3a46f12b3377a59e86ecca66d8606ad64f9
 
 LABEL maintainer = "Zhijian Li"
 LABEL software = "Share-seq pipeline"
@@ -12,15 +12,23 @@ LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
 LABEL software.task="cell-annotation"
 
-RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-save -e "cat(Sys.getenv('R_HOME'))")/etc/Rprofile.site
+# To prevent time zone prompt
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV R_LIBS_USER=/usr/local/lib/R
-ENV RETICULATE_MINICONDA_ENABLED=FALSE
+## Create new user 
+ENV USER=shareseq
+WORKDIR /home/$USER
+RUN groupadd -r $USER && \
+    useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
+    chown $USER:$USER /home/$USER
 
-RUN apt-get update -qq && \
-    apt-get install -y -qq --no-install-recommends\
-    cmake \
-    git \
+# Install libraries
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    patch \
+    build-essential \
     binutils \
     gtk-doc-tools \
     libcairo2-dev \
@@ -38,18 +46,17 @@ RUN apt-get update -qq && \
     libxml2-dev \
     libxt-dev \
     libgeos-dev \
-    meson \
-    pkg-config \
-    python3 \
-    python3-pip && \
-    rm -rf /var/lib/apt/lists/*
+    meson 
 
-ENV USER=shareseq
-WORKDIR /home/$USER
+# Install python and R
+RUN apt-get install -y --no-install-recommends python3 python3-pip r-base
 
-RUN groupadd -r $USER &&\
-    useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
-    chown $USER:$USER /home/$USER
+RUN apt-get install -y --no-install-recommends libblas-dev liblapack-dev
+
+RUN rm -rf /var/lib/apt/lists/*
+
+RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-save -e "cat(Sys.getenv('R_HOME'))")/etc/Rprofile.site
+ENV R_LIBS_USER=/usr/local/lib/R
 
 RUN R --no-echo --no-restore --no-save -e "install.packages('hdf5r')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('remotes')"
@@ -59,16 +66,15 @@ RUN R --no-echo --no-restore --no-save -e "install.packages('BiocManager')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('glue')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('Matrix')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('SeuratObject')"
-RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.3.0')"
-RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=F, ask=F)"
-RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
-RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
-RUN R --no-echo --no-restore --no-save -e "install.packages('anndata')"
+# RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.3.0')"
+# RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=F, ask=F)"
+# RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
+# RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('anndata')"
 
-RUN python3 -m pip install --break-system-packages jupyter papermill anndata
+# RUN python3 -m pip install --break-system-packages anndata cellxgene-census
 
-COPY src/bash/monitor_script.sh /usr/local/bin
-COPY src/jupyter_nb/cell_annotation_notebook.ipynb /usr/local/bin/
-COPY src/R/cell_annotation_helper_functions.R /usr/local/bin/
-
-RUN R -e "IRkernel::installspec()"
+# COPY src/bash/monitor_script.sh /usr/local/bin
+# COPY src/python/get_cellxgene_data.py /usr/local/bin
+# COPY src/jupyter_nb/cell_annotation_notebook.ipynb /usr/local/bin/
+# COPY src/R/cell_annotation_helper_functions.R /usr/local/bin/

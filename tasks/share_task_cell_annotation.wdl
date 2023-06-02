@@ -10,22 +10,20 @@ task cell_annotation {
     }
 
     input {
-        # Sample name
+        # Sample or project name
         String prefix
 
         # Reference genome
         String genome
 
         # Reference data name and id
+        String reference_data_id
         String reference_data_name
         String reference_label
 
         # Query data
         File query_data
-
-        String? output_filename = "${prefix}.rna.cell.annotation.notebook.${genome}.ipynb"
-        String? log_filename = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
-
+ 
         # Docker image
         String? docker_image
         
@@ -40,31 +38,26 @@ task cell_annotation {
     Float input_file_size_mb = size(query_data, "M")
 
     # Determining memory size base on the size of the input files.
-    #Float mem_gb = 32.0 + memory_factor * input_file_size_mb
-    Float mem_gb = 100
+    Float mem_gb = 32.0 + memory_factor * input_file_size_mb
 
     # Determining disk size base on the size of the input files.
-    #Int disk_gb = round(disk_factor * input_file_size_mb)
-    Int disk_gb = 100
+    Int disk_gb = round(disk_factor * input_file_size_mb)
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
     
-    String monitor_log = "rna_cell_annotation_monitor.log"
-
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome}'
-    String predicted_labels_plot = '${plots_filepath}/${prefix}.rna.cell.annotation.predicted.labels.${genome}.png'
-    String predicted_scores_plot = '${plots_filepath}/${prefix}.rna.cell.annotation.predicted.scores.${genome}.png'
-
-    #Other filepaths
-    String prediction = '${prefix}.rna.cell.annotation.prediction.${genome}.csv'
-
+    
     command {
         set -e
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
+        # Download data from cellxgene
+        python3 $(which get_cellxgene_data.py) ${reference_data_id} ${reference_data_name}
+
+        # Perform cell annotation
         papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
         -p reference_data_name ${reference_data_name} \
         -p reference_label ${reference_label} \
@@ -75,12 +68,11 @@ task cell_annotation {
     }
 
     output {
+        File reference_h5ad = "${reference_data_name}"
         File notebook_output = output_filename
-        File notebook_log = log_filename
-        File monitor_log = monitor_log
-        File prediction = prediction
-        File predicted_labels_plot = predicted_labels_plot
-        File predicted_scores_plot = predicted_scores_plot
+        File notebook_log = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
+        File monitor_log = "rna_cell_annotation_monitor.log"
+        File prediction = '${prefix}.rna.cell.annotation.prediction.${genome}.csv'
     }
 
     runtime {
@@ -92,6 +84,12 @@ task cell_annotation {
     }
 
     parameter_meta {
+        reference_data_id: {
+            description: 'Reference dataset id',
+            help: 'The dataset id from cellxgene server.',
+            examples: ['3bbb6cf9-72b9-41be-b568-656de6eb18b5']
+        }
+
         reference_data_name: {
             description: 'Reference data',
             help: 'This file will be used as reference',

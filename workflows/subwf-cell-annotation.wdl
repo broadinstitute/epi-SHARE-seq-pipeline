@@ -1,7 +1,6 @@
 version 1.0
 
 # Import the tasks called by the pipeline
-import "../tasks/get_cellxgene_data.wdl" as get_cellxgene_data
 import "../tasks/share_task_cell_annotation.wdl" as share_task_cell_annotation
 
 workflow wf_cell_annotation {
@@ -15,7 +14,7 @@ workflow wf_cell_annotation {
 
     input {
         # Sample name
-        String prefix="prefix"
+        String? prefix="prefix"
 
         # Reference genome
         String genome
@@ -29,40 +28,28 @@ workflow wf_cell_annotation {
         File query_data
         
         # Docker images
-        String? docker_image_get_cellxgene_data="lzj1769/get_cellxgene_data"
-        String? docker_image_cell_annotation="lzj1769/cell_annotation"
+        String? docker_image="lzj1769/cell_annotation"
     
         # Runtime parameters
         Float? disk_factor = 0.1
         Float? memory_factor = 0.15
     }
 
-    call get_cellxgene_data.get_cellxgene_data as get_cellxgene_data{
-        input:
-            reference_data_id = reference_data_id,
-            reference_data_name = reference_data_name,
-            docker_image = docker_image_get_cellxgene_data
-    }
-
     call share_task_cell_annotation.cell_annotation as cell_annotation{
         input:
+            reference_data_id = reference_data_id,
             reference_data_name = reference_data_name,
             reference_label = reference_label,
             query_data = query_data,
             genome = genome,
             prefix = prefix,
-            docker_image = docker_image_cell_annotation,
+            docker_image = docker_image,
             disk_factor = disk_factor,
             memory_factor = memory_factor
     }
 
     output {
-        # Output from get_cellxgene_data
-        File share_cell_annotation_reference_h5ad = get_cellxgene_data.reference_h5ad
-        File get_cellxgene_data_monitor = get_cellxgene_data.monitor_log
-        File get_cellxgene_data_log = get_cellxgene_data.running_log
-        
-        # Output from cell_annotation
+        File share_cell_annotation_reference_h5ad = cell_annotation.reference_h5ad
         File share_cell_annotation_notebook_output = cell_annotation.notebook_output
         File share_cell_annotation_notebook_log = cell_annotation.notebook_log
         File share_cell_annotation_monitor_log = cell_annotation.monitor_log
