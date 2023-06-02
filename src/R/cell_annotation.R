@@ -34,7 +34,7 @@ option_list = list(
                 help="Reference data. Must be a .h5ad", 
                 metavar="character"),
     make_option(c("--reference_label"), type="character", default="cell_type", 
-                help="Reference data. Must be a .h5ad", 
+                help="Which label used for annotation.", 
                 metavar="character"),
     make_option(c("--query_data"), type="character", default="query.rds", 
                 help="Query data.", 

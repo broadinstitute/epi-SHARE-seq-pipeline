@@ -61,12 +61,12 @@ task cell_annotation {
 
         # Perform cell annotation
         Rscript $(which cell_annotation.R) \
-        ${prefix} \
-        ${reference_data_name} \
-        ${reference_label} \
-        ${query_data} \
-        ${genome} \
-        ${gene_id_to_symbol}
+        --prefix ${prefix} \
+        --reference_data_name ${reference_data_name} \
+        --reference_label ${reference_label} \
+        --query_data ${query_data} \
+        --genome ${genome} \
+        --gene_id_to_symbol ${gene_id_to_symbol}
 
     }
 
