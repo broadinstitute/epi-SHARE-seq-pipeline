@@ -18,9 +18,9 @@ task share_correct_fastq {
         String? pkr
         String? prefix
 
-        Int? cpus = 1
+        Int? cpus = 16
         Float? disk_factor = 8.0
-        Float? memory_factor = 0.15
+        Float? memory_factor = 0.08
         String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_correct_fastq"
     }
 
@@ -28,7 +28,7 @@ task share_correct_fastq {
     Float input_file_size_gb = size(fastq_R1, "G") + size(fastq_R2, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 5.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 16.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
@@ -56,7 +56,7 @@ task share_correct_fastq {
             ~{prefix} \
             ~{pkr}
 
-        gzip *.fastq
+        pigz -p ~{cpus} *.fastq
     >>>
 
     output {

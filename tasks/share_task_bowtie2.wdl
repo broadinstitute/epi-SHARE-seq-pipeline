@@ -19,7 +19,6 @@ task share_atac_align {
         String chemistry
         String genome_name          # GRCh38, mm10
         String prefix = "sample-share"
-        Boolean append_comment = false
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
@@ -76,7 +75,7 @@ task share_atac_align {
             --rg "SM:None" \
             --rg "LB:None" \
             --rg "PL:Illumina" \
-            ~{if append_comment then "--sam-append-comment" else ""} \
+            ~{if "~{chemistry}" != "shareseq" then "--sam-append-comment" else ""} \
             -x $genome_prefix \
             -1 ~{sep="," fastq_R1} \
             -2 ~{sep="," fastq_R2} 2> ~{alignment_log} | \
