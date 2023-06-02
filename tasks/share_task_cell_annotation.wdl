@@ -48,7 +48,7 @@ task cell_annotation {
     
     #Plot filepaths
     String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome}'
-    
+
     command {
         set -e
 
@@ -57,21 +57,21 @@ task cell_annotation {
         # Download data from cellxgene
         python3 $(which get_cellxgene_data.py) ${reference_data_id} ${reference_data_name}
 
-        # Perform cell annotation
-        papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
-        -p reference_data_name ${reference_data_name} \
-        -p reference_label ${reference_label} \
-        -p query_data ${query_data} \
-        -p genome ${genome} \
-        -p prefix ${prefix} \
-        -p papermill ${papermill}
+        # # Perform cell annotation
+        # papermill $(which cell_annotation_notebook.ipynb) ${output_filename} \
+        # -p reference_data_name ${reference_data_name} \
+        # -p reference_label ${reference_label} \
+        # -p query_data ${query_data} \
+        # -p genome ${genome} \
+        # -p prefix ${prefix} \
+        # -p papermill ${papermill}
     }
 
     output {
         File reference_h5ad = "${reference_data_name}"
-        File notebook_output = output_filename
+        # File notebook_output = output_filename
         File notebook_log = "log/${prefix}.rna.cell.annotation.logfile.${genome}.txt"
-        File monitor_log = "rna_cell_annotation_monitor.log"
+        File monitor_log = "cell_annotation_monitor.log"
         File prediction = '${prefix}.rna.cell.annotation.prediction.${genome}.csv'
     }
 

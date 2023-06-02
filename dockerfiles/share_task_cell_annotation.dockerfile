@@ -27,6 +27,7 @@ RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
     gcc \
     g++ \
+    gfortran \
     patch \
     build-essential \
     binutils \
@@ -46,26 +47,26 @@ RUN apt-get install -y --no-install-recommends \
     libxml2-dev \
     libxt-dev \
     libgeos-dev \
-    meson 
-
+    meson \
+    libblas-dev \
+    liblapack-dev
+    
 # Install python and R
 RUN apt-get install -y --no-install-recommends python3 python3-pip r-base
-
-RUN apt-get install -y --no-install-recommends libblas-dev liblapack-dev
 
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-save -e "cat(Sys.getenv('R_HOME'))")/etc/Rprofile.site
 ENV R_LIBS_USER=/usr/local/lib/R
 
-RUN R --no-echo --no-restore --no-save -e "install.packages('hdf5r')"
-RUN R --no-echo --no-restore --no-save -e "install.packages('remotes')"
-RUN R --no-echo --no-restore --no-save -e "install.packages('IRkernel')"
-RUN R --no-echo --no-restore --no-save -e "install.packages('logr')"
-RUN R --no-echo --no-restore --no-save -e "install.packages('BiocManager')"
-RUN R --no-echo --no-restore --no-save -e "install.packages('glue')"
-RUN R --no-echo --no-restore --no-save -e "install.packages('Matrix')"
-RUN R --no-echo --no-restore --no-save -e "install.packages('SeuratObject')"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('hdf5r')"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('remotes')"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('IRkernel')"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('logr')"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('BiocManager')"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('glue')"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('Matrix')"
+# RUN R --no-echo --no-restore --no-save -e "install.packages('SeuratObject')"
 # RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.3.0')"
 # RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=F, ask=F)"
 # RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
