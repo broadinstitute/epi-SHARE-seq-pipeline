@@ -80,3 +80,8 @@ COPY src/bash/monitor_script.sh /usr/local/bin
 COPY src/python/get_cellxgene_data.py /usr/local/bin
 COPY src/R/cell_annotation.R /usr/local/bin/
 COPY src/R/cell_annotation_helper_functions.R /usr/local/bin/
+
+ENV RETICULATE_MINICONDA_ENABLED=FALSE
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends python3-dev python3-venv
