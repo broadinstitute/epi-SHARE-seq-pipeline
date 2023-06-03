@@ -56,31 +56,15 @@ query_data = opt$query_data
 genome = opt$genome
 gene_id_to_symbol = as.logical(opt$gene_id_to_symbol)
 
-# Function to save plots
-plot_filename = glue::glue("{prefix}.cell.annotation.plots.{genome}")
-dir.create(plot_filename, showWarnings=F)
-
-printPNG <- function(name, plot, papermill, width = 22, height = 11){
-    filename = glue::glue("{plot_filename}/{prefix}.cell.annotation.{name}.{genome}.png")
-    
-    if(papermill){
-        ggsave(plot = plot, filename = filename, width = width, height = height)
-    }
-}
-
 # Create log file
 logfile <- file.path(glue::glue("{prefix}.cell.annotation.logfile.{genome}.txt"))
 lf <- log_open(logfile)
-
 
 # Loading H5AD file
 tryCatch(
     {
         log_print("# Loading reference data...")
         
-        #Convert(glue::glue("{reference_data_name}.h5ad"), ".h5seurat")
-        #obj.ref <- LoadH5Seurat(glue::glue("{reference_data_name}.h5Seurat"))
-
         adata <- read_h5ad(glue::glue("{reference_data_name}.h5ad"))
         counts <- t(as.matrix(adata$raw$X))
         colnames(counts) <- adata$obs_names
@@ -245,8 +229,9 @@ tryCatch(
         p <- DimPlot(obj.query, group.by = "predicted.id", label = TRUE, 
                       label.size = 5, repel = TRUE, reduction = "umap")
         
-        printPNG(name = "predicted.labels", plot = p, papermill = papermill, 
-                 width = 6, height = 6)
+        ggsave(plot = p, 
+              filename = glue::glue("{prefix}.cell.annotation.prediction.{genome}.png"), 
+              width = 8, height = 8)
         
         log_print("SUCCESSFUL: Plotting predicted labels")
         

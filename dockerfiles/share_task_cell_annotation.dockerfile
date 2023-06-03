@@ -14,6 +14,7 @@ LABEL software.task="cell-annotation"
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
+ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 ## Create new user 
 ENV USER=shareseq
@@ -53,7 +54,8 @@ RUN apt-get install -y --no-install-recommends \
     libbz2-dev
     
 # Install python and R
-RUN apt-get install -y --no-install-recommends python3 python3-pip r-base
+RUN apt-get install -y --no-install-recommends \
+    python3 python3-pip python3-dev python3-venv r-base
 
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -81,7 +83,3 @@ COPY src/python/get_cellxgene_data.py /usr/local/bin
 COPY src/R/cell_annotation.R /usr/local/bin/
 COPY src/R/cell_annotation_helper_functions.R /usr/local/bin/
 
-ENV RETICULATE_MINICONDA_ENABLED=FALSE
-
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends python3-dev python3-venv

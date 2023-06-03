@@ -46,9 +46,12 @@ task cell_annotation {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
     
-    #Plot filepaths
-    String plots_filepath = '${prefix}.rna.cell.annotation.plots.${genome}'
+    #Output files
+    String reference_h5ad = "${reference_data_name}.h5ad"
     String monitor_log = "cell_annotation_monitor.log"
+    String notebook_log = "log/${prefix}.cell.annotation.logfile.${genome}.txt"
+    String prediction = "${prefix}.cell.annotation.prediction.${genome}.csv"
+    String prediction_plot = "${prefix}.cell.annotation.prediction.${genome}.png"
 
     command {
         set -e
@@ -73,10 +76,11 @@ task cell_annotation {
     }
 
     output {
-        File reference_h5ad = "${reference_data_name}.h5ad"
+        File reference_h5ad = "${reference_h5ad}"
         File monitor_log = "${monitor_log}"
-        File notebook_log = "log/${prefix}.cell.annotation.logfile.${genome}.txt"
-        File prediction = '${prefix}.cell.annotation.prediction.${genome}.csv'
+        File notebook_log = "${notebook_log}"
+        File prediction = '${prediction}'
+        File prediction_plot = '${prediction_plot}'
     }
 
     runtime {
