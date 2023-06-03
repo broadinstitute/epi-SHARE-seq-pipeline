@@ -38,7 +38,7 @@ task cell_annotation {
     Float input_file_size_mb = size(query_data, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 32.0 + memory_factor * input_file_size_mb
+    Float mem_gb = 64.0 + memory_factor * input_file_size_mb
 
     # Determining disk size base on the size of the input files.
     Int disk_gb = round(disk_factor * input_file_size_mb)
