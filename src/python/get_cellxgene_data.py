@@ -6,11 +6,14 @@ from cellxgene server using cellxgene_census API.
 import argparse
 import logging
 import cellxgene_census
+import scanpy as sc
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Download data from cellxgene server")
-    parser.add_argument("dataset_id", help="Dataset id to download")
-    parser.add_argument("output_filename", help="Output filename")
+    parser.add_argument("--id", type=str, required=True,
+                        help="Cellxgene dataset id to download.")
+    parser.add_argument("--out", type=str, required=True,
+                        help="Output filename", default="reference")
     
     return parser.parse_args()
 
@@ -24,7 +27,9 @@ if __name__ == '__main__':
     
     logging.info("Downloading data\n")
     cellxgene_census.download_source_h5ad(
-        args.dataset_id, 
-        to_path=args.output_filename)
+        dataset_id=args.id, 
+        to_path=f"{args.out}.h5ad")
+    
+    adata = sc.read_h5ad(f"{args.out}.h5ad")
     
     logging.info("All done!")

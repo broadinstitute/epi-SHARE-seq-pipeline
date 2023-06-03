@@ -72,7 +72,6 @@ RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', ve
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
-RUN R --no-echo --no-restore --no-save -e "install.packages('anndata')"
 RUN R --no-echo --no-restore --no-save -e "install.packages('optparse')"
 
 RUN python3 -m pip install anndata cellxgene-census

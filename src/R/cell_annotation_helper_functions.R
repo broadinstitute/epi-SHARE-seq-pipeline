@@ -7,6 +7,7 @@
 ## Email: lzj1769@gmail.com
 ## ---------------------------
 library(reticulate)
+use_python("/usr/bin/python3")
 
 read_h5ad <- function(
   filename,
