@@ -73,7 +73,7 @@ task cell_annotation {
     }
 
     output {
-        File reference_h5ad = "${reference_data_name}"
+        File reference_h5ad = "${reference_data_name}.h5ad"
         File monitor_log = "${monitor_log}"
         File notebook_log = "log/${prefix}.cell.annotation.logfile.${genome}.txt"
         File prediction = '${prefix}.cell.annotation.prediction.${genome}.csv'

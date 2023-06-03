@@ -18,7 +18,6 @@ suppressMessages(library(cowplot))
 suppressMessages(library(EnsDb.Mmusculus.v79))
 suppressMessages(library(EnsDb.Hsapiens.v86))
 suppressMessages(library(optparse))
-suppressMessages(library(anndata))
 
 options("logr.notes" = FALSE)
 options(future.globals.maxSize=10e9)
@@ -82,7 +81,7 @@ tryCatch(
         #Convert(glue::glue("{reference_data_name}.h5ad"), ".h5seurat")
         #obj.ref <- LoadH5Seurat(glue::glue("{reference_data_name}.h5Seurat"))
 
-        adata <- read_h5ad(reference_data_name)
+        adata <- read_h5ad(glue::glue("{reference_data_name}.h5ad"))
         counts <- t(as.matrix(adata$raw$X))
         colnames(counts) <- adata$obs_names
         rownames(counts) <- adata$var_names
