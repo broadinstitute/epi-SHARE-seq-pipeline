@@ -16,16 +16,20 @@ task share_rna_align {
         # and aligns it to the genome using STARsolo.
         Array[File] fastq_R1
         Array[File] fastq_R2
-        String chemistry
-        File? whitelist
+        File whitelist
         File genome_index_tar
         String genome_name
         String prefix
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star'
+        String chemistry
+        
+        File? placeholder
+
+        # Runtime parameters
         Int cpus = 16
         Float? disk_factor = 50.0
         Float? memory_factor = 2.0
-        File? placeholder
+        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star'
+        
     }
 
     # Determine the size of the input

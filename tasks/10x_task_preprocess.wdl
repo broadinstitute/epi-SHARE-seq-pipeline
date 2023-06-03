@@ -23,7 +23,7 @@ task preprocess_tenx {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        String docker_image = "us.gcr.io/buenrostro-share-seq/10x_task_preprocessing"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/10x_task_preprocess"
     }
 
     # Determine the size of the input

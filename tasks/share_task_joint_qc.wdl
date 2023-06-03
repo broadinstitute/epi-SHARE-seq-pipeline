@@ -21,7 +21,6 @@ task joint_qc_plotting {
         Int min_genes = 200
         Int min_tss = 4
         Int min_frags = 100
-        Int? reverse_complement
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
@@ -72,7 +71,7 @@ task joint_qc_plotting {
         memory : "${mem_gb} GB"
         memory_retry_multiplier: 2
         disks: "local-disk ${disk_gb} ${disk_type}"
-        docker : docker_image
+        docker : "${docker_image}"
         maxRetries:1
     }
 

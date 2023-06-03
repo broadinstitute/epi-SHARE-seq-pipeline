@@ -36,9 +36,9 @@ task qc_atac {
         String? prefix
 
         # Runtime
-        Int? cpus = 2
-        Float? disk_factor = 8.0
-        Float? memory_factor = 0.15
+        Int? cpus = 8
+        Float? disk_factor = 10.0
+        Float? memory_factor = 0.3
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
     }
 
@@ -46,7 +46,7 @@ task qc_atac {
     Float input_file_size_gb = size(raw_bam, "G") + size(filtered_bam, "G") + size(queryname_final_bam, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 6.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 24.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
@@ -92,7 +92,8 @@ task qc_atac {
     command<<<
         set -e
 
-        bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
+        # I am not writing to a file anymore because Google keeps track of it automatically.
+        bash $(which monitor_script.sh) 1>&2 &
 
         cp ~{mito_metrics_barcode} mito_metrics
 
@@ -107,53 +108,63 @@ task qc_atac {
 
         # samstats raw
         # output of bowtie2
-        samtools view -o - in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
+        echo '------ SKIPPING: SAMstats for raw bam ------' 1>&2
+        #time sambamba view -t ~{cpus} in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
 
         # SAMstat final filtered file
         # final bam
-        samtools view in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
+        echo '------ SKIPPING: SAMstats for final bam ------' 1>&2
+        #time sambamba view -t ~{cpus}  in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
 
         # library complexity
         # queryname_final_bam from filter
-        samtools view ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
+        echo '------ START: Compute library complexity ------' 1>&2
+        time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
-        python3 $(which qc_atac_compute_tss_enrichment.py) \
+        echo '------ START: Compute TSS enrichment ------' 1>&2
+        time python3 $(which qc_atac_compute_tss_enrichment.py) \
             -e 2000 \
             --tss ~{tss} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.fragments.tsv.gz
 
         # Duplicates per barcode
-        python3 $(which qc_atac_count_duplicates_per_barcode.py) \
+        echo '------ START: Compute duplication per barcode ------' 1>&2
+        time python3 $(which qc_atac_count_duplicates_per_barcode.py) \
             -o ~{duplicate_stats} \
             --bc_tag ~{barcode_tag} \
             in.wdup.bam
 
         if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} == "true" ];then
             cp ~{duplicate_stats} tmp_duplicate_stats
-            awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","reads_unique","reads_duplicate","pct_duplicates"}FNR>1{print map[$1],$2,$3,$4}' ~{barcode_conversion_dict} tmp_duplicate_stats > ~{duplicate_stats}
+            echo '------ START: Convert barcode duplicate metrics for 10x ------' 1>&2
+            time awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","reads_unique","reads_duplicate","pct_duplicates"}FNR>1{print map[$1],$2,$3,$4}' ~{barcode_conversion_dict} tmp_duplicate_stats > ~{duplicate_stats}
 
             cp mito_metrics tmp_mito_metrics
-            awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","raw_reads_nonmito","raw_reads_mito"}FNR>1{print map[$1],$2,$3}' ~{barcode_conversion_dict} tmp_mito_metrics > mito_metrics
-
+            echo '------ START: Convert barcode mito metrics for 10x ------' 1>&2
+            time awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","raw_reads_nonmito","raw_reads_mito"}FNR>1{print map[$1],$2,$3}' ~{barcode_conversion_dict} tmp_mito_metrics > mito_metrics
         fi
 
         # Fragments in peaks
         # "~{prefix}.reads.in.peak.tsv"
-        python3 $(which qc_atac_compute_reads_in_peaks.py) \
+        echo '------ START: Compute fragments in peaks------' 1>&2
+        time python3 $(which qc_atac_compute_reads_in_peaks.py) \
             --peaks ~{peaks} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.fragments.tsv.gz
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ~{stats_log}
-        samtools idxstats -@ ~{samtools_threads} in.raw.bam >> ~{stats_log}
+        echo '------ START: Samtools idxstats on raw ------' 1>&2
+        time samtools idxstats -@ ~{cpus} in.raw.bam >> ~{stats_log}
 
         echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ~{stats_log}
-        samtools idxstats -@ ~{samtools_threads} in.filtered.bam >> ~{stats_log}
+        echo '------ START: Samtools idxstats on final ------' 1>&2
+        time samtools idxstats -@ ~{cpus} in.filtered.bam >> ~{stats_log}
 
         echo '' > ~{hist_log}
-        java -Xmx~{picard_java_memory}G -jar $(which picard.jar) CollectInsertSizeMetrics \
+        echo '------ START: Picard CollectInsertSizeMetrics ------' 1>&2
+        time java -Xmx~{picard_java_memory}G -jar $(which picard.jar) CollectInsertSizeMetrics \
             VALIDATION_STRINGENCY=SILENT \
             I=in.raw.bam \
             O=~{hist_log} \
@@ -161,20 +172,23 @@ task qc_atac {
             W=1000  2>> picard_run.log
 
         # Insert size plot bulk
-        python3 $(which plot_insert_size_hist.py) ~{hist_log} ~{prefix} ~{hist_log_png}
+        echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
+        time python3 $(which plot_insert_size_hist.py) ~{hist_log} ~{prefix} ~{hist_log_png}
 
-        join -j 1  <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q;sort -k1,1)) <(cat ~{duplicate_stats} | (sed -u 1q;sort -k1,1)) | \
+        echo '------ START: Generate metadata ------' 1>&2
+        time join -j 1  <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q;sort -k1,1)) <(cat ~{duplicate_stats} | (sed -u 1q;sort -k1,1)) | \
         join -j 1 - <(cat ~{prefix}.atac.qc.~{genome_name}.reads.in.peak.tsv | (sed -u 1q;sort -k1,1)) | \
         join -j 1 - <(cat mito_metrics| (sed -u 1q;sort -k1,1)) | \
         awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_reads_promoter","pct_reads_peaks","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
 
         # Barcode rank plot
-        Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_cutoff} ~{fragment_barcode_rank_plot}
+        echo '------ START: Generate barcod rank plot ------' 1>&2
+        time Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_cutoff} ~{fragment_barcode_rank_plot}
     >>>
 
     output {
-        File atac_qc_samstats_raw = samstats_raw_out
-        File atac_qc_samstats_filtered = samstats_filtered_out
+        File? atac_qc_samstats_raw = samstats_raw_out
+        File? atac_qc_samstats_filtered = samstats_filtered_out
         File atac_qc_pbc_stats = pbc_stats
 
         File atac_qc_final_stats = stats_log
@@ -191,7 +205,7 @@ task qc_atac {
 
         File? atac_qc_barcode_rank_plot = fragment_barcode_rank_plot
 
-        File atac_qc_monitor_log = monitor_log
+        #File? atac_qc_monitor_log = monitor_log
     }
 
     runtime {
