@@ -226,12 +226,12 @@ tryCatch(
     {
         log_print("# Plotting predicted labels")
         
-        p <- DimPlot(obj.query, group.by = "predicted.id", label = TRUE, 
-                      label.size = 5, repel = TRUE, reduction = "umap")
+        p <- DimPlot(obj.query, group.by = "predicted.id", 
+                    label = FALSE, reduction = "umap")
         
         ggsave(plot = p, 
               filename = glue::glue("{prefix}.cell.annotation.prediction.{genome}.png"), 
-              width = 8, height = 8)
+              width = 8, height = 5)
         
         log_print("SUCCESSFUL: Plotting predicted labels")
         
