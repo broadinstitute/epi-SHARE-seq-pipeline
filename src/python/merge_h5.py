@@ -132,9 +132,7 @@ def get_merged_data(tar_files, pkrs, ensembl):
     # create csc matrix
     n_row = len(gene_list)
     n_col = len(barcode_list)
-    row_idx, col_idx = zip(*merged_matrix.keys())
-    counts = list(merged_matrix.values())
-    count_matrix = csc_matrix((counts, (row_idx, col_idx)), shape=(n_row,n_col))
+    count_matrix = csc_matrix((list(merged_matrix.values()), (zip(*merged_matrix.keys()))), shape=(n_row,n_col))
     
     return(count_matrix, barcode_list, gene_list)
         

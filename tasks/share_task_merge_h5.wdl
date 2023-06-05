@@ -18,7 +18,7 @@ task share_merge_h5 {
 
         String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_merge_rna'
         Float? disk_factor = 2.0
-        Float? memory_factor = 2.0
+        Float? memory_factor = 120.0
     }
 
     # Determine the size of the input
