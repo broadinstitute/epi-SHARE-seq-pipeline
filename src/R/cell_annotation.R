@@ -231,7 +231,7 @@ tryCatch(
         
         ggsave(plot = p, 
               filename = glue::glue("{prefix}.cell.annotation.prediction.{genome}.png"), 
-              width = 8, height = 5)
+              width = 15, height = 12)
         
         log_print("SUCCESSFUL: Plotting predicted labels")
         
