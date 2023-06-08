@@ -50,7 +50,7 @@ task joint_qc_plotting {
     command {
         set -e
 
-        bash $(which monitor_script.sh) > monitoring.log &
+        bash $(which monitor_script.sh) 1>&2 &
 
         # Make joint qc plot
         python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${default="share-seq" prefix}
