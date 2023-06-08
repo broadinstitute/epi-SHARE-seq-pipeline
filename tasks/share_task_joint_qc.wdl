@@ -35,7 +35,7 @@ task joint_qc_plotting {
     Float input_file_size_gb = size(atac_barcode_metadata, "G") + size(rna_barcode_metadata, "G")
 
     # Determine memory size based on the size of the input files
-    Float mem_gb = 5.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 8.0 + memory_factor * input_file_size_gb
 
     # Determine disk size based on the size of the input files
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
