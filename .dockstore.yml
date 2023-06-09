@@ -9,6 +9,7 @@ workflows:
              - release
              - bowtie2-sambamba
              - sambamba
+             - archr-mem-factor
          tags:
              - /.*/
 
