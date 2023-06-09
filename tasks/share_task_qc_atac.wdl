@@ -212,6 +212,7 @@ task qc_atac {
         cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
+        singularity: "docker://${docker_image}"
         maxRetries: 1
         memory: "${mem_gb} GB"
         memory_retry_multiplier: 2

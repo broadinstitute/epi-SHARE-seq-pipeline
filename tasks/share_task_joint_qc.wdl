@@ -71,6 +71,7 @@ task joint_qc_plotting {
         memory : "${mem_gb} GB"
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker : "${docker_image}"
+        singularity: "docker://${docker_image}"
         maxRetries:1
     }
 

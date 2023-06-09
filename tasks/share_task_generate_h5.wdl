@@ -66,6 +66,7 @@ task generate_h5 {
         memory : "${mem_gb} GB"
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker : "${docker_image}"
+        singularity: "docker://${docker_image}"
     }
 
     parameter_meta {
@@ -84,7 +85,7 @@ task generate_h5 {
                 help: 'Prefix that will be used to name the output files.',
                 example: 'MyExperiment'
             }
-	gene_naming: {
+	    gene_naming: {
                 description: 'Gene naming convention',
                 help: 'Convention for gene naming in h5 matrix; either "gene_name" (default) or "ensembl".',
                 example: ['gene_name', 'ensembl']

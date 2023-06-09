@@ -63,13 +63,14 @@ task share_correct_fastq {
         File corrected_fastq_R1 = "~{corrected_fastq_R1}.gz"
         File corrected_fastq_R2 = "~{corrected_fastq_R2}.gz"
         File barcode_qc = "~{prefix}_barcode_qc.txt"
-	File monitor_log = "~{monitor_log}"
+	    File monitor_log = "~{monitor_log}"
     }
 
     runtime {
         cpu : cpus
-        memory : "~{mem_gb} GB"
-        disks: "local-disk ~{disk_gb} ~{disk_type}"
-        docker : "~{docker_image}"
+        memory : "${mem_gb} GB"
+        disks: "local-disk ${disk_gb} ${disk_type}"
+        # docker : "${docker_image}"
+        singularity: "docker://${docker_image}"
     }
 }

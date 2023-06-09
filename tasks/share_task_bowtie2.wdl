@@ -118,6 +118,7 @@ task share_atac_align {
     runtime {
         cpu: cpus
         docker: "${docker_image}"
+        singularity: "docker://${docker_image}"
         disks: "local-disk ${disk_gb} ${disk_type}"
         maxRetries:1
         memory: "${mem_gb} GB"

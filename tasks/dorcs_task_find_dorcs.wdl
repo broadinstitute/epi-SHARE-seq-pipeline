@@ -99,8 +99,9 @@ task find_dorcs {
 
     runtime {
         cpu : 4
-        memory : mem_gb+'G'
-        docker : docker_image
+        memory : "${mem_gb} GB"
+        docker: "${docker_image}"
+        singularity: "docker://${docker_image}"
         disks : 'local-disk ${disk_gb} LOCAL'
         maxRetries : 0
     }

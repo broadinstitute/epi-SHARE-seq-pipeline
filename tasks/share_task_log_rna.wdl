@@ -17,6 +17,7 @@ task log_rna {
         # the quality metrics
         File alignment_log
         File dups_log
+        String docker_image = 'ubuntu:latest'
     }
 
     command <<<
@@ -40,7 +41,9 @@ task log_rna {
     }
 
     runtime {
-        docker: 'ubuntu:latest'
+        memory: "2 GB"
+        docker: "${docker_image}"
+        singularity: "docker://${docker_image}"
     }
     parameter_meta {
         alignment_log: {

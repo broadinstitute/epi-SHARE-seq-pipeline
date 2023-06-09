@@ -102,6 +102,7 @@ task share_atac_merge_bams {
     runtime {
         cpu: cpu
         docker: "${docker_image}"
+        singularity: "docker://${docker_image}"
         disks: "local-disk ${disk} HDD"
         disk: disk + " GB" # TES
         #disks: "local-disk ${disk_gb} ${disk_type}"

@@ -41,6 +41,7 @@ task html_report {
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
+        String docker_image = "nchernia/share_task_html_report:14"
     }
 
     String output_file = "${default="share-seq" prefix}.html"
@@ -77,6 +78,8 @@ task html_report {
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:14'
+        memory: "2 GB"
+        docker : "${docker_image}"
+        singularity: "docker://${docker_image}"
     }
 }
