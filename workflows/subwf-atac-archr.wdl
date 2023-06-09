@@ -21,6 +21,8 @@ workflow wf_atac {
         String? prefix
         Int? min_tss = 4
         Int? min_frags = 100
+        Float? archr_disk_factor = 8.0
+        Float? archr_memory_factor = 4.0
     }
 
     call share_task_archr.archr as archr{
@@ -34,7 +36,9 @@ workflow wf_atac {
             doublet_knn_method = "UMAP",
             lsi_method = 1,
             docker_image = docker,
-            prefix = prefix
+            prefix = prefix,
+            disk_factor = archr_disk_factor,
+            memory_factor = archr_memory_factor
     }
 
     output {
