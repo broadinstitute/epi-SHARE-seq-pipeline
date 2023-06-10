@@ -103,6 +103,7 @@ task share_rna_align {
             --outFilterScoreMinOverLread 0.3 \
             --outFilterMatchNminOverLread 0.3 \
             --outSAMtype BAM SortedByCoordinate \
+            --limitBAMsortRAM 31232551044 \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \
