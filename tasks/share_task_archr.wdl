@@ -46,9 +46,21 @@ task archr {
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_archr"
         String log_filename = "log/${prefix}.atac.archr.logfile.${genome}.txt"
 
-        Int? mem_gb = 32
-        Int? disk_gb = 50
+        Float? disk_factor = 8.0
+        Float? memory_factor = 4.0
     }
+    
+    # Determine the size of the input
+    Float input_file_size_gb = size(atac_frag, "G") 
+
+    # Determining memory size base on the size of the input files.
+    Float mem_gb = 32.0 + memory_factor * input_file_size_gb
+
+    # Determining disk size base on the size of the input files.
+    Int disk_gb = round(50.0 + disk_factor * input_file_size_gb)
+
+    # Determining disk type base on the size of disk.
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     #Plot filepaths
     String plots_filepath = '${prefix}.atac.archr.plots.${genome}'
@@ -133,9 +145,10 @@ task archr {
         cpu : 4
         memory : mem_gb+'G'
         docker : docker_image
-        disks : 'local-disk ${disk_gb} LOCAL'
-        maxRetries : 0
+        disks : 'local-disk ${disk_gb} ${disk_type}'
+        maxRetries : 1
         bootDiskSizeGb: 50
+        memory_retry_multiplier: 2
     }
 
     parameter_meta {
