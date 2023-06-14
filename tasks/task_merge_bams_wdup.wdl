@@ -1,9 +1,9 @@
 version 1.0
 
 # TASK
-# SHARE-atac-merge_bams
+# task-merge-filtered-bams-wdups
 
-task share_atac_merge_bams {
+task atac_merge_filtered_bams_wdups {
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
@@ -12,19 +12,20 @@ task share_atac_merge_bams {
 
     input {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
-        Array[File] bams
-        Array[File] logs
+        Array[File] wdups_bams
         String genome_name
         String prefix = "sample-share"
+        String? barcode_tag = "CB" # "XC"
         Int? multimappers # = 5
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
         String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_merge_bams"
+        String? singularity_image = "docker://us.gcr.io/buenrostro-share-seq/share_task_merge_bams"
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(bams, "G")
+    Float input_file_size_gb = size(wdups_bams, "G")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 16.0 + memory_factor * input_file_size_gb
@@ -61,9 +62,10 @@ task share_atac_merge_bams {
     String unsorted_bam = "${prefix}.atac.merge.${genome_name}.bam"
 
     # Define the output names
-    String merged_bam = "${prefix}.atac.merged.k${multimappers}.${genome_name}.sorted.bam"
-    String merged_bai = "${prefix}.atac.merged.k${multimappers}.${genome_name}.sorted.bam.bai"
-    String alignment_log = "${prefix}.atac.merged.k${multimappers}.${genome_name}.log"
+    String merged_bam = "${prefix}.atac.filtered.wdup.k${multimappers}.${genome_name}.sorted.bam"
+    String merged_bai = "${prefix}.atac.filtered.wdup.k${multimappers}.${genome_name}.sorted.bam.bai"
+    String stats_log = '${default="share-seq" prefix}.atac.filtered.wdup.k${multimappers}.${genome_name}.stats.log.txt'
+    String duplicate_stats = '${default="share-seq" prefix}.atac.filtered.wdup.qc.duplicate.stats.${genome_name}.tsv'
 
     String monitor_log = "atac_merge_monitor.log"
 
@@ -72,36 +74,37 @@ task share_atac_merge_bams {
 
         bash $(which monitor_script.sh) 2>&1 &
 
-        #sambamba merge -t ~{cpus} ~{unsorted_bam} ~{sep=" " bams}
-
-        #sambamba sort -t ~{cpus} -m ~{command_mem_mb}M -o ~{merged_bam} ~{unsorted_bam}
-      
-        #sambamba index -t ~{cpus} ~{merged_bam}
-
         # Trying picard
         
         java -Dsamjdk.compression_level=~{compression_level} -Xms~{command_mem_mb}m -Xmx~{command_mem_mb}m -jar /usr/local/bin/picard.jar \
         MergeSamFiles \
         USE_THREADING=true \
-        SORT_ORDER="coordinate" \
-        INPUT=~{sep=' INPUT=' bams} \
+        ASSUME_SORT_ORDER="queryname" \
+        SORT_ORDER="queryname" \
+        INPUT=~{sep=' INPUT=' wdups_bams} \
         OUTPUT=~{merged_bam}
 
         sambamba index -t ~{cpus} ~{merged_bam}
-
-        sed 's/^[[:space:]]*//g' ~{sep=" " logs} | cut -f 1 -d ' ' | awk '{ sum[FNR%15]+=$1 } END {n_total=length(sum);for (idx=1; idx <= n_total; idx++){print sum[idx]}}' > ~{alignment_log}
+        
+        # Duplicates per barcode
+        echo '------ START: Compute duplication per barcode ------' 1>&2
+        time python3 $(which qc_atac_count_duplicates_per_barcode.py) \
+            -o ~{duplicate_stats} \
+            --bc_tag ~{barcode_tag} \
+            ~{merged_bam}
 
     >>>
 
     output {
-        File atac_merged_alignment = merged_bam
-        File atac_merged_alignment_index = merged_bai
-        File atac_merged_alignment_log = alignment_log
+        File atac_wdup_alignment = merged_bam
+        File atac_wdup_alignment_index = merged_bai
+        File atac_qc_duplicate_stats = duplicate_stats
     }
 
     runtime {
         cpu: cpu
         docker: "${docker_image}"
+        singularity: "${singularity_image}"
         disks: "local-disk ${disk} HDD"
         disk: disk + " GB" # TES
         #disks: "local-disk ${disk_gb} ${disk_type}"
@@ -112,7 +115,7 @@ task share_atac_merge_bams {
     }
 
     parameter_meta {
-        bams: {
+        wdups_bams: {
                 description: 'Individuals bams from the scatter alignment task',
                 help: 'Individuals bams from the scatter alignment task',
                 example: 'align.raw.L1.bam',

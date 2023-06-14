@@ -4,8 +4,20 @@ version 1.0
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
-import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
-import "../tasks/share_task_filter_atac.wdl" as share_task_filter
+import "../tasks/task_merge_bams.wdl" as task_merge_bams
+
+import "../tasks/task_initial_filter_atac.wdl" as task_filter
+import "../tasks/task_mark_duplicates.wdl" as task_mark_duplicates
+
+import "../tasks/task_merge_bams_wdup.wdl" as task_merge_bams_wdup
+import "../tasks/task_merge_bams_dedup.wdl" as task_merge_bams_dedup
+import "../tasks/task_merge_fragments.wdl" as task_merge_fragments
+
+import "../tasks/task_qc_tss_enrichment.wdl" as task_tss_enrichment
+import "../tasks/task_qc_reads_in_peaks.wdl" as task_reads_peaks
+
+import "../tasks/task_merge_qc.wdl" as task_merge_qc
+
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
 import "../tasks/share_task_archr.wdl" as share_task_archr
@@ -71,6 +83,7 @@ workflow wf_atac {
         Float? filter_disk_factor = 8.0
         Float? filter_memory_factor = 0.15
         String? filter_docker_image
+        String? filter_singularity_image
 
         # QC-specific inputs
         File? raw_bam
@@ -147,7 +160,7 @@ workflow wf_atac {
             }
         }
         
-        call share_task_merge_bams.share_atac_merge_bams as merge{
+        call task_merge_bams.atac_merge_bams as merge{
             input:
                 bams = align.atac_alignment,
                 logs = align.atac_alignment_log,
@@ -161,71 +174,139 @@ workflow wf_atac {
         }
 
 
-        call share_task_filter.share_atac_filter as filter {
+        call task_filter.atac_initial_filter as filter {
             input:
                 bam = merge.atac_merged_alignment,
                 bam_index = merge.atac_merged_alignment_index,
                 multimappers = align_multimappers,
-                shift_plus = filter_shift_plus,
-                shift_minus = filter_shift_minus,
-                barcode_tag = barcode_tag,
                 barcode_tag_fragments = barcode_tag_fragments_,
-                mapq_threshold = mapq_threshold,
                 genome_name = genome_name,
                 minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
                 prefix = prefix,
-                barcode_conversion_dict = barcode_conversion_dict,
                 cpus = filter_cpus,
                 disk_factor = filter_disk_factor,
                 docker_image = filter_docker_image,
+                singularity_image = filter_singularity_image,
                 memory_factor = filter_memory_factor
         }
 
-        call share_task_qc_atac.qc_atac as qc_atac{
+        scatter(bam in filter.atac_initial_filter_bams_to_dedup){
+            call task_mark_duplicates.atac_mark_duplicates as markdup{
             input:
-                raw_bam = merge.atac_merged_alignment,
-                raw_bam_index = merge.atac_merged_alignment_index,
-                filtered_bam = filter.atac_filter_alignment_dedup,
-                filtered_bam_index = filter.atac_filter_alignment_dedup_index,
-                queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
-                wdup_bam = filter.atac_filter_alignment_wdup,
-                wdup_bam_index = filter.atac_filter_alignment_wdup_index,
-                mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
-                mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
-                fragments = filter.atac_filter_fragments,
-                fragments_index = filter.atac_filter_fragments_index,
+                bam = bam,
                 barcode_conversion_dict = barcode_conversion_dict,
-                peaks = peak_set,
-                tss = tss_bed,
-                fragment_cutoff = qc_fragment_cutoff,
-                mapq_threshold = mapq_threshold,
+                barcode_tag = barcode_tag,
+                barcode_tag_fragments = barcode_tag_fragments_,
+                shift_plus = filter_shift_plus,
+                shift_minus = filter_shift_minus,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = qc_cpus,
+                disk_factor = filter_disk_factor,
+                docker_image = filter_docker_image,
+                singularity_image = filter_singularity_image,
+                memory_factor = filter_memory_factor
+            }
+        }
+        call task_merge_bams_wdup.atac_merge_filtered_bams_wdups as merge_bams_wdup{
+            input:
+                wdups_bams = markdup.atac_filter_alignment_wdup_queryname,
+                genome_name = genome_name,
                 barcode_tag = barcode_tag_fragments_,
+                multimappers = align_multimappers,
+                prefix = prefix,
+                cpus = qc_cpus,
+                disk_factor = filter_disk_factor,
+                docker_image = filter_docker_image,
+                singularity_image = filter_singularity_image,
+                memory_factor = filter_memory_factor
+        }
+        call task_merge_bams_dedup.atac_merge_filtered_bams as merge_bams_dedup{
+            input:
+                dedup_bams = markdup.atac_filter_alignment_dedup,
+                genome_name = genome_name,
+                multimappers = align_multimappers,
+                prefix = prefix,
+                cpus = qc_cpus,
+                disk_factor = filter_disk_factor,
+                docker_image = filter_docker_image,
+                singularity_image = filter_singularity_image,
+                memory_factor = filter_memory_factor
+        }
+        call task_merge_fragments.atac_merge_fragments as merge_fragments{
+            input:
+                fragments = markdup.atac_filter_fragments,
                 genome_name = genome_name,
                 prefix = prefix,
                 cpus = qc_cpus,
                 disk_factor = qc_disk_factor,
-                docker_image = qc_docker_image,
-                memory_factor = qc_memory_factor
+                docker_image = filter_docker_image,
+                singularity_image = filter_singularity_image,
+                memory_factor = filter_memory_factor
+        }
+
+        call task_tss_enrichment.qc_atac_tss_enrichment as tss_enrichment{
+            input:
+                fragments = merge_fragments.atac_final_fragments,
+                fragments_index = merge_fragments.atac_final_fragments_index,
+                tss = tss_bed,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = qc_cpus,
+                disk_factor = qc_disk_factor,
+                docker_image = filter_docker_image,
+                singularity_image = filter_singularity_image,
+                memory_factor = filter_memory_factor
+        }
+
+        call task_reads_peaks.qc_atac_reads_in_peaks as reads_peaks{
+            input:
+                fragments = merge_fragments.atac_final_fragments,
+                fragments_index = merge_fragments.atac_final_fragments_index,
+                peaks = peak_set,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = qc_cpus,
+                disk_factor = qc_disk_factor,
+                docker_image = filter_docker_image,
+                singularity_image = filter_singularity_image,
+                memory_factor = filter_memory_factor
+        }
+
+        call task_merge_qc.atac_merge_qc as qc{
+            input:
+                tss_enrichment_barcode_stats = tss_enrichment.atac_qc_tss_enrichment_barcode_stats,
+                duplicate_stats = merge_bams_wdup.atac_qc_duplicate_stats,
+                reads_in_peaks = reads_peaks.atac_qc_fragments_in_peaks,
+                mito_metrics_barcode = filter.atac_initial_filter_mito_metrics_barcode,
+                barcode_conversion_dict = barcode_conversion_dict,
+                fragment_cutoff = filter_minimum_fragments_cutoff,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = filter_cpus,
+                disk_factor = filter_disk_factor,
+                docker_image = filter_docker_image,
+                singularity_image = filter_singularity_image,
+                memory_factor = filter_memory_factor
         }
 
         call share_task_log_atac.log_atac as log_atac {
-        input:
-            alignment_log = merge.atac_merged_alignment_log,
-            dups_log = qc_atac.atac_qc_duplicate_stats,
-            pbc_log = qc_atac.atac_qc_pbc_stats
+            input:
+                alignment_log = merge.atac_merged_alignment_log,
+                dups_log = merge_bams_wdup.atac_qc_duplicate_stats
         }
 
         if (  "~{pipeline_modality}" == "full" ) {
             call share_task_archr.archr as archr{
                 input:
-                    atac_frag = filter.atac_filter_fragments,
+                    atac_frag = merge_fragments.atac_final_fragments,
                     genome = genome_name,
                     peak_set = peak_set,
                     prefix = prefix
             }
             call share_task_archr.archr as archr_strict{
                 input:
-                    atac_frag = filter.atac_filter_fragments,
+                    atac_frag = merge_fragments.atac_final_fragments,
                     genome = genome_name,
                     peak_set = peak_set,
                     prefix = '${prefix}_strict',
@@ -246,23 +327,22 @@ workflow wf_atac {
         File? share_atac_alignment_log = merge.atac_merged_alignment_log
 
         # Filter
-        File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
-        File? share_atac_filter_alignment_dedup_index = filter.atac_filter_alignment_dedup_index
-        File? share_atac_filter_alignment_wdup = filter.atac_filter_alignment_wdup
-        File? share_atac_filter_alignment_wdup_index = filter.atac_filter_alignment_wdup_index
-        File? share_atac_filter_fragments = filter.atac_filter_fragments
-        File? share_atac_filter_fragments_index = filter.atac_filter_fragments_index
-        File? share_atac_filter_monitor_log = filter.atac_filter_monitor_log
-        File? share_atac_filter_mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk
-        File? share_atac_filter_mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode
+        File? share_atac_filter_alignment_dedup =  merge_bams_dedup.atac_filtered_alignment
+        File? share_atac_filter_alignment_dedup_index =  merge_bams_dedup.atac_filtered_alignment_index
+        File? share_atac_filter_fragments = merge_fragments.atac_final_fragments
+        File? share_atac_filter_fragments_index = merge_fragments.atac_final_fragments_index
+        #File? share_atac_filter_monitor_log = filter.atac_filter_monitor_log
+        File? share_atac_filter_mito_metrics_bulk = filter.atac_initial_filter_mito_metrics_bulk
+        File? share_atac_filter_mito_metrics_barcode = filter.atac_initial_filter_mito_metrics_barcode
 
         # QC
-        File? share_atac_barcode_metadata = qc_atac.atac_qc_barcode_metadata
-        File? share_atac_qc_final = qc_atac.atac_qc_final_stats
-        File? share_atac_qc_hist_plot = qc_atac.atac_qc_final_hist_png
-        File? share_atac_qc_hist_txt = qc_atac.atac_qc_final_hist
-        File? share_atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
-        File? share_atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
+        File? share_atac_barcode_metadata = qc.atac_qc_barcode_metadata
+        File? share_atac_qc_barcode_rank_plot = qc.atac_qc_barcode_rank_plot
+        File? share_atac_qc_final = merge.atac_merged_idxstats
+        File? share_atac_qc_hist_plot = merge.atac_merged_hist_png
+        File? share_atac_qc_hist_txt = merge.atac_merged_hist
+        File? share_atac_qc_tss_enrichment = tss_enrichment.atac_qc_tss_enrichment_plot
+        
 
         # Log
         Int? share_atac_total_reads = log_atac.atac_total_reads
