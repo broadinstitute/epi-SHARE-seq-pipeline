@@ -297,13 +297,6 @@ workflow wf_atac {
         }
 
         if (  "~{pipeline_modality}" == "full" ) {
-            call share_task_archr.archr as archr{
-                input:
-                    atac_frag = merge_fragments.atac_final_fragments,
-                    genome = genome_name,
-                    peak_set = peak_set,
-                    prefix = prefix
-            }
             call share_task_archr.archr as archr_strict{
                 input:
                     atac_frag = merge_fragments.atac_final_fragments,
@@ -312,6 +305,15 @@ workflow wf_atac {
                     prefix = '${prefix}_strict',
                     min_tss = 5,
                     min_frags = 1000
+            }
+        }
+        if (  "~{pipeline_modality}" == "wasteful" ) {
+            call share_task_archr.archr as archr{
+                input:
+                    atac_frag = merge_fragments.atac_final_fragments,
+                    genome = genome_name,
+                    peak_set = peak_set,
+                    prefix = prefix
             }
         }
     }
