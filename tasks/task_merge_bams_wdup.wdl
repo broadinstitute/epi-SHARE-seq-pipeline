@@ -79,7 +79,7 @@ task atac_merge_filtered_bams_wdups {
         java -Dsamjdk.compression_level=~{compression_level} -Xms~{command_mem_mb}m -Xmx~{command_mem_mb}m -jar /usr/local/bin/picard.jar \
         MergeSamFiles \
         USE_THREADING=true \
-        ASSUME_SORT_ORDER="queryname" \
+        ASSUME_SORTED="queryname" \
         SORT_ORDER="queryname" \
         INPUT=~{sep=' INPUT=' wdups_bams} \
         OUTPUT=~{merged_bam}

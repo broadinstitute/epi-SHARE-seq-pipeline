@@ -86,7 +86,7 @@ task atac_merge_bams {
         java -Dsamjdk.compression_level=~{compression_level} -Xms~{command_mem_mb}m -Xmx~{command_mem_mb}m -jar /usr/local/bin/picard.jar \
         MergeSamFiles \
         USE_THREADING=true \
-        ASSUME_SORT_ORDER="coordinate" \
+        ASSUME_SORTED="coordinate" \
         SORT_ORDER="coordinate" \
         INPUT=~{sep=' INPUT=' bams} \
         OUTPUT=~{merged_bam}
