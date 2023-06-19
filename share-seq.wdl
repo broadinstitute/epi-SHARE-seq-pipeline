@@ -18,6 +18,7 @@ workflow share {
         # Common inputs
 
         Boolean trim_fastqs = true
+        Boolean dorcs_flag = true
         String chemistry
         String prefix = "shareseq-project"
         String? pkr=""
@@ -153,13 +154,15 @@ workflow share {
     if ( process_atac && process_rna ) {
         if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
             if ( pipeline_modality == "full" ) {
-                call find_dorcs.wf_dorcs as dorcs{
-                    input:
-                        rna_matrix = rna.share_rna_h5,
-                        atac_fragments = atac.share_atac_filter_fragments,
-                        peak_file = peak_set_,
-                        genome = genome_name_,
-                        prefix = prefix
+                if ( dorcs_flag ){
+                    call find_dorcs.wf_dorcs as dorcs{
+                        input:
+                            rna_matrix = rna.share_rna_h5,
+                            atac_fragments = atac.share_atac_filter_fragments,
+                            peak_file = peak_set_,
+                            genome = genome_name_,
+                            prefix = prefix
+                    }
                 }
             }
             
