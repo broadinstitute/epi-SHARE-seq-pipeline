@@ -126,7 +126,7 @@ task atac_initial_filter {
         rm ~{non_mito_bam}
 
         sambamba sort -t ~{cpus} -m ~{samtools_memory_gb}G -o tmp_filtered_bam_sorted.bam ~{tmp_fixmate_bam}
-        sambamba index tmp_filtered_bam_sorted
+        sambamba index tmp_filtered_bam_sorted.bam
         # Split into chromosomes to speed up the marking of duplicates.
         # get list of chromosomes from the bam file
         chromosomes=$(samtools idxstats tmp_filtered_bam_sorted.bam | cut -f1 | grep -v '*')
