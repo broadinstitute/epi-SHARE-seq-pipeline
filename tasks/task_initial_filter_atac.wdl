@@ -125,11 +125,13 @@ task atac_initial_filter {
         rm ~{tmp_filtered_bam}
         rm ~{non_mito_bam}
 
+        sambamba sort -t ~{cpus} -m ~{samtools_memory_gb}G -o tmp_filtered_bam_sorted.bam ~{tmp_fixmate_bam}
+        sambamba index tmp_filtered_bam_sorted
         # Split into chromosomes to speed up the marking of duplicates.
         # get list of chromosomes from the bam file
-        chromosomes=$(samtools idxstats ~{tmp_fixmate_bam} | cut -f1 | grep -v '*')
+        chromosomes=$(samtools idxstats tmp_filtered_bam_sorted.bam | cut -f1 | grep -v '*')
 
-        input_split_bam=~{tmp_fixmate_bam}
+        input_split_bam='tmp_filtered_bam_sorted.bam'
 
         # parallel tool execution of samtools view for each chromosome
         # I am removing the -k option because the order is not going to be maintained in the following steps.
@@ -151,7 +153,6 @@ task atac_initial_filter {
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
         singularity: "${singularity_image}"
-        maxRetries: 1
     }
 
     parameter_meta {
