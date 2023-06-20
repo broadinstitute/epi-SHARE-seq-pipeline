@@ -125,6 +125,7 @@ task atac_initial_filter {
         rm ~{tmp_filtered_bam}
         rm ~{non_mito_bam}
 
+        echo '------ START: Sort by coordinates ------' 1>&2
         sambamba sort -t ~{cpus} -m ~{samtools_memory_gb}G -o tmp_filtered_bam_sorted.bam ~{tmp_fixmate_bam}
         sambamba index tmp_filtered_bam_sorted.bam
         # Split into chromosomes to speed up the marking of duplicates.
@@ -133,10 +134,11 @@ task atac_initial_filter {
 
         input_split_bam='tmp_filtered_bam_sorted.bam'
 
+        echo '------ START: Split by chromosomes ------' 1>&2
         # parallel tool execution of samtools view for each chromosome
         # I am removing the -k option because the order is not going to be maintained in the following steps.
         # Saving the order of chromosomes for when I am going to merge.
-        printf "%s\n" ${chromosomes} | parallel -j ~{parallel_threads} "samtools view -@ ~{samtools_view_threads} -b ${input_split_bam} > {}.bam"
+        printf "%s\n" ${chromosomes} | parallel -j ~{parallel_threads} "samtools view -@ ~{samtools_view_threads} -b tmp_filtered_bam_sorted > {}.bam"
 
     >>>
 
