@@ -20,7 +20,7 @@ workflow wf_atac {
         String? docker
         String? prefix
         Int? min_tss = 4
-        Int? min_frags = 100
+        Int? min_frags = 1000
         Float? archr_disk_factor = 8.0
         Float? archr_memory_factor = 4.0
     }
