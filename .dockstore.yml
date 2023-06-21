@@ -9,7 +9,6 @@ workflows:
              - release
              - bowtie2-sambamba
              - sambamba
-             - archr-mem-factor
          tags:
              - /.*/
 
@@ -55,7 +54,6 @@ workflows:
          branches:
              - main
              - dev
-             - archr-mem-factor
          tags:
              - /.*/
 
