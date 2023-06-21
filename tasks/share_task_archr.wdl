@@ -17,7 +17,7 @@ task archr {
 
         #ArchR QC
         Int min_tss = 4
-        Int min_frags = 100
+        Int min_frags = 1000
         String add_tile_mat = "TRUE"
         String add_gene_score_mat = "TRUE"
 

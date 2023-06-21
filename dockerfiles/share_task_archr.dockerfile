@@ -57,7 +57,8 @@ RUN R --no-echo --no-restore --no-save -e "devtools::install_github('GreenleafLa
 
 RUN R --no-echo --no-restore --no-save -e "devtools::install_github('immunogenomics/presto')"
 
-RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.3.0')"
+
 
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('logr','hexbin', 'ggpointdensity'))"
 

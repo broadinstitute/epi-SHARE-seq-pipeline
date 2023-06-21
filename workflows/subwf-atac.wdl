@@ -90,6 +90,12 @@ workflow wf_atac {
         Float? trim_disk_factor = 8.0
         Float? trim_memory_factor = 0.15
         String? trim_docker_image
+        
+        # ArchR-specific inputs
+        # Runtime parameters
+        Float? archr_disk_factor
+        Float? archr_memory_factor 
+        String? archr_docker_image
     }
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
@@ -221,16 +227,10 @@ workflow wf_atac {
                     atac_frag = filter.atac_filter_fragments,
                     genome = genome_name,
                     peak_set = peak_set,
-                    prefix = prefix
-            }
-            call share_task_archr.archr as archr_strict{
-                input:
-                    atac_frag = filter.atac_filter_fragments,
-                    genome = genome_name,
-                    peak_set = peak_set,
-                    prefix = '${prefix}_strict',
-                    min_tss = 5,
-                    min_frags = 1000
+                    prefix = prefix,
+                    memory_factor = archr_memory_factor,
+                    disk_factor = archr_disk_factor,
+                    docker_image = archr_docker_image
             }
         }
     }
@@ -294,26 +294,5 @@ workflow wf_atac {
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_raw_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
-
-        # ArchR strict
-        File? share_atac_archr_strict_notebook_output = archr_strict.notebook_output
-        File? share_atac_archr_strict_notebook_log = archr_strict.notebook_log
-
-        File? share_atac_archr_strict_raw_tss_enrichment = archr_strict.archr_raw_tss_by_uniq_frags_plot
-        File? share_atac_archr_strict_filtered_tss_enrichment = archr_strict.archr_filtered_tss_by_uniq_frags_plot
-        File? share_atac_archr_strict_raw_fragment_size_plot = archr_strict.archr_raw_frag_size_dist_plot
-        File? share_atac_archr_strict_filtered_fragment_size_plot = archr_strict.archr_filtered_frag_size_dist_plot
-
-        File? share_atac_archr_strict_umap_doublets = archr_strict.archr_umap_doublets
-        File? share_atac_archr_strict_umap_cluster_plot = archr_strict.archr_umap_cluster_plot
-        File? share_atac_archr_strict_umap_num_frags_plot = archr_strict.archr_umap_num_frags_plot
-        File? share_atac_archr_strict_umap_tss_score_plot = archr_strict.archr_umap_tss_score_plot
-        File? share_atac_archr_strict_umap_frip_plot = archr_strict.archr_umap_frip_plot
-
-        File? share_atac_archr_strict_gene_heatmap_plot = archr_strict.archr_heatmap_plot
-        File? share_atac_archr_strict_arrow = archr_strict.archr_arrow
-        File? share_atac_archr_strict_obj = archr_strict.archr_raw_obj
-        File? share_atac_archr_strict_plots_zip = archr_strict.plots_zip
-
     }
 }
