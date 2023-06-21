@@ -271,3 +271,70 @@ if __name__ == '__main__':
                        help='optional file with html text to add at top of file', nargs='?') 
     args = parser.parse_args()
     main(args.output_file_name, args.image_file_list, args.log_file_list, args.input_file_name)
+
+
+
+
+
+
+
+"""""
+bash script to get a file with just the numbers
+
+echo ~{atac_total_reads} "</td></tr>" > sum_stats.txt
+echo ~{atac_aligned_uniquely} "</td></tr>" >> sum_stats.txt
+echo ~{atac_unaligned} "</td></tr>" >> sum_stats.txt
+echo ~{atac_feature_reads} "</td></tr>" >> sum_stats.txt
+echo ~{atac_duplicate_reads} "</td></tr>" >> sum_stats.txt
+echo ~{atac_percent_duplicates} "</td></tr>" >> sum_stats.txt
+echo ~{atac_nrf} "</td></tr>" >> sum_stats.txt
+echo ~{atac_pbc1} "</td></tr>" >> sum_stats.txt
+echo ~{atac_pbc2} "</td></tr>" >> sum_stats.txt
+echo ~{rna_total_reads} "</td></tr>" >> sum_stats.txt
+echo ~{rna_aligned_uniquely} "</td></tr>" >> sum_stats.txt
+echo ~{rna_aligned_multimap} "</td></tr>" >> sum_stats.txt
+echo ~{rna_unaligned} "</td></tr>" >> sum_stats.txt
+echo ~{rna_feature_reads} "</td></tr>" >> sum_stats.txt
+echo ~{rna_duplicate_reads} "</td></tr>" >> sum_stats.txt
+percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
+echo $percent "</td></tr></table>" >> sum_stats.txt
+
+names to go with the numbers above
+names = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
+
+
+
+#function that writes a table from names and numbers
+
+def write_summary_table(txt, nums, outfile):
+    #write the header for the atac section
+    outfile.write("<table> <th> ATAC </th>")
+    for int in range(len(txt)): 
+        #write the header for the rna section after all the atac stuff has 
+        #been added
+        if int == 6:
+            outfile.write("<th> RNA </th>")
+        outfile.write("<tr> <td>")
+        outfile.write(txt[int])
+        outfile.write("</td> <td>")
+        #format the numbers to print with commas
+        outfile.write(str("{:,}".format(nums[int])))
+        outfile.write("</td> </tr>")
+        outfile.write("</table>")
+
+
+#read the text files of numbers and labels into lists, then use those lists
+#to make a table
+#note: only works if the text files are one label/number per line
+label_names_file = open(labels_file, 'r')
+#use of splitlines eliminates the trailing endline character
+label_names = label_names_file.read().splitlines()
+summary_stats_file = open(numbers_file)
+summary_stats = summary_stats_file.read().splitlines()
+#cast the digits from the text file to ints
+summary_stats = [int(num) for num in summary_stats]
+
+write_summary_table(label_names, summary_stats, output_file)
+
+"""
+
