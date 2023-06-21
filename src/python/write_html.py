@@ -48,7 +48,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
         #tab1:checked ~ .tab.content1,
         #tab2:checked ~ .tab.content2, 
         #tab3:checked ~ .tab.content3,  
-        #tab4:checked ~ .tab.content4 
+        #tab4:checked ~ .tab.content4,
         #tab5:checked ~ .tab.content5{ display: block; } 
         input + label { 
         border: 1px solid #999; 
@@ -235,7 +235,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     output_file.write("</div>")
 
     #write to logs tab
-    output_file.write('<div calss="tab content5">')
+    output_file.write('<div class="tab content5">')
     logs = fname.read().splitlines()
     
     # loop through log files in log list and write
