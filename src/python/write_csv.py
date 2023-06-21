@@ -5,24 +5,25 @@ def main(output_file_name, names_list, numeric_list, image_list, log_list):
 
     output_file = io.open(output_file_name, 'w', encoding='utf8')
     
+    names_array = []
     if names_list is not None:
         with open(names_list, "r") as names_f: 
-            names_array = names_f.readline().split()
+            names_array = names_f.read().splitlines()
     
     
     if numeric_list is not None:
         with open(numeric_list, "r") as numeric_f: 
-            numeric_array = numeric_f.readline().split()
+            numeric_array = numeric_f.read().splitlines()
     
     
     if image_list is not None:
         with open(image_list, "r") as image_f: 
-            image_array = image_f.readline().split()
+            image_array = image_f.read().splitlines()
 
     
     if log_list is not None:
         with open(log_list, "r") as log_f: 
-            log_array = log_f.readline().split()
+            log_array = log_f.read().splitlines()
 
 
     csv_values = numeric_array + image_array + log_array

@@ -49,13 +49,22 @@ task html_report {
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
 
-    
-    
+    # new stuff im adding for the dictionary functionality
+
+    # try to implicity coerce them all to strings here 
+    String other_output_file = "${default="share-seq-data" prefix}.csv"
+    Array[String] nums_to_save = [atac_total_reads, atac_aligned_uniquely, atac_unaligned, atac_feature_reads, atac_duplicate_reads, atac_nrf, atac_pbc1, atac_pbc2, atac_percent_duplicates, rna_total_reads, rna_aligned_uniquely, rna_aligned_multimap, rna_unaligned, rna_feature_reads, rna_duplicate_reads]
+    Array[String] names_of_data = ['prefix', 'atac_total_reads', 'atac_aligned_uniquely','atac_unaligned', 'atac_feature_reads','atac_duplicate_reads','atac_nrf','atac_pbc1','atac_pbc2','atac_percent_duplicates','rna_total_reads','rna_aligned_uniquely','rna_aligned_multimap','rna_unaligned','rna_feature_reads','rna_duplicate_reads', 'joint_qc_plot', 'joint_density_plot', 'share_rna_umi_barcode_rank_plot', 'share_rna_gene_barcode_rank_plot', 'share_rna_gene_umi_scatter_plot','share_rna_seurat_raw_violin_plot', 'share_rna_seurat_raw_qc_scatter_plot', 'share_rna_seurat_filtered_violin_plot', 'share_rna_seurat_filtered_qc_scatter_plot', 'share_rna_seurat_variable_genes_plot', 'share_rna_seurat_PCA_dim_loadings_plot', 'share_rna_seurat_PCA_plot', 'share_rna_seurat_heatmap_plot', 'share_rna_seurat_jackstraw_plot', 'share_rna_seurat_elbow_plot', 'share_rna_seurat_umap_cluster_plot', 'share_rna_seurat_umap_rna_count_plot', 'share_rna_seurat_umap_gene_count_plot', 'share_rna_seurat_umap_mito_plot', 'share_atac_qc_barcode_rank_plot', 'share_atac_qc_hist_plot', 'share_atac_qc_tss_enrichment', 'share_atac_archr_gene_heatmap_plot', 'share_atac_archr_raw_tss_enrichment', 'share_atac_archr_filtered_tss_enrichment', 'share_atac_archr_raw_fragment_size_plot', 'share_atac_archr_filtered_fragment_size_plot', 'share_atac_archr_umap_doublets', 'share_atac_archr_umap_cluster_plot', 'share_atac_archr_umap_doublets', 'share_atac_archr_umap_num_frags_plot', 'share_atac_archr_umap_tss_score_plot', 'share_atac_archr_umap_frip_plot','share_atac_archr_gene_heatmap_plot', 'share_atac_archr_strict_raw_tss_enrichment', 'share_atac_archr_strict_filtered_tss_enrichment', 'share_atac_archr_strict_raw_fragment_size_plot', 'share_atac_archr_strict_filtered_fragment_size_plot', 'share_atac_archr_strict_umap_doublets', 'share_atac_archr_strict_umap_cluster_plot', 'share_atac_archr_umap_doublets', 'share_atac_archr_strict_umap_num_frags_plot', 'share_atac_archr_strict_umap_tss_score_plot', 'share_atac_archr_strict_umap_frip_plot','share_atac_archr_strict_gene_heatmap_plot', 'j_plot','share_rna_alignment_log',  'share_task_starsolo_barcodes_stats', 'share_task_starsolo_features_stats', 'share_task_starsolo_summary_csv', 'share_task_starsolo_umi_per_cell', 'share_task_starsolo_raw_tar','share_rna_seurat_notebook_log', 'share_atac_alignment_log', 'share_atac_archr_notebook_log', 'dorcs_notebook_log']
+    # added echo command to get the names and the numbers in bash, and added 
+    # a call to the make csv python script with the relevant files
     command <<<
 
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
 
+        echo "~{sep="\n" names_of_data}" > names_list.txt
+        echo "~{sep="\n" nums_to_save}" > numeric_list.txt
+        
         echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
         echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.txt
@@ -74,9 +83,13 @@ task html_report {
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt
+        
+        python3 /software/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt
     >>>
+    
     output {
         File html_report_file = "~{output_file}"
+        File csv_report_file = "~{other_output_file}"
     }
 
     runtime {
