@@ -28,7 +28,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
             data = open(image, 'rb').read() # read bytes from file
             data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
             data_base64 = data_base64.decode('utf-8')    # convert bytes to string
-            output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
+            output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + io.os.path.basename(image)+ '><br>') # embed in html
     
     #function like write pngs, but ideally works for writing into columns
     def write_pngs_column(images):
@@ -36,7 +36,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
             data = open(image, 'rb').read() # read bytes from file
             data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
             data_base64 = data_base64.decode('utf-8')    # convert bytes to string
-            output_file.write('<img style="width:100%;" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
+            output_file.write('<img style="width:100%;" src="data:image/png;base64,' + data_base64 + '" alt=' + io.os.path.basename(image)+ '><br>') # embed in html
 
     
     #Sets up the style for the tabs. Also links each tab to the content that
@@ -48,7 +48,8 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
         #tab1:checked ~ .tab.content1,
         #tab2:checked ~ .tab.content2, 
         #tab3:checked ~ .tab.content3,  
-        #tab4:checked ~ .tab.content4 { display: block; } 
+        #tab4:checked ~ .tab.content4 
+        #tab5:checked ~ .tab.content5{ display: block; } 
         input + label { 
         border: 1px solid #999; 
         background: #EEE; 
@@ -113,7 +114,9 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
         <input type="radio" name="tabs" id="tab3" /"> 
         <label for="tab3">ATAC plots</label>
         <input type="radio" name="tabs" id="tab4" />
-        <label for="tab4">Statistics</label>""")
+        <label for="tab4">Statistics</label>
+        <input type="radio" name="tabs" id="tab5" checked />
+        <label for="tab5">Log files </label>""")
     
     #everything from here until the first break will be under the first tab
     output_file.write('<div class="tab content1">')
@@ -221,19 +224,23 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     output_file.write('<div class="tab content4">') 
     output_file.write("</div>")
 
+    output_file.write('<div calss="tab content5">')
+    logs = fname.read().splitlines()
+    # loop through log files in log list and write
+    for log in logs:
+        output_file.write(log)
+        output_file.write("<br>")
+    output_file.write("</div>")
+    output_file.write('</body></html>')
+    output_file.close()
+    
+
 
 
     
     #need to fix this, going to be something similar to what the images were
     #with open(log_file_list) as fname:
-        #logs = fname.read().splitlines()
-
-    # loop through log files in log list and write
-    #for log in logs:
-        #output_file.write(log)
-        #output_file.write("<br>")
-    #output_file.write('</body></html>')
-    #output_file.close()
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

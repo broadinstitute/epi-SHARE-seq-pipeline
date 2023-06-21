@@ -27,7 +27,7 @@ task write_csv {
         touch numeric.txt 
         touch image.txt 
         touch log.txt
-        echo $~{names_data}[@] >> names.txt
+        echo ${~{names_data}[@]} >> names.txt
         echo $~{numeric_data}[@] >> numeric.txt
         echo $~{image_data}[@] >> image.txt
         echo $~{log_data}[@] >> log.txt
