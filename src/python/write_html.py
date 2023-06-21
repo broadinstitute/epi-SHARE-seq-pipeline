@@ -158,7 +158,6 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     
     #loop through the list of image files, and put them in the right set
     #depending on their name
-    
     for image_file in images:
         for name in top_level_file_names: 
             if name in image_file:
@@ -194,15 +193,24 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     #called within a chunk of formatted html
     output_file.write("""<div class="row">
                 <div class="column left">""")
+    
+    # writes summary statistics (eventually should be moved to own tab and 
+    # and not hard coded)
     output_file.write("""<center> <span style="font-size: 50;"> 41890 cells </span> <br> <br>
                     <span style="font-size: 30;"> 29656 both 670 RNA 11627 ATAC </span> <br> <br>
                     <span style="font-size: 25;"> RNA:  112,366,191 / 346,626,836 aligned (43% dup) </span> </center>""")
+    
+    #write images to far left of summary tab 
     write_pngs_column(top_level_left)
     output_file.write("""</div>
                 <div class="column left"> """)
+    
+    #write images to middle of summary tab
     write_pngs_column(top_level_middle)
     output_file.write("""</div>
                         <div class="column left">""")
+    
+    #write images to right of summary tab
     write_pngs_column(top_level_right)                    
     output_file.write("""</div>
                     </div>""")
@@ -210,22 +218,26 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     output_file.write("</div>")
     
     
-    
+    #write images to rna tab 
     output_file.write('<div class="tab content2">')
     write_pngs(rna_plots)
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
 
+    #write images to atac plot section
     output_file.write('<div class="tab content3">')
     write_pngs(atac_plots)
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
 
+    #write to summary stats tab
     output_file.write('<div class="tab content4">') 
     output_file.write("</div>")
 
+    #write to logs tab
     output_file.write('<div calss="tab content5">')
     logs = fname.read().splitlines()
+    
     # loop through log files in log list and write
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
