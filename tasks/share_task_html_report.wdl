@@ -89,6 +89,7 @@ task html_report {
     
     output {
         File html_report_file = "~{output_file}"
+        #added output for the overall csv
         File csv_report_file = "~{other_output_file}"
     }
 

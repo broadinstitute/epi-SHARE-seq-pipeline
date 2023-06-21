@@ -247,6 +247,8 @@ workflow share {
         # Report
         File? html_summary = html_report.html_report_file
 
+        # csv output
+        File? csv_summary = html_report.csv_report_file
     
     }
 
