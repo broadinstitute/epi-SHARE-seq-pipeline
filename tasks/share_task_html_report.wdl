@@ -4,6 +4,7 @@ version 1.0
 # SHARE-html-report
 # Gather information from log files
 
+#updating this to also generate the file with the data
 
 task html_report {
     meta {
@@ -48,11 +49,7 @@ task html_report {
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
 
-    # TODO: command needs fixing in two ways. Firstly, all of the echoes are printing formatted summary stats to an output file, that the write_html script then prints the 
-    # rest of the report into. The stats aren't all that well formated. Two thoughts for this. Firstly, the names and numbers could be written into a text file that is then 
-    # passed to write_html as an argument, so write_html can format the stats well. Secondly, could see what happens if the wdl list is passed to the command line, but that 
-    # seems unlikely and would require some weird stuff with lists given the need to move strings, ints, and floats. Second thing that needs to happen is that, in the last line, 
-    # the call needs to be modified to work with the amount of parameters. Also inputs will need to be updated to reflect the three lists of image files moving around
+    
     
     command <<<
 
