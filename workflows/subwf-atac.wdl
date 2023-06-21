@@ -90,6 +90,12 @@ workflow wf_atac {
         Float? trim_disk_factor = 8.0
         Float? trim_memory_factor = 0.15
         String? trim_docker_image
+        
+        # ArchR-specific inputs
+        # Runtime parameters
+        Float? archr_disk_factor
+        Float? archr_memory_factor 
+        String? archr_docker_image
     }
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
@@ -221,7 +227,10 @@ workflow wf_atac {
                     atac_frag = filter.atac_filter_fragments,
                     genome = genome_name,
                     peak_set = peak_set,
-                    prefix = prefix
+                    prefix = prefix,
+                    memory_factor = archr_memory_factor,
+                    disk_factor = archr_disk_factor,
+                    docker_image = archr_docker_image
             }
         }
     }
