@@ -138,7 +138,7 @@ task atac_initial_filter {
         # parallel tool execution of samtools view for each chromosome
         # I am removing the -k option because the order is not going to be maintained in the following steps.
         # Saving the order of chromosomes for when I am going to merge.
-        printf "%s\n" ${chromosomes} | parallel -j ~{parallel_threads} "samtools view -@ ~{samtools_view_threads} -b tmp_filtered_bam_sorted > {}.bam"
+        printf "%s\n" ${chromosomes} | parallel -j ~{parallel_threads} "samtools view -@ ~{samtools_view_threads} -b tmp_filtered_bam_sorted.bam {} > {}.bam"
 
     >>>
 
