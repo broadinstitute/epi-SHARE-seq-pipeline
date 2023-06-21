@@ -26,11 +26,11 @@ RUN apt-get update && apt-get install -y \
     libncursesw5-dev \
     libbz2-dev \
     perl \
-    python \
+    python3 \
     unzip \
     xz-utils \
     wget \
-    zlib1g-dev &&\
+    zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Make directory for all softwares
@@ -38,9 +38,14 @@ RUN mkdir /software
 WORKDIR /software
 ENV PATH="/software:${PATH}"
 
+RUN alias python=python3
+
 # Install bedtools 2.29.0
-RUN git clone --branch ${BEDTOOLS_VERSION} --single-branch https://github.com/arq5x/bedtools2.git && \
-    cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
+#RUN git clone --branch ${BEDTOOLS_VERSION} --single-branch https://github.com/arq5x/bedtools2.git && \
+#    cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
+
+RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.31.0/bedtools-2.31.0.tar.gz && \
+    tar -xvzf bedtools-2.31.0.tar.gz && cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2
 
 # Install sambamba 0.6.6
 RUN wget https://github.com/lomereiter/sambamba/releases/download/v${SAMBAMBA_VERSION}/sambamba_v${SAMBAMBA_VERSION}_linux.tar.bz2 && \
@@ -60,7 +65,7 @@ RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VER
 
 
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
+FROM ubuntu:latest
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
@@ -69,19 +74,21 @@ LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
 LABEL software.task="filter"
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
     gcc \
     libcurl4-openssl-dev \
+    openjdk-11-jdk \
     parallel \
-    python3 \
+    python3-full \
     python3-dev \
     python3-pip \
-    openjdk-11-jre \
-    zlib1g-dev &&\
+    zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts
-RUN python3 -m pip install --no-cache-dir --ignore-installed pysam
+RUN python3 -m pip install --ignore-installed  --no-cache-dir pysam
 
 # Create and setup new user
 ENV USER=shareseq
