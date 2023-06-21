@@ -227,6 +227,8 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     output_file.write('<div calss="tab content5">')
     logs = fname.read().splitlines()
     # loop through log files in log list and write
+    with open(log_file_list) as fname:
+        logs = fname.read().splitlines()
     for log in logs:
         output_file.write(log)
         output_file.write("<br>")
