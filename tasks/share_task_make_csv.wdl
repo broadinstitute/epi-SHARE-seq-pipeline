@@ -31,7 +31,7 @@ task write_csv {
         echo $~{numeric_data}[@] >> numeric.txt
         echo $~{image_data}[@] >> image.txt
         echo $~{log_data}[@] >> log.txt
-        PYTHONIOENCODING=utf-8 python3 /software/write_csv.py ~{output_file} names.txt numeric.txt image.txt log.txt
+        python3 /software/write_csv.py ~{output_file} names.txt numeric.txt image.txt log.txt
         >>>
 
     output {

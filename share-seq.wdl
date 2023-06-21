@@ -396,6 +396,7 @@ workflow share {
             atac.share_atac_alignment_log, 
             atac.share_atac_archr_notebook_log, 
             dorcs.dorcs_notebook_log]
+    
     }
 
 }
