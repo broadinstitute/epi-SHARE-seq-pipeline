@@ -85,8 +85,8 @@ task html_report {
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt
-        
-        python3 /src/python/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt
+
+        python3 write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt
     >>>
     
     output {
