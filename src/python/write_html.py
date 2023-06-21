@@ -19,11 +19,6 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     Log files separated by their title and encoded via pre tag
     """
     # Open output file, write input if exists
-    
-    #had to essentially remove the image file list as an argument and replace
-    #it with an os thing that grabs the list of files direcetly, which is
-    #hardcoded which is not great. But it works for getting the images. 
-
     output_file = io.open(output_file_name, 'w', encoding='utf8')
     
     #function takes a list of pngs, encodes them in base64, and writes them to
