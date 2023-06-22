@@ -44,7 +44,7 @@ def main(output_file_name, names_list, numeric_list, image_list, log_list):
         else: 
             output_file.write(names_array[idx] + ", " + "no matching value \n")
 
-
+#force commit
 
 
 
