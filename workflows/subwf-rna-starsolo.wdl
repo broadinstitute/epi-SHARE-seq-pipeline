@@ -36,7 +36,11 @@ workflow wf_rna {
 
         # Align-specific inputs
         File idx_tar
-        String? barcode_tag
+        String soloUMIdedup = "1MM_All"
+        Int outFilterMultimapNmax = 20
+        Float outFilterScoreMinOverLread = 0.3
+        Float outFilterMatchNminOverLread = 0.3
+        Int? winAnchorMultimapNmax
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor
@@ -53,6 +57,7 @@ workflow wf_rna {
         # QC-specific inputs
         Int? umi_cutoff
         Int? gene_cutoff
+        String? barcode_tag
         # Runtime parameters
         Int? qc_cpus
         Float? qc_disk_factor
@@ -96,6 +101,11 @@ workflow wf_rna {
                 fastq_R1 = select_first([correct.corrected_fastq_R1, read1]),
                 fastq_R2 = select_first([correct.corrected_fastq_R2, read2]),
                 whitelist = whitelist,
+                soloUMIdedup = soloUMIdedup,
+                outFilterMultimapNmax = outFilterMultimapNmax,
+                outFilterScoreMinOverLread = outFilterScoreMinOverLread,
+                outFilterMatchNminOverLread = outFilterMatchNminOverLread,
+                winAnchorMultimapNmax = winAnchorMultimapNmax,
                 genome_name = genome_name,
                 genome_index_tar = idx_tar,
                 prefix = prefix,
