@@ -11,7 +11,7 @@ import io
 import os.path
 
 
-def main(output_file_name, image_file_list, log_file_list, input_file_name=None):
+def main(output_file_name, image_file_list, log_file_list, stats_list_file, input_file_name=None):
     """
     Write to the input file
     Image file list is list of png images
@@ -39,6 +39,23 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
             data_base64 = data_base64.decode('utf-8')    # convert bytes to string
             output_file.write('<img style="width:100%;" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
 
+    
+    def write_summary_table(txt, nums, outfile):
+        #write the header for the atac section
+        outfile.write("<table> <th> ATAC </th>")
+        for int in range(len(txt)): 
+            #write the header for the rna section after all the atac stuff has 
+            #been added
+            if int == 6:
+                outfile.write("<th> RNA </th>")
+            outfile.write("<tr> <td>")
+            outfile.write(txt[int])
+            outfile.write("</td> <td>")
+            #format the numbers to print with commas
+            outfile.write(str("{:,}".format(nums[int])))
+            outfile.write("</td> </tr>")
+            outfile.write("</table>")
+        
     
     #Sets up the style for the tabs. Also links each tab to the content that
     #should be displayed when the tab is checked
@@ -232,7 +249,11 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     output_file.write("</div>")
 
     #write to summary stats tab
+    stats_names_list = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
+    with open(stats_list_file) as stats_f:
+        stats_list = stats_f.read().splitlines
     output_file.write('<div class="tab content4">') 
+    write_summary_table(stats_names_list, stats_list, output_file)
     output_file.write("</div>")
 
     #write to logs tab
@@ -270,8 +291,10 @@ if __name__ == '__main__':
                        help='file containing list of text log files to append to end of HTML file')
     group.add_argument('--input_file_name',
                        help='optional file with html text to add at top of file', nargs='?') 
+    group.add_argument('stats_file_list',
+                       help='file containing list of numbers for summary statistics')
     args = parser.parse_args()
-    main(args.output_file_name, args.image_file_list, args.log_file_list, args.input_file_name)
+    main(args.output_file_name, args.image_file_list, args.log_file_list, args.stats_file_list, args.input_file_name)
 
 
 
