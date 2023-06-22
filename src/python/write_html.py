@@ -28,7 +28,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
             data = open(image, 'rb').read() # read bytes from file
             data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
             data_base64 = data_base64.decode('utf-8')    # convert bytes to string
-            output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + io.os.path.basename(image)+ '><br>') # embed in html
+            output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
     
     #function like write pngs, but ideally works for writing into columns
     def write_pngs_column(images):
@@ -36,7 +36,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
             data = open(image, 'rb').read() # read bytes from file
             data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
             data_base64 = data_base64.decode('utf-8')    # convert bytes to string
-            output_file.write('<img style="width:100%;" src="data:image/png;base64,' + data_base64 + '" alt=' + io.os.path.basename(image)+ '><br>') # embed in html
+            output_file.write('<img style="width:100%;" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
 
     
     #Sets up the style for the tabs. Also links each tab to the content that

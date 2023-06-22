@@ -39,7 +39,10 @@ def main(output_file_name, names_list, numeric_list, image_list, log_list):
     
     # make a csv file with labels formated label, data
     for idx in range(len(names_array)):
-        output_file.write(names_array[idx] + ", " + csv_values[idx] + "\n")
+        if idx < len(csv_values):
+            output_file.write(names_array[idx] + ", " + csv_values[idx] + "\n")
+        else: 
+            output_file.write(names_array[idx] + ", " + "no matching value \n")
 
 
 
