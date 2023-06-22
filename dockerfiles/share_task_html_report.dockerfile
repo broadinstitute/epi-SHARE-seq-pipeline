@@ -24,3 +24,7 @@ ENV PATH="/software:${PATH}"
 
 # Copy the external scripts inside
 COPY src/python/write_html.py /software
+
+# added for write csv that gets called in same task as write html, maybe should
+# be in its own file at some point
+COPY src/python/write_csv.py /software

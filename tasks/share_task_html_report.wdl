@@ -86,7 +86,7 @@ task html_report {
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt
 
-         PYTHONIOENCODING=utf-8 python3 /software/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt
+        python3 /software/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt
     >>>
     
     output {
