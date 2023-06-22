@@ -35,12 +35,15 @@ task html_report {
         Int? rna_unaligned
         Int? rna_feature_reads
         Int? rna_duplicate_reads
-
+       
         ## JPEG files to be encoded and appended to html
         Array[File?] image_files
 
         ## Raw text logs to append to end of html
         Array[String?] log_files
+
+        ## new docker image
+        String? docker_image
 
     }
 
@@ -96,7 +99,8 @@ task html_report {
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:14'
+        #docker: 'nchernia/share_task_html_report:14'
+        docker: "${docker_image}"
     }
 }
 
