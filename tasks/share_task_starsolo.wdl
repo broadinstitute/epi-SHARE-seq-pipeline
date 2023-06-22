@@ -21,9 +21,6 @@ task share_rna_align {
         String genome_name
         String prefix
         String chemistry
-        
-        File? placeholder
-
         # Runtime parameters
         Int cpus = 16
         Float? disk_factor = 50.0
