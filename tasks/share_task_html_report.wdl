@@ -42,8 +42,6 @@ task html_report {
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
-        ## new docker image
-        String? docker_image
 
     }
 
@@ -99,8 +97,7 @@ task html_report {
     }
 
     runtime {
-        #docker: 'nchernia/share_task_html_report:14'
-        docker: "${docker_image}"
+        docker: 'nchernia/share_task_html_report:14'
     }
 }
 
