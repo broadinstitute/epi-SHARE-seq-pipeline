@@ -27,7 +27,10 @@ task share_rna_align {
         Int outFilterMultimapNmax = 20
         Float outFilterScoreMinOverLread = 0.3
         Float outFilterMatchNminOverLread = 0.3
+        Float? outFilterMismatchNoverReadLmax
+        Int? outFilterScoreMin
         Int? winAnchorMultimapNmax
+        
 
         # Runtime parameters
         Int cpus = 16
@@ -101,13 +104,15 @@ task share_rna_align {
             --soloCBlen 24 \
             --soloUMIstart 25 \
             --soloUMIlen 10 \
-            --soloUMIdedup ${soloUMIdedup} \
+            --soloUMIdedup ~{soloUMIdedup} \
             --chimOutType WithinBAM \
             --limitOutSJcollapsed 2000000 \
             --outFilterMultimapNmax ~{outFilterMultimapNmax} \
-            --outFilterScoreMinOverLread ${outFilterScoreMinOverLread} \
-            --outFilterMatchNminOverLread ${outFilterMatchNminOverLread} \
-            ${"--winAnchorMultimapNmax " + winAnchorMultimapNmax} \
+            --outFilterScoreMinOverLread ~{outFilterScoreMinOverLread} \
+            --outFilterMatchNminOverLread ~{outFilterMatchNminOverLread} \
+            ~{"--outFilterMismatchNoverReadLmax "+ outFilterMismatchNoverReadLmax} \
+            ~{"--winAnchorMultimapNmax " + winAnchorMultimapNmax} \
+            ~{"--outFilterScoreMin " + outFilterScoreMin} \
             --outSAMtype BAM SortedByCoordinate \
             --limitBAMsortRAM 31232551044 \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \

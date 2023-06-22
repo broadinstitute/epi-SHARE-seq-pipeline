@@ -41,6 +41,9 @@ workflow wf_rna {
         Float outFilterScoreMinOverLread = 0.3
         Float outFilterMatchNminOverLread = 0.3
         Int? winAnchorMultimapNmax
+        Float? outFilterMismatchNoverReadLmax
+        Int? outFilterScoreMin
+
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor
@@ -106,6 +109,8 @@ workflow wf_rna {
                 outFilterScoreMinOverLread = outFilterScoreMinOverLread,
                 outFilterMatchNminOverLread = outFilterMatchNminOverLread,
                 winAnchorMultimapNmax = winAnchorMultimapNmax,
+                outFilterMismatchNoverReadLmax = outFilterMismatchNoverReadLmax,
+                outFilterScoreMin = outFilterScoreMin,
                 genome_name = genome_name,
                 genome_index_tar = idx_tar,
                 prefix = prefix,
