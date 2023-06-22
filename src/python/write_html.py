@@ -8,6 +8,7 @@ Write output HTML file from list of images and text
 import argparse
 import base64
 import io
+import os.path
 
 
 def main(output_file_name, image_file_list, log_file_list, input_file_name=None):
