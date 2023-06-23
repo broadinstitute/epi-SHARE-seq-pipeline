@@ -243,11 +243,11 @@ def main(output_file_name, image_file_list, log_file_list, stats_list_file, inpu
     output_file.write("</div>")
 
     #write to summary stats tab
-    stats_names_list = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
-    with open(stats_list_file) as stats_f:
-        stats_list = stats_f.read().splitlines
+    #stats_names_list = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
+    #ith open(stats_list_file) as stats_f:
+        #stats_list = stats_f.read().splitlines
     output_file.write('<div class="tab content4">') 
-    write_summary_table(stats_names_list, stats_list, output_file)
+    #write_summary_table(stats_names_list, stats_list, output_file)
     output_file.write("</div>")
 
     #write to logs tab
