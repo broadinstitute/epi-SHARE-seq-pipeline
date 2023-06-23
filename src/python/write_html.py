@@ -41,21 +41,14 @@ def main(output_file_name, image_file_list, log_file_list, stats_list_file, inpu
 
     
     def write_summary_table(txt, nums, outfile):
-        #write the header for the atac section
-        outfile.write("<table> <th> ATAC </th>")
-        for int in range(len(txt)): 
-            #write the header for the rna section after all the atac stuff has 
-            #been added
-            if int == 6:
-                outfile.write("<th> RNA </th>")
-            outfile.write("<tr> <td>")
-            outfile.write(txt[int])
-            outfile.write("</td> <td>")
-            #format the numbers to print with commas
-            outfile.write(str("{:,}".format(nums[int])))
-            outfile.write("</td> </tr>")
-            outfile.write("</table>")
-        
+        outfile.write("<table>")
+        outfile.write("<th>Summary Statistics</th>")
+        for index in range(len(txt)):
+            if index < len(nums):
+                outfile.write("<tr> <td>" + txt[index] + "</td> <td>" + nums[index] + " </td> </tr>")
+            else:
+                outfile.write("<tr> <td>" + txt[index] + "</td> <td>No matching number</td> </tr>")
+        outfile.write("</table>")
     
     #Sets up the style for the tabs. Also links each tab to the content that
     #should be displayed when the tab is checked
@@ -113,6 +106,7 @@ def main(output_file_name, image_file_list, log_file_list, stats_list_file, inpu
                         display: table;
                         clear: both;
                         }
+                        
                         </style>
                         """)
     
@@ -249,11 +243,11 @@ def main(output_file_name, image_file_list, log_file_list, stats_list_file, inpu
     output_file.write("</div>")
 
     #write to summary stats tab
-    #stats_names_list = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
-    #with open(stats_list_file) as stats_f:
-        #stats_list = stats_f.read().splitlines
+    stats_names_list = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
+    with open(stats_list_file) as stats_f:
+        stats_list = stats_f.read().splitlines
     output_file.write('<div class="tab content4">') 
-    #write_summary_table(stats_names_list, stats_list, output_file)
+    write_summary_table(stats_names_list, stats_list, output_file)
     output_file.write("</div>")
 
     #write to logs tab
