@@ -46,6 +46,7 @@ task html_report {
     }
 
     String output_file = "${default="share-seq" prefix}.html"
+    String test_output_file = "${default="share-seq=test" prefix}.html"
     # need to select from valid files since some are optional
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
@@ -67,8 +68,7 @@ task html_report {
 
         echo "~{sep="\n" names_of_data}" > names_list.txt
         echo "~{sep="\n" nums_to_save}" > numeric_list.txt
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt
-        echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" >> output.txt
+        echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
         echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.txt
         echo "<tr><td>Unique Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.txt
@@ -85,6 +85,7 @@ task html_report {
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table> </p>" >> output.txt
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name > test_output.txt 
         
         python3 /software/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt
     >>>
@@ -93,6 +94,7 @@ task html_report {
         File html_report_file = "~{output_file}"
         #added output for the overall csv
         File csv_report_file = "~{other_output_file}"
+        File html_test_file = "~{test_output_file}"
     }
 
     runtime {
