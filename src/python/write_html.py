@@ -11,7 +11,7 @@ import io
 import os.path
 
 
-def main(output_file_name, image_file_list, log_file_list, stats_list_file, input_file_name=None):
+def main(output_file_name, image_file_list, log_file_list, input_file_name=None):
     """
     Write to the input file
     Image file list is list of png images
@@ -285,10 +285,9 @@ if __name__ == '__main__':
                        help='file containing list of text log files to append to end of HTML file')
     group.add_argument('--input_file_name',
                        help='optional file with html text to add at top of file', nargs='?') 
-    group.add_argument('stats_file_list',
-                       help='file containing list of numbers for summary statistics')
+
     args = parser.parse_args()
-    main(args.output_file_name, args.image_file_list, args.log_file_list, args.stats_file_list, args.input_file_name)
+    main(args.output_file_name, args.image_file_list, args.log_file_list, args.input_file_name)
 
 
 
