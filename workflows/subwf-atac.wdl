@@ -3,9 +3,7 @@ version 1.0
 # Import the tasks called by the pipeline
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
-import "../tasks/share_task_bowtie2.wdl" as share_task_align
-import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
-import "../tasks/share_task_filter_atac.wdl" as share_task_filter
+import "../tasks/task_chromap.wdl" as task_align_chromap
 import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
 import "../tasks/share_task_archr.wdl" as share_task_archr
@@ -136,55 +134,20 @@ workflow wf_atac {
     }
 
     if (  "~{pipeline_modality}" != "no_align" ) {
-        scatter(read_pair in zip(select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]), select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]))) {
-            call share_task_align.share_atac_align as align {
-                input:
-                    fastq_R1 = [read_pair.left],
-                    fastq_R2 = [read_pair.right],
-                    chemistry= chemistry,
-                    genome_name = genome_name,
-                    genome_index_tar = genome_index_tar,
-                    multimappers = align_multimappers,
-                    prefix = prefix,
-                    disk_factor = align_disk_factor,
-                    memory_factor = align_memory_factor,
-                    cpus = align_cpus,
-                    docker_image = align_docker_image
-            }
-        }
         
-        call share_task_merge_bams.share_atac_merge_bams as merge{
+        call task_align_chromap.atac_align_chromap as align {
             input:
-                bams = align.atac_alignment,
-                logs = align.atac_alignment_log,
-                multimappers = align_multimappers,
+                fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
+                fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
+                chemistry= chemistry,
                 genome_name = genome_name,
+                genome_index_tar = genome_index_tar,
+                multimappers = align_multimappers,
                 prefix = prefix,
-                cpus = merge_cpus,
-                memory_factor = merge_memory_factor,
                 disk_factor = align_disk_factor,
-                docker_image = merge_docker_image
-        }
-
-
-        call share_task_filter.share_atac_filter as filter {
-            input:
-                bam = merge.atac_merged_alignment,
-                bam_index = merge.atac_merged_alignment_index,
-                multimappers = align_multimappers,
-                shift_plus = filter_shift_plus,
-                shift_minus = filter_shift_minus,
-                barcode_tag = barcode_tag,
-                barcode_tag_fragments = barcode_tag_fragments_,
-                mapq_threshold = mapq_threshold,
-                genome_name = genome_name,
-                minimum_fragments_cutoff = filter_minimum_fragments_cutoff,
-                prefix = prefix,
-                barcode_conversion_dict = barcode_conversion_dict,
-                cpus = filter_cpus,
-                disk_factor = filter_disk_factor,
-                docker_image = filter_docker_image,
-                memory_factor = filter_memory_factor
+                memory_factor = align_memory_factor,
+                cpus = align_cpus,
+                docker_image = align_docker_image
         }
 
         call share_task_qc_atac.qc_atac as qc_atac{
