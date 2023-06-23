@@ -68,23 +68,23 @@ task html_report {
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         "~{sep="\n" valid_log_files}" > log_list.txt
 
-        echo ~{atac_total_reads} >> output.txt
-        echo ~{atac_aligned_uniquely} >> output.txt
-        echo ~{atac_unaligned} >> output.txt
-        echo ~{atac_feature_reads} >> output.txt
-        echo ~{atac_duplicate_reads} >> output.txt
-        echo ~{atac_percent_duplicates} >> output.txt
-        echo ~{atac_nrf} >> output.txt
-        echo ~{atac_pbc1} >> output.txt
-        echo ~{atac_pbc2} >> output.txt
-        echo ~{rna_total_reads} >> output.txt
-        echo ~{rna_aligned_uniquely} >> output.txt
-        echo ~{rna_aligned_multimap} >> output.txt
-        echo ~{rna_unaligned} >> output.txt
-        echo ~{rna_feature_reads} >> output.txt
-        echo ~{rna_duplicate_reads} >> output.txt
+        echo ~{atac_total_reads} '/n' >> output.txt
+        echo ~{atac_aligned_uniquely} '/n' >> output.txt
+        echo ~{atac_unaligned} '/n' >> output.txt
+        echo ~{atac_feature_reads} '/n' >> output.txt
+        echo ~{atac_duplicate_reads} '/n' >> output.txt
+        echo ~{atac_percent_duplicates} '/n' >> output.txt
+        echo ~{atac_nrf} '/n' >> output.txt
+        echo ~{atac_pbc1} '/n' >> output.txt
+        echo ~{atac_pbc2} '/n' >> output.txt
+        echo ~{rna_total_reads} '/n' >> output.txt
+        echo ~{rna_aligned_uniquely} '/n' >> output.txt
+        echo ~{rna_aligned_multimap} '/n' >> output.txt
+        echo ~{rna_unaligned} '/n' >> output.txt
+        echo ~{rna_feature_reads} '/n' >> output.txt
+        echo ~{rna_duplicate_reads} '/n' >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-        echo $percent >> output.txt
+        echo $percent '/n' >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{test_output_file} image_list.txt output.txt log_list.txt
         
         python3 /software/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt

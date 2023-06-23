@@ -245,7 +245,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
     #write to summary stats tab
     stats_names_list = ["Total reads", "Aligned uniquely", "Unaligned", "Unique Reads", "Duplicate Reads", "Percent Duplicates", "NRF=Distinct/Total", "PBC1=OnePair/Distinct", "PBC2=OnePair/TwoPair", "Total reads", "Aligned uniquely", "Aligned multimap", "Unaligned", "Filtered (feature) Reads", "Duplicate Reads", "Percent Duplicates"]
     with open(stats_info) as stats_f:
-        stats_list = stats_f.readline().split(" ")
+        stats_list = stats_f.read().split(" ")
     output_file.write('<div class="tab content4">') 
     write_summary_table(stats_names_list, stats_list, output_file)
     output_file.write("</div>")
