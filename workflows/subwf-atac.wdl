@@ -19,6 +19,7 @@ workflow wf_atac {
     input {
         # ATAC sub-workflow inputs
         File chrom_sizes
+        File genome_index_tar
         File tss_bed
         File peak_set
         Int? mapq_threshold = 30
@@ -26,11 +27,13 @@ workflow wf_atac {
         String? barcode_tag_fragments
         String chemistry
         String? prefix = "sample"
+        String? subpool = "none"
         String genome_name
         Int? cutoff
         String pipeline_modality = "full"
         Boolean trim_fastqs = true
         File? barcode_conversion_dict # For 10X multiome
+        
 
         # Correct-specific inputs
         Boolean correct_barcodes = true
@@ -45,8 +48,19 @@ workflow wf_atac {
         # Align-specific inputs
         Array[File] read1
         Array[File] read2
+        Array[File] fastq_barcode
         Int? align_multimappers
-        File genome_index_tar
+        File reference_fasta
+        Boolean? remove_pcr_duplicates = true
+        Boolean? remove_pcr_duplicates_at_cell_level = true
+        Boolean? Tn5_shift = true
+        Boolean? low_mem = true
+        Boolean? bed_output = true
+        Int? max_insert_size = 2000
+        Int? quality_filter = 0
+        Int? bc_error_threshold = 2
+        Float? bc_probability_threshold = 0.9
+        String? read_format
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor = 8.0
@@ -139,30 +153,42 @@ workflow wf_atac {
             input:
                 fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
                 fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
-                chemistry= chemistry,
+                fastq_barcode = select_first([trim.fastq_barcode_trimmed, correct.corrected_fastq_barcode, fastq_barcode]),
+                reference_fasta = reference_fasta,
                 genome_name = genome_name,
-                genome_index_tar = genome_index_tar,
                 multimappers = align_multimappers,
+                barcode_inclusion_list = whitelist,
+                barcode_conversion_dict = barcode_conversion_dict,
                 prefix = prefix,
                 disk_factor = align_disk_factor,
                 memory_factor = align_memory_factor,
                 cpus = align_cpus,
-                docker_image = align_docker_image
+                docker_image = align_docker_image,
+                remove_pcr_duplicates = remove_pcr_duplicates,
+                remove_pcr_duplicates_at_cell_level = remove_pcr_duplicates_at_cell_level,
+                Tn5_shift = Tn5_shift,
+                low_mem = low_mem,
+                bed_output = bed_output,
+                max_insert_size = max_insert_size,
+                quality_filter = quality_filter,
+                bc_error_threshold = bc_error_threshold,
+                bc_probability_threshold = bc_probability_threshold,
+                read_format = read_format
         }
 
         call share_task_qc_atac.qc_atac as qc_atac{
             input:
-                raw_bam = merge.atac_merged_alignment,
-                raw_bam_index = merge.atac_merged_alignment_index,
-                filtered_bam = filter.atac_filter_alignment_dedup,
-                filtered_bam_index = filter.atac_filter_alignment_dedup_index,
-                queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
-                wdup_bam = filter.atac_filter_alignment_wdup,
-                wdup_bam_index = filter.atac_filter_alignment_wdup_index,
-                mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
-                mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode,
-                fragments = filter.atac_filter_fragments,
-                fragments_index = filter.atac_filter_fragments_index,
+                raw_bam = align.atac_fragments,
+                raw_bam_index = align.atac_fragments,
+                filtered_bam = align.atac_fragments,
+                filtered_bam_index = align.atac_fragments,
+                queryname_final_bam = align.atac_fragments,
+                wdup_bam = align.atac_fragments,
+                wdup_bam_index = align.atac_fragments,
+                mito_metrics_bulk = align.atac_fragments,
+                mito_metrics_barcode = align.atac_fragments,
+                fragments = align.atac_fragments,
+                fragments_index = align.atac_fragments_index,
                 barcode_conversion_dict = barcode_conversion_dict,
                 peaks = peak_set,
                 tss = tss_bed,
@@ -179,7 +205,7 @@ workflow wf_atac {
 
         call share_task_log_atac.log_atac as log_atac {
         input:
-            alignment_log = merge.atac_merged_alignment_log,
+            alignment_log = align.atac_align_barcode_statistics,
             dups_log = qc_atac.atac_qc_duplicate_stats,
             pbc_log = qc_atac.atac_qc_pbc_stats
         }
@@ -187,7 +213,7 @@ workflow wf_atac {
         if (  "~{pipeline_modality}" == "full" ) {
             call share_task_archr.archr as archr{
                 input:
-                    atac_frag = filter.atac_filter_fragments,
+                    atac_frag = align.atac_fragments,
                     genome = genome_name,
                     peak_set = peak_set,
                     prefix = prefix,
@@ -204,20 +230,21 @@ workflow wf_atac {
         Array[File]? atac_read2_processed = if defined(trim.fastq_R1_trimmed) then trim.fastq_R2_trimmed else correct.corrected_fastq_R2
 
         # Align
-        File? share_atac_alignment_raw = merge.atac_merged_alignment
-        File? share_atac_alignment_raw_index = merge.atac_merged_alignment_index
-        File? share_atac_alignment_log = merge.atac_merged_alignment_log
+        # File? share_atac_alignment_raw = merge.atac_merged_alignment
+        # File? share_atac_alignment_raw_index = merge.atac_merged_alignment_index
+        File? atac_alignment_log = align.atac_align_log
 
         # Filter
-        File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
-        File? share_atac_filter_alignment_dedup_index = filter.atac_filter_alignment_dedup_index
-        File? share_atac_filter_alignment_wdup = filter.atac_filter_alignment_wdup
-        File? share_atac_filter_alignment_wdup_index = filter.atac_filter_alignment_wdup_index
-        File? share_atac_filter_fragments = filter.atac_filter_fragments
-        File? share_atac_filter_fragments_index = filter.atac_filter_fragments_index
-        File? share_atac_filter_monitor_log = filter.atac_filter_monitor_log
-        File? share_atac_filter_mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk
-        File? share_atac_filter_mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode
+        # File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
+        # File? share_atac_filter_alignment_dedup_index = filter.atac_filter_alignment_dedup_index
+        # File? share_atac_filter_alignment_wdup = filter.atac_filter_alignment_wdup
+        # File? share_atac_filter_alignment_wdup_index = filter.atac_filter_alignment_wdup_index
+        File? share_atac_fragments = align.atac_fragments
+        File? share_atac_fragments_index = align.atac_fragments_index
+        # File? share_atac_filter_fragments_index = filter.atac_filter_fragments_index
+        # File? share_atac_filter_monitor_log = filter.atac_filter_monitor_log
+        # File? share_atac_filter_mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk
+        # File? share_atac_filter_mito_metrics_barcode = filter.atac_filter_mito_metrics_barcode
 
         # QC
         File? share_atac_barcode_metadata = qc_atac.atac_qc_barcode_metadata

@@ -17,11 +17,21 @@ task atac_align_chromap {
         Array[File] fastq_barcode
         File reference_fasta
         File? barcode_inclusion_list
-        File? barcode_translation_dict
+        File? barcode_conversion_dict
+
+        Boolean? trim_adapters = true
+        Boolean? remove_pcr_duplicates = true
+        Boolean? remove_pcr_duplicates_at_cell_level = true
+        Boolean? Tn5_shift = true
+        Boolean? low_mem = true
+        Boolean? bed_output = true
+        Int? max_insert_size = 2000
+        Int? quality_filter = 0
+        
 
         Int? multimappers = 4
-        Int? bc-error-threshold = 2
-        Float? bc-probability-threshold = 0.9
+        Int? bc_error_threshold = 2
+        Float? bc_probability_threshold = 0.9
         String? read_format
 
         String? subpool = "none"
@@ -31,14 +41,14 @@ task atac_align_chromap {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/task_chromap"
     }
 
     # Determine the size of the input
     Float input_file_size_gb = size(fastq_R1, "G") + size(fastq_R2, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 24.0 + size(genome_index_tar, "G") + memory_factor * input_file_size_gb
+    Float mem_gb = 24.0 + size(reference_fasta, "G") + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
@@ -66,30 +76,30 @@ task atac_align_chromap {
         # --read-format bc:0:15,r1:16:-1
         # The start and end are inclusive and -1 means the end of the read. User may use multiple fields to specify non-consecutive segments, e.g. bc:0:15,bc:32:-1.
         # The strand is presented by '+' and '-' symbol, if '-' the barcode will be reverse-complemented after extraction
-~{true='--use-allele-specific-annotations' false='' use_allele_specific_annotations}
+        
         chromap -x chromap_index/index \
-                --trim-adapters \
-                --remove-pcr-duplicates \
-                --remove-pcr-duplicates-at-cell-level \
-                -l 2000 \
-                --Tn5-shift \
-                --low-mem \
-                --BED \
-                ~{"--bc-error-threshold " + bc-error-threshold} \
-                ~{"--bc-probability-threshold " + bc-probability-threshold} \
+                ~{true='--trim-adapters ' false='' trim_adapters} \
+                ~{true='--remove-pcr-duplicates ' false='' remove_pcr_duplicates} \
+                ~{true='--remove-pcr-duplicates-at-cell-level ' false='' remove_pcr_duplicates_at_cell_level} \
+                ~{true='--Tn5-shift ' false='' Tn5_shift} \
+                ~{true='--low-mem ' false='' low_mem} \
+                ~{true='--BED ' false='' bed_output} \
+                ~{"--l" + max_insert_size} \
+                ~{"--bc-error-threshold " + bc_error_threshold} \
+                ~{"--bc-probability-threshold " + bc_probability_threshold} \
                 ~{"--read_format " + read_format} \
-                --drop-repetitive-reads 4 \
+                ~{"--drop-repetitive-reads " + multimappers} \
                 -x chromap_index/index \
                 -r ~{reference_fasta} \
-                -q 0 \
+                ~{"-q " + quality_filter} \
                 -t ~{cpus} \
                 -1 ~{sep="," fastq_R1} \
                 -2 ~{sep="," fastq_R2} \
                 -b ~{sep="," fastq_barcode} \
                 ~{"--barcode-whitelist" + barcode_inclusion_list} \
-                ~{"--barcode-translate " + barcode_translation_dict} \
+                ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o ~{fragments} \
-                --summary ~{barcode_log}
+                --summary ~{barcode_log} 2>&1 > ~{alignment_log}
         
         if [[ ~{subpool} != "none" ]]; then
             awk -v OFS="\t" -v subpool=~{subpool} '{$4=$4"_"$subpool; print $0}' ~{fragments} > temp
@@ -105,7 +115,9 @@ task atac_align_chromap {
         File atac_fragments = "~{fragments}.gz"
         File atac_fragments_index = "~{fragments}.gz.tbi"
         File atac_align_barcode_statistics = barcode_log
+        File atac_align_log = alignment_log
     }
+
 
     runtime {
         cpu: cpus

@@ -36,6 +36,7 @@ task share_trim_fastqs_atac {
     # Read trimming outfiles
     String fastq_R1_trimmed = basename(fastq_R1, ".fastq.gz") + "_trimmed.fastq"
     String fastq_R2_trimmed = basename(fastq_R2, ".fastq.gz") + "_trimmed.fastq"
+    String fastq_barcode_trimmed = basename(fastq_R1, ".fastq.gz") + "_trimmed.fastq"
     String trimming_log_json = basename(fastq_R1, "R1.fastq.gz") + ".atac.preprocess.trimming.log.json"
     String trimming_log_html = basename(fastq_R1, "R1.fastq.gz") + ".atac.preprocess.trimming.log.html"
     String trimming_stats = basename(fastq_R1, "R1.fastq.gz") + ".atac.preprocess.trimming.adapter.stats.txt"
@@ -62,6 +63,7 @@ task share_trim_fastqs_atac {
     output {
         File fastq_R1_trimmed = fastq_R1_trimmed + ".gz"
         File fastq_R2_trimmed = fastq_R2_trimmed + ".gz"
+        File fastq_barcode_trimmed = fastq_barcode_trimmed + ".gz"
         File? tenx_trimming_log_json = trimming_log_json
         File? tenx_trimming_log_html = trimming_log_html
         File trimming_stats = trimming_stats

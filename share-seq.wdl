@@ -158,7 +158,7 @@ workflow share {
                     call find_dorcs.wf_dorcs as dorcs{
                         input:
                             rna_matrix = rna.share_rna_h5,
-                            atac_fragments = atac.share_atac_filter_fragments,
+                            atac_fragments = atac.share_atac_fragments,
                             peak_file = peak_set_,
                             genome = genome_name_,
                             prefix = prefix
@@ -203,7 +203,7 @@ workflow share {
                 image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, rna.share_rna_umi_barcode_rank_plot, rna.share_rna_gene_barcode_rank_plot, rna.share_rna_gene_umi_scatter_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_barcode_rank_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment,  atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, dorcs.j_plot],
 
                 ## Links to files and logs to append to end of html
-                log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
+                log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
         }
     }
 
@@ -224,9 +224,9 @@ workflow share {
         File? share_rna_seurat_obj = rna.share_rna_seurat_obj
 
         # ATAC ouputs
-        File? share_atac_final_bam_dedup = atac.share_atac_filter_alignment_dedup
-        File? share_atac_filter_fragments = atac.share_atac_filter_fragments
-        File? share_atac_filter_fragments_index = atac.share_atac_filter_fragments_index
+        #File? share_atac_final_bam_dedup = atac.share_atac_filter_alignment_dedup
+        File? share_atac_filter_fragments = atac.share_atac_fragments
+        File? share_atac_filter_fragments_index = atac.share_atac_fragments_index
         File? share_atac_barcode_metadata = atac.share_atac_barcode_metadata
         File? share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
         File? share_atac_archr_arrow = atac.share_atac_archr_arrow

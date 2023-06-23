@@ -38,6 +38,7 @@ task share_correct_fastq {
 
     String corrected_fastq_R1 = basename(fastq_R1, ".fastq.gz") + "_corrected.fastq"
     String corrected_fastq_R2 = basename(fastq_R2, ".fastq.gz") + "_corrected.fastq"
+    String corrected_fastq_barcode = basename(fastq_R1, ".fastq.gz") + "_corrected_barcode.fastq"
     String monitor_log = "correct_fastqs_monitor.log"
 
     command <<<
@@ -62,8 +63,9 @@ task share_correct_fastq {
     output {
         File corrected_fastq_R1 = "~{corrected_fastq_R1}.gz"
         File corrected_fastq_R2 = "~{corrected_fastq_R2}.gz"
+        File corrected_fastq_barcode= "~{corrected_fastq_barcode}.gz"
         File barcode_qc = "~{prefix}_barcode_qc.txt"
-	File monitor_log = "~{monitor_log}"
+	    File monitor_log = "~{monitor_log}"
     }
 
     runtime {
