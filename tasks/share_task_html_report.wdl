@@ -67,7 +67,7 @@ task html_report {
 
         echo "~{sep="\n" names_of_data}" > names_list.txt
         echo "~{sep="\n" nums_to_save}" > numeric_list.txt
-        
+        cat image_list
         echo ~{atac_total_reads} "</td></tr>" > sum_stats.txt
         echo ~{atac_aligned_uniquely} "</td></tr>" >> sum_stats.txt
         echo ~{atac_unaligned} "</td></tr>" >> sum_stats.txt

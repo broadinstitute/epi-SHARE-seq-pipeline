@@ -148,63 +148,63 @@ def main(output_file_name, image_file_list, log_file_list, stats_list_file, inpu
     #hack works with the local file, need to fix this at some point
     
     #make list of file names that should be shown on the top level tab
-    top_level_file_names = ['BMMC_single_donor.hg38.joint.qc.plot', \
-                            'BMMC_single_donor.hg38.joint.density.plot', \
-                            'BMMC_single_donor.atac.archr.postfiltered_tss_by_uniq_frags.hg38', \
-                            'BMMC_single_donor.atac.qc.hg38.tss_enrichment_bulk', \
-                            'BMMC_single_donor.dorcs.jplot.hg38', \
-                            'BMMC_single_donor.rna.seurat.umap.hg38', \
-                            'BMMC_single_donor.atac.archr.umap_clusters.hg38']
+    #top_level_file_names = ['BMMC_single_donor.hg38.joint.qc.plot', 
+                            #'BMMC_single_donor.hg38.joint.density.plot', 
+                            #'BMMC_single_donor.atac.archr.postfiltered_tss_by_uniq_frags.hg38', 
+                            #'BMMC_single_donor.atac.qc.hg38.tss_enrichment_bulk', 
+                            #'BMMC_single_donor.dorcs.jplot.hg38', 
+                            #'BMMC_single_donor.rna.seurat.umap.hg38', 
+                            #'BMMC_single_donor.atac.archr.umap_clusters.hg38']
     
-    top_level_file_names_left = ['BMMC_single_donor.hg38.joint.density.plot', \
-                                 'BMMC_single_donor.hg38.joint.qc.plot']
-    top_level_file_names_middle = ['BMMC_single_donor.atac.archr.postfiltered_tss_by_uniq_frags.hg38', \
-                                   'BMMC_single_donor.atac.archr.umap_clusters.hg38']
-    top_level_file_names_right = ['BMMC_single_donor.atac.qc.hg38.tss_enrichment_bulk', \
-                                  'BMMC_single_donor.dorcs.jplot.hg38', \
-                                  'BMMC_single_donor.rna.seurat.umap.hg38']
+    #top_level_file_names_left = ['BMMC_single_donor.hg38.joint.density.plot', 
+                                 #'BMMC_single_donor.hg38.joint.qc.plot']
+    #top_level_file_names_middle = ['BMMC_single_donor.atac.archr.postfiltered_tss_by_uniq_frags.hg38', 
+                                   #'BMMC_single_donor.atac.archr.umap_clusters.hg38']
+    #top_level_file_names_right = ['BMMC_single_donor.atac.qc.hg38.tss_enrichment_bulk', 
+                                  #'BMMC_single_donor.dorcs.jplot.hg38', 
+                                  #'BMMC_single_donor.rna.seurat.umap.hg38']
     
     #instantiate sets to take on the contents expected for each tab
     #sets used to prevent repeats, go back at some point and see if necessary
-    atac_plots = set()
-    rna_plots = set()
-    top_level = set()
-    top_level_left = set()
-    top_level_middle = set()
-    top_level_right = set()
-    other = set()
+    #atac_plots = set()
+    #rna_plots = set()
+    #top_level = set()
+    #top_level_left = set()
+    #top_level_middle = set()
+    #top_level_right = set()
+    #other = set()
     
     #loop through the list of image files, and put them in the right set
     #depending on their name
-    for image_file in images:
-        for name in top_level_file_names: 
-            if name in image_file:
-                top_level.add(image_file)
-        if 'atac' in image_file:
-            atac_plots.add(image_file)
-        elif 'rna' in image_file:
-            rna_plots.add(image_file)
-        else: 
-            other.add(image_file)   
+    #for image_file in images:
+        #for name in top_level_file_names: 
+            #if name in image_file:
+                #top_level.add(image_file)
+        #if 'atac' in image_file:
+            #atac_plots.add(image_file)
+        #elif 'rna' in image_file:
+            #rna_plots.add(image_file)
+        #else: 
+            #other.add(image_file)   
     
     #sort the top level images based on where they should go (left, middle, 
     # right) in the top level tab 
     #probably figure out a more efficeint way to do this at some point, but
     #this definetly works for now
-    for image_top in top_level:
-        for image_left in top_level_file_names_left:
-            if image_left in image_top:
-                top_level_left.add(image_top)
+    #for image_top in top_level:
+        #for image_left in top_level_file_names_left:
+            #if image_left in image_top:
+                #top_level_left.add(image_top)
     
-    for image_top in top_level:
-        for image_right in top_level_file_names_right:
-            if image_right in image_top:
-                top_level_right.add(image_top)
+    #for image_top in top_level:
+        #for image_right in top_level_file_names_right:
+             #if image_right in image_top:
+                #top_level_right.add(image_top)
     
-    for image_top in top_level:
-        for image_middle in top_level_file_names_middle:
-            if image_middle in image_top:
-                top_level_middle.add(image_top)
+    #for image_top in top_level:
+        #for image_middle in top_level_file_names_middle:
+            #if image_middle in image_top:
+                #top_level_middle.add(image_top) 
     
     #write the images to the proper tab. The spacing for the output file 
     #write calls is a bit weird because the write_pngs function needs to be 
@@ -219,17 +219,17 @@ def main(output_file_name, image_file_list, log_file_list, stats_list_file, inpu
                     <span style="font-size: 25;"> RNA:  112,366,191 / 346,626,836 aligned (43% dup) </span> </center>""")
     
     #write images to far left of summary tab 
-    write_pngs_column(top_level_left)
+    write_pngs_column(images)
     output_file.write("""</div>
                 <div class="column left"> """)
     
     #write images to middle of summary tab
-    write_pngs_column(top_level_middle)
+    write_pngs_column(images)
     output_file.write("""</div>
                         <div class="column left">""")
     
     #write images to right of summary tab
-    write_pngs_column(top_level_right)                    
+    write_pngs_column(images)                    
     output_file.write("""</div>
                     </div>""")
     output_file.write('<a href="#top">Go to top of page</a>')
@@ -238,22 +238,22 @@ def main(output_file_name, image_file_list, log_file_list, stats_list_file, inpu
     
     #write images to rna tab 
     output_file.write('<div class="tab content2">')
-    write_pngs(rna_plots)
+    write_pngs(images)
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
 
     #write images to atac plot section
     output_file.write('<div class="tab content3">')
-    write_pngs(atac_plots)
+    write_pngs(images)
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
 
     #write to summary stats tab
-    stats_names_list = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
-    with open(stats_list_file) as stats_f:
-        stats_list = stats_f.read().splitlines
+    #stats_names_list = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
+    #with open(stats_list_file) as stats_f:
+        #stats_list = stats_f.read().splitlines
     output_file.write('<div class="tab content4">') 
-    write_summary_table(stats_names_list, stats_list, output_file)
+    #write_summary_table(stats_names_list, stats_list, output_file)
     output_file.write("</div>")
 
     #write to logs tab
