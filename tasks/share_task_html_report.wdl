@@ -68,23 +68,25 @@ task html_report {
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
 
-        echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
-        echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
-        echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.txt
-        echo "<tr><td>Unique Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Percent Duplicates</td><td>" ~{atac_percent_duplicates} "</td></tr>" >> output.txt
-        echo "<tr><td>NRF=Distinct/Total</td><td>" ~{atac_nrf} "</td></tr>" >> output.txt
-        echo "<tr><td>PBC1=OnePair/Distinct</td><td>" ~{atac_pbc1} "</td></tr>" >> output.txt
-        echo "<tr><td>PBC2=OnePair/TwoPair</td><td>" ~{atac_pbc2} "</td></tr>" >> output.txt
-        echo "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>" >> output.txt
-        echo "<tr><td>Aligned multimap</td><td>" ~{rna_aligned_multimap} "</td></tr>" >> output.txt
-        echo "<tr><td>Unaligned</td><td>" ~{rna_unaligned} "</td></tr>" >> output.txt
-        echo "<tr><td>Filtered (feature) Reads</td><td>" ~{rna_feature_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
+        echo "Summary Statistics" > output.txt  
+        echo "Total reads" ~{atac_total_reads} >> output.txt
+        echo "Aligned uniquely" ~{atac_aligned_uniquely} >> output.txt
+        echo "Unaligned" ~{atac_unaligned} >> output.txt
+        echo "Unique Reads" ~{atac_feature_reads} >> output.txt
+        echo "Duplicate Reads" ~{atac_duplicate_reads} >> output.txt
+        echo "Percent Duplicates" ~{atac_percent_duplicates} >> output.txt
+        echo "NRF=Distinct/Total" ~{atac_nrf} >> output.txt
+        echo "PBC1=OnePair/Distinct" ~{atac_pbc1} >> output.txt
+        echo "PBC2=OnePair/TwoPair" ~{atac_pbc2} >> output.txt
+        echo "RNA" >> output.txt
+        echo "Total reads" ~{rna_total_reads} >> output.txt
+        echo "Aligned uniquely" ~{rna_aligned_uniquely} >> output.txt
+        echo "Aligned multimap" ~{rna_aligned_multimap} >> output.txt
+        echo "Unaligned" ~{rna_unaligned} >> output.txt
+        echo "Filtered (feature) Reads" ~{rna_feature_reads} >> output.txt
+        echo "Duplicate Reads" ~{rna_duplicate_reads} >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-        echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
+        echo "Percent Duplicates" $percent >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{test_output_file} image_list.txt output.txt log_list.txt
         
         python3 /software/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt
