@@ -66,27 +66,25 @@ task html_report {
         echo "~{sep="\n" names_of_data}" > names_list.txt
         echo "~{sep="\n" nums_to_save}" > numeric_list.txt
         echo "~{sep="\n" valid_image_files}" > image_list.txt
-        echo "~{sep="\n" valid_log_files}" > log_list.txt
+        "~{sep="\n" valid_log_files}" > log_list.txt
 
-        echo "Summary Statistics" > output.txt  
-        echo "Total reads" ~{atac_total_reads} >> output.txt
-        echo "Aligned uniquely" ~{atac_aligned_uniquely} >> output.txt
-        echo "Unaligned" ~{atac_unaligned} >> output.txt
-        echo "Unique Reads" ~{atac_feature_reads} >> output.txt
-        echo "Duplicate Reads" ~{atac_duplicate_reads} >> output.txt
-        echo "Percent Duplicates" ~{atac_percent_duplicates} >> output.txt
-        echo "NRF=Distinct/Total" ~{atac_nrf} >> output.txt
-        echo "PBC1=OnePair/Distinct" ~{atac_pbc1} >> output.txt
-        echo "PBC2=OnePair/TwoPair" ~{atac_pbc2} >> output.txt
-        echo "RNA" >> output.txt
-        echo "Total reads" ~{rna_total_reads} >> output.txt
-        echo "Aligned uniquely" ~{rna_aligned_uniquely} >> output.txt
-        echo "Aligned multimap" ~{rna_aligned_multimap} >> output.txt
-        echo "Unaligned" ~{rna_unaligned} >> output.txt
-        echo "Filtered (feature) Reads" ~{rna_feature_reads} >> output.txt
-        echo "Duplicate Reads" ~{rna_duplicate_reads} >> output.txt
+        echo ~{atac_total_reads} >> output.txt
+        echo ~{atac_aligned_uniquely} >> output.txt
+        echo ~{atac_unaligned} >> output.txt
+        echo ~{atac_feature_reads} >> output.txt
+        echo ~{atac_duplicate_reads} >> output.txt
+        echo ~{atac_percent_duplicates} >> output.txt
+        echo ~{atac_nrf} >> output.txt
+        echo ~{atac_pbc1} >> output.txt
+        echo ~{atac_pbc2} >> output.txt
+        echo ~{rna_total_reads} >> output.txt
+        echo ~{rna_aligned_uniquely} >> output.txt
+        echo ~{rna_aligned_multimap} >> output.txt
+        echo ~{rna_unaligned} >> output.txt
+        echo ~{rna_feature_reads} >> output.txt
+        echo ~{rna_duplicate_reads} >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-        echo "Percent Duplicates" $percent >> output.txt
+        echo $percent >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{test_output_file} image_list.txt output.txt log_list.txt
         
         python3 /software/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt

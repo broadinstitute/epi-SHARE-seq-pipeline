@@ -243,14 +243,11 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
     output_file.write("</div>")
 
     #write to summary stats tab
-    #stats_names_list = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
-    #ith open(stats_list_file) as stats_f:
-        #stats_list = stats_f.read().splitlines
+    stats_names_list = ["Total reads", "Aligned uniquely", "Unaligned", "Unique Reads", "Duplicate Reads", "Percent Duplicates", "NRF=Distinct/Total", "PBC1=OnePair/Distinct", "PBC2=OnePair/TwoPair", "Total reads", "Aligned uniquely", "Aligned multimap", "Unaligned", "Filtered (feature) Reads", "Duplicate Reads", "Percent Duplicates"]
+    with open(stats_info) as stats_f:
+        stats_list = stats_f.read().split(" ")
     output_file.write('<div class="tab content4">') 
-    #write_summary_table(stats_names_list, stats_list, output_file)
-    with open(stats_info) as stats_f: 
-        for line in stats_f:
-            output_file.write(line)
+    write_summary_table(stats_names_list, stats_list, output_file)
     output_file.write("</div>")
     
     # loop through log files in log list and write
