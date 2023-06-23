@@ -11,7 +11,7 @@ import io
 import os.path
 
 
-def main(output_file_name, image_file_list, log_file_list, input_file_name=None):
+def main(output_file_name, image_file_list, stats_info, log_file_list, input_file_name=None):
     """
     Write to the input file
     Image file list is list of png images
@@ -248,11 +248,10 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
         #stats_list = stats_f.read().splitlines
     output_file.write('<div class="tab content4">') 
     #write_summary_table(stats_names_list, stats_list, output_file)
+    with open(stats_info) as stats_f: 
+        for line in stats_f:
+            output_file.write(line)
     output_file.write("</div>")
-
-    #write to logs tab
-    output_file.write('<div class="tab content5">')
-    logs = fname.read().splitlines()
     
     # loop through log files in log list and write
     with open(log_file_list) as fname:
@@ -281,14 +280,15 @@ if __name__ == '__main__':
                        help='html file to write to')
     group.add_argument('image_file_list', 
                        help='file containing list of image files to paste in HTML file')
+    group.add_argument('stats_info',
+                       help='file containing calculated stats')
     group.add_argument('log_file_list',
                        help='file containing list of text log files to append to end of HTML file')
     group.add_argument('--input_file_name',
                        help='optional file with html text to add at top of file', nargs='?') 
 
     args = parser.parse_args()
-    main(args.output_file_name, args.image_file_list, args.log_file_list, args.input_file_name)
-
+    main(args.output_file_name, args.image_file_list, args.stats_info, args.log_file_list, args.input_file_name)
 
 
 
