@@ -67,26 +67,24 @@ task html_report {
 
         echo "~{sep="\n" names_of_data}" > names_list.txt
         echo "~{sep="\n" nums_to_save}" > numeric_list.txt
-        cat image_list
-        echo ~{atac_total_reads} "</td></tr>" > sum_stats.txt
-        echo ~{atac_aligned_uniquely} "</td></tr>" >> sum_stats.txt
-        echo ~{atac_unaligned} "</td></tr>" >> sum_stats.txt
-        echo ~{atac_feature_reads} "</td></tr>" >> sum_stats.txt
-        echo ~{atac_duplicate_reads} "</td></tr>" >> sum_stats.txt
-        echo ~{atac_percent_duplicates} "</td></tr>" >> sum_stats.txt
-        echo ~{atac_nrf} "</td></tr>" >> sum_stats.txt
-        echo ~{atac_pbc1} "</td></tr>" >> sum_stats.txt
-        echo ~{atac_pbc2} "</td></tr>" >> sum_stats.txt
-        echo ~{rna_total_reads} "</td></tr>" >> sum_stats.txt
-        echo ~{rna_aligned_uniquely} "</td></tr>" >> sum_stats.txt
-        echo ~{rna_aligned_multimap} "</td></tr>" >> sum_stats.txt
-        echo ~{rna_unaligned} "</td></tr>" >> sum_stats.txt
-        echo ~{rna_feature_reads} "</td></tr>" >> sum_stats.txt
-        echo ~{rna_duplicate_reads} "</td></tr>" >> sum_stats.txt
+        echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
+        echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
+        echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.txt
+        echo "<tr><td>Unique Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.txt
+        echo "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>" >> output.txt
+        echo "<tr><td>Percent Duplicates</td><td>" ~{atac_percent_duplicates} "</td></tr>" >> output.txt
+        echo "<tr><td>NRF=Distinct/Total</td><td>" ~{atac_nrf} "</td></tr>" >> output.txt
+        echo "<tr><td>PBC1=OnePair/Distinct</td><td>" ~{atac_pbc1} "</td></tr>" >> output.txt
+        echo "<tr><td>PBC2=OnePair/TwoPair</td><td>" ~{atac_pbc2} "</td></tr>" >> output.txt
+        echo "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>" >> output.txt
+        echo "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>" >> output.txt
+        echo "<tr><td>Aligned multimap</td><td>" ~{rna_aligned_multimap} "</td></tr>" >> output.txt
+        echo "<tr><td>Unaligned</td><td>" ~{rna_unaligned} "</td></tr>" >> output.txt
+        echo "<tr><td>Filtered (feature) Reads</td><td>" ~{rna_feature_reads} "</td></tr>" >> output.txt
+        echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-        echo $percent "</td></tr></table>" >> sum_stats.txt
-
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt sum_stats.txt --input_file_name output.txt
+        echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt
         python3 /software/write_csv.py ~{other_output_file} names_list.txt numeric_list.txt image_list.txt log_list.txt
     >>>
     
