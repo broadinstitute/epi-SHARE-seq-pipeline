@@ -5,7 +5,7 @@ import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/task_chromap.wdl" as task_align_chromap
 import "../tasks/task_qc_atac.wdl" as task_qc_atac
-import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
+import "../tasks/task_log_atac.wdl" as task_log_atac
 import "../tasks/share_task_archr.wdl" as share_task_archr
 
 
@@ -147,14 +147,14 @@ workflow wf_atac {
             }
         }
     }
-
+#fastq_barcode = select_first([trim.fastq_barcode_trimmed, correct.corrected_fastq_barcode, fastq_barcode]),
     if (  "~{pipeline_modality}" != "no_align" ) {
         
         call task_align_chromap.atac_align_chromap as align {
             input:
                 fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
                 fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
-                fastq_barcode = select_first([trim.fastq_barcode_trimmed, correct.corrected_fastq_barcode, fastq_barcode]),
+                fastq_barcode = fastq_barcode,
                 reference_fasta = reference_fasta,
                 trim_adapters = trim_adapters,
                 genome_name = genome_name,
@@ -182,12 +182,10 @@ workflow wf_atac {
             input:
                 fragments = align.atac_fragments,
                 fragments_index = align.atac_fragments_index,
-                barcode_conversion_dict = barcode_conversion_dict,
+                barcode_summary = align.atac_align_barcode_statistics,
                 peaks = peak_set,
                 tss = tss_bed,
                 fragment_cutoff = qc_fragment_cutoff,
-                mapq_threshold = mapq_threshold,
-                barcode_tag = barcode_tag_fragments_,
                 genome_name = genome_name,
                 prefix = prefix,
                 cpus = qc_cpus,
@@ -196,11 +194,10 @@ workflow wf_atac {
                 memory_factor = qc_memory_factor
         }
 
-        call share_task_log_atac.log_atac as log_atac {
+        call task_log_atac.log_atac as log_atac {
         input:
-            alignment_log = align.atac_align_barcode_statistics,
-            dups_log = qc_atac.atac_qc_duplicate_stats,
-            pbc_log = qc_atac.atac_qc_pbc_stats
+            alignment_log = align.atac_align_log,
+            barcode_log = qc_atac.atac_qc_barcode_metadata
         }
 
         if (  "~{pipeline_modality}" == "full" ) {
@@ -241,7 +238,6 @@ workflow wf_atac {
 
         # QC
         File? share_atac_barcode_metadata = qc_atac.atac_qc_barcode_metadata
-        File? share_atac_qc_final = qc_atac.atac_qc_final_stats
         File? share_atac_qc_hist_plot = qc_atac.atac_qc_final_hist_png
         File? share_atac_qc_hist_txt = qc_atac.atac_qc_final_hist
         File? share_atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
@@ -253,9 +249,6 @@ workflow wf_atac {
         Int? share_atac_unaligned = log_atac.atac_unaligned
         Int? share_atac_feature_reads = log_atac.atac_feature_reads
         Int? share_atac_duplicate_reads = log_atac.atac_duplicate_reads
-        Float? share_atac_nrf = log_atac.atac_nrf
-        Float? share_atac_pbc1 = log_atac.atac_pbc1
-        Float? share_atac_pbc2 = log_atac.atac_pbc2
         Float? share_atac_percent_duplicates = log_atac.atac_pct_dup
 
         # ArchR

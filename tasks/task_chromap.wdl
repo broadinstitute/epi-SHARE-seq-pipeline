@@ -14,7 +14,7 @@ task atac_align_chromap {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Array[File] fastq_R1
         Array[File] fastq_R2
-        Array[File?] fastq_barcode
+        Array[File] fastq_barcode
         File reference_fasta
         File? barcode_inclusion_list
         File? barcode_conversion_dict
@@ -106,7 +106,7 @@ task atac_align_chromap {
             mv temp ~{fragments}
         fi
 
-        pigz -p ~{cpus} ~{fragments}
+        bgzip -c ~{fragments} > ~{fragments}.gz
         tabix --zero-based --preset bed ~{fragments}.gz
 
     >>>
