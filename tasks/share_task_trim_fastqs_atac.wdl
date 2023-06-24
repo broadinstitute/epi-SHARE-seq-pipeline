@@ -63,7 +63,7 @@ task share_trim_fastqs_atac {
     output {
         File fastq_R1_trimmed = fastq_R1_trimmed + ".gz"
         File fastq_R2_trimmed = fastq_R2_trimmed + ".gz"
-        File fastq_barcode_trimmed = fastq_barcode_trimmed + ".gz"
+        File? fastq_barcode_trimmed = fastq_barcode_trimmed + ".gz"
         File? tenx_trimming_log_json = trimming_log_json
         File? tenx_trimming_log_html = trimming_log_html
         File trimming_stats = trimming_stats

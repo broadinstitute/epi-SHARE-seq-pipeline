@@ -14,7 +14,7 @@ task atac_align_chromap {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Array[File] fastq_R1
         Array[File] fastq_R2
-        Array[File] fastq_barcode
+        Array[File?] fastq_barcode
         File reference_fasta
         File? barcode_inclusion_list
         File? barcode_conversion_dict
@@ -58,7 +58,7 @@ task atac_align_chromap {
 
     # Define the output names
     String fragments = '${prefix}.atac.filter.fragments.${genome_name}.tsv'
-    String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.log.txt"
+    String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.sumary.csv"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
 
     String monitor_log = "atac_align_monitor.log"

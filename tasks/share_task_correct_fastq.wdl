@@ -63,7 +63,7 @@ task share_correct_fastq {
     output {
         File corrected_fastq_R1 = "~{corrected_fastq_R1}.gz"
         File corrected_fastq_R2 = "~{corrected_fastq_R2}.gz"
-        File corrected_fastq_barcode= "~{corrected_fastq_barcode}.gz"
+        File? corrected_fastq_barcode= "~{corrected_fastq_barcode}.gz"
         File barcode_qc = "~{prefix}_barcode_qc.txt"
 	    File monitor_log = "~{monitor_log}"
     }

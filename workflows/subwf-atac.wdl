@@ -4,7 +4,7 @@ version 1.0
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/task_chromap.wdl" as task_align_chromap
-import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
+import "../tasks/task_qc_atac.wdl" as task_qc_atac
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
 import "../tasks/share_task_archr.wdl" as share_task_archr
 
@@ -56,6 +56,7 @@ workflow wf_atac {
         Boolean? Tn5_shift = true
         Boolean? low_mem = true
         Boolean? bed_output = true
+        Boolean? trim_adapters = true
         Int? max_insert_size = 2000
         Int? quality_filter = 0
         Int? bc_error_threshold = 2
@@ -155,6 +156,7 @@ workflow wf_atac {
                 fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
                 fastq_barcode = select_first([trim.fastq_barcode_trimmed, correct.corrected_fastq_barcode, fastq_barcode]),
                 reference_fasta = reference_fasta,
+                trim_adapters = trim_adapters,
                 genome_name = genome_name,
                 multimappers = align_multimappers,
                 barcode_inclusion_list = whitelist,
@@ -176,17 +178,8 @@ workflow wf_atac {
                 read_format = read_format
         }
 
-        call share_task_qc_atac.qc_atac as qc_atac{
+        call task_qc_atac.qc_atac as qc_atac{
             input:
-                raw_bam = align.atac_fragments,
-                raw_bam_index = align.atac_fragments,
-                filtered_bam = align.atac_fragments,
-                filtered_bam_index = align.atac_fragments,
-                queryname_final_bam = align.atac_fragments,
-                wdup_bam = align.atac_fragments,
-                wdup_bam_index = align.atac_fragments,
-                mito_metrics_bulk = align.atac_fragments,
-                mito_metrics_barcode = align.atac_fragments,
                 fragments = align.atac_fragments,
                 fragments_index = align.atac_fragments_index,
                 barcode_conversion_dict = barcode_conversion_dict,
