@@ -35,7 +35,7 @@ task qc_atac {
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(raw_bam, "G") + size(filtered_bam, "G") + size(queryname_final_bam, "G")
+    Float input_file_size_gb = size(fragments, "G")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 24.0 + memory_factor * input_file_size_gb
@@ -87,14 +87,6 @@ task qc_atac {
         # I am not writing to a file anymore because Google keeps track of it automatically.
         bash $(which monitor_script.sh) 1>&2 &
 
-        cp ~{mito_metrics_barcode} mito_metrics
-
-        ln -s ~{raw_bam} in.raw.bam
-        ln -s ~{raw_bam_index} in.raw.bam.bai
-        ln -s ~{filtered_bam} in.filtered.bam
-        ln -s ~{filtered_bam_index} in.filtered.bam.bai
-        ln -s ~{wdup_bam} in.wdup.bam
-        ln -s ~{wdup_bam_index} in.wdup.bam.bai
         ln -s ~{fragments} in.fragments.tsv.gz
         ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
 
@@ -108,11 +100,6 @@ task qc_atac {
         echo '------ SKIPPING: SAMstats for final bam ------' 1>&2
         #time sambamba view -t ~{cpus}  in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
 
-        # library complexity
-        # queryname_final_bam from filter
-        echo '------ START: Compute library complexity ------' 1>&2
-        time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
-
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2
         time python3 $(which qc_atac_compute_tss_enrichment.py) \
@@ -121,23 +108,6 @@ task qc_atac {
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.fragments.tsv.gz
 
-        # Duplicates per barcode
-        echo '------ START: Compute duplication per barcode ------' 1>&2
-        time python3 $(which qc_atac_count_duplicates_per_barcode.py) \
-            -o ~{duplicate_stats} \
-            --bc_tag ~{barcode_tag} \
-            in.wdup.bam
-
-        if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} == "true" ];then
-            cp ~{duplicate_stats} tmp_duplicate_stats
-            echo '------ START: Convert barcode duplicate metrics for 10x ------' 1>&2
-            time awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","reads_unique","reads_duplicate","pct_duplicates"}FNR>1{print map[$1],$2,$3,$4}' ~{barcode_conversion_dict} tmp_duplicate_stats > ~{duplicate_stats}
-
-            cp mito_metrics tmp_mito_metrics
-            echo '------ START: Convert barcode mito metrics for 10x ------' 1>&2
-            time awk -F ",|\t" -v OFS="\t" 'FNR==NR{map[$1]=$2; next}FNR==1{print "barcode","raw_reads_nonmito","raw_reads_mito"}FNR>1{print map[$1],$2,$3}' ~{barcode_conversion_dict} tmp_mito_metrics > mito_metrics
-        fi
-
         # Fragments in peaks
         # "~{prefix}.reads.in.peak.tsv"
         echo '------ START: Compute fragments in peaks------' 1>&2
@@ -145,23 +115,6 @@ task qc_atac {
             --peaks ~{peaks} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.fragments.tsv.gz
-
-        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ~{stats_log}
-        echo '------ START: Samtools idxstats on raw ------' 1>&2
-        time samtools idxstats -@ ~{cpus} in.raw.bam >> ~{stats_log}
-
-        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ~{stats_log}
-        echo '------ START: Samtools idxstats on final ------' 1>&2
-        time samtools idxstats -@ ~{cpus} in.filtered.bam >> ~{stats_log}
-
-        echo '' > ~{hist_log}
-        echo '------ START: Picard CollectInsertSizeMetrics ------' 1>&2
-        time java -Xmx~{picard_java_memory}G -jar $(which picard.jar) CollectInsertSizeMetrics \
-            VALIDATION_STRINGENCY=SILENT \
-            I=in.raw.bam \
-            O=~{hist_log} \
-            H=~{hist_log_pdf} \
-            W=1000  2>> picard_run.log
 
         # Insert size plot bulk
         echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
@@ -210,16 +163,6 @@ task qc_atac {
     }
 
     parameter_meta {
-        raw_bam: {
-                description: 'Unfiltered bam',
-                help: 'Not filtered alignment bam file.',
-                example: 'aligned.hg38.bam'
-            }
-        raw_bam: {
-                description: 'Filtered bam',
-                help: 'Filtered alignment bam file. Typically, no duplicates and quality filtered.',
-                example: 'aligned.hg38.rmdup.filtered.bam'
-            }
         tss: {
                 description: 'TSS bed file',
                 help: 'List of TSS in bed format used for the enrichment plot.',
