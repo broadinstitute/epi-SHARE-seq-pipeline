@@ -58,7 +58,7 @@ task atac_align_chromap {
 
     # Define the output names
     String fragments = '${prefix}.atac.filter.fragments.${genome_name}.tsv'
-    String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.sumary.csv"
+    String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.summary.csv"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
 
     String monitor_log = "atac_align_monitor.log"
@@ -104,6 +104,8 @@ task atac_align_chromap {
         if [[ ~{subpool} != "none" ]]; then
             awk -v OFS="\t" -v subpool=~{subpool} '{$4=$4"_"subpool; print $0}' ~{fragments} > temp
             mv temp ~{fragments}
+            awk -v FS="," -v OFS="," -v subpool=~{subpool} '{$1=$1"_"subpool; print $0}' ~{alignment_log} > temp
+            mv temp ~{alignment_log}
         fi
 
         bgzip -c ~{fragments} > ~{fragments}.gz
