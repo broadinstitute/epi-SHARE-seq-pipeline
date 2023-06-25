@@ -85,7 +85,9 @@ def count_fragments_in_promoter(tabix_filename,
     counts_dict = defaultdict(lambda: np.zeros(301))
     # Max size before writing on disk 8Gb (in byte)
     tempfile_fnp = tempfile.SpooledTemporaryFile(max_size=8589934592)
-    count_matrix = np.memmap(tempfile_fnp, mode="w+",
+    print(tempfile_fnp)
+    print(tempfile_fnp.fileno)
+    count_matrix = np.memmap(tempfile_fnp, mode="r+",
                              dtype=np.int16,
                              shape=(total_barcodes, 301))
 
@@ -155,7 +157,7 @@ def count_fragments_in_promoter(tabix_filename,
         except ValueError:
             print(f"No reads found for {tss[0]}:{max(1,promoter_start)}-{promoter_end}.")
 
-    return counts_dict_bulk, counts_dict, fragments_in_promoter_counter, reads_in_tss_counter, reads_in_promoter_counter
+    return barcodes_index_map, counts_dict_bulk, count_matrix, fragments_in_promoter_counter, reads_in_tss_counter, reads_in_promoter_counter
 
 def _add_read_to_dictionary(fragment_counter,
                             fragment_counter_barcodes,
@@ -286,7 +288,7 @@ if __name__ == '__main__':
     # Using column chr, start, end and what user input contains the strand information.
     tss_list = np.loadtxt(args.tss, 'str', usecols=(0, 1, 2, args.s-1))
 
-    bulk_counts, barcode_counts, stats, reads_in_tss, reads_in_promoter = count_fragments_in_promoter(args.tabix,
+    barcode_index_map, bulk_counts, barcode_counts, stats, reads_in_tss, reads_in_promoter = count_fragments_in_promoter(args.tabix,
                                                                                                       tss_list,
                                                                                                       flank=args.e,
                                                                                                       )
@@ -301,7 +303,7 @@ if __name__ == '__main__':
         # but also the total count like ArchR
         print(f"barcode\tfragments_promoter\treads_tss\treads_promoter\ttss_enrichment\treads_tss_total", file=out_file)
         for barcode, fragments_in_promoter in stats.items():
-            tss_enrichment, reads_sum = compute_tss_enrichment_barcode(barcode_counts[barcode])
+            tss_enrichment, reads_sum = compute_tss_enrichment_barcode(barcode_counts[barcode_index_map[barcode], :])
             print(f"{barcode}\t{len(fragments_in_promoter)}\t{len(reads_in_tss[barcode])}\t{len(reads_in_promoter[barcode])}\t{tss_enrichment}\t{reads_sum}", file=out_file)
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:

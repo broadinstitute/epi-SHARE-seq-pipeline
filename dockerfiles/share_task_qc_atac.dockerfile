@@ -76,7 +76,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts (pysam, SAMstats)
-RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam --editable=git+https://github.com/kundajelab/SAMstats@75e60f1e67c6d5d066371a0b53729e4b1f6f76c5#egg=SAMstats
+RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam xopen --editable=git+https://github.com/kundajelab/SAMstats@75e60f1e67c6d5d066371a0b53729e4b1f6f76c5#egg=SAMstats
 
 # Create and setup new user
 ENV USER=shareseq
