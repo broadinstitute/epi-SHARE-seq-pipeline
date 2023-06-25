@@ -104,8 +104,8 @@ task atac_align_chromap {
         if [[ ~{subpool} != "none" ]]; then
             awk -v OFS="\t" -v subpool=~{subpool} '{$4=$4"_"subpool; print $0}' ~{fragments} > temp
             mv temp ~{fragments}
-            awk -v FS="," -v OFS="," -v subpool=~{subpool} '{$1=$1"_"subpool; print $0}' ~{alignment_log} > temp
-            mv temp ~{alignment_log}
+            awk -v FS="," -v OFS="," -v subpool=~{subpool} '{$1=$1"_"subpool; print $0}' ~{barcode_log} > temp
+            mv temp ~{barcode_log}
         fi
 
         bgzip -c ~{fragments} > ~{fragments}.gz
