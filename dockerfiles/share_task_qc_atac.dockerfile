@@ -78,14 +78,6 @@ RUN apt-get update && apt-get install -y \
 # Install packages for python3 scripts (pysam, SAMstats)
 RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam xopen --editable=git+https://github.com/kundajelab/SAMstats@75e60f1e67c6d5d066371a0b53729e4b1f6f76c5#egg=SAMstats
 
-# Create and setup new user
-ENV USER=shareseq
-WORKDIR /home/$USER
-
-RUN groupadd -r $USER &&\
-    useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
-    chown $USER:$USER /home/$USER
-
 # Add folder with software to the path
 ENV PATH="/software:${PATH}"
 
@@ -104,5 +96,3 @@ COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 
 USER ${USER}
-
-
