@@ -84,7 +84,7 @@ task atac_align_chromap {
                 ~{true='--Tn5-shift ' false='' Tn5_shift} \
                 ~{true='--low-mem ' false='' low_mem} \
                 ~{true='--BED ' false='' bed_output} \
-                ~{"--l " + max_insert_size} \
+                ~{"-l " + max_insert_size} \
                 ~{"--bc-error-threshold " + bc_error_threshold} \
                 ~{"--bc-probability-threshold " + bc_probability_threshold} \
                 ~{"--read_format " + read_format} \
