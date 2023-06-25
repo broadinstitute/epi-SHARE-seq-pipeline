@@ -25,7 +25,7 @@ task qc_atac {
         String? prefix
 
         # Runtime
-        Int? cpus = 8
+        Int? cpus = 1
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
@@ -64,7 +64,7 @@ task qc_atac {
         ln -s ~{fragments} in.fragments.tsv.gz
         ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
 
-        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>1 {Arr[$1]++;next} Arr[$4] {print $0}' ~{barcode_summary} <( zcat in.fragments.tsv.gz ) | bgzip -c > no-singleton.bed.gz
+        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' ~{barcode_summary} <( zcat in.fragments.tsv.gz ) | bgzip -c > no-singleton.bed.gz
 
         tabix --zero-based --preset bed no-singleton.bed.gz
 
@@ -108,6 +108,8 @@ task qc_atac {
     output {
         File atac_qc_final_hist_png = hist_log_png
         File atac_qc_final_hist = hist_log
+
+        File temp_frag = "no-singleton.bed.gz"
 
         File atac_qc_tss_enrichment_barcode_stats = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
         File atac_qc_tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
