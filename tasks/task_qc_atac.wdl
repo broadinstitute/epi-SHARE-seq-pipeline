@@ -38,7 +38,7 @@ task qc_atac {
     Float mem_gb = 24.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
-    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
+    Int disk_gb = round(100.0 + disk_factor * input_file_size_gb)
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
