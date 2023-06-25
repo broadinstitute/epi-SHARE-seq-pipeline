@@ -203,7 +203,7 @@ workflow wf_atac {
         if (  "~{pipeline_modality}" == "full" ) {
             call share_task_archr.archr as archr{
                 input:
-                    atac_frag = align.atac_fragments,
+                    atac_frag = qc_atac.temp_frag,
                     genome = genome_name,
                     peak_set = peak_set,
                     prefix = prefix,
