@@ -84,7 +84,7 @@ task atac_align_chromap {
                 ~{true='--Tn5-shift ' false='' Tn5_shift} \
                 ~{true='--low-mem ' false='' low_mem} \
                 ~{true='--BED ' false='' bed_output} \
-                ~{"--l" + max_insert_size} \
+                ~{"--l " + max_insert_size} \
                 ~{"--bc-error-threshold " + bc_error_threshold} \
                 ~{"--bc-probability-threshold " + bc_probability_threshold} \
                 ~{"--read_format " + read_format} \
@@ -96,7 +96,7 @@ task atac_align_chromap {
                 -1 ~{sep="," fastq_R1} \
                 -2 ~{sep="," fastq_R2} \
                 -b ~{sep="," fastq_barcode} \
-                ~{"--barcode-whitelist" + barcode_inclusion_list} \
+                ~{"--barcode-whitelist " + barcode_inclusion_list} \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o ~{fragments} \
                 --summary ~{barcode_log} 2>&1 > ~{alignment_log}
