@@ -158,6 +158,7 @@ workflow wf_atac {
                 reference_fasta = reference_fasta,
                 trim_adapters = trim_adapters,
                 genome_name = genome_name,
+                subpool = pkr,
                 multimappers = align_multimappers,
                 barcode_inclusion_list = whitelist,
                 barcode_conversion_dict = barcode_conversion_dict,
