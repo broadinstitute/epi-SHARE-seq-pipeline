@@ -10,7 +10,7 @@ import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report 
 
 #add this to import arguments to r script
-import "tasks/share_task_qc_atac.wdl" as share_task_qc_atac
+import "tasks/share_task_qc_atac.wdl" as qc_atac
 
 
 # WDL workflow for SHARE-seq
@@ -272,9 +272,9 @@ workflow share {
         File? csv_summary = html_report.csv_report_file
     
         #output params needed to run the r script
-        File? r_script_param_1 = share_task_qc_atac.atac_qc_barcode_metadata
-        Int? r_script_param_2 = share_task_qc_atac.fragment_cutoff_out
-        File? r_script_param_3 = share_task_qc_atac.atac_qc_barcode_rank_plot
+        File? r_script_param_1 = qc_atac.atac_qc_barcode_metadata
+        Int? r_script_param_2 = qc_atac.fragment_cutoff_out
+        File? r_script_param_3 = qc_atac.atac_qc_barcode_rank_plot
     
     }
 
