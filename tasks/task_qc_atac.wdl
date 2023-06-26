@@ -93,7 +93,7 @@ task qc_atac {
 
         echo '------ START: Generate metadata ------' 1>&2
 
-        awk -v FS=',' -v OFS=" " 'NR==1{print $0,"uniq","pct_dup","pct_unmapped";next}{$1=$1;if ($2-$3-$4-$5>0){print $0,($2-$3-$4-$5),$3/($2-$4-$5),($5+$4)/$2} else { print $0,0,0,0}}' ~{barcode_summary} > tmp-barcode-stats
+        awk -v FS=',' -v OFS=" " 'NR==1{$1=$1;print $0,"uniq","pct_dup","pct_unmapped";next}{$1=$1;if ($2-$3-$4-$5>0){print $0,($2-$3-$4-$5),$3/($2-$4-$5),($5+$4)/$2} else { print $0,0,0,0}}' ~{barcode_summary} > tmp-barcode-stats
 
         cut -f 1 ~{prefix}.atac.qc.~{genome_name}.reads.in.peak.tsv > barcodes_passing_threshold
 
