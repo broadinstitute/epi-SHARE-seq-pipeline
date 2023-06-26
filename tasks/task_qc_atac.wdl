@@ -93,7 +93,7 @@ task qc_atac {
 
         echo '------ START: Generate metadata ------' 1>&2
 
-        awk -v FS=',' -v OFS=" " 'NR==1{print $0,"uniq","pct_dup","pct_unmapped"}{print $0,($2-$3-$4-$5),$3/($2-$4-$5),($5+$4)/$2}' ~{barcode_summary} > tmp-barcode-stats
+        awk -v FS=',' -v OFS=" " 'NR==1{print $0,"uniq","pct_dup","pct_unmapped";next}{$1=$1;if ($2-$3-$4-$5>0){print $0,($2-$3-$4-$5),$3/($2-$4-$5),($5+$4)/$2} else { print $0,0,0,0}}' ~{barcode_summary} > tmp-barcode-stats
 
 
         time join -j 1  <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q;sort -k1,1)) <(cat tmp-barcode-stats | (sed -u 1q;sort -k1,1)) | \
