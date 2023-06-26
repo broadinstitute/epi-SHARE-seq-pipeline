@@ -80,6 +80,9 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
         } 
         </style>""")
     
+    output_file.write('<style> table {font-size: 30;} </style>')
+
+
     #slighlt adapted from code from following link 
     #https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_three_columns_unequal
     output_file.write(""" <style>
@@ -207,11 +210,13 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
     output_file.write("</div>")
     
     # loop through log files in log list and write
+    output_file.write('<div class="tab content5">') 
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
     for log in logs:
         output_file.write(log)
         output_file.write("<br>")
+    output_file.write("</div>")
     output_file.write("</div>")
     output_file.write('</body></html>')
     output_file.close()
