@@ -99,7 +99,7 @@ task atac_align_chromap {
                 ~{"--barcode-whitelist " + barcode_inclusion_list} \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o ~{fragments} \
-                --summary ~{barcode_log} > ~{alignment_log}
+                --summary ~{barcode_log} > ~{alignment_log} 2>&1
         
         if [[ ~{subpool} != "none" ]]; then
             awk -v OFS="\t" -v subpool=~{subpool} '{$4=$4"_"subpool; print $0}' ~{fragments} > temp
