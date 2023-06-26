@@ -24,6 +24,7 @@ task log_atac {
     #awk 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f%", 100*dups/(unique+dups)}' ~{dups_log} > pct_duplicate_reads.txt
 
     command <<<
+        # grep "Number of" chromap-log.txt | grep -v threads| tr -d '.' | LC_ALL=en_US.utf8 numfmt -d ':' --field 2 --g
         total_reads=$(awk 'NR==1{print $1}' ~{alignment_log})
         echo $total_reads > total_reads.txt
         aligned_uniquely=$(awk 'NR==4{print $1}' ~{alignment_log})
