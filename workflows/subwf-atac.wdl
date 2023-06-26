@@ -197,8 +197,7 @@ workflow wf_atac {
 
         call task_log_atac.log_atac as log_atac {
         input:
-            alignment_log = align.atac_align_log,
-            barcode_log = qc_atac.atac_qc_barcode_metadata
+            barcode_log = align.atac_align_barcode_statistics
         }
 
         if (  "~{pipeline_modality}" == "full" ) {
@@ -223,7 +222,7 @@ workflow wf_atac {
         # Align
         # File? share_atac_alignment_raw = merge.atac_merged_alignment
         # File? share_atac_alignment_raw_index = merge.atac_merged_alignment_index
-        File? atac_alignment_log = align.atac_align_log
+        File? share_atac_alignment_log = align.atac_alignment_log
 
         # Filter
         # File? share_atac_filter_alignment_dedup = filter.atac_filter_alignment_dedup
@@ -245,11 +244,11 @@ workflow wf_atac {
         File? share_atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
 
         # Log
-        Int? share_atac_total_reads = log_atac.atac_total_reads
-        Int? share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely
-        Int? share_atac_unaligned = log_atac.atac_unaligned
-        Int? share_atac_feature_reads = log_atac.atac_feature_reads
-        Int? share_atac_duplicate_reads = log_atac.atac_duplicate_reads
+        # Int? share_atac_total_reads = log_atac.atac_total_reads
+        # Int? share_atac_aligned_uniquely = log_atac.atac_aligned_uniquely
+        # Int? share_atac_unaligned = log_atac.atac_unaligned
+        # Int? share_atac_feature_reads = log_atac.atac_feature_reads
+        # Int? share_atac_duplicate_reads = log_atac.atac_duplicate_reads
         Float? share_atac_percent_duplicates = log_atac.atac_pct_dup
 
         # ArchR

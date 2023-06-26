@@ -17,16 +17,13 @@ task html_report {
         # and the metrics and writes out an html file
 
         String? prefix
-
         # Stats for ATAC and RNA, will go at top of html
-        Int? atac_total_reads
-        Int? atac_aligned_uniquely
-        Int? atac_unaligned
-        Int? atac_feature_reads
-        Int? atac_duplicate_reads
-        Float? atac_nrf
-        Float? atac_pbc1
-        Float? atac_pbc2
+        # Int? atac_total_reads
+        # Int? atac_aligned_uniquely
+        # Int? atac_unaligned
+        # Int? atac_feature_reads
+        # Int? atac_duplicate_reads
+        File? atac_alignment_log
         Float? atac_percent_duplicates
         Int? rna_total_reads
         Int? rna_aligned_uniquely
@@ -49,19 +46,16 @@ task html_report {
     Array[String] valid_log_files = select_all(log_files)
 
     command <<<
+        grep "Number of" ~{atac_alignment_log} | grep -v threads| tr -d '.' | LC_ALL=en_US.utf8 numfmt -d ':' --field 2 --g  | sed 's/ /_/g' | sed 's/:/\t/g'> alignment_statistics_formatted.txt
+        grep "#" ~{atac_alignment_log} | sed 's/, /\n/g' | tr -d '# ' | sed 's/:/\t/g' >> alignment_statistics_formatted.txt
 
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
 
-        echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
-        echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
-        echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.txt
-        echo "<tr><td>Unique Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Percent Duplicates</td><td>" ~{atac_percent_duplicates} "</td></tr>" >> output.txt
-        echo "<tr><td>NRF=Distinct/Total</td><td>" ~{atac_nrf} "</td></tr>" >> output.txt
-        echo "<tr><td>PBC1=OnePair/Distinct</td><td>" ~{atac_pbc1} "</td></tr>" >> output.txt
-        echo "<tr><td>PBC2=OnePair/TwoPair</td><td>" ~{atac_pbc2} "</td></tr>" >> output.txt
+        echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr>" > output.txt
+        echo "<tr><td>" >> output.txt
+        cat alignment_statistics_formatted.txt | column -t >> output.txt
+        echo "</td></tr>" >> output.txt
         echo "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>" >> output.txt
         echo "<tr><td>Aligned multimap</td><td>" ~{rna_aligned_multimap} "</td></tr>" >> output.txt

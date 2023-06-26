@@ -117,7 +117,7 @@ task atac_align_chromap {
         File atac_fragments = "~{fragments}.gz"
         File atac_fragments_index = "~{fragments}.gz.tbi"
         File atac_align_barcode_statistics = barcode_log
-        File atac_align_log = alignment_log
+        File atac_alignment_log = alignment_log
     }
 
 
