@@ -70,7 +70,6 @@ task html_report {
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
         echo "~{sep="\n" nums_to_save}" > numeric_list.txt
-        echo "~{sep="\n" first_ints}" > summary_nums.txt
 
 
         
