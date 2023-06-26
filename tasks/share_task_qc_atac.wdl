@@ -206,6 +206,10 @@ task qc_atac {
         File? atac_qc_barcode_rank_plot = fragment_barcode_rank_plot
 
         #File? atac_qc_monitor_log = monitor_log
+
+        #added so that it can be passed to outer one to get arguments out
+        Int? fragment_cutoff_out = fragment_cutoff
+    
     }
 
     runtime {
