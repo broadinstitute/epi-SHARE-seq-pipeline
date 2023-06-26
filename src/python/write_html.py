@@ -45,10 +45,11 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
         outfile.write("<th>Summary Statistics</th>")
         for index in range(len(txt)):
             if index < len(nums):
-                outfile.write("<tr> <td>" + txt[index] + "</td> <td>" + "{:,}".format(int(nums[index])) + " </td> </tr>")
+                outfile.write("<tr> <td>" + txt[index] + "</td> <td>" + "{:,}".format(float(nums[index])) + " </td> </tr>")
             else:
                 outfile.write("<tr> <td>" + txt[index] + "</td> <td>No matching number</td> </tr>")
         outfile.write("</table>")
+        
     
     #Sets up the style for the tabs. Also links each tab to the content that
     #should be displayed when the tab is checked
