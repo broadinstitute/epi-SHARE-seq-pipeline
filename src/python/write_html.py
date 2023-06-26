@@ -143,16 +143,16 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
     with open(image_file_list) as fname:
         images = fname.read().splitlines() 
 
-    atac_plot_indices = []
-    rna_plots_indices = []
+    atac_plot_indices = range(19, len(images))
+    rna_plots_indices = range(2, 19)
     top_level_indices = [0, 1, 17, 24, 26, 29]
     top_level_left_indices = []
     top_level_middle_indicies = []
     top_level_right_indicies = []
     other_indices = []
     
-    atac_plots = []
-    rna_plots = []
+    atac_plots = [images[i] for i in atac_plot_indices]
+    rna_plots = [images[i] for i in rna_plots_indices]
     top_level = [images[i] for i in top_level_indices]
     top_level_left = []
     top_level_middle = []
@@ -191,13 +191,13 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
     
     #write images to rna tab 
     output_file.write('<div class="tab content2">')
-    write_pngs(images)
+    write_pngs(rna_plots)
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
 
     #write images to atac plot section
     output_file.write('<div class="tab content3">')
-    write_pngs(images)
+    write_pngs(atac_plots)
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
 
