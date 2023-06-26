@@ -63,6 +63,7 @@ task html_report {
     Array[Int?] second_ints = [rna_total_reads, rna_aligned_uniquely, rna_aligned_multimap, rna_unaligned, rna_feature_reads, rna_duplicate_reads]
     # added echo command to get the names and the numbers in bash, and added 
     # a call to the make csv python script with the relevant files
+    # comment to push changes through
     command <<<
 
         echo "~{sep="\n" names_of_data}" > names_list.txt
