@@ -18,7 +18,7 @@ barcode_metadata <- read.table(barcode_metadata_file, header=T)
 
 # Impose fragment cutoff, sort in decreasing order, assign rank
 # 1 fragment = 2 reads
-fragment <- barcode_metadata$reads_unique / 2
+fragment <- barcode_metadata$unique
 fragment_filtered <- fragment[fragment >= fragment_cutoff]
 fragment_filtered_sort <- sort(fragment_filtered, decreasing=T)
 fragment_rank <- 1:length(fragment_filtered_sort)
