@@ -15,6 +15,7 @@ task share_merge_h5 {
         Array[String]? pkrs = ''
         String? gene_naming
         String? prefix
+        Boolean concat_barcodes = false
 
         String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_merge_rna'
         Float? disk_factor = 2.0
@@ -33,8 +34,9 @@ task share_merge_h5 {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
-    String output_file = '${default='aggregated' prefix}.h5'
-    String ensembl_option = if '${gene_naming}'=='ensembl' then '--ensembl' else ''
+    String output_file = '~{default='aggregated' prefix}.h5'
+    String ensembl_option = if '~{gene_naming}'=='ensembl' then '--ensembl' else ''
+    String concat_barcodes_option = if concat_barcodes then '--concat' else ''
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -53,11 +55,13 @@ task share_merge_h5 {
             ~{output_file} \
             ~{sep=' ' tars} \
             $pkr \
-            ~{ensembl_option}
+            ~{ensembl_option} \
+            ~{concat_barcodes_option}
     >>>
 
     output {
         File h5_matrix = '${output_file}'
+        File monitor_log = '${monitor_log}'
     }
 
     runtime {

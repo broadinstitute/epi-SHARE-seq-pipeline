@@ -17,6 +17,7 @@ def parse_arguments():
     parser.add_argument("tar_files", nargs="*", help="File names for tar archives, one per matrix to be merged. Each must contain matrix.mtx, features.tsv, and barcodes.tsv files")
     parser.add_argument("--pkrs", nargs="*", help="PKR names, one per matrix to be merged")
     parser.add_argument("--ensembl", help="Flag for outputting gene names in ENSEMBL form, rather than gene id", action="store_true")
+    parser.add_argument("--concat", help="Flag for concatenating barcodes, rather than summing counts of duplicate barcodes", action="store_true")
     return parser.parse_args()
 
 def get_split_lines(file_name, delimiter, skip=0):
@@ -51,13 +52,15 @@ def merge_sum_dicts(dicts):
             merged[k] += v
     return merged
             
-def get_merged_data(tar_files, pkrs, ensembl):
+def get_merged_data(tar_files, pkrs, ensembl, concat):
     """
     Takes in paths to tar files (one per count matrix to be merged)
     containing barcodes.tsv, features.tsv, and matrix.mtx output files from STARsolo. 
     Merges matrices by translating individual mtx file indices to a master set of indices. 
     Outputs merged CSC matrix, barcode list, and gene list. 
-    Genes will be outputted as ENSEMBL IDs if ensembl=True, and as gene symbols otherwise.
+    If the same barcode(+PKR) is present in multiple tar files, its counts will be summed by default.
+    However, if concat==True, each occurrence will be preserved in its own column.
+    Genes will be outputted as ENSEMBL IDs if ensembl==True, and as gene symbols otherwise.
     """
     # if PKRs supplied, associate PKRs with appropriate tars
     if pkrs:
@@ -67,7 +70,9 @@ def get_merged_data(tar_files, pkrs, ensembl):
         
     barcode_set = set()
     gene_set = set()
-    mappings = []
+    count_mappings = []
+    barcode_mappings = []
+    gene_mappings = []
     
     for tar_file in tar_files:
         # read tar and extract files
@@ -83,6 +88,7 @@ def get_merged_data(tar_files, pkrs, ensembl):
         else:
             barcode_mapping = {line[0]:idx for idx, line in enumerate(barcodes)}
         barcode_set.update(barcode_mapping.keys())
+        barcode_mappings.append(barcode_mapping)
         
         # read features file
         features = get_split_lines("features.tsv.gz", delimiter="\t")   
@@ -97,19 +103,21 @@ def get_merged_data(tar_files, pkrs, ensembl):
             gene_symbols_unique = rename_duplicates(gene_symbols)
             gene_mapping = {gene:idx for idx, gene in enumerate(gene_symbols_unique)}
         gene_set.update(gene_mapping.keys())
+        gene_mappings.append(gene_mapping)
         
         # read matrix file
         matrix = get_split_lines("matrix.mtx.gz", delimiter=" ", skip=3)
         # get mapping of coordinates to count and convert to zero-based indexing;
         # {(row_idx,col_idx):count}
         count_mapping = {(int(line[0])-1, int(line[1])-1) : int(line[2]) for line in matrix}
-        
-        mappings.append((barcode_mapping, gene_mapping, count_mapping))
+        count_mappings.append(count_mapping)
         
         tar.close()
     
     barcode_list = list(barcode_set)
     gene_list = list(gene_set)
+    n_row = len(gene_list)
+    n_col = len(barcode_list)
     
     # assign column indices for master list of barcodes    
     merged_barcode_mapping = {barcode:idx for idx, barcode in enumerate(barcode_list)}
@@ -118,23 +126,22 @@ def get_merged_data(tar_files, pkrs, ensembl):
     
     # iterate through each matrix's mappings and translate them to the merged mappings; 
     # for each gene/barcode, get its index in the merged mapping to create the dict {individual_idx:merged_idx}.
-    # then re-map counts into the merged matrix; {(merged_row_idx, merged_col_idx):count}.
-    new_count_mappings = []
-    for mapping_triple in mappings:
-        new_barcode_mapping = {idx:merged_barcode_mapping[barcode] for barcode, idx in mapping_triple[0].items()}
-        new_gene_mapping = {idx:merged_gene_mapping[gene] for gene, idx in mapping_triple[1].items()}
-        new_count_mapping = {(new_gene_mapping[coords[0]],new_barcode_mapping[coords[1]]):count for coords, count in mapping_triple[2].items()}
-        new_count_mappings.append(new_count_mapping)
-        
-    # merge matrices; sum counts with identical coordinates
-    merged_matrix = merge_sum_dicts(new_count_mappings)
+    # then re-map counts into the merged matrix; {(merged_row_idx, merged_col_idx):count}. 
+    # make csc matrix.
+    count_matrices = list()
+    for i in range(len(tar_files))       :
+        barcode_mappings[i] = {idx:merged_barcode_mapping[barcode] for barcode, idx in barcode_mappings[i].items()}
+        gene_mappings[i] = {idx:merged_gene_mapping[gene] for gene, idx in gene_mappings[i].items()}
+        count_mappings[i] = {(gene_mappings[i][coords[0]],barcode_mappings[i][coords[1]]):count for coords, count in count_mappings[i].items()}
+        count_matrix = csc_matrix((list(count_mappings[i].values()), zip(*count_mappings[i].keys())), shape=(n_row,n_col))
+        count_matrices.append(count_matrix)
     
-    # create csc matrix
-    n_row = len(gene_list)
-    n_col = len(barcode_list)
-    count_matrix = csc_matrix((list(merged_matrix.values()), (zip(*merged_matrix.keys()))), shape=(n_row,n_col))
+    # sum matrices to get merged matrix
+    merged_matrix = csc_matrix((n_row,n_col))
+    for matrix in count_matrices:
+        merged_matrix += matrix
     
-    return(count_matrix, barcode_list, gene_list)
+    return(merged_matrix, barcode_list, gene_list)
         
 def write_h5(output_file, count_matrix, barcode_list, gene_list):
     h5_file = h5py.File(output_file, "w")
@@ -157,9 +164,10 @@ def main():
     tar_files = getattr(args, "tar_files")
     pkrs = getattr(args, "pkrs")
     ensembl = getattr(args, "ensembl")
+    concat = getattr(args, "concat")
     
     # get merged count matrix, barcode list, and gene list from input tars
-    count_matrix, barcode_list, gene_list = get_merged_data(tar_files, pkrs, ensembl)
+    count_matrix, barcode_list, gene_list = get_merged_data(tar_files, pkrs, ensembl, concat)
     
     # write merged data to new h5 file
     write_h5(output_file, count_matrix, barcode_list, gene_list)
