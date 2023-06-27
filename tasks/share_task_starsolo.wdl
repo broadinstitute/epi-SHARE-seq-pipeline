@@ -218,7 +218,7 @@ task share_rna_align {
             --outFilterScoreMin 30 \
             --outFileNamePrefix result/ \
             --limitBAMsortRAM 31232551044 \
-            --clipAdapterType CellRanger4 \
+            --clipAdapterType CellRanger4
 
             feature_type='Gene'
             # TODO: add the final case in which none of the above is passed.
