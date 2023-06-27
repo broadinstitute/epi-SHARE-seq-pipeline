@@ -67,7 +67,7 @@ task atac_align_chromap {
     command <<<
         set -e
 
-        bash $(which monitor_script.sh) > ~{monitor_log} 2>&1 &
+        bash $(which monitor_script.sh) 1>&2 &
 
         # Create index
         mkdir chromap_index

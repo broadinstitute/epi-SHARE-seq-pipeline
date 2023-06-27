@@ -218,6 +218,46 @@ task share_rna_align {
 
             feature_type='Gene'
             # TODO: add the final case in which none of the above is passed.
+        # PARSE
+        elif [ '~{chemistry}' == 'parse']; then
+            STAR --genomeDir {input.genome_index} \
+           --readFilesIn {params.sequence_reads} {params.barcode_reads} \
+           --readFilesCommand zcat \
+           --runThreadN {threads} \
+           --genomeLoad NoSharedMemory \
+           --outFilterMultimapNmax 20 \
+           --alignSJoverhangMin 8 \
+           --alignSJDBoverhangMin 1 \
+           --outFilterMismatchNmax 999 \
+           --outFilterMismatchNoverReadLmax 0.04 \
+           --alignIntronMin 20 \
+           --alignIntronMax 1000000 \
+           --alignMatesGapMax 1000000 \
+           --outSAMheaderCommentFile COfile.txt \
+           --outSAMheaderHD @HD VN:1.4 SO:coordinate \
+           --outSAMunmapped Within \
+           --outFilterType BySJout \
+           --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY gx gn \
+           --outSAMstrandField intronMotif \
+           --outSAMtype BAM SortedByCoordinate \
+           --sjdbScore 1 \
+           --clipAdapterType CellRanger4 \
+           --clip5pAdapterSeq AAGCAGTGGTATCAACGCAGAGTGAATGGG \
+           --outFilterScoreMin 30 \
+           --soloUMIdedup 1MM_CR \
+           --soloUMIfiltering MultiGeneUMI_CR \
+           --soloType CB_UMI_Complex \
+           --soloCellFilter EmptyDrops_CR \
+           --soloCBmatchWLtype EditDist_2 \
+           --soloCBposition 0_10_0_17 0_48_0_55 0_78_0_85 \
+           --soloUMIposition 0_0_0_9 \
+           --soloCBwhitelist {input.inclusion_list}/CB23.txt {input.inclusion_list}/CB23.txt {input.inclusion_list}/CB1.txt \
+           --soloStrand {params.stranded} \
+           --soloFeatures {params.gene_model} SJ \
+           --soloMultiMappers Unique EM \
+           --limitBAMsortRAM {resources.mem_bytes} \
+           --outTmpDir {params.star_tmp} \
+           --outFileNamePrefix ./ 2>&1 >> {log}
         fi
 
         # tar and gzip barcodes, features, and matrix files
