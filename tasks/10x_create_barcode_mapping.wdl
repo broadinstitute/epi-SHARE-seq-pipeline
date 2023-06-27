@@ -39,8 +39,8 @@ task mapping_tenx_barcodes {
         set -e
 
         if [ "$(zcat ~{whitelist_atac} | wc -l)" -eq "$(zcat ~{whitelist_rna} | wc -l)" ]; then
-            zcat ~{whitelist_atac} | tr ACGTacgt TGCAtgca | rev | paste -d ',' - <(zcat ~{whitelist_rna}) > ~{barcode_conversion_dict}
-            paste -d ',' <(zcat ~{whitelist_atac}) <(zcat ~{whitelist_rna}) >> ~{barcode_conversion_dict}
+            zcat ~{whitelist_atac} | tr ACGTacgt TGCAtgca | rev | paste -d '\t' - <(zcat ~{whitelist_rna}) > ~{barcode_conversion_dict}
+            paste -d '\t' <(zcat ~{whitelist_atac}) <(zcat ~{whitelist_rna}) >> ~{barcode_conversion_dict}
         fi
     >>>
 
