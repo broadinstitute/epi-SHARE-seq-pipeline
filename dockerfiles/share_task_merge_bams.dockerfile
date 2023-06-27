@@ -21,10 +21,10 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     libncurses5-dev \
     libbz2-dev \
-    python \
+    python3 \
     unzip \
     wget \
-    zlib1g-dev &&\
+    zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
 
 
@@ -52,7 +52,7 @@ LABEL software.version.is-production="No"
 LABEL software.task="merge"
 
 RUN apt-get update && apt-get install -y \
-    openjdk-11-jre &&\
+    openjdk-17-jre && \
     rm -rf /var/lib/apt/lists/*
 
 # Create and setup new user

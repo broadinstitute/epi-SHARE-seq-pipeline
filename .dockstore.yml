@@ -54,7 +54,6 @@ workflows:
          branches:
              - main
              - dev
-             - neva
          tags:
              - /.*/
 
@@ -65,7 +64,6 @@ workflows:
          branches:
              - main
              - dev
-             - neva
          tags:
              - /.*/
 
