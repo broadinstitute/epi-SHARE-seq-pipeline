@@ -21,6 +21,8 @@ task share_rna_align {
         String genome_name
         String prefix
         String chemistry
+        String? parse_strand
+        String? parse_gene_model
         
         File? placeholder
 
@@ -220,10 +222,11 @@ task share_rna_align {
             # TODO: add the final case in which none of the above is passed.
         # PARSE
         elif [ '~{chemistry}' == 'parse']; then
+
             STAR --genomeDir {input.genome_index} \
-           --readFilesIn {params.sequence_reads} {params.barcode_reads} \
+           --readFilesIn $read_files \
            --readFilesCommand zcat \
-           --runThreadN {threads} \
+           --runThreadN ~{cpus} \
            --genomeLoad NoSharedMemory \
            --outFilterMultimapNmax 20 \
            --alignSJoverhangMin 8 \
@@ -252,10 +255,10 @@ task share_rna_align {
            --soloCBposition 0_10_0_17 0_48_0_55 0_78_0_85 \
            --soloUMIposition 0_0_0_9 \
            --soloCBwhitelist {input.inclusion_list}/CB23.txt {input.inclusion_list}/CB23.txt {input.inclusion_list}/CB1.txt \
-           --soloStrand {params.stranded} \
-           --soloFeatures {params.gene_model} SJ \
+           --soloStrand ~{parse_strand} \
+           --soloFeatures ~{parse_gene_model} SJ \
            --soloMultiMappers Unique EM \
-           --limitBAMsortRAM {resources.mem_bytes} \
+           --limitBAMsortRAM 31232551044 \
            --outTmpDir {params.star_tmp} \
            --outFileNamePrefix ./ 2>&1 >> {log}
         fi

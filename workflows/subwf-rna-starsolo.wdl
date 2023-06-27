@@ -26,6 +26,9 @@ workflow wf_rna {
         Array[File] read1
         Array[File] read2
 
+        String? parse_strand
+        String? parse_gene_model
+
         # Correct-specific inputs
         Boolean correct_barcodes = true
         # Runtime parameters
@@ -98,6 +101,8 @@ workflow wf_rna {
                 whitelist = whitelist,
                 genome_name = genome_name,
                 genome_index_tar = idx_tar,
+                parse_gene_model = parse_gene_model,
+                parse_strand = parse_strand,
                 prefix = prefix,
                 cpus = align_cpus,
                 disk_factor = align_disk_factor,
