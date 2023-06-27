@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts (pysam, SAMstats)
-RUN python3 -m pip install --no-cache-dir --ignore-installed numpy pandas pybind11 --editable=git+https://github.com/GreenleafLab/matcha.git#egg=matcha
+RUN python3 -m pip install --break-system-packages --no-cache-dir --ignore-installed numpy pandas pybind11 --editable=git+https://github.com/GreenleafLab/matcha.git#egg=matcha
 
 # Create and setup new user
 ENV USER=shareseq
