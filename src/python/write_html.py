@@ -80,7 +80,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
         } 
         </style>""")
     
-    output_file.write('<style> table {font-size: 30;} </style>')
+    output_file.write('<style> table {font-size: 30; border-spacing; 50px 0} </style>')
 
 
     #slighlt adapted from code from following link 
@@ -146,18 +146,16 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
     atac_plot_indices = range(19, len(images))
     rna_plots_indices = range(2, 19)
     top_level_indices = [0, 1, 17, 24, 26, 29]
-    top_level_left_indices = []
-    top_level_middle_indicies = []
-    top_level_right_indicies = []
-    other_indices = []
+    top_level_left_indices = [0, 1]
+    top_level_middle_indices = [17, 24]
+    top_level_right_indices = [26, 29]
     
     atac_plots = [images[i] for i in atac_plot_indices]
     rna_plots = [images[i] for i in rna_plots_indices]
     top_level = [images[i] for i in top_level_indices]
-    top_level_left = []
-    top_level_middle = []
-    top_level_right = []
-    other = []
+    top_level_left = [images[i] for i in top_level_left_indices]
+    top_level_middle = [images[i] for i in top_level_middle_indices]
+    top_level_right = [images[i] for i in top_level_right_indices]
     
     #write the images to the proper tab. The spacing for the output file 
     #write calls is a bit weird because the write_pngs function needs to be 
@@ -172,17 +170,17 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
                     <span style="font-size: 25;"> RNA:  112,366,191 / 346,626,836 aligned (43% dup) </span> </center>""")
     
     #write images to far left of summary tab 
-    write_pngs_column(top_level)
+    write_pngs_column(top_level_left)
     output_file.write("""</div>
                 <div class="column left"> """)
     
     #write images to middle of summary tab
-    write_pngs_column(images)
+    write_pngs_column(top_level_middle)
     output_file.write("""</div>
                         <div class="column left">""")
     
     #write images to right of summary tab
-    write_pngs_column(images)                    
+    write_pngs_column(top_level_right)                    
     output_file.write("""</div>
                     </div>""")
     output_file.write('<a href="#top">Go to top of page</a>')
