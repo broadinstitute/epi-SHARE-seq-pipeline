@@ -133,7 +133,7 @@ workflow share {
                     read2 = select_first([read2_atac]),
                     fastq_barcode = fastq_barcode,
                     chemistry = chemistry,
-                    pkr = subpool,
+                    subpool = subpool,
                     whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
                     trim_fastqs = trim_fastqs,
                     chrom_sizes = chrom_sizes_,

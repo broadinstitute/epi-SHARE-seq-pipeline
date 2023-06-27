@@ -38,7 +38,6 @@ workflow wf_atac {
         # Correct-specific inputs
         Boolean correct_barcodes = true
         File whitelist
-        String? pkr
         # Runtime parameters
         Int? correct_cpus = 16
         Float? correct_disk_factor = 8.0
@@ -122,7 +121,7 @@ workflow wf_atac {
                     fastq_R2 = read_pair.right,
                     whitelist = whitelist,
                     sample_type = "ATAC",
-                    pkr = pkr,
+                    pkr = subpool,
                     prefix = prefix,
                     cpus = correct_cpus,
                     disk_factor = correct_disk_factor,
@@ -158,7 +157,7 @@ workflow wf_atac {
                 reference_fasta = reference_fasta,
                 trim_adapters = trim_adapters,
                 genome_name = genome_name,
-                subpool = pkr,
+                subpool = subpool,
                 multimappers = align_multimappers,
                 barcode_inclusion_list = whitelist,
                 barcode_conversion_dict = barcode_conversion_dict,
