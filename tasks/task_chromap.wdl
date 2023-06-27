@@ -71,11 +71,14 @@ task atac_align_chromap {
 
         # Create index
         mkdir chromap_index
-        chromap -i -r ~{reference_fasta} -o chromap_index/index
+        echo '------ indexing ------' 1>&2
+        time chromap -i -r ~{reference_fasta} -o chromap_index/index
 
         if [[ '~{barcode_inclusion_list}' == *.gz ]]; then
+            echo '------ Decompressing the barcode inclusion list ------' 1>&2
             gunzip -c ~{barcode_inclusion_list} > barcode_inclusion_list.txt
         else
+            echo '------ No decompression needed for the barcode inclusion list ------' 1>&2
             cat ~{barcode_inclusion_list} > barcode_inclusion_list.txt
         fi
 
@@ -83,8 +86,8 @@ task atac_align_chromap {
         # --read-format bc:0:15,r1:16:-1
         # The start and end are inclusive and -1 means the end of the read. User may use multiple fields to specify non-consecutive segments, e.g. bc:0:15,bc:32:-1.
         # The strand is presented by '+' and '-' symbol, if '-' the barcode will be reverse-complemented after extraction
-        
-        chromap -x chromap_index/index \
+        echo '------ align chromap ------' 1>&2
+        time chromap -x chromap_index/index \
                 ~{true='--trim-adapters ' false='' trim_adapters} \
                 ~{true='--remove-pcr-duplicates ' false='' remove_pcr_duplicates} \
                 ~{true='--remove-pcr-duplicates-at-cell-level ' false='' remove_pcr_duplicates_at_cell_level} \
@@ -94,7 +97,7 @@ task atac_align_chromap {
                 ~{"-l " + max_insert_size} \
                 ~{"--bc-error-threshold " + bc_error_threshold} \
                 ~{"--bc-probability-threshold " + bc_probability_threshold} \
-                ~{"--read_format " + read_format} \
+                ~{"--read-format " + read_format} \
                 ~{"--drop-repetitive-reads " + multimappers} \
                 -x chromap_index/index \
                 -r ~{reference_fasta} \
@@ -109,6 +112,7 @@ task atac_align_chromap {
                 --summary ~{barcode_log} > ~{alignment_log} 2>&1
         
         if [[ '~{subpool}' != "none" ]]; then
+            echo '------  Add subpool to barcode name ------' 1>&2
             awk -v OFS="\t" -v subpool=~{subpool} '{$4=$4"_"subpool; print $0}' ~{fragments} > temp
             mv temp ~{fragments}
             awk -v FS="," -v OFS="," -v subpool=~{subpool} 'NR==1{print $0;next}{$1=$1"_"subpool; print $0}' ~{barcode_log} > temp
