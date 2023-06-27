@@ -91,16 +91,12 @@ workflow share {
     File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
 
     if ( chemistry != "shareseq" && process_atac) {
-        scatter (idx in range(length(read1_atac))) {
-            call preprocess_tenx.preprocess_tenx as preprocess_tenx{
-                    input:
-                        fastq_R1 = read1_atac[idx],
-                        fastq_R3 = read2_atac[idx],
-                        fastq_R2 = fastq_barcode[idx],
-                        whitelist = select_first([whitelist_atac, whitelist_atac_]),
-                        chemistry = chemistry,
-                        prefix = prefix
-            }
+        call preprocess_tenx.preprocess_tenx as preprocess_tenx{
+                input:
+                    fastq_barcode = fastq_barcode[1],
+                    whitelist = select_first([whitelist_atac, whitelist_atac_]),
+                    chemistry = chemistry,
+                    prefix = prefix
         }
         if ( chemistry == "10x_multiome" ){
             call tenx_barcode_map.mapping_tenx_barcodes as barcode_mapping{
@@ -133,8 +129,8 @@ workflow share {
         if ( read1_atac[0] != "" ) {
             call share_atac.wf_atac as atac{
                 input:
-                    read1 = select_first([preprocess_tenx.fastq_R1_preprocessed ,read1_atac]),
-                    read2 = select_first([preprocess_tenx.fastq_R2_preprocessed ,read2_atac]),
+                    read1 = select_first([read1_atac]),
+                    read2 = select_first([read2_atac]),
                     chemistry = chemistry,
                     pkr = pkr,
                     whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
@@ -144,6 +140,7 @@ workflow share {
                     tss_bed = tss_bed_,
                     peak_set = peak_set_,
                     prefix = prefix,
+                    read_format = preprocess_tenx.tenx_barcode_complementation_qc,
                     genome_name = genome_name_,
                     barcode_conversion_dict = barcode_mapping.tenx_barcode_conversion_dict,
                     pipeline_modality = pipeline_modality

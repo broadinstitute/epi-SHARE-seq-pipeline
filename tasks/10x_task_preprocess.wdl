@@ -12,12 +12,12 @@ task preprocess_tenx {
 
     input {
         # This task takes in input the 3 fastqs coming out from cellranger mkfastqs and preprocess them.
-        File fastq_R1 # Pair 1 reads
-        File fastq_R3 # Pair 2 reads
-        File fastq_R2 # Barcode fastq
+        File? fastq_R1 # Pair 1 reads
+        File? fastq_R2 # Pair 2 reads
+        File fastq_barcode # Barcode fastq
         File? whitelist # Barcode whitelist (chemistry specific)
         Int? barcode_dist = 2
-        Float? threshold_pct_barcode_matching = 0.60
+        Float? threshold_pct_barcode_matching = 0.30
         String chemistry
         String? prefix
         Int? cpus = 16
@@ -27,7 +27,7 @@ task preprocess_tenx {
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(fastq_R1, "G") + size(fastq_R2, "G") + size(fastq_R3, "G")
+    Float input_file_size_gb =  size(fastq_barcode, "G")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 5.0 + memory_factor * input_file_size_gb
@@ -63,11 +63,6 @@ task preprocess_tenx {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        # Strip read description
-        zcat ~{fastq_R1} | sed 's/ .*//' | gzip > stripped_R1.fastq.gz
-        zcat ~{fastq_R3} | sed 's/ .*//' | gzip > stripped_R2.fastq.gz
-        zcat ~{fastq_R2} | sed 's/ .*//' | gzip > stripped_barcode.fastq.gz
-
         if [[ '~{whitelist}' == *.gz ]]; then
             gunzip -c ~{whitelist} > whitelist.txt
         else
@@ -77,23 +72,23 @@ task preprocess_tenx {
         # auto-detect barcode complementation
         # python3 barcode_revcomp_detect.py barcode_fastq chemistry whitelist qc_out out threshold
 
-        python3 $(which barcode_revcomp_detect.py) stripped_barcode.fastq.gz ~{chemistry} whitelist.txt ~{barcode_complementation_qc} ~{barcode_complementation_out} ~{threshold_pct_barcode_matching}
+        python3 $(which barcode_revcomp_detect.py) ~{fastq_barcode} ~{chemistry} whitelist.txt ~{barcode_complementation_qc} ~{barcode_complementation_out} ~{threshold_pct_barcode_matching}
 
         # barcode correction and filtering
         # python3 match_barcodes.py
 
-        python3 $(which match_barcodes.py) stripped_R1.fastq.gz stripped_R2.fastq.gz stripped_barcode.fastq.gz ~{chemistry} ~{barcode_dist} ~{barcode_complementation_out} whitelist.txt ~{cleaned_fastq_R1} ~{cleaned_fastq_R2} ~{barcode_correction_qc} ~{cpus}
+        #python3 $(which match_barcodes.py) stripped_R1.fastq.gz stripped_R2.fastq.gz stripped_barcode.fastq.gz ~{chemistry} ~{barcode_dist} ~{barcode_complementation_out} whitelist.txt ~{cleaned_fastq_R1} ~{cleaned_fastq_R2} ~{barcode_correction_qc} ~{cpus}
 
         # Cleaned old files
-        rm stripped_R1.fastq.gz stripped_R2.fastq.gz stripped_barcode.fastq.gz
+        #rm stripped_R1.fastq.gz stripped_R2.fastq.gz stripped_barcode.fastq.gz
     >>>
 
     output {
-        File fastq_R1_preprocessed = cleaned_fastq_R1
-        File fastq_R2_preprocessed = cleaned_fastq_R2
-        File tenx_barcode_complementation_qc = barcode_complementation_qc
-        File tenx_barcode_correction_qc = barcode_correction_qc
-        File? tenx_barcode_conversion_dict = barcode_conversion_dict
+        #File fastq_R1_preprocessed = cleaned_fastq_R1
+        #File fastq_R2_preprocessed = cleaned_fastq_R2
+        String? tenx_barcode_complementation_qc = read_string(barcode_complementation_qc)
+        #File tenx_barcode_correction_qc = barcode_correction_qc
+        #File? tenx_barcode_conversion_dict = barcode_conversion_dict
         #File tenx_trimming_log_json = trimming_log_json
         #File trimming_log_html = trimming_log_html
         #File tenx_trimming_stats = trimming_stats
@@ -113,11 +108,11 @@ task preprocess_tenx {
                 description: 'Pairs 1 fastq',
                 help: 'Pairs 1 fastq',
             }
-        fastq_R2: {
+        fastq_barcode: {
                 description: 'Barcode fastq',
                 help: 'Barcode fastq',
             }
-        fastq_R3: {
+        fastq_R2: {
                 description: 'Pairs 2 fastq',
                 help: 'Pairs 2 fastq',
             }
