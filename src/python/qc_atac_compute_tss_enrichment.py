@@ -189,6 +189,9 @@ def _add_read_to_dictionary(fragment_counter,
             reads_in_tss[barcode].add(fragment_id)
     return
 
+# this script need to be updated to be made with a title, try to make 
+# the font the same size as well
+
 def plot_tss_enrichment(raw_signal, smoothed_signal, out_file):
     fig=plt.figure(figsize=(8.0, 5.0))
     plt.plot(raw_signal,'k.')
