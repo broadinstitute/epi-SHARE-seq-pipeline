@@ -141,7 +141,7 @@ workflow share {
                     tss_bed = tss_bed_,
                     peak_set = peak_set_,
                     prefix = prefix,
-                    read_format = preprocess_tenx.tenx_barcode_complementation_qc,
+                    read_format = preprocess_tenx.tenx_barcode_complementation_out,
                     genome_name = genome_name_,
                     barcode_conversion_dict = barcode_mapping.tenx_barcode_conversion_dict,
                     pipeline_modality = pipeline_modality

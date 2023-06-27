@@ -88,6 +88,7 @@ task preprocess_tenx {
         #File fastq_R1_preprocessed = cleaned_fastq_R1
         #File fastq_R2_preprocessed = cleaned_fastq_R2
         String? tenx_barcode_complementation_qc = read_string(barcode_complementation_qc)
+        String? tenx_barcode_complementation_out = read_string(barcode_complementation_out)
         #File tenx_barcode_correction_qc = barcode_correction_qc
         #File? tenx_barcode_conversion_dict = barcode_conversion_dict
         #File tenx_trimming_log_json = trimming_log_json
