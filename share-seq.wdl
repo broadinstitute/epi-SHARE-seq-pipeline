@@ -21,7 +21,7 @@ workflow share {
         Boolean dorcs_flag = true
         String chemistry
         String prefix = "shareseq-project"
-        String? subpool=""
+        String? subpool = "none"
         String pipeline_modality = "full" # "full": run everything; "count_only": stops after producing fragment file and count matrix; "no_align": correct and trim raw fastqs.
 
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
