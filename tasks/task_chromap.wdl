@@ -73,6 +73,12 @@ task atac_align_chromap {
         mkdir chromap_index
         chromap -i -r ~{reference_fasta} -o chromap_index/index
 
+        if [[ '~{barcode_inclusion_list}' == *.gz ]]; then
+            gunzip -c ~{barcode_inclusion_list} > barcode_inclusion_list.txt
+        else
+            cat ~{barcode_inclusion_list} > barcode_inclusion_list.txt
+        fi
+
         # [r1|r2|bc]:start:end:strand
         # --read-format bc:0:15,r1:16:-1
         # The start and end are inclusive and -1 means the end of the read. User may use multiple fields to specify non-consecutive segments, e.g. bc:0:15,bc:32:-1.
@@ -97,7 +103,7 @@ task atac_align_chromap {
                 -1 ~{sep="," fastq_R1} \
                 -2 ~{sep="," fastq_R2} \
                 -b ~{sep="," fastq_barcode} \
-                ~{"--barcode-whitelist " + barcode_inclusion_list} \
+                --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o ~{fragments} \
                 --summary ~{barcode_log} > ~{alignment_log} 2>&1
