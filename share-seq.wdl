@@ -93,7 +93,7 @@ workflow share {
     if ( chemistry != "shareseq" && process_atac) {
         call preprocess_tenx.preprocess_tenx as preprocess_tenx{
                 input:
-                    fastq_barcode = fastq_barcode[1],
+                    fastq_barcode = fastq_barcode[0],
                     whitelist = select_first([whitelist_atac, whitelist_atac_]),
                     chemistry = chemistry,
                     prefix = prefix
