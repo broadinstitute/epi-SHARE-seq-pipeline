@@ -43,9 +43,12 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
     def write_summary_table(txt, nums, outfile):
         outfile.write("<table>")
         outfile.write("<th>Summary Statistics</th>")
+        outfile.write("<tr><td colspan=2>ATAC</td></tr>")
         for index in range(len(txt)):
             if index < len(nums):
                 outfile.write("<tr> <td>" + txt[index] + "</td> <td>" + "{:,}".format(float(nums[index])) + " </td> </tr>")
+                if index == 8:
+                    outfile.write("<tr><td colspan=2>RNA</td></tr>")
             else:
                 outfile.write("<tr> <td>" + txt[index] + "</td> <td>No matching number</td> </tr>")
         outfile.write("</table>")
