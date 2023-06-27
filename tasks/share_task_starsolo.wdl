@@ -259,8 +259,9 @@ task share_rna_align {
            --soloFeatures ~{parse_gene_model} SJ \
            --soloMultiMappers Unique EM \
            --limitBAMsortRAM 31232551044 \
-           --outTmpDir {params.star_tmp} \
-           --outFileNamePrefix ./ 2>&1 >> {log}
+           --outFileNamePrefix result/
+
+           feature_type = ~{parse_gene_model}
         fi
 
         # tar and gzip barcodes, features, and matrix files
