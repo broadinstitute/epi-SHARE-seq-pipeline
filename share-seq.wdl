@@ -32,7 +32,7 @@ workflow share {
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
-        Array[File] fastq_barcode = []
+        Array[File] fastq_barcode
         Boolean count_only = false
         File? chrom_sizes
         File? atac_genome_index_tar
