@@ -272,9 +272,9 @@ workflow share {
         File? csv_summary = html_report.csv_report_file
     
         #output params needed to run the r script
-        File? r_script_param_1 = qc_atac.atac_qc_barcode_metadata
+        #File? r_script_param_1 = qc_atac.atac_qc_barcode_metadata
         Int? r_script_param_2 = qc_atac.fragment_cutoff_out
-        File? r_script_param_3 = qc_atac.atac_qc_barcode_rank_plot
+        #File? r_script_param_3 = qc_atac.atac_qc_barcode_rank_plot
     
     }
 
