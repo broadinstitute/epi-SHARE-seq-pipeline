@@ -162,6 +162,7 @@ task share_rna_align {
             --outSAMunmapped Within \
             --outSAMstrandField intronMotif \
             --outFilterScoreMin 30 \
+            --limitBAMsortRAM 31232551044 \
             --outFileNamePrefix result/
 
             feature_type='Gene'
@@ -216,6 +217,7 @@ task share_rna_align {
             --outSAMstrandField intronMotif \
             --outFilterScoreMin 30 \
             --outFileNamePrefix result/ \
+            --limitBAMsortRAM 31232551044 \
             --clipAdapterType CellRanger4 \
 
             feature_type='Gene'
