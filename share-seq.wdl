@@ -131,6 +131,7 @@ workflow share {
                 input:
                     read1 = select_first([read1_atac]),
                     read2 = select_first([read2_atac]),
+                    fastq_barcode = fastq_barcode,
                     chemistry = chemistry,
                     pkr = pkr,
                     whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
