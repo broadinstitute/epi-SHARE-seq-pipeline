@@ -21,7 +21,7 @@ def main(output_file_name, names_list, numeric_list, image_list, log_list):
     # generate an array of the numeric data (represented by strings)
     if numeric_list is not None:
         with open(numeric_list, "r") as numeric_f: 
-            numeric_array = numeric_f.read().splitlines()
+            numeric_array = numeric_f.read().split('/n')
     
     # generate an array of image data (represented by strings)
     if image_list is not None:
