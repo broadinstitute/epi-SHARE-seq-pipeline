@@ -15,7 +15,7 @@ workflow aggregate_counts {
 
     input {
         # Common inputs
-        String genome_name
+        String? genome_name
         String? prefix = 'merged'
         Boolean merge_only = false
         Boolean? concat_barcodes = false       
@@ -44,7 +44,7 @@ workflow aggregate_counts {
         String? merge_fragments_docker_image
 
         # ArchR inputs
-        File peak_set
+        File? peak_set
     }
 
     Boolean aggregate_rna = if length(tars) > 0 then true else false
