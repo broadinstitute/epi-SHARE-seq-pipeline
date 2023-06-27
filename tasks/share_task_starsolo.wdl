@@ -29,7 +29,7 @@ task share_rna_align {
         # Runtime parameters
         Int cpus = 16
         Float? disk_factor = 50.0
-        Float? memory_factor = 0.5
+        Float? memory_factor = 1.5
         String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star'
         
     }
@@ -223,7 +223,7 @@ task share_rna_align {
         # PARSE
         elif [ '~{chemistry}' == 'parse']; then
 
-            STAR --genomeDir {input.genome_index} \
+            STAR --genomeDir ./ \
            --readFilesIn $read_files \
            --readFilesCommand zcat \
            --runThreadN ~{cpus} \
