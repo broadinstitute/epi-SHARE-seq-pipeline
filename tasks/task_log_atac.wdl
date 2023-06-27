@@ -23,7 +23,7 @@ task log_atac {
     #awk 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f%", 100*dups/(unique+dups)}' ~{dups_log} > pct_duplicate_reads.txt
 
     command <<<
-        awk -v FS="," 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f%", 100*dups/(unique+dups)}' ~{barcode_log} > pct_duplicate_reads.txt
+        awk -v FS="," 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f", 100*dups/(unique+dups)}' ~{barcode_log} > pct_duplicate_reads.txt
     >>>
     output {
         Float? atac_pct_dup = read_float("pct_duplicate_reads.txt")
