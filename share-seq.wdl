@@ -9,9 +9,6 @@ import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report 
 
-#add this to import arguments to r script
-import "tasks/share_task_qc_atac.wdl" as qc_atac
-
 
 # WDL workflow for SHARE-seq
 
