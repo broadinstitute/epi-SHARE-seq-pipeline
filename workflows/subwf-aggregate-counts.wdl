@@ -15,6 +15,7 @@ workflow aggregate_counts {
 
     input {
         # Common inputs
+        File genome_tsv
         String? genome_name
         String? prefix = 'merged'
         Boolean merge_only = false
@@ -50,6 +51,10 @@ workflow aggregate_counts {
     Boolean aggregate_rna = if length(tars) > 0 then true else false
     Boolean aggregate_atac = if length(fragments) > 0 then true else false
 
+    Map[String, File] annotations = read_map(genome_tsv)
+    String genome_name_ =  select_first([genome_name, annotations["genome_name"]])
+    File peak_set_ = select_first([peak_set, annotations["ccre"]])
+
     if (aggregate_rna) {
         call share_task_merge_h5.share_merge_h5 as merge_h5 {
             input:
@@ -66,7 +71,7 @@ workflow aggregate_counts {
             call share_task_seurat.seurat as seurat {
                 input:
                     rna_matrix = merge_h5.h5_matrix,
-                    genome_name = genome_name,
+                    genome_name = genome_name_,
                     min_features = seurat_min_features,
                     percent_mt = seurat_percent_mt,
                     min_cells = seurat_min_cells,
@@ -92,18 +97,9 @@ workflow aggregate_counts {
             call share_task_archr.archr as archr {
                 input:
                     atac_frag = merge_fragments.fragments,
-                    genome = genome_name,
-                    peak_set = peak_set,
+                    genome = genome_name_,
+                    peak_set = peak_set_,
                     prefix = prefix
-            }
-            call share_task_archr.archr as archr_strict {
-                input:
-                    atac_frag = merge_fragments.fragments,
-                    genome = genome_name,
-                    peak_set = peak_set,
-                    prefix = '${prefix}_strict',
-                    min_tss = 5,
-                    min_frags = 1000
             }
         }
     }
@@ -114,8 +110,8 @@ workflow aggregate_counts {
                 input:
                     rna_matrix = merge_h5.h5_matrix,
                     atac_fragments = merge_fragments.fragments,
-                    peak_file = peak_set,
-                    genome = genome_name,
+                    peak_file = peak_set_,
+                    genome = genome_name_,
                     prefix = prefix
             }
         }
@@ -134,11 +130,6 @@ workflow aggregate_counts {
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_raw_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
-
-        File? share_atac_archr_strict_notebook_output = archr_strict.notebook_output
-        File? share_atac_archr_strict_arrow = archr_strict.archr_arrow
-        File? share_atac_archr_strict_obj = archr_strict.archr_raw_obj
-        File? share_atac_archr_strict_plots_zip = archr_strict.plots_zip
 
         File? dorcs_notebook_output = dorcs.dorcs_notebook_output
         File? dorcs_genes_summary = dorcs.dorcs_genes_summary
