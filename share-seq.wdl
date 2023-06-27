@@ -117,7 +117,7 @@ workflow share {
                     whitelist = select_first([whitelist_rna, whitelist_rna_, whitelist, whitelist_]),
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
-                    pkr = pkr,
+                    pkr = subpool,
                     genome_name = genome_name_,
                     pipeline_modality = pipeline_modality,
                     gene_naming = gene_naming
@@ -133,7 +133,7 @@ workflow share {
                     read2 = select_first([read2_atac]),
                     fastq_barcode = fastq_barcode,
                     chemistry = chemistry,
-                    pkr = pkr,
+                    pkr = subpool,
                     whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
                     trim_fastqs = trim_fastqs,
                     chrom_sizes = chrom_sizes_,
