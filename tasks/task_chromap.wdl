@@ -72,7 +72,7 @@ task atac_align_chromap {
         # Create index
         mkdir chromap_index
         echo '------ indexing ------' 1>&2
-        time chromap -i -r ~{reference_fasta} -o chromap_index/index
+        time chromap -i -r <(zcat ~{reference_fasta}) -o chromap_index/index
 
         if [[ '~{barcode_inclusion_list}' == *.gz ]]; then
             echo '------ Decompressing the barcode inclusion list ------' 1>&2
