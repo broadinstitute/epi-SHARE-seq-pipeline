@@ -54,7 +54,7 @@ task html_report {
 
         echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr>" > output.txt
         echo "<tr><td>" >> output.txt
-        cat alignment_statistics_formatted.txt | column -t >> output.txt
+        cat alignment_statistics_formatted.txt >> output.txt
         echo "</td></tr>" >> output.txt
         echo "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>" >> output.txt
