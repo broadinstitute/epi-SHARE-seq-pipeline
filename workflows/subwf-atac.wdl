@@ -178,30 +178,30 @@ workflow wf_atac {
                 read_format = read_format
         }
 
-        call task_qc_atac.qc_atac as qc_atac{
-            input:
-                fragments = align.atac_fragments,
-                fragments_index = align.atac_fragments_index,
-                barcode_summary = align.atac_align_barcode_statistics,
-                peaks = peak_set,
-                tss = tss_bed,
-                subpool = subpool,
-                barcode_conversion_dict = barcode_conversion_dict,
-                fragment_cutoff = qc_fragment_cutoff,
-                genome_name = genome_name,
-                prefix = prefix,
-                cpus = qc_cpus,
-                disk_factor = qc_disk_factor,
-                docker_image = qc_docker_image,
-                memory_factor = qc_memory_factor
-        }
-
         call task_log_atac.log_atac as log_atac {
         input:
             barcode_log = align.atac_align_barcode_statistics
         }
 
         if (  "~{pipeline_modality}" == "full" ) {
+            call task_qc_atac.qc_atac as qc_atac{
+                input:
+                    fragments = align.atac_fragments,
+                    fragments_index = align.atac_fragments_index,
+                    barcode_summary = align.atac_align_barcode_statistics,
+                    peaks = peak_set,
+                    tss = tss_bed,
+                    subpool = subpool,
+                    barcode_conversion_dict = barcode_conversion_dict,
+                    fragment_cutoff = qc_fragment_cutoff,
+                    genome_name = genome_name,
+                    prefix = prefix,
+                    cpus = qc_cpus,
+                    disk_factor = qc_disk_factor,
+                    docker_image = qc_docker_image,
+                    memory_factor = qc_memory_factor
+            }
+
             call share_task_archr.archr as archr{
                 input:
                     atac_frag = qc_atac.temp_frag,
