@@ -42,6 +42,8 @@ task html_report {
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
+        File? joint_barcode_stats
+
 
     }
 
@@ -82,7 +84,7 @@ task html_report {
         echo ~{rna_duplicate_reads} '/n' >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo $percent '/n' >> output.txt
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt output.txt log_list.txt
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt output.txt log_list.txt ~{joint_barcode_stats}
         
         python3 /software/write_csv.py ~{other_output_file} names_list.txt output.txt image_list.txt log_list.txt
     >>>

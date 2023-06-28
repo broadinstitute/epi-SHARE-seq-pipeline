@@ -9,9 +9,10 @@ import argparse
 import base64
 import io
 import os.path
+import csv 
 
 
-def main(output_file_name, image_file_list, stats_info, log_file_list, input_file_name=None):
+def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_file, input_file_name=None):
     """
     Write to the input file
     Image file list is list of png images
@@ -53,6 +54,21 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
                 outfile.write("<tr> <td>" + txt[index] + "</td> <td>No matching number</td> </tr>")
         outfile.write("</table>")
         
+    def write_stats_from_csv(qc_stats_file, outfile):
+        csv_stats = []
+        with open(qc_stats_file, mode='r') as stats_file: 
+            stats_reader = csv.reader(stats_file)
+            for row in stats_reader: 
+                csv_stats.append(row)
+        stats_values = csv_stats[1]
+        #order of values is neither, both, rna, atac 
+        stats_values.pop(0)
+        total_cells = int(stats_values[1]) + int(stats_values[2]) + int(stats_values[3])
+        output_file.write("<center> <span style='font-size: 50;'>" + str(total_cells) + " cells </span> <br> <br>")
+        output_file.write("<span style='font-size: 30;'> " + stats_values[1] + " both " + stats_values[2] + " RNA " + stats_values[3] + " ATAC </span> <br> <br>")
+        output_file.write("<span style='font-size: 25;'> RNA:   / 346,626,836 aligned (43% dup) TODO: this still hard coded, find numbers and make available </span> </center>")
+        #utfile.write(stats_names)
+        #outfile.write(stats_values)
     
     #Sets up the style for the tabs. Also links each tab to the content that
     #should be displayed when the tab is checked
@@ -168,9 +184,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, input_fil
     
     # writes summary statistics (eventually should be moved to own tab and 
     # and not hard coded)
-    output_file.write("""<center> <span style="font-size: 50;"> 41890 cells </span> <br> <br>
-                    <span style="font-size: 30;"> 29656 both 670 RNA 11627 ATAC </span> <br> <br>
-                    <span style="font-size: 25;"> RNA:  112,366,191 / 346,626,836 aligned (43% dup) </span> </center>""")
+    write_stats_from_csv(qc_stats_file, output_file)
     
     #write images to far left of summary tab 
     write_pngs_column(top_level_left)
@@ -243,76 +257,10 @@ if __name__ == '__main__':
                        help='file containing calculated stats')
     group.add_argument('log_file_list',
                        help='file containing list of text log files to append to end of HTML file')
+    group.add_argument('qc_stats',
+                       help='file containing information for top level tab')
     group.add_argument('--input_file_name',
                        help='optional file with html text to add at top of file', nargs='?') 
 
     args = parser.parse_args()
-    main(args.output_file_name, args.image_file_list, args.stats_info, args.log_file_list, args.input_file_name)
-
-
-
-
-
-
-"""""
-bash script to get a file with just the numbers
-
-echo ~{atac_total_reads} "</td></tr>" > sum_stats.txt
-echo ~{atac_aligned_uniquely} "</td></tr>" >> sum_stats.txt
-echo ~{atac_unaligned} "</td></tr>" >> sum_stats.txt
-echo ~{atac_feature_reads} "</td></tr>" >> sum_stats.txt
-echo ~{atac_duplicate_reads} "</td></tr>" >> sum_stats.txt
-echo ~{atac_percent_duplicates} "</td></tr>" >> sum_stats.txt
-echo ~{atac_nrf} "</td></tr>" >> sum_stats.txt
-echo ~{atac_pbc1} "</td></tr>" >> sum_stats.txt
-echo ~{atac_pbc2} "</td></tr>" >> sum_stats.txt
-echo ~{rna_total_reads} "</td></tr>" >> sum_stats.txt
-echo ~{rna_aligned_uniquely} "</td></tr>" >> sum_stats.txt
-echo ~{rna_aligned_multimap} "</td></tr>" >> sum_stats.txt
-echo ~{rna_unaligned} "</td></tr>" >> sum_stats.txt
-echo ~{rna_feature_reads} "</td></tr>" >> sum_stats.txt
-echo ~{rna_duplicate_reads} "</td></tr>" >> sum_stats.txt
-percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-echo $percent "</td></tr></table>" >> sum_stats.txt
-
-names to go with the numbers above
-names = ['Total reads', 'Aligned uniquely', 'Unaligned', 'Unique Reads', 'Duplicate Reads', 'Percent Duplicates', 'Distinct/Total', 'OnePair/Distinct', 'OnePair/TwoPair', 'rna switch', 'Total reads', 'Aligned uniquely', 'Aligned multimap', 'Unaligned', 'Filtered', 'Duplicate Reads', 'Percent Duplicates']
-
-
-
-#function that writes a table from names and numbers
-
-def write_summary_table(txt, nums, outfile):
-    #write the header for the atac section
-    outfile.write("<table> <th> ATAC </th>")
-    for int in range(len(txt)): 
-        #write the header for the rna section after all the atac stuff has 
-        #been added
-        if int == 6:
-            outfile.write("<th> RNA </th>")
-        outfile.write("<tr> <td>")
-        outfile.write(txt[int])
-        outfile.write("</td> <td>")
-        #format the numbers to print with commas
-        outfile.write(str("{:,}".format(nums[int])))
-        outfile.write("</td> </tr>")
-        outfile.write("</table>")
-
-
-#read the text files of numbers and labels into lists, then use those lists
-#to make a table
-#note: only works if the text files are one label/number per line
-label_names_file = open(labels_file, 'r')
-#use of splitlines eliminates the trailing endline character
-label_names = label_names_file.read().splitlines()
-summary_stats_file = open(numbers_file)
-summary_stats = summary_stats_file.read().splitlines()
-#cast the digits from the text file to ints
-summary_stats = [int(num) for num in summary_stats]
-
-write_summary_table(label_names, summary_stats, output_file)
-
-"""
-
-##new thing to push commit 
-
+    main(args.output_file_name, args.image_file_list, args.stats_info, args.log_file_list, args.qc_stats, args.input_file_name)
