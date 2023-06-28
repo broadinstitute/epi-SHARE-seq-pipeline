@@ -29,6 +29,7 @@ workflow share {
         File? whitelist
         File? whitelist_atac
         File? whitelist_rna
+        String? read_format
 
         # ATAC-specific inputs
         Array[File] read1_atac
@@ -142,7 +143,7 @@ workflow share {
                     tss_bed = tss_bed_,
                     peak_set = peak_set_,
                     prefix = prefix,
-                    read_format = preprocess_tenx.tenx_barcode_complementation_out,
+                    read_format = select_first([read_format, preprocess_tenx.tenx_barcode_complementation_out]),
                     genome_name = genome_name_,
                     barcode_conversion_dict = barcode_mapping.tenx_barcode_conversion_dict,
                     pipeline_modality = pipeline_modality
