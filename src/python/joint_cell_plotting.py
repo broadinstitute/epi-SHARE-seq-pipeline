@@ -131,6 +131,26 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 
     plot.save(filename=plot_file, dpi=1000)
 
+def write_summary_csv(input_file, output_file): 
+    data = pd.read_csv(input_file)
+    neither_count = get_count_of_type(data, 'neither')
+    both_count = get_count_of_type(data, 'both')
+    rna_count = get_count_of_type(data, 'RNA only')
+    atac_count = get_count_of_type(data, 'ATAC only')
+    df_input = [{'neither': neither_count, 'both': both_count, 'RNA only': rna_count, 'ATAC only': atac_count}]
+    stats_df = pd.DataFrame(df_input)
+    stats_df.to_csv(output_file)
+
+def get_count_of_type(dataframe, classifier):
+    data_one_kind = dataframe.loc[dataframe['QC'] == classifier]
+    field = data_one_kind.at[data_one_kind.index[1], 'QC_count']
+    count = ""
+    for char in field: 
+        if char.isdigit():
+            count = count + char
+    return int(count)
+
+
 def main():
     # create log file
     logging.basicConfig(filename="joint_cell_plotting.log", level=logging.INFO)
@@ -147,6 +167,7 @@ def main():
     min_tss = getattr(args, "min_tss")
     min_frags = getattr(args, "min_frags")
     plot_file = getattr(args, "plot_file")
+    qc_summary_data = getattr(args, "qc_summary_data")
 
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
@@ -162,7 +183,9 @@ def main():
 
     # save dataframe
     logging.info("Saving dataframe as csv\n")
-    metrics_df.to_csv(barcode_metadata_file)
+    input_csv = metrics_df.to_csv(barcode_metadata_file)
+    write_summary_csv(input_csv, qc_summary_data)
+    
     logging.info("All done!")
 
 
