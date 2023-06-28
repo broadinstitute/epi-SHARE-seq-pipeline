@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
     parser.add_argument("plot_file", help="Filename for plot png file")
+    parser.add_argument("qc_summary_data", help="Filename for csv with numeric outputs of qc analysis")
     parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
     parser.add_argument("pkr", help="PKR name", nargs='?', default="")
 

@@ -49,7 +49,7 @@ task joint_qc_plotting {
 
     #add another return from the function/parameter to the python script that
     #is a file containing the metadata
-
+    String joint_barcode_stats = '${default="share-seq" prefix}.joint.barcode.stats.${genome_name}.csv'
     
     command {
         set -e
@@ -57,7 +57,7 @@ task joint_qc_plotting {
         bash $(which monitor_script.sh) > monitoring.log &
 
         # Make joint qc plot
-        python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${default="share-seq" prefix}
+        python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_stats} ${joint_barcode_metadata} ${default="share-seq" prefix}
 
         # Make joint density plot
         Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}
@@ -69,6 +69,7 @@ task joint_qc_plotting {
         File? joint_qc_plot = "${joint_qc_plot}"
         File? joint_density_plot = "${joint_density_plot}"
         File joint_barcode_metadata = "${joint_barcode_metadata}"
+        File? joint_barcode_stats = "${joint_barcode_stats}"
     }
 
     runtime {
