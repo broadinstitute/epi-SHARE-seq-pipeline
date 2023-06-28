@@ -183,8 +183,8 @@ def main():
 
     # save dataframe
     logging.info("Saving dataframe as csv\n")
-    input_csv = metrics_df.to_csv(barcode_metadata_file)
-    write_summary_csv(input_csv, qc_summary_data)
+    metrics_df.to_csv(barcode_metadata_file)
+    write_summary_csv(barcode_metadata_file, qc_summary_data)
     
     logging.info("All done!")
 
