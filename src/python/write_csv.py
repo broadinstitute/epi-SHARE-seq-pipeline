@@ -17,6 +17,9 @@ def main(output_file_name, names_list, numeric_list, image_list, log_list):
     if names_list is not None:
         with open(names_list, "r") as names_f: 
             names_array = names_f.read().splitlines()
+    names_array_clean = []
+    for name in names_array:
+        names_array_clean.append((name.split('/')[-1]))    
     
     # generate an array of the numeric data (represented by strings)
     if numeric_list is not None:
@@ -40,7 +43,7 @@ def main(output_file_name, names_list, numeric_list, image_list, log_list):
     # make a csv file with labels formated label, data
     for idx in range(len(names_array)):
         if idx < len(csv_values):
-            output_file.write(names_array[idx] + ", " + csv_values[idx] + "\n")
+            output_file.write(names_array_clean[idx] + ", " + csv_values[idx] + "\n")
         else: 
             output_file.write(names_array[idx] + ", " + "no matching value \n")
 

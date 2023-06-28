@@ -88,7 +88,7 @@ task html_report {
         echo $percent '/n' >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt output.txt log_list.txt ~{joint_barcode_stats}
         
-        python3 /software/write_csv.py ~{other_output_file} names_list.txt output.txt image_list.txt log_list.txt
+        python3 /software/write_csv.py ~{other_output_file} ~{third_output_file} output.txt image_list.txt log_list.txt
     >>>
     
     output {
