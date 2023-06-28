@@ -68,7 +68,9 @@ task qc_atac {
         ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
 
         if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} == "true" ]; then
+            echo '------ There is a conversion list ------' 1>&2
             if [ '~{subpool}' != "none" ]; then
+                echo '------ There is a subpool ------' 1>&2
                 awk -v subpool=~{subpool} -v OFS="\t" '{print $1"_"subpool,$2"_"subpool}' ~{barcode_conversion_dict} > temp_conversion
             else
                 cp ~{barcode_conversion_dict} > temp_conversion
@@ -77,7 +79,7 @@ task qc_atac {
         else
             cp ~{barcode_summary} temp_summary
         fi
-
+        echo '------ Filtering fragments ------' 1>&2
         time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz ) | bgzip -c > no-singleton.bed.gz
 
         tabix --zero-based --preset bed no-singleton.bed.gz
