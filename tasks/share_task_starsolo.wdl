@@ -26,6 +26,9 @@ task share_rna_align {
         
         File? placeholder
 
+        File parse_bc1 = "gs://fc-secure-0a879173-62d3-4c3a-8fc3-e35ee4248901/whitelists/parse/barcode-1_onlist_v2.txt"
+        File parse_bc23 = "gs://fc-secure-0a879173-62d3-4c3a-8fc3-e35ee4248901/whitelists/parse/barcode-23_onlist.txt"
+
         # Runtime parameters
         Int cpus = 16
         Float? disk_factor = 50.0
@@ -256,7 +259,7 @@ task share_rna_align {
            --soloCBmatchWLtype EditDist_2 \
            --soloCBposition 0_10_0_17 0_48_0_55 0_78_0_85 \
            --soloUMIposition 0_0_0_9 \
-           --soloCBwhitelist {input.inclusion_list}/CB23.txt {input.inclusion_list}/CB23.txt {input.inclusion_list}/CB1.txt \
+           --soloCBwhitelist ~{parse_bc23} ~{parse_bc23} ~{parse_bc1} \
            --soloStrand ~{parse_strand} \
            --soloFeatures ~{parse_gene_model} SJ \
            --soloMultiMappers Unique EM \
