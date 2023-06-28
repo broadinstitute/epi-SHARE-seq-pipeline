@@ -67,8 +67,8 @@ task qc_atac {
         ln -s ~{fragments} in.fragments.tsv.gz
         ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
 
-        if [[ ~{if defined(barcode_conversion_dict) then "true" else "false"} == "true"]]; then
-            if [[ '~{subpool}' != "none" ]]; then
+        if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} == "true" ]; then
+            if [ '~{subpool}' != "none" ]; then
                 awk -v subpool=~{subpool} -v OFS="\t" '{print $1"_"subpool,$2"_"subpool}' ~{barcode_conversion_dict} > temp_conversion
             else
                 cp ~{barcode_conversion_dict} > temp_conversion
