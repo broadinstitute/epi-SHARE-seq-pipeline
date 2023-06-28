@@ -41,7 +41,7 @@ def main(output_file_name, names_list, numeric_list, image_list, log_list):
     csv_values = numeric_array + image_array + log_array
     
     # make a csv file with labels formated label, data
-    for idx in range(len(names_array)):
+    for idx in range(len(names_array_clean)):
         if idx < len(csv_values):
             output_file.write(names_array_clean[idx] + ", " + csv_values[idx] + "\n")
         else: 
