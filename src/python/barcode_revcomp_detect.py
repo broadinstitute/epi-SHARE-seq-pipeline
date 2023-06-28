@@ -49,9 +49,9 @@ def bc_detect(fastq, whitelist, out, qc, offset, num_reads=100000, thresh=0.45):
         raise ValueError(f"Insufficient barcode match rate: {bc_match_prop}, {bcrc_match_prop}")
     with open(out, 'w') as f:
         if fc_chosen:
-            f.write(f"bc:0:-1\n")
+            f.write(f"bc:{offset}:-1\n")
         else:
-            f.write(f"bc:0:-1:-\n")
+            f.write(f"bc:{offset}:-1:-\n")
 
 try:
     fastq = sys.argv[1]

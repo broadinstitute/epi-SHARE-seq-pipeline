@@ -42,6 +42,9 @@ task mapping_tenx_barcodes {
             zcat ~{whitelist_atac} | tr ACGTacgt TGCAtgca | rev | paste -d '\t' - <(zcat ~{whitelist_rna}) > ~{barcode_conversion_dict}
             paste -d '\t' <(zcat ~{whitelist_atac}) <(zcat ~{whitelist_rna}) >> ~{barcode_conversion_dict}
         fi
+        # Fix for chromap.
+        awk -v OFS="\t" {print $2,$1} barcode_conversion_dict.csv > temp
+        mv temp ~{barcode_conversion_dict}
     >>>
 
     output {
