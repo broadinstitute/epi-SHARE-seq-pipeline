@@ -19,10 +19,12 @@ task qc_atac {
         File? barcode_summary
         File? peaks
         File? tss
+        File? barcode_conversion_dict
 
         Int? fragment_cutoff = 10
         String? genome_name
         String? prefix
+        String? subpool="none"
 
         # Runtime
         Int? cpus = 1
@@ -65,7 +67,18 @@ task qc_atac {
         ln -s ~{fragments} in.fragments.tsv.gz
         ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
 
-        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' ~{barcode_summary} <( zcat in.fragments.tsv.gz ) | bgzip -c > no-singleton.bed.gz
+        if [[ ~{if defined(barcode_conversion_dict) then "true" else "false"} == "true"]]; then
+            if [[ '~{subpool}' != "none" ]]; then
+                awk -v subpool=~{subpool} -v OFS="\t" '{print $1"_"subpool,$2"_"subpool}' ~{barcode_conversion_dict} > temp_conversion
+            else
+                cp ~{barcode_conversion_dict} > temp_conversion
+            fi
+            awk -v FS='[,|\t]' -v OFS=',' 'FNR==NR{map[$2]=$1; next}FNR==1{print $0}FNR>1 && map[$1] {print map[$1],$2,$3,$4,$5}' temp_conversion ~{barcode_summary} > temp_summary
+        else
+            cp ~{barcode_summary} temp_summary
+        fi
+
+        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz ) | bgzip -c > no-singleton.bed.gz
 
         tabix --zero-based --preset bed no-singleton.bed.gz
 

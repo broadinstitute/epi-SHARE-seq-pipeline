@@ -185,6 +185,8 @@ workflow wf_atac {
                 barcode_summary = align.atac_align_barcode_statistics,
                 peaks = peak_set,
                 tss = tss_bed,
+                subpool = subpool,
+                barcode_conversion_dict = barcode_conversion_dict,
                 fragment_cutoff = qc_fragment_cutoff,
                 genome_name = genome_name,
                 prefix = prefix,
