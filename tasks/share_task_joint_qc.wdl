@@ -47,6 +47,10 @@ task joint_qc_plotting {
     String joint_density_plot = '${default="share-seq" prefix}.${genome_name}.joint.density.plot.png'
     String joint_barcode_metadata = '${default="share-seq" prefix}.joint.barcode.metadata.${genome_name}.csv'
 
+    #add another return from the function/parameter to the python script that
+    #is a file containing the metadata
+
+    
     command {
         set -e
 
