@@ -79,11 +79,12 @@ task qc_atac {
         else
             cp ~{barcode_summary} temp_summary
         fi
+        echo '------ Number of barcodes BEFORE filtering------' 1>&2
         wc -l temp_summary
         echo '------ Filtering fragments ------' 1>&2
         time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz ) | bgzip -c > no-singleton.bed.gz
-        echo '------ Number of fragments after filtering------' 1>&2
-        zcat no-singleton.bed.gz | wc -l
+        echo '------ Number of barcodes AFTER filtering------' 1>&2
+        cat temp_summary | grep -v barcode | awk -v FS="," '($2-$3-$4-$5)>50' | wc -l
         tabix --zero-based --preset bed no-singleton.bed.gz
 
         # TSS enrichment stats
