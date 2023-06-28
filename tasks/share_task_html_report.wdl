@@ -42,7 +42,7 @@ task html_report {
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
-
+        File? joint_barcode_stats
 
     }
 
@@ -50,8 +50,6 @@ task html_report {
     # need to select from valid files since some are optional
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
-    String stuff = "push through changes"
-    File? joint_barcode_stats = share_task_joint_qc.joint_barcode_stats
 
     # new stuff im adding for the dictionary functionality
 

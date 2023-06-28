@@ -223,6 +223,7 @@ workflow share {
                 ## Links to files and logs to append to end of html
                 log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
         
+                joint_barcode_stats = joint_qc.joint_barcode_stats
         }
     
     
