@@ -99,7 +99,7 @@ workflow share {
                     fastq_barcode = fastq_barcode[0],
                     whitelist = select_first([whitelist_atac, whitelist_atac_]),
                     chemistry = chemistry,
-                    barcode_offset = barcode_offset,
+                    barcode_offset = atac_barcode_offset,
                     prefix = prefix
         }
         if ( chemistry == "10x_multiome" ){
