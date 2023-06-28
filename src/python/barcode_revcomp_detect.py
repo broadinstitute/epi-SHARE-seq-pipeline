@@ -55,19 +55,16 @@ def bc_detect(fastq, whitelist, out, qc, offset, num_reads=100000, thresh=0.45):
 
 try:
     fastq = sys.argv[1]
-    modality = sys.argv[2]
+    #10x = 0
+    #10x_multiome=8
+    offset = int(sys.argv[2])
     whitelist = sys.argv[3]
 
     qc = sys.argv[4]
     out = sys.argv[5]
     thres = sys.argv[6]
 
-    if modality == "10x":
-        offset = 0
-        bc_detect(fastq, whitelist, out, qc, offset, 100000, float(thres))
-    elif modality == "10x_multiome":
-        offset = 8
-        bc_detect(fastq, whitelist, out, qc, offset, 100000, float(thres))
+    bc_detect(fastq, whitelist, out, qc, offset, 100000, float(thres))
 
 except NameError:
     pass

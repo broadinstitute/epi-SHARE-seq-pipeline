@@ -91,6 +91,7 @@ def count_fragments_in_promoter(tabix_filename,
                              shape=(total_barcodes, 301))
 
     tabixfile = pysam.TabixFile(tabix_filename)
+    count_for_flush_to_disk = 0
     for tss in tss_list:
         # print(tss)
         # TSS example: ["chr", "start", "end", "strand"]
@@ -152,7 +153,10 @@ def count_fragments_in_promoter(tabix_filename,
                                         reads_in_promoter_counter,
                                         fragment_id,
                                         "end")
-                #count_matrix.flush()
+                count_for_flush_to_disk += 1
+                if count_for_flush_to_disk % 100000 == 0:
+                    count_matrix.flush()
+
         except ValueError:
             print(f"No reads found for {tss[0]}:{max(1,promoter_start)}-{promoter_end}.")
 

@@ -17,6 +17,7 @@ task preprocess_tenx {
         File fastq_barcode # Barcode fastq
         File? whitelist # Barcode whitelist (chemistry specific)
         Int? barcode_dist = 2
+        Int barcode_offset
         Float? threshold_pct_barcode_matching = 0.30
         String chemistry
         String? prefix
@@ -73,7 +74,7 @@ task preprocess_tenx {
         # auto-detect barcode complementation
         # python3 barcode_revcomp_detect.py barcode_fastq chemistry whitelist qc_out out threshold
 
-        python3 $(which barcode_revcomp_detect.py) ~{fastq_barcode} ~{chemistry} whitelist.txt ~{barcode_complementation_qc} ~{barcode_complementation_out} ~{threshold_pct_barcode_matching}
+        python3 $(which barcode_revcomp_detect.py) ~{fastq_barcode} ~{barcode_offset} whitelist.txt ~{barcode_complementation_qc} ~{barcode_complementation_out} ~{threshold_pct_barcode_matching}
 
         # barcode correction and filtering
         # python3 match_barcodes.py

@@ -39,6 +39,7 @@ workflow share {
         File? chrom_sizes
         File? atac_genome_index_tar
         File? tss_bed
+        Int atac_barcode_offset
         String? barcode_tag = "CB"
 
         #Int? cpus_atac
@@ -92,12 +93,13 @@ workflow share {
     File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
     File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
 
-    if ( chemistry != "shareseq" && process_atac) {
+    if ( chemistry != "shareseq" && chemistry != "parse" && process_atac) {
         call preprocess_tenx.preprocess_tenx as preprocess_tenx{
                 input:
                     fastq_barcode = fastq_barcode[0],
                     whitelist = select_first([whitelist_atac, whitelist_atac_]),
                     chemistry = chemistry,
+                    barcode_offset = barcode_offset,
                     prefix = prefix
         }
         if ( chemistry == "10x_multiome" ){
