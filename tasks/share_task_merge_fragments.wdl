@@ -27,7 +27,7 @@ task share_merge_fragments {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
-    String output_file = '${default='aggregated' prefix}.tsv.gz'
+    String output_file = '${default='aggregated' prefix}.fragments.tsv.gz'
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -35,7 +35,8 @@ task share_merge_fragments {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        cat ~{sep=' ' fragments} > ~{output_file}
+        # concatenate fragment files and resort
+        cat ~{sep=' ' fragments} | bgzip -dc | sort -k1 | bgzip -c > ~{output_file}
     >>>
 
     output {
