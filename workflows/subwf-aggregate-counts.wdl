@@ -5,7 +5,8 @@ import '../tasks/share_task_merge_fragments.wdl' as share_task_merge_fragments
 import '../tasks/share_task_merge_barcode_metadata.wdl' as share_task_merge_barcode_metadata
 import '../tasks/share_task_seurat.wdl' as share_task_seurat 
 import '../tasks/share_task_archr.wdl' as share_task_archr
-import "./subwf-find-dorcs.wdl" as find_dorcs
+import '../tasks/share_task_joint_qc.wdl' as share_task_joint_qc
+import './subwf-find-dorcs.wdl' as find_dorcs
 
 workflow aggregate_counts {
     meta {
@@ -54,6 +55,10 @@ workflow aggregate_counts {
 
         # ArchR inputs
         File? peak_set
+
+        # Joint QC inputs
+        Int? remove_low_yielding_cells = 10
+        String? joint_qc_docker_image
     }
 
     Boolean aggregate_rna = if length(tars) > 0 then true else false
@@ -137,6 +142,15 @@ workflow aggregate_counts {
     }
 
     if (aggregate_atac && aggregate_rna) {
+        call share_task_joint_qc.joint_qc_plotting as joint_qc {
+            input:
+                atac_barcode_metadata = merge_atac_barcode_metadata.barcode_metadata,
+                rna_barcode_metadata = merge_rna_barcode_metadata.barcode_metadata,
+                genome_name = genome_name_,
+                prefix = prefix,
+                docker_image = joint_qc_docker_image
+        }
+
         if (!merge_only) {
             call find_dorcs.wf_dorcs as dorcs {
                 input:
@@ -164,6 +178,8 @@ workflow aggregate_counts {
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_raw_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
+
+        File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
 
         File? dorcs_notebook_output = dorcs.dorcs_notebook_output
         File? dorcs_genes_summary = dorcs.dorcs_genes_summary
