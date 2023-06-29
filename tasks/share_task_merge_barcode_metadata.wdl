@@ -33,7 +33,7 @@ task share_merge_barcode_metadata {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
-    String output_file = '~{default='aggregated' prefix}.{modality}.barcode.metadata.tsv'
+    String output_file = '~{default='aggregated' prefix}.~{modality}.barcode.metadata.tsv'
     String concat_barcodes_option = if concat_barcodes then '--concat' else ''
     String monitor_log = 'monitor.log'
 
