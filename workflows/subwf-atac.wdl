@@ -179,40 +179,38 @@ workflow wf_atac {
         }
 
         call task_log_atac.log_atac as log_atac {
-        input:
-            barcode_log = align.atac_align_barcode_statistics
+            input:
+                barcode_log = align.atac_align_barcode_statistics
         }
 
-        if (  "~{pipeline_modality}" == "qc" ) {
-            call task_qc_atac.qc_atac as qc_atac{
-                input:
-                    fragments = align.atac_fragments,
-                    fragments_index = align.atac_fragments_index,
-                    barcode_summary = align.atac_align_barcode_statistics,
-                    peaks = peak_set,
-                    tss = tss_bed,
-                    subpool = subpool,
-                    barcode_conversion_dict = barcode_conversion_dict,
-                    fragment_cutoff = qc_fragment_cutoff,
-                    genome_name = genome_name,
-                    prefix = prefix,
-                    cpus = qc_cpus,
-                    disk_factor = qc_disk_factor,
-                    docker_image = qc_docker_image,
-                    memory_factor = qc_memory_factor
-            }
+        call task_qc_atac.qc_atac as qc_atac{
+            input:
+                fragments = align.atac_fragments,
+                fragments_index = align.atac_fragments_index,
+                barcode_summary = align.atac_align_barcode_statistics,
+                peaks = peak_set,
+                tss = tss_bed,
+                subpool = subpool,
+                barcode_conversion_dict = barcode_conversion_dict,
+                fragment_cutoff = qc_fragment_cutoff,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = qc_cpus,
+                disk_factor = qc_disk_factor,
+                docker_image = qc_docker_image,
+                memory_factor = qc_memory_factor
+         }
 
-            if (  "~{pipeline_modality}" == "full_archr" ) {
-                call share_task_archr.archr as archr{
-                    input:
-                        atac_frag = qc_atac.temp_frag,
-                        genome = genome_name,
-                        peak_set = peak_set,
-                        prefix = prefix,
-                        memory_factor = archr_memory_factor,
-                        disk_factor = archr_disk_factor,
-                        docker_image = archr_docker_image
-                }
+        if (  "~{pipeline_modality}" == "full" ) {
+            call share_task_archr.archr as archr{
+                input:
+                    atac_frag = qc_atac.temp_frag,
+                    genome = genome_name,
+                    peak_set = peak_set,
+                    prefix = prefix,
+                    memory_factor = archr_memory_factor,
+                    disk_factor = archr_disk_factor,
+                    docker_image = archr_docker_image
             }
         }
     }

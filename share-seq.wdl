@@ -168,7 +168,7 @@ workflow share {
                 }
             }
             
-            if ( pipeline_modality == "qc_atac" ) {
+            if ( pipeline_modality != "no_align" ) {
                 call joint_qc.joint_qc_plotting as joint_qc {
                     input:
                         atac_barcode_metadata = atac.share_atac_barcode_metadata,
@@ -180,7 +180,7 @@ workflow share {
         }
     }
 
-    if ( pipeline_modality == "qc_atac" ) {
+    if ( pipeline_modality != "no_align" ) {
         call html_report.html_report as html_report {
             input:
                 prefix = prefix,
