@@ -54,12 +54,12 @@ task html_report {
     # new stuff im adding for the dictionary functionality
 
     # try to implicity coerce them all to strings here 
-    String other_output_file = "${default="share-seq-data" prefix}.txt"
+    String other_output_file = "${default="share-seq-data" prefix}.csv"
     String names_for_csv = "${default="share-seq-data" prefix}names.txt"
     String images_for_csv = "${default="share-seq-data" prefix}images.txt"
     String logs_for_csv = "${default="share-seq-data" prefix}logs.txt"
     #issue with this line at the moment, commenting it out to see if hard coded numbers are ok
-    Array[String] names_of_data = ['atac_total_reads', 'atac_aligned_uniquely','atac_unaligned', 'atac_feature_reads','atac_duplicate_reads','atac_nrf','atac_pbc1','atac_pbc2','atac_percent_duplicates','rna_total_reads','rna_aligned_uniquely','rna_aligned_multimap','rna_unaligned','rna_feature_reads','rna_duplicate_reads', 'joint_qc_plot', 'joint_density_plot', 'share_rna_umi_barcode_rank_plot', 'share_rna_gene_barcode_rank_plot', 'share_rna_gene_umi_scatter_plot', 'share_rna_seurat_raw_violin_plot', 'share_rna_seurat_raw_qc_scatter_plot', 'share_rna_seurat_filtered_violin_plot', 'share_rna_seurat_filtered_qc_scatter_plot', 'share_rna_seurat_variable_genes_plot', 'share_rna_seurat_PCA_dim_loadings_plot', 'share_rna_seurat_PCA_plot', 'share_rna_seurat_heatmap_plot', 'share_rna_seurat_jackstraw_plot', 'share_rna_seurat_elbow_plot', 'share_rna_seurat_umap_cluster_plot', 'share_rna_seurat_umap_rna_count_plot', 'share_rna_seurat_umap_gene_count_plot', 'share_rna_seurat_umap_mito_plot', 'share_atac_qc_barcode_rank_plot', 'share_atac_qc_hist_plot', 'share_atac_qc_tss_enrichment', 'share_atac_archr_raw_tss_enrichment', 'share_atac_archr_filtered_tss_enrichment', 'share_atac_archr_raw_fragment_size_plot', 'share_atac_archr_filtered_fragment_size_plot', 'share_atac_archr_umap_cluster', 'share_atac_archr_umap_num_frags_plot', 'share_atac_archr_umap_tss_score_plot', 'share_atac_archr_umap_frip_plot', 'share_atac_archr_raw_tss_by_unique_frags', 'share_atac_archr_filtered_tss_by_unique_frags', 'share_atac_archr_unfiltered_tss_by_unique_frags', 'share_atac_archr_filtered_tss_by_unique_frags','share_atac_archr_umap_cluster_plot', 'share_atac_archr_strict_umap_num_frags_plot', 'share_atac_archr_strict_umap_tss_score_plot', 'share_atac_archr_strict_umap_frip_plot', 'share_rna_alignment_log',  'share_task_starsolo_barcodes_stats', 'share_task_starsolo_features_stats', 'share_task_starsolo_summary_csv', 'share_task_starsolo_umi_per_cell', 'share_task_starsolo_raw_tar','share_rna_seurat_notebook_log', 'share_atac_alignment_log', 'share_atac_archr_notebook_log', 'dorcs_notebook_log']
+    Array[String] names_of_data = ['atac_total_reads', 'atac_aligned_uniquely','atac_unaligned', 'atac_feature_reads','atac_duplicate_reads', 'atac_percent_duplicates', 'atac_nrf','atac_pbc1','atac_pbc2', 'rna_total_reads','rna_aligned_uniquely','rna_aligned_multimap','rna_unaligned','rna_feature_reads','rna_duplicate_reads', 'rna_percent_duplicate', 'joint_qc_plot', 'joint_density_plot', 'share_rna_umi_barcode_rank_plot', 'share_rna_gene_barcode_rank_plot', 'share_rna_gene_umi_scatter_plot', 'share_rna_seurat_raw_violin_plot', 'share_rna_seurat_raw_qc_scatter_plot', 'share_rna_seurat_filtered_violin_plot', 'share_rna_seurat_filtered_qc_scatter_plot', 'share_rna_seurat_variable_genes_plot', 'share_rna_seurat_PCA_dim_loadings_plot', 'share_rna_seurat_PCA_plot', 'share_rna_seurat_heatmap_plot', 'share_rna_seurat_jackstraw_plot', 'share_rna_seurat_elbow_plot', 'share_rna_seurat_umap_cluster_plot', 'share_rna_seurat_umap_rna_count_plot', 'share_rna_seurat_umap_gene_count_plot', 'share_rna_seurat_umap_mito_plot', 'share_atac_qc_barcode_rank_plot', 'share_atac_qc_hist_plot', 'share_atac_qc_tss_enrichment', 'share_atac_archr_raw_tss_enrichment', 'share_atac_archr_filtered_tss_enrichment', 'share_atac_archr_raw_fragment_size_plot', 'share_atac_archr_filtered_fragment_size_plot', 'share_atac_archr_umap_cluster', 'share_atac_archr_umap_num_frags_plot', 'share_atac_archr_umap_tss_score_plot', 'share_atac_archr_umap_frip_plot', 'share_atac_archr_raw_tss_by_unique_frags', 'share_atac_archr_filtered_tss_by_unique_frags', 'share_atac_archr_unfiltered_tss_by_unique_frags', 'share_atac_archr_filtered_tss_by_unique_frags','share_atac_archr_umap_cluster_plot', 'share_atac_archr_strict_umap_num_frags_plot', 'share_atac_archr_strict_umap_tss_score_plot', 'share_atac_archr_strict_umap_frip_plot', 'share_rna_alignment_log',  'share_task_starsolo_barcodes_stats', 'share_task_starsolo_features_stats', 'share_task_starsolo_summary_csv', 'share_task_starsolo_umi_per_cell', 'share_task_starsolo_raw_tar','share_rna_seurat_notebook_log', 'share_atac_alignment_log', 'share_atac_archr_notebook_log', 'dorcs_notebook_log']
     Array[String] names_numeric_fields = ['atac_total_reads', 'atac_aligned_uniquely','atac_unaligned', 'atac_feature_reads','atac_duplicate_reads','atac_nrf','atac_pbc1','atac_pbc2','atac_percent_duplicates','rna_total_reads','rna_aligned_uniquely','rna_aligned_multimap','rna_unaligned','rna_feature_reads','rna_duplicate_reads']
     command <<<
 
@@ -71,23 +71,23 @@ task html_report {
         echo "~{sep="\n" valid_log_files}" >> ~{names_for_csv}
 
         
-        echo ~{atac_total_reads} '\n' >> output.txt
-        echo ~{atac_aligned_uniquely} '\n' >> output.txt
-        echo ~{atac_unaligned} '\n' >> output.txt
-        echo ~{atac_feature_reads} '\n' >> output.txt
-        echo ~{atac_duplicate_reads} '\n' >> output.txt
-        echo ~{atac_percent_duplicates} '\n' >> output.txt
-        echo ~{atac_nrf} '\n' >> output.txt
-        echo ~{atac_pbc1} '\n' >> output.txt
-        echo ~{atac_pbc2} '\n' >> output.txt
-        echo ~{rna_total_reads} '\n' >> output.txt
-        echo ~{rna_aligned_uniquely} '\n' >> output.txt
-        echo ~{rna_aligned_multimap} '\n' >> output.txt
-        echo ~{rna_unaligned} '\n' >> output.txt
-        echo ~{rna_feature_reads} '\n' >> output.txt
-        echo ~{rna_duplicate_reads} '\n' >> output.txt
+        echo ~{atac_total_reads} >> output.txt
+        echo ~{atac_aligned_uniquely} >> output.txt
+        echo ~{atac_unaligned} >> output.txt
+        echo ~{atac_feature_reads} >> output.txt
+        echo ~{atac_duplicate_reads} >> output.txt
+        echo ~{atac_percent_duplicates} >> output.txt
+        echo ~{atac_nrf} >> output.txt
+        echo ~{atac_pbc1} >> output.txt
+        echo ~{atac_pbc2} >> output.txt
+        echo ~{rna_total_reads} >> output.txt
+        echo ~{rna_aligned_uniquely} >> output.txt
+        echo ~{rna_aligned_multimap} >> output.txt
+        echo ~{rna_unaligned} >> output.txt
+        echo ~{rna_feature_reads} >> output.txt
+        echo ~{rna_duplicate_reads} >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-        echo $percent '\n' >> output.txt
+        echo $percent >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} ~{images_for_csv} output.txt ~{logs_for_csv} ~{joint_barcode_stats}
         
         python3 /software/write_csv.py ~{other_output_file} ~{names_for_csv} output.txt ~{images_for_csv} ~{logs_for_csv}
