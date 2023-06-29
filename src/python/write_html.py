@@ -159,7 +159,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
 
     stats_names_list = ["Total reads", "Aligned uniquely", "Unaligned", "Unique Reads", "Duplicate Reads", "Percent Duplicates", "NRF=Distinct/Total", "PBC1=OnePair/Distinct", "PBC2=OnePair/TwoPair", "Total reads", "Aligned uniquely", "Aligned multimap", "Unaligned", "Filtered (feature) Reads", "Duplicate Reads", "Percent Duplicates"]
     with open(stats_info) as stats_f:
-        stats_list = stats_f.read().split('/n')
+        stats_list = stats_f.read().splitlines()
     rna_aligned = stats_list[10]
     rna_duplication_percent = stats_list[15]
     
@@ -190,7 +190,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
     
     # writes summary statistics (eventually should be moved to own tab and 
     # and not hard coded)
-    write_stats_from_csv(qc_stats_file, output_file)
+    write_stats_from_csv(qc_stats_file, output_file, rna_aligned, rna_duplication_percent)
     
     #write images to far left of summary tab 
     write_pngs_column(top_level_left)

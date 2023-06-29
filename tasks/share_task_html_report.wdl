@@ -71,23 +71,23 @@ task html_report {
         echo "~{sep="\n" valid_log_files}" >> ~{names_for_csv}
 
         
-        echo ~{atac_total_reads} '/n' >> output.txt
-        echo ~{atac_aligned_uniquely} '/n' >> output.txt
-        echo ~{atac_unaligned} '/n' >> output.txt
-        echo ~{atac_feature_reads} '/n' >> output.txt
-        echo ~{atac_duplicate_reads} '/n' >> output.txt
-        echo ~{atac_percent_duplicates} '/n' >> output.txt
-        echo ~{atac_nrf} '/n' >> output.txt
-        echo ~{atac_pbc1} '/n' >> output.txt
-        echo ~{atac_pbc2} '/n' >> output.txt
-        echo ~{rna_total_reads} '/n' >> output.txt
-        echo ~{rna_aligned_uniquely} '/n' >> output.txt
-        echo ~{rna_aligned_multimap} '/n' >> output.txt
-        echo ~{rna_unaligned} '/n' >> output.txt
-        echo ~{rna_feature_reads} '/n' >> output.txt
-        echo ~{rna_duplicate_reads} '/n' >> output.txt
+        echo ~{atac_total_reads} '\n' >> output.txt
+        echo ~{atac_aligned_uniquely} '\n' >> output.txt
+        echo ~{atac_unaligned} '\n' >> output.txt
+        echo ~{atac_feature_reads} '\n' >> output.txt
+        echo ~{atac_duplicate_reads} '\n' >> output.txt
+        echo ~{atac_percent_duplicates} '\n' >> output.txt
+        echo ~{atac_nrf} '\n' >> output.txt
+        echo ~{atac_pbc1} '\n' >> output.txt
+        echo ~{atac_pbc2} '\n' >> output.txt
+        echo ~{rna_total_reads} '\n' >> output.txt
+        echo ~{rna_aligned_uniquely} '\n' >> output.txt
+        echo ~{rna_aligned_multimap} '\n' >> output.txt
+        echo ~{rna_unaligned} '\n' >> output.txt
+        echo ~{rna_feature_reads} '\n' >> output.txt
+        echo ~{rna_duplicate_reads} '\n' >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-        echo $percent '/n' >> output.txt
+        echo $percent '\n' >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} ~{images_for_csv} output.txt ~{logs_for_csv} ~{joint_barcode_stats}
         
         python3 /software/write_csv.py ~{other_output_file} ~{names_for_csv} output.txt ~{images_for_csv} ~{logs_for_csv}
