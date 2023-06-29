@@ -183,7 +183,7 @@ workflow wf_atac {
             barcode_log = align.atac_align_barcode_statistics
         }
 
-        if (  "~{pipeline_modality}" == "full" ) {
+        if (  "~{pipeline_modality}" == "qc" ) {
             call task_qc_atac.qc_atac as qc_atac{
                 input:
                     fragments = align.atac_fragments,
@@ -202,15 +202,17 @@ workflow wf_atac {
                     memory_factor = qc_memory_factor
             }
 
-            call share_task_archr.archr as archr{
-                input:
-                    atac_frag = qc_atac.temp_frag,
-                    genome = genome_name,
-                    peak_set = peak_set,
-                    prefix = prefix,
-                    memory_factor = archr_memory_factor,
-                    disk_factor = archr_disk_factor,
-                    docker_image = archr_docker_image
+            if (  "~{pipeline_modality}" == "full_archr" ) {
+                call share_task_archr.archr as archr{
+                    input:
+                        atac_frag = qc_atac.temp_frag,
+                        genome = genome_name,
+                        peak_set = peak_set,
+                        prefix = prefix,
+                        memory_factor = archr_memory_factor,
+                        disk_factor = archr_disk_factor,
+                        docker_image = archr_docker_image
+                }
             }
         }
     }
