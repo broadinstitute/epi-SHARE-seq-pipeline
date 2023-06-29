@@ -2,6 +2,7 @@ version 1.0
 
 import '../tasks/share_task_merge_h5.wdl' as share_task_merge_h5
 import '../tasks/share_task_merge_fragments.wdl' as share_task_merge_fragments
+import '../tasks/share_task_merge_barcode_metadata.wdl' as share_task_merge_barcode_metadata
 import '../tasks/share_task_seurat.wdl' as share_task_seurat 
 import '../tasks/share_task_archr.wdl' as share_task_archr
 import "./subwf-find-dorcs.wdl" as find_dorcs
@@ -29,6 +30,18 @@ workflow aggregate_counts {
         Float? merge_h5_memory_factor
         String? merge_h5_docker_image
 
+        # ATAC aggregation inputs
+        Array[File] fragments
+        Float? merge_fragments_disk_factor
+        String? merge_fragments_docker_image
+
+        # Merge barcode metadata inputs
+        Array[File] rna_barcode_metadata
+        Array[File] atac_barcode_metadata
+        Float? merge_barcode_metadata_disk_factor
+        Float? merge_barcode_metadata_memory_factor
+        String? merge_barcode_metadata_docker_image
+
         # Seurat inputs 
         Int? seurat_min_features
         Float? seurat_percent_mt
@@ -38,11 +51,6 @@ workflow aggregate_counts {
         Float? seurat_disk_factor
         Float? seurat_memory_factor
         String? seurat_docker_image
-
-        # ATAC aggregation inputs
-        Array[File] fragments
-        Float? merge_fragments_disk_factor
-        String? merge_fragments_docker_image
 
         # ArchR inputs
         File? peak_set
@@ -67,6 +75,18 @@ workflow aggregate_counts {
                 memory_factor = merge_h5_memory_factor,
                 docker_image = merge_h5_docker_image
         }
+
+        call share_task_merge_barcode_metadata.share_merge_barcode_metadata as merge_rna_barcode_metadata {
+            input:
+                barcode_metadata = rna_barcode_metadata,
+                modality = 'RNA',
+                prefix = prefix,
+                concat_barcodes = concat_barcodes,
+                disk_factor = merge_barcode_metadata_disk_factor,
+                memory_factor = merge_barcode_metadata_memory_factor,
+                docker_image = merge_barcode_metadata_docker_image
+        }
+
         if (!merge_only) {
             call share_task_seurat.seurat as seurat {
                 input:
@@ -93,6 +113,18 @@ workflow aggregate_counts {
                 disk_factor = merge_fragments_disk_factor,
                 docker_image = merge_fragments_docker_image
         }
+
+        call share_task_merge_barcode_metadata.share_merge_barcode_metadata as merge_atac_barcode_metadata {
+            input:
+                barcode_metadata = atac_barcode_metadata,
+                modality = 'ATAC',
+                prefix = prefix,
+                concat_barcodes = concat_barcodes,
+                disk_factor = merge_barcode_metadata_disk_factor,
+                memory_factor = merge_barcode_metadata_memory_factor,
+                docker_image = merge_barcode_metadata_docker_image
+        }
+
         if (!merge_only) {
             call share_task_archr.archr as archr {
                 input:
@@ -106,7 +138,7 @@ workflow aggregate_counts {
 
     if (aggregate_atac && aggregate_rna) {
         if (!merge_only) {
-            call find_dorcs.wf_dorcs as dorcs{
+            call find_dorcs.wf_dorcs as dorcs {
                 input:
                     rna_matrix = merge_h5.h5_matrix,
                     atac_fragments = merge_fragments.fragments,
@@ -119,12 +151,14 @@ workflow aggregate_counts {
 
     output {
         File? aggregated_h5 = merge_h5.h5_matrix
+        File? aggreated_rna_barcode_metadata = merge_rna_barcode_metadata.barcode_metadata
         
+        File? aggregated_fragments = merge_fragments.fragments
+        File? aggregated_atac_barcode_metadata = merge_atac_barcode_metadata.barcode_metadata
+
         File? share_rna_seurat_notebook_output = seurat.notebook_output
         File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
-
-        File? aggregated_fragments = merge_fragments.fragments
 
         File? share_atac_archr_notebook_output = archr.notebook_output
         File? share_atac_archr_arrow = archr.archr_arrow
