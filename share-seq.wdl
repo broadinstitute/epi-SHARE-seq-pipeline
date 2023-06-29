@@ -180,7 +180,7 @@ workflow share {
         }
     }
 
-    if ( pipeline_modality != "no_align" ) {
+    if ( pipeline_modality == "qc_atac" ) {
         call html_report.html_report as html_report {
             input:
                 prefix = prefix,
