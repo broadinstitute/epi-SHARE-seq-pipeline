@@ -269,8 +269,10 @@ workflow share {
         # csv output
         File? csv_summary = html_report.csv_report_file
     
-        #names for csv
+        # Inputs to write html report script 
         File? names_for_csv = html_report.csv_report_names
+        File? images_for_csv = html_report.csv_report_images
+        File? logs_for_csv = html_report.csv_report_logs
         
         #output params needed to run the r script
     }
