@@ -168,7 +168,7 @@ workflow share {
                 }
             }
             
-            if ( pipeline_modality != "no_align" ) {
+            if ( pipeline_modality == "qc_atac" ) {
                 call joint_qc.joint_qc_plotting as joint_qc {
                     input:
                         atac_barcode_metadata = atac.share_atac_barcode_metadata,
