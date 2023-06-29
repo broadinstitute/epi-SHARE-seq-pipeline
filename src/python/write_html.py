@@ -54,7 +54,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
                 outfile.write("<tr> <td>" + txt[index] + "</td> <td>No matching number</td> </tr>")
         outfile.write("</table>")
         
-    def write_stats_from_csv(qc_stats_file, outfile):
+    def write_stats_from_csv(qc_stats_file, outfile, aligned, duplicate):
         csv_stats = []
         with open(qc_stats_file, mode='r') as stats_file: 
             stats_reader = csv.reader(stats_file)
@@ -64,9 +64,9 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
         #order of values is neither, both, rna, atac 
         stats_values.pop(0)
         total_cells = int(stats_values[1]) + int(stats_values[2]) + int(stats_values[3])
-        output_file.write("<center> <span style='font-size: 50;'>" + str(total_cells) + " cells </span> <br> <br>")
-        output_file.write("<span style='font-size: 30;'> " + stats_values[1] + " both " + stats_values[2] + " RNA " + stats_values[3] + " ATAC </span> <br> <br>")
-        output_file.write("<span style='font-size: 25;'> RNA:   / 346,626,836 aligned (43% dup) TODO: this still hard coded, find numbers and make available </span> </center>")
+        outfile.write("<center> <span style='font-size: 50;'>" + str(total_cells) + " cells </span> <br> <br>")
+        outfile.write("<span style='font-size: 30;'> " + stats_values[1] + " both " + stats_values[2] + " RNA " + stats_values[3] + " ATAC </span> <br> <br>")
+        outfile.write("<span style='font-size: 25;'> RNA:   / " +  aligned + " ( " + duplicate + "% dup) </span> </center>")
         #utfile.write(stats_names)
         #outfile.write(stats_values)
     
@@ -157,6 +157,12 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
     output_file.write('<div class="tab content1">')
     
 
+    stats_names_list = ["Total reads", "Aligned uniquely", "Unaligned", "Unique Reads", "Duplicate Reads", "Percent Duplicates", "NRF=Distinct/Total", "PBC1=OnePair/Distinct", "PBC2=OnePair/TwoPair", "Total reads", "Aligned uniquely", "Aligned multimap", "Unaligned", "Filtered (feature) Reads", "Duplicate Reads", "Percent Duplicates"]
+    with open(stats_info) as stats_f:
+        stats_list = stats_f.read().split('/n')
+    rna_aligned = stats_list[10]
+    rna_duplication_percent = stats_list[15]
+    
     # loop through images in image list and encode
     output_file.write('<br>')
     with open(image_file_list) as fname:
@@ -164,14 +170,14 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
 
     atac_plot_indices = range(19, len(images))
     rna_plots_indices = range(2, 19)
-    top_level_indices = [0, 1, 17, 24, 26, 29]
+    #top_level_indices = [0, 1, 17, 24, 26, 29]
     top_level_left_indices = [0, 1]
     top_level_middle_indices = [17, 24]
     top_level_right_indices = [26, 29]
     
     atac_plots = [images[i] for i in atac_plot_indices]
     rna_plots = [images[i] for i in rna_plots_indices]
-    top_level = [images[i] for i in top_level_indices]
+    #top_level = [images[i] for i in top_level_indices]
     top_level_left = [images[i] for i in top_level_left_indices]
     top_level_middle = [images[i] for i in top_level_middle_indices]
     top_level_right = [images[i] for i in top_level_right_indices]
@@ -217,9 +223,6 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
     output_file.write("</div>")
 
     #write to summary stats tab
-    stats_names_list = ["Total reads", "Aligned uniquely", "Unaligned", "Unique Reads", "Duplicate Reads", "Percent Duplicates", "NRF=Distinct/Total", "PBC1=OnePair/Distinct", "PBC2=OnePair/TwoPair", "Total reads", "Aligned uniquely", "Aligned multimap", "Unaligned", "Filtered (feature) Reads", "Duplicate Reads", "Percent Duplicates"]
-    with open(stats_info) as stats_f:
-        stats_list = stats_f.read().split('/n')
     output_file.write('<div class="tab content4">') 
     write_summary_table(stats_names_list, stats_list, output_file)
     output_file.write("</div>")
