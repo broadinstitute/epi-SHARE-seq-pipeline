@@ -84,7 +84,7 @@ task qc_atac {
         wc -l temp_summary
 
         echo '------ Filtering fragments ------' 1>&2
-        time pigz -p ~{cpus} -d -c in.fragments.tsv.gz | -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary  | bgzip -l 5 -@ ~{cpus} -c > no-singleton.bed.gz
+        time pigz -p ~{cpus} -d -c in.fragments.tsv.gz | awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary  | bgzip -l 5 -@ ~{cpus} -c > no-singleton.bed.gz
         
         echo '------ Number of barcodes AFTER filtering------' 1>&2
         cat temp_summary | grep -v barcode | awk -v FS="," '($2-$3-$4-$5)>50' | wc -l
