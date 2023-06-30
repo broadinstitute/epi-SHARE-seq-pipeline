@@ -116,22 +116,30 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
                     color = "QC")
              + theme_light()
              + theme(figure_size = (8,6),
-                     title = element_text(size=12),
-                     axis_title = element_text(size=10),
-                     axis_text = element_text(size=8),
                      legend_box_margin = 0,
-                     legend_title = element_text(size=8),
-                     legend_text = element_text(size=6),
                      legend_key = element_blank(),
                      plot_caption=element_text(size=8, ha="center", margin={"r": 3.2, "t": -0.2, "units": "in"}),
                      panel_grid_minor = element_blank())
+             
+            + theme(title = element_text(hjust = 0.5),
+                    panel_border = element_blank(), 
+                    panel_grid_major = element_blank(), 
+                    panel_gridz_minor = element_blank(), 
+                    axis_line = element_line(colour = "black"))+              
+            + theme(axis_title=element_text(size=14), 
+                    axis_text=element_text(size=10), 
+                    legend_title=element_text(size=14), 
+                    legend_text=element_text(size=10))
+             
              + scale_x_log10(limits=(10,xy_lim), labels=label_func)
              + scale_y_log10(limits=(10,xy_lim), labels=label_func)
+             + scale_color_viridis_b()
              )
 
     plot.save(filename=plot_file, dpi=1000)
 
-def write_summary_csv(input_file, output_file): 
+# write information for the top level page (counts of reads) to a csv
+def write_top_level_csv(input_file, output_file): 
     data = pd.read_csv(input_file)
     neither_count = get_count_of_type(data, 'neither')
     both_count = get_count_of_type(data, 'both')
@@ -141,10 +149,13 @@ def write_summary_csv(input_file, output_file):
     stats_df = pd.DataFrame(df_input)
     stats_df.to_csv(output_file)
 
+# extract the count information from the QC column for a given category (both,
+# neither, rna only, atac only)
 def get_count_of_type(dataframe, classifier):
     data_one_kind = dataframe.loc[dataframe['QC'] == classifier]
     field = data_one_kind.at[data_one_kind.index[1], 'QC_count']
     count = ""
+    # extract the digits from other characters in the string
     for char in field: 
         if char.isdigit():
             count = count + char
@@ -184,7 +195,9 @@ def main():
     # save dataframe
     logging.info("Saving dataframe as csv\n")
     metrics_df.to_csv(barcode_metadata_file)
-    write_summary_csv(barcode_metadata_file, qc_summary_data)
+    
+    # write the stats for the top level into a csv
+    write_top_level_csv(barcode_metadata_file, qc_summary_data)
     
     logging.info("All done!")
 
