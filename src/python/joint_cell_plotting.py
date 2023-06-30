@@ -116,24 +116,17 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
                     color = "QC")
              + theme_light()
              + theme(figure_size = (8,6),
+                     title = element_text(size=12),
+                     axis_title = element_text(size=10),
+                     axis_text = element_text(size=8),
                      legend_box_margin = 0,
+                     legend_title = element_text(size=8),
+                     legend_text = element_text(size=6),
                      legend_key = element_blank(),
                      plot_caption=element_text(size=8, ha="center", margin={"r": 3.2, "t": -0.2, "units": "in"}),
                      panel_grid_minor = element_blank())
-             
-            + theme(title = element_text(hjust = 0.5),
-                    panel_border = element_blank(), 
-                    panel_grid_major = element_blank(), 
-                    panel_gridz_minor = element_blank(), 
-                    axis_line = element_line(colour = "black"))+              
-            + theme(axis_title=element_text(size=14), 
-                    axis_text=element_text(size=10), 
-                    legend_title=element_text(size=14), 
-                    legend_text=element_text(size=10))
-             
              + scale_x_log10(limits=(10,xy_lim), labels=label_func)
              + scale_y_log10(limits=(10,xy_lim), labels=label_func)
-             + scale_color_viridis_b()
              )
 
     plot.save(filename=plot_file, dpi=1000)

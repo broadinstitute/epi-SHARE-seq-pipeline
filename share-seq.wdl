@@ -274,6 +274,10 @@ workflow share {
         # File? images_for_csv = html_report.csv_report_images
         # File? logs_for_csv = html_report.csv_report_logs
         
+        # inputs to joint calling py script
+        File? rna_barcode_metadata = joint_qc.rna_barcode_metadata
+        File? atac_barcode_metadata = joint_qc.rna_barcode_metadata
+    
     }
 
 }
