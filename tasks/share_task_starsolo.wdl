@@ -266,7 +266,7 @@ task share_rna_align {
            --limitBAMsortRAM 31232551044 \
            --outFileNamePrefix result/
 
-           feature_type = ~{parse_gene_model}
+           feature_type='~{parse_gene_model}'
         fi
 
         # tar and gzip barcodes, features, and matrix files
