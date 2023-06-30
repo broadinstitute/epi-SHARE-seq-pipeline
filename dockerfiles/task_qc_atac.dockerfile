@@ -15,6 +15,7 @@ LABEL software.task="qc-atac"
 RUN apt-get update && apt-get install -y \
     gcc \
     git \
+    pigz \
     python3 \
     python3-dev \
     python3-pip \

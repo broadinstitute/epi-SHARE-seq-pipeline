@@ -27,7 +27,7 @@ task qc_atac {
         String? subpool="none"
 
         # Runtime
-        Int? cpus = 1
+        Int? cpus = 4
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
@@ -84,7 +84,7 @@ task qc_atac {
         wc -l temp_summary
 
         echo '------ Filtering fragments ------' 1>&2
-        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz ) | bgzip -c > no-singleton.bed.gz
+        time pigz -p ~{cpus} -d -c in.fragments.tsv.gz | -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary  | bgzip -l 5 -@ ~{cpus} -c > no-singleton.bed.gz
         
         echo '------ Number of barcodes AFTER filtering------' 1>&2
         cat temp_summary | grep -v barcode | awk -v FS="," '($2-$3-$4-$5)>50' | wc -l
