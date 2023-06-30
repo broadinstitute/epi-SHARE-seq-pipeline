@@ -84,7 +84,7 @@ task qc_atac {
         wc -l temp_summary
 
         echo '------ Filtering fragments ------' 1>&2
-        time pigz -p ~{cpus} -d -c in.fragments.tsv.gz | awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary  | bgzip -l 5 -@ ~{cpus} -c > no-singleton.bed.gz
+        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz )  | bgzip -l 5 -@ ~{cpus} -c > no-singleton.bed.gz
         
         echo '------ Number of barcodes AFTER filtering------' 1>&2
         cat temp_summary | grep -v barcode | awk -v FS="," -v threshold=~{fragment_cutoff} '($2-$3-$4-$5)>threshold' | wc -l
@@ -135,6 +135,8 @@ task qc_atac {
         File atac_qc_final_hist = hist_log
 
         File temp_frag = "no-singleton.bed.gz"
+        
+        File temp_summary = "temp_summary"
 
         File atac_qc_tss_enrichment_barcode_stats = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
         File atac_qc_tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
