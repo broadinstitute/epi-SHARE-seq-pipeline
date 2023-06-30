@@ -38,7 +38,7 @@ task qc_atac {
     Float input_file_size_gb = size(fragments, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 24.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 32.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
     Int disk_gb = round(100.0 + disk_factor * input_file_size_gb)
