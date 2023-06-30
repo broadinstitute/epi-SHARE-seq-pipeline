@@ -226,7 +226,7 @@ task share_rna_align {
             feature_type='Gene'
             # TODO: add the final case in which none of the above is passed.
         # PARSE
-        elif [ '~{chemistry}' == 'parse']; then
+        elif [ '~{chemistry}' == 'parse' ]; then
 
             STAR --genomeDir ./ \
            --readFilesIn $read_files \
