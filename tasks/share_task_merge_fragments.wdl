@@ -36,8 +36,8 @@ task share_merge_fragments {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        # concatenate fragment files, merge sort
-        cat ~{sep=' ' fragments} | gunzip -c | sort -m -k1,1 -k2,2n | bgzip -c -@ 4 > ~{output_file}
+        # concatenate fragment files, sort, bgzip
+        cat ~{sep=' ' fragments} | gunzip -c | sort -k1,1 -k2,2n | bgzip -c -@ 4 > ~{output_file}
         
         # tabix index
         tabix --zero-based -p bed ~{output_file} 
