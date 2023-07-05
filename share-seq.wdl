@@ -90,7 +90,7 @@ workflow share {
     File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
     File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
 
-    if ( chemistry != "shareseq" && process_atac) {
+    if ( chemistry != "shareseq" && process_atac && trim_fastqs) {
         scatter (idx in range(length(read1_atac))) {
             call preprocess_tenx.preprocess_tenx as preprocess_tenx{
                     input:
