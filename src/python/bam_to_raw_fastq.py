@@ -141,12 +141,12 @@ def write_fastqs(bam_file, read_1_pointers, read_2_pointers, r1_barcode_subset_d
                     
                 # increment QC counter
                 if r1_barcode:
-                    if r1_barcode == "G"*8:
-                        poly_g_barcode += 1
-                    elif exact:
+                    if exact:
                         exact_match += 1
-                    elif not exact:
+                    else:
                         nonexact_match += 1
+                elif "G"*8 in r1_barcode_window:
+                    poly_g_barcode += 1
                 else:
                     nonmatch += 1
                     
