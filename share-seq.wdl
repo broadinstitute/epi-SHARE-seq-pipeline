@@ -277,7 +277,7 @@ workflow share {
         # inputs to joint calling py script
         File? rna_barcode_metadata = joint_qc.rna_bardcode_metadata_out
         File? atac_barcode_metadata = joint_qc.atac_barcode_metadata_2
-    
+        
     }
 
 }
