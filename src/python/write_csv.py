@@ -22,7 +22,8 @@ def main(output_file_name, names_list, numeric_list, image_list, log_list):
     #strip everything before the last front slash to make the names of the 
     #data fields more readable
     for name in names_array:
-        names_array_clean.append((name.split('/')[-1]))    
+        #names_array_clean.append((name.split('/')[-1]))
+        names_array_clean.append((name.split('/')[-1].split('shareseq-project.')[-1]))    
     
     # generate an array of the numeric data (represented by strings)
     if numeric_list is not None:
