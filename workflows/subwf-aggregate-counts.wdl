@@ -35,6 +35,7 @@ workflow aggregate_counts {
         Array[File] fragments
         Float? merge_fragments_disk_factor
         String? merge_fragments_docker_image
+        Int? merge_fragments_cpus
 
         # Merge barcode metadata inputs
         Array[File] rna_barcode_metadata
@@ -116,7 +117,8 @@ workflow aggregate_counts {
                 fragments = fragments,
                 prefix = prefix,
                 disk_factor = merge_fragments_disk_factor,
-                docker_image = merge_fragments_docker_image
+                docker_image = merge_fragments_docker_image,
+                cpus = merge_fragments_cpus
         }
 
         call share_task_merge_barcode_metadata.share_merge_barcode_metadata as merge_atac_barcode_metadata {
