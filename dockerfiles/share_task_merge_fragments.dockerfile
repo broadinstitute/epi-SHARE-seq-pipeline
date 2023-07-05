@@ -12,6 +12,7 @@ LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
 LABEL software.task="merge_fragments"
 
+ENV SAMTOOLS_VERSION 1.16
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -20,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     automake \
     build-essential \
+    git \
     libcurl4-openssl-dev \
     liblz4-dev \
     liblzma-dev \
@@ -27,6 +29,12 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
+
+# Install samtools 1.16
+RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
+    cd htslib && git submodule update --init --recursive && autoreconf -i && make && make install && cd ../ && \
+    git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
+    cd samtools && make && make install && cd ../ && rm -rf samtools* && rm -rf htslib*
 
 # Create and setup new user
 ENV USER=shareseq
