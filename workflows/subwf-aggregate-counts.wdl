@@ -1,6 +1,6 @@
 version 1.0
 
-import '../tasks/share_task_merge_h5.wdl' as share_task_merge_h5
+import '../tasks/share_task_merge_mtx.wdl' as share_task_merge_mtx
 import '../tasks/share_task_merge_fragments.wdl' as share_task_merge_fragments
 import '../tasks/share_task_merge_barcode_metadata.wdl' as share_task_merge_barcode_metadata
 import '../tasks/share_task_seurat.wdl' as share_task_seurat 
@@ -17,7 +17,7 @@ workflow aggregate_counts {
 
     input {
         # Common inputs
-        File genome_tsv
+        File? genome_tsv
         String? genome_name
         String? prefix = 'merged'
         Boolean merge_only = false
