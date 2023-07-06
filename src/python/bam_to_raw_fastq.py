@@ -152,8 +152,6 @@ def write_fastqs(bam_file, read_1_pointers, read_2_pointers, r1_barcode_subset_d
                     
     # write QC stats
     with open(f"{prefix}_R1_barcode_qc.txt", "w") as f:
-        fields = ["library", "exact_match", "nonexact_match", "nonmatch", "poly_G_barcode"]
-        f.write("\t".join(fields) + "\n")
         f.write("%s\t%s\t%s\t%s\t%s" % (prefix, exact_match, nonexact_match, nonmatch, poly_g_barcode))
 
 def main():
