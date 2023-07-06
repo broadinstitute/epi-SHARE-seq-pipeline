@@ -152,6 +152,7 @@ if (gene_plot2) {
 dev.off()
 
 # Make genes vs UMIs scatter plot
+# this plot should be reformatted to look like the others
 png(gene_umi_plot_file, width=8, height=8, units='in', res=300)
 
 plot(x=barcode_metadata$umis,

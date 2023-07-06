@@ -38,7 +38,7 @@ def get_hist_vals(histogram_file):
 def label_func(breaks):
     return ["{:.0e}".format(x) for x in breaks]
 
-# need to make things look pretty here as well, make box go all the way around
+# this needs to be formatted like the other things too
 
 def plot_hist(df, pkr, out_file):
     plot = (ggplot(df, aes(x="insert_size", y="count")) +
