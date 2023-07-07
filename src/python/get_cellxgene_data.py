@@ -32,4 +32,10 @@ if __name__ == '__main__':
     
     adata = sc.read_h5ad(f"{args.out}.h5ad")
     
+    # get counts
+    if not adata.raw:
+        adata.raw = adata.copy()
+    
+    adata.write_h5ad(f"{args.out}.h5ad")
+    
     logging.info("All done!")
