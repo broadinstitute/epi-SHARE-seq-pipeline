@@ -62,7 +62,7 @@ def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix, threads=1):
     for read in infile:
         if read.flag & 260 == 0 and read.reference_name != "chrM" and barcode_metrics[read.get_tag(barcode_tag)][0] > cutoff*2:
             outfile.write(read)
-        if read.flag & 260 == 0 and read.reference_name == "chrM" and barcode_metrics[read.get_tag(barcode_tag)][0] > cutoff*2:
+        if read.flag & 260 == 0 and read.reference_name == "chrM":
             mitofile.write(read)
 
     outfile.close()
