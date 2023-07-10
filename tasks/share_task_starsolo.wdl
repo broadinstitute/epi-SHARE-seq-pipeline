@@ -99,6 +99,7 @@ task share_rna_align {
             --soloCBmatchWLtype Exact \
             --soloCBstart 1 \
             --soloCBlen 24 \
+            --soloMultiMappers Unique EM \
             --soloUMIstart 25 \
             --soloUMIlen 10 \
             --soloUMIdedup 1MM_All \
@@ -109,7 +110,7 @@ task share_rna_align {
             --outFilterMatchNminOverLread 0.3 \
             --outSAMtype BAM SortedByCoordinate \
             --limitBAMsortRAM 31232551044 \
-            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
+            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \
 
@@ -191,7 +192,7 @@ task share_rna_align {
             --genomeDir ./ \
             --genomeLoad NoSharedMemory \
             --soloType CB_UMI_Simple \
-            --soloFeatures Gene SJ \
+            --soloFeatures GeneFull SJ \
             --soloStrand Forward \
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
@@ -223,7 +224,7 @@ task share_rna_align {
             --limitBAMsortRAM 31232551044 \
             --clipAdapterType CellRanger4
 
-            feature_type='Gene'
+            feature_type='GeneFull'
             # TODO: add the final case in which none of the above is passed.
         # PARSE
         elif [ '~{chemistry}' == 'parse' ]; then
@@ -245,7 +246,7 @@ task share_rna_align {
            --outSAMheaderHD @HD VN:1.4 SO:coordinate \
            --outSAMunmapped Within \
            --outFilterType BySJout \
-           --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY gx gn \
+           --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN gx gn \
            --outSAMstrandField intronMotif \
            --outSAMtype BAM SortedByCoordinate \
            --sjdbScore 1 \
