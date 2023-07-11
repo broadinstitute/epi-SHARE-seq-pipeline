@@ -9,6 +9,7 @@ workflows:
              - release
              - bowtie2-sambamba
              - sambamba
+             - michael-nums-output
          tags:
              - /.*/
 

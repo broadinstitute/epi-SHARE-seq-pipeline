@@ -241,6 +241,23 @@ workflow share {
 
         # Report
         File? html_summary = html_report.html_report_file
+
+        # numbers to output 
+        Int atac_total_reads = atac_total_reads
+        Int atac_aligned_uniquely = atac_aligned_uniquely 
+        Int atac_unaligned = atac_unaligned 
+        Int atac_feature_reads = atac_feature_reads 
+        Int atac_duplicate_reads = atac_duplicate_reads 
+        Int atac_nrf = atac_nrf 
+        Int atac_pbc1 = atac_pbc1 
+        Int atac_pbc2 = atac_pbc2 
+        Int atac_percent_duplicates = atac_percent_duplicates 
+        Int rna_total_reads = rna_total_reads
+        Int rna_aligned_uniquely = rna_aligned_uniquely 
+        Int rna_aligned_multimap = rna_aligned_multimap 
+        Int rna_unaligned = rna_unaligned
+        Int rna_feature_reads = rna_feature_reads 
+        Int rna_duplicate_reads = rna_duplicate_reads 
     }
 
 }
