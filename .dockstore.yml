@@ -8,6 +8,7 @@ workflows:
              - main
              - release
              - IGVF-variant-jamboree
+             - sw-IGVF-variant-jamboree
          tags:
              - /.*/
 
