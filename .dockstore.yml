@@ -75,7 +75,6 @@ workflows:
              - main
              - release
              - kdong
-             - poly-G
          tags:
              - /.*/
 
