@@ -38,7 +38,7 @@ task html_report {
        
         ## JPEG files to be encoded and appended to html
         Array[File?] image_files
-
+        Array[String?] image_file_paths
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
