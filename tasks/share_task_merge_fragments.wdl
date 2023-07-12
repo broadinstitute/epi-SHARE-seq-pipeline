@@ -16,7 +16,7 @@ task share_merge_fragments {
 
         String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_merge_fragments'
         Float? disk_factor = 1.5
-        Int? cpus = 4
+        Int? cpus = 8
     }
 
     # Determine the size of the input
@@ -36,9 +36,12 @@ task share_merge_fragments {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        # concatenate fragment files, sort, bgzip
-        cat ~{sep=' ' fragments} | gunzip -c | sort -k1,1 -k2,2n | bgzip -c -@ 4 > ~{output_file}
-        
+        # decompress fragment files
+        pigz -p ~{cpus} -d *.gz
+
+        # merge sort and bgzip merged file
+        sort -k1,1 -k2,2n -m *.tsv | bgzip -c -@ ~{cpus} > ~{output_file}
+
         # tabix index
         tabix --zero-based -p bed ~{output_file} 
     >>>
