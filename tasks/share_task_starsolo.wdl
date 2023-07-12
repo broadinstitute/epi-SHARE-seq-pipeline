@@ -2,7 +2,6 @@ version 1.0
 
 # TASK
 # SHARE-rna-STARsolo
-# test git
 
 task share_rna_align {
     meta {
@@ -216,6 +215,10 @@ task share_rna_align {
 
             feature_type='Gene'
             # TODO: add the final case in which none of the above is passed.
+
+        elif [ '~{chemistry}' == 'bacdrop' ]; then
+            echo 'hi'
+
         fi
 
         # tar and gzip barcodes, features, and matrix files
