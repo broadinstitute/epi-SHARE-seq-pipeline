@@ -2,6 +2,7 @@ version 1.0
 
 # TASK
 # SHARE-rna-STARsolo
+# test git
 
 task share_rna_align {
     meta {
