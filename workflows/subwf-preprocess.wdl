@@ -160,8 +160,12 @@ task BarcodeMap {
 	}
 
 	command <<<
-		
-		tail -n +6 ~{metaCsv} | awk -F "," -v num=~{lane} '{split($6,a," "); for(i in a) {if (a[i] == num) print $0}}' | cut -d, -f2 |  sed 's/ /\t/' > barcodes.tsv
+		if tail -n +5 ~{metaCsv} | head -1 | grep -q Lanes 
+		then 		
+			tail -n +6 ~{metaCsv} | awk -F "," -v num=~{lane} '{split($6,a," "); for(i in a) {if (a[i] == num) print $0}}' | cut -d, -f2 |  sed 's/ /\t/' > barcodes.tsv
+		else
+			tail -n +6 ~{metaCsv} | cut -d, -f2 |  sed 's/ /\t/' > barcodes.tsv
+		fi
 	>>>
 
 	output {
