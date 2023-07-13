@@ -217,12 +217,6 @@ task share_rna_align {
             # TODO: add the final case in which none of the above is passed.
 
         elif [ '~{chemistry}' == 'bacdrop' ]; then
-            # Check that CB + UMI length is correct
-            if [ $cb_umi_length -ne 21 ]; then
-                echo 'CB + UMI length is $cb_umi_length; expected 21'
-                exit 1
-            fi
-
             if [[ '~{whitelist}' == *.gz ]]; then
                 gunzip -c ~{whitelist} > bacdrop_whitelist.txt
             else
@@ -249,7 +243,7 @@ task share_rna_align {
             --chimOutType WithinBAM \
             --soloCBstart 9 \
             --soloUMIstart 1 \
-            --sjdbGTFfile ./ \ # how come this doesn't appear above? try this way or figure out how to call this file in the tar
+            #--sjdbGTFfile ./ \ # how come this doesn't appear above? try this way or figure out how to call this file in the tar
             --sjdbGTFfeatureExon CDS \ # bacdrop chemistry only
             --sjdbGTFtagExonParentTranscript gene_id \ # bacdrop chemistry only
             --sjdbGTFtagExonParentGeneName gene \ # bacdrop chemistry only
