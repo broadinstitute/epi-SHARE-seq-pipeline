@@ -89,9 +89,9 @@ workflows:
          tags:
              - /.*/
 
-   - name: "SHARE-seq-aggregate-counts"
+   - name: "SHARE-seq-merge"
      subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-aggregate-counts.wdl
+     primaryDescriptorPath: /workflows/subwf-merge.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - merge-pkr
