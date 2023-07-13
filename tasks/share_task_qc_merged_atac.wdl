@@ -21,7 +21,7 @@ task share_qc_merged_atac {
 
         # Runtime
         Float? disk_factor = 10.0
-        Float? memory_factor = 0.3
+        Float? memory_factor = 1.5
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_merged_atac"
     }
 
