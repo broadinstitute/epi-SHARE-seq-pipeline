@@ -228,6 +228,7 @@ task share_rna_align {
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
+            --soloBarcodeReadLength 0 \ # added to avoid checking cb+umi length
             --soloType CB_UMI_Simple \
             --soloCBwhitelist bacdrop_whitelist.txt \
             --soloCBmatchWLtype Exact \
@@ -249,6 +250,7 @@ task share_rna_align {
             --sjdbGTFtagExonParentGeneName gene \ # bacdrop chemistry only
             --soloBarcodeMate 1 \ # for paired end alignment - identifies which read mate contains the barcode and umi
             --clip5pNbases 21 0 \ # for paired end alignment - clips first 21 bases from read1
+
 
             feature_type='Gene'
 
