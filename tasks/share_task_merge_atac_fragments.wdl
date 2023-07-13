@@ -50,6 +50,7 @@ task share_merge_fragments {
 
     output {
         File fragments = '${output_file}'
+        File fragments_index = '${output_file}.tbi'
         File monitor_log = '${monitor_log}'
     }
 

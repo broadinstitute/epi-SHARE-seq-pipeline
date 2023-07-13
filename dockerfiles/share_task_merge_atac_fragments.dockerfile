@@ -27,7 +27,6 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     libncurses5-dev \
     libbz2-dev \
-    pigz \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 

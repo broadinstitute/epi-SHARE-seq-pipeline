@@ -134,6 +134,7 @@ workflow merge {
             input:
                 barcode_metadata = atac_barcode_metadata,
                 fragments = merge_fragments.fragments,
+                fragments_index = merge_fragments.fragments_index,
                 tss = tss_bed_,
                 prefix = prefix,
                 genome_name = genome_name_,

@@ -13,6 +13,7 @@ task share_qc_merged_atac {
     input {
         Array[File] barcode_metadata
         File fragments
+        File fragments_index
         File tss
         String? prefix
         String? genome_name
