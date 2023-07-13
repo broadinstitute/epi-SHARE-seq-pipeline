@@ -502,9 +502,8 @@ task AggregateBarcodeQC {
 	}
 
 	command <<<
-		echo -e "LIB_BARCODE\tEXACT\tPASS\tFAIL_MISMATCH\tFAIL_HOMOPOLYMER" > R1_barcode_stats.txt
+		echo -e "library\texact_match\tnonexact_match\tnonmatch\tpoly_G_barcode" > R1_barcode_stats.txt
 		cat ~{sep=" " barcodeQCs} >> R1_barcode_stats.txt
-		# awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}' combined.txt > final.txt
 	>>>
 	
 	output {
