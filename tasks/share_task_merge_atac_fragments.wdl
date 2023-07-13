@@ -37,7 +37,7 @@ task share_merge_fragments {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # decompress fragment files
-        pigz -p ~{cpus} -d *.gz
+        gzip -d *.gz
 
         # merge sort and bgzip merged file
         sort -k1,1 -k2,2n -m *.tsv | bgzip -c -@ ~{cpus} > ~{output_file}
