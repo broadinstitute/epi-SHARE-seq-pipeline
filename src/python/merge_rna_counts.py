@@ -72,9 +72,9 @@ def get_merged_data(tar_files, pkrs, ensembl):
         # get mapping of barcode to column index; {barcode:col_idx}
         # append PKR with underscore if supplied
         if tar_pkr:
-            barcode_mapping = {"_".join(line[0], tar_pkr[tar_file], basename):idx for idx, line in enumerate(barcodes)}
+            barcode_mapping = {(line[0]+"_"+tar_pkr[tar_file]+"_"+basename):idx for idx, line in enumerate(barcodes)}
         else:
-            barcode_mapping = {"_".join(line[0], basename):idx for idx, line in enumerate(barcodes)}
+            barcode_mapping = {(line[0]+"_"+basename):idx for idx, line in enumerate(barcodes)}
         barcode_list.append(barcode_mapping.keys())
         barcode_mappings.append(barcode_mapping)
         
