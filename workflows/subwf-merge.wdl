@@ -8,6 +8,7 @@ import "../tasks/share_task_seurat.wdl" as share_task_seurat
 import "../tasks/share_task_archr.wdl" as share_task_archr
 import "../tasks/share_task_joint_qc.wdl" as share_task_joint_qc
 import "./subwf-find-dorcs.wdl" as find_dorcs
+import "../tasks/share_task_html_report.wdl" as html_report
 
 workflow merge {
     meta {
@@ -177,6 +178,12 @@ workflow merge {
         }
     }
 
+    call html_report.html_report as html_report {
+#        input:
+#            prefix = prefix,
+#            image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, qc_merged_rna.umi_barcode_rank_plot, qc_merged_rna.gene_barcode_rank_plot, qc_merged_rna.gene_umi_scatter_plot, seurat.seurat_raw_violin_plot, seurat.seurat_raw_qc_scatter_plot, seurat.seurat_filtered_violin_plot, seurat.seurat_filtered_qc_scatter_plot, seurat.seurat_variable_genes_plot, seurat.seurat_PCA_dim_loadings_plot, seurat.seurat_PCA_plot, seurat.seurat_heatmap_plot, seurat.seurat_jackstraw_plot, seurat.seurat_elbow_plot, seurat.seurat_umap_cluster_plot, seurat.seurat_umap_rna_count_plot, seurat.seurat_umap_gene_count_plot, seurat.seurat_umap_mito_plot, qc_merged_atac.barcode_rank_plot, qc_merged_atac.insert_size_hist, qc_merged_atac.tss_enrichment_plot, archr.archr_raw_tss_by_uniq_frags_plot, archr.archr_filtered_tss_by_uniq_frags_plot, archr.archr_raw_frag_size_dist_plot, archr.archr_filtered_frag_size_dist_plot, archr.archr_umap_doublets, archr.archr_umap_cluster_plot, archr.archr_umap_doublets, archr.archr_umap_num_frags_plot, archr.archr_umap_tss_score_plot, archr.archr_umap_frip_plot, archr.archr_heatmap_plot, dorcs.j_plot]
+    }
+
     output {
         File? merged_h5 = merge_counts.h5_matrix
         File? merged_rna_barcode_metadata = merge_counts.barcode_metadata
@@ -199,5 +206,7 @@ workflow merge {
         File? dorcs_notebook_output = dorcs.dorcs_notebook_output
         File? dorcs_genes_summary = dorcs.dorcs_genes_summary
         File? dorcs_regions_summary = dorcs.dorcs_regions_summary
+
+#        File? html_report = html_report.html_report_file
     }
 }   
