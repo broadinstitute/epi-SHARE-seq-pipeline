@@ -102,7 +102,7 @@ workflow merge {
                 docker_image = qc_merged_rna_docker_image
         } 
 
-        if (pipeline_modality != 'full') {
+        if (pipeline_modality == 'full') {
             call share_task_seurat.seurat as seurat {
                 input:
                     rna_matrix = merge_counts.h5_matrix,
@@ -143,7 +143,7 @@ workflow merge {
                 docker_image = qc_merged_atac_docker_image
         }
 
-        if (pipeline_modality != 'full') {
+        if (pipeline_modality == 'full') {
             call share_task_archr.archr as archr {
                 input:
                     atac_frag = merge_fragments.fragments,
@@ -164,7 +164,7 @@ workflow merge {
                 docker_image = joint_qc_docker_image
         }
 
-        if (pipeline_modality != 'full') {
+        if (pipeline_modality == 'full') {
             call find_dorcs.wf_dorcs as dorcs {
                 input:
                     rna_matrix = merge_counts.h5_matrix,
