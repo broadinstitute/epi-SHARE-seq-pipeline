@@ -217,7 +217,46 @@ task share_rna_align {
             # TODO: add the final case in which none of the above is passed.
 
         elif [ '~{chemistry}' == 'bacdrop' ]; then
-            echo 'hi'
+            # Check that CB + UMI length is correct
+            if [ $cb_umi_length -ne 21 ]; then
+                echo 'CB + UMI length is $cb_umi_length; expected 21'
+                exit 1
+            fi
+
+            if [[ '~{whitelist}' == *.gz ]]; then
+                gunzip -c ~{whitelist} > bacdrop_whitelist.txt
+            else
+                cat ~{whitelist} > bacdrop_whitelist.txt
+            fi
+
+            $(which STAR) \
+            --readFilesIn $read_files \
+            --readFilesCommand zcat \
+            --runThreadN ~{cpus} \
+            --genomeDir ./ \
+            --soloType CB_UMI_Simple \
+            --soloCBwhitelist bacdrop_whitelist.txt \
+            --soloCBmatchWLtype Exact \
+            --soloCBlen 13 \
+            --soloUMIlen 8 \
+            --alignSJDBoverhangMin 1000 \ # consider using 1 as above
+            --alignIntronMax 1 \
+            --outFilterMultimapNmax 100 \ # consider using 20 as above
+            --outSAMtype BAM SortedByCoordinate \
+            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \ # consider adding NM as above
+            --outFileNamePrefix result/
+            --outReadsUnmapped Fastx \
+            --chimOutType WithinBAM \
+            --soloCBstart 9 \
+            --soloUMIstart 1 \
+            --sjdbGTFfile ./ \ # how come this doesn't appear above? try this way or figure out how to call this file in the tar
+            --sjdbGTFfeatureExon CDS \ # bacdrop chemistry only
+            --sjdbGTFtagExonParentTranscript gene_id \ # bacdrop chemistry only
+            --sjdbGTFtagExonParentGeneName gene \ # bacdrop chemistry only
+            --soloBarcodeMate 1 \ # for paired end alignment - identifies which read mate contains the barcode and umi
+            --clip5pNbases 21 0 \ # for paired end alignment - clips first 21 bases from read1
+
+            feature_type='Gene'
 
         fi
 
