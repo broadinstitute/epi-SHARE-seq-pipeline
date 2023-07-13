@@ -35,12 +35,14 @@ task share_merge_fragments {
         set -e
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
-        ls
+        
         # decompress fragment files
-        gunzip *.gz
+        #gunzip *.gz
 
         # merge sort and bgzip merged file
-        sort -k1,1 -k2,2n -m *.tsv | bgzip -c -@ ~{cpus} > ~{output_file}
+        #sort -k1,1 -k2,2n -m *.tsv | bgzip -c -@ ~{cpus} > ~{output_file}
+
+        cat ~{sep=' ' fragments} | gunzip -c | sort -k1,1 -k2,2n | bgzip -c -@ 4 > ~{output_file}
 
         # tabix index
         tabix --zero-based -p bed ~{output_file} 
