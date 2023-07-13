@@ -35,7 +35,7 @@ task share_merge_fragments {
         set -e
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
-
+        ls
         # decompress fragment files
         gunzip *.gz
 
