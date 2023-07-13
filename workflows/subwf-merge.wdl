@@ -1,13 +1,13 @@
 version 1.0
 
-import '../tasks/share_task_merge_rna_counts.wdl' as share_task_merge_rna_counts
-import '../tasks/share_task_merge_atac_fragments.wdl' as share_task_merge_atac_fragments
-import '../tasks/share_task_qc_merged_atac.wdl' as share_task_qc_merged_atac
-import '../tasks/share_task_qc_merged_rna.wdl' as share_task_qc_merged_rna
-import '../tasks/share_task_seurat.wdl' as share_task_seurat 
-import '../tasks/share_task_archr.wdl' as share_task_archr
-import '../tasks/share_task_joint_qc.wdl' as share_task_joint_qc
-import './subwf-find-dorcs.wdl' as find_dorcs
+import "../tasks/share_task_merge_rna_counts.wdl" as share_task_merge_rna_counts
+import "../tasks/share_task_merge_atac_fragments.wdl" as share_task_merge_atac_fragments
+import "../tasks/share_task_qc_merged_atac.wdl" as share_task_qc_merged_atac
+import "../tasks/share_task_qc_merged_rna.wdl" as share_task_qc_merged_rna
+import "../tasks/share_task_seurat.wdl" as share_task_seurat 
+import "../tasks/share_task_archr.wdl" as share_task_archr
+import "../tasks/share_task_joint_qc.wdl" as share_task_joint_qc
+import "./subwf-find-dorcs.wdl" as find_dorcs
 
 workflow merge {
     meta {
