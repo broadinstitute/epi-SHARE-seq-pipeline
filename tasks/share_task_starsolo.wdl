@@ -228,7 +228,7 @@ task share_rna_align {
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
-            --soloBarcodeReadLength 0 \ # added to avoid checking cb+umi length
+            --soloBarcodeReadLength 0 # added to avoid checking cb+umi length \
             --soloType CB_UMI_Simple \
             --soloCBwhitelist bacdrop_whitelist.txt \
             --soloCBmatchWLtype Exact \
