@@ -41,22 +41,19 @@ task share_merge_counts {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        if [ '~{sep='' pkrs}' == '' ]; then
-            pkr=''
-        else
-            pkr='--pkr ~{sep=' ' pkrs}'
-        fi
-
-        # Create merged h5 matrix
+        # Create merged h5 matrix, mtx, barcode metadata
         python3 $(which merge_rna_counts.py) \
             ~{prefix} \
             ~{sep=' ' tars} \
-            $pkr \
+            --pkr ~{sep=' ' pkrs} \
             ~{ensembl_option} \
+
+        tar -cvf ~{prefix}.tar ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
 
     output {
         File h5_matrix = '${prefix}.h5'
+        File merged_tar = '${prefix}.tar'
         File barcode_metadata = '${prefix}_rna_barcode_metadata.tsv'
         File monitor_log = '${monitor_log}'
     }
