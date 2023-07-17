@@ -36,13 +36,10 @@ task merge_fragments {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
-        # decompress fragment files
-        #gunzip *.gz
+        # decompress fragment files, merge sort, bgzip
+        pigz -p ~{cpus} -dc ~{sep=' ' fragments} | sort -k1,1 -k2,2n -m | bgzip -c -@ ~{cpus} > ~{output_file}
 
-        # merge sort and bgzip merged file
-        #sort -k1,1 -k2,2n -m *.tsv | bgzip -c -@ ~{cpus} > ~{output_file}
-
-        cat ~{sep=' ' fragments} | gunzip -c | sort -k1,1 -k2,2n | bgzip -c -@ 4 > ~{output_file}
+        #cat ~{sep=' ' fragments} | gunzip -c | sort -k1,1 -k2,2n | bgzip -c -@ 4 > ~{output_file}
 
         # tabix index
         tabix --zero-based -p bed ~{output_file} 
@@ -58,5 +55,18 @@ task merge_fragments {
         cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker : "${docker_image}"
+    }
+
+    parameter_meta {
+        fragments: {
+                description: 'Fragment files',
+                help: 'Array of fragment files, one per entity to be merged.',
+                example: ['first.fragment.file.tsv.gz', 'second.fragment.file.tsv.gz']
+            }
+        prefix: {
+                description: 'Prefix for output files',
+                help: 'Prefix that will be used to name the output files',
+                example: 'MyExperiment'
+            }
     }
 }
