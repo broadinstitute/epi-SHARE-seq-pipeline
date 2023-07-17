@@ -75,6 +75,7 @@ workflows:
              - main
              - release
              - kdong
+             - neva
          tags:
              - /.*/
 
