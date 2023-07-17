@@ -13,6 +13,10 @@ import pandas as pd
 from plotnine import *
 
 def parse_arguments():
+    #for qc plots, TSS, frags, UMIS, and genes cuttoff are all passed here as 
+    #arguments, so can write them into seperate file to move them around, or 
+    #add to the already exisiting csv output file. First option is probably 
+    #easier down the line
     parser = argparse.ArgumentParser(description="Plot barcodes by RNA and ATAC QC status")
     parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv file")
     parser.add_argument("atac_metrics_file", help="Filename for ATAC metrics tsv file")
@@ -189,7 +193,7 @@ def main():
     logging.info("Saving dataframe as csv\n")
     metrics_df.to_csv(barcode_metadata_file)
     
-    # write the stats for the top level into a csv
+    # write the stats for the top level into a csv, containd joint qc numbers
     write_top_level_csv(barcode_metadata_file, qc_summary_data)
     
     logging.info("All done!")

@@ -190,7 +190,7 @@ def _add_read_to_dictionary(fragment_counter,
     return
 
 # this needs to be changed to make things uniform
-
+# looking for the max? value of the raw and smooth signals
 def plot_tss_enrichment(raw_signal, smoothed_signal, out_file):
     fig=plt.figure(figsize=(8.0, 5.0))
     plt.plot(raw_signal,'k.')
