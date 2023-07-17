@@ -1,9 +1,9 @@
 version 1.0
 
 # TASK
-# SHARE-merge-rna-counts
+# merge-rna-counts
 
-task share_merge_counts {
+task merge_counts {
     meta {
         version: 'v0.1'
         author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
@@ -16,7 +16,7 @@ task share_merge_counts {
         String? gene_naming
         String? prefix
 
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_merge_rna_counts'
+        String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_merge_rna_counts'
         Float? disk_factor = 2.0
         Float? memory_factor = 50.0
     }
@@ -45,7 +45,7 @@ task share_merge_counts {
         python3 $(which merge_rna_counts.py) \
             ~{prefix} \
             ~{sep=' ' tars} \
-            --pkr ~{sep=' ' subpool_names} \
+            --subpools ~{sep=' ' subpool_names} \
             ~{ensembl_option} \
 
         tar -cvf ~{prefix}.tar ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz

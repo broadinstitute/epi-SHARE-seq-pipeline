@@ -92,7 +92,7 @@ workflows:
 
    - name: "SHARE-seq-merge"
      subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-merge.wdl
+     primaryDescriptorPath: /workflows/subwf-merge-data.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - merge-pkr

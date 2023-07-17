@@ -1,9 +1,9 @@
 version 1.0
 
-import "../tasks/share_task_merge_rna_counts.wdl" as share_task_merge_rna_counts
-import "../tasks/share_task_merge_atac_fragments.wdl" as share_task_merge_atac_fragments
-import "../tasks/share_task_qc_merged_atac.wdl" as share_task_qc_merged_atac
-import "../tasks/share_task_qc_merged_rna.wdl" as share_task_qc_merged_rna
+import "../tasks/task_merge_rna_counts.wdl" as task_merge_rna_counts
+import "../tasks/task_merge_atac_fragments.wdl" as task_merge_atac_fragments
+import "../tasks/task_qc_merged_atac.wdl" as task_qc_merged_atac
+import "../tasks/task_qc_merged_rna.wdl" as task_qc_merged_rna
 import "../tasks/share_task_seurat.wdl" as share_task_seurat 
 import "../tasks/share_task_archr.wdl" as share_task_archr
 import "../tasks/share_task_joint_qc.wdl" as share_task_joint_qc
@@ -90,7 +90,7 @@ workflow merge {
     File peak_set_ = select_first([peak_set, annotations["ccre"]])
 
     if (aggregate_rna) {
-        call share_task_merge_rna_counts.share_merge_counts as merge_counts {
+        call task_merge_rna_counts.merge_counts as merge_counts {
             input:
                 tars = tars,
                 subpool_names = subpool_names,
@@ -102,7 +102,7 @@ workflow merge {
         }
 
         if (run_qc_merged_rna) {
-            call share_task_qc_merged_rna.share_qc_merged_rna as qc_merged_rna {
+            call task_qc_merged_rna.qc_merged_rna as qc_merged_rna {
                 input:
                     barcode_metadata = merge_counts.barcode_metadata,
                     prefix = prefix,
@@ -134,7 +134,7 @@ workflow merge {
     }
 
     if (aggregate_atac) {
-        call share_task_merge_atac_fragments.share_merge_fragments as merge_fragments {
+        call task_merge_atac_fragments.merge_fragments as merge_fragments {
             input:
                 fragments = fragments,
                 prefix = prefix,
@@ -144,7 +144,7 @@ workflow merge {
         }
 
         if (run_qc_merged_atac) {
-            call share_task_qc_merged_atac.share_qc_merged_atac as qc_merged_atac {
+            call task_qc_merged_atac.qc_merged_atac as qc_merged_atac {
                 input:
                     barcode_metadata = atac_barcode_metadata,
                     fragments = merge_fragments.fragments,
@@ -211,14 +211,14 @@ workflow merge {
 
         File? merged_atac_barcode_metadata = qc_merged_atac.barcode_metadata
 
-        File? share_rna_seurat_notebook_output = seurat.notebook_output
-        File? share_rna_seurat_obj = seurat.seurat_filtered_obj
-        File? share_rna_plots_zip = seurat.plots_zip
+        File? seurat_notebook_output = seurat.notebook_output
+        File? seurat_obj = seurat.seurat_filtered_obj
+        File? seurat_plots_zip = seurat.plots_zip
 
-        File? share_atac_archr_notebook_output = archr.notebook_output
-        File? share_atac_archr_arrow = archr.archr_arrow
-        File? share_atac_archr_obj = archr.archr_raw_obj
-        File? share_atac_archr_plots_zip = archr.plots_zip
+        File? archr_notebook_output = archr.notebook_output
+        File? archr_arrow = archr.archr_arrow
+        File? atac_archr_obj = archr.archr_raw_obj
+        File? atac_archr_plots_zip = archr.plots_zip
 
         File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
 

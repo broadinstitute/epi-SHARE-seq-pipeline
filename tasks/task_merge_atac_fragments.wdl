@@ -1,9 +1,9 @@
 version 1.0
 
 # TASK
-# SHARE-merge-atac-fragments
+# merge-atac-fragments
 
-task share_merge_fragments {
+task merge_fragments {
     meta {
         version: 'v0.1'
         author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
@@ -14,7 +14,7 @@ task share_merge_fragments {
         Array[File] fragments
         String? prefix
 
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_merge_atac_fragments'
+        String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_merge_atac_fragments'
         Float? disk_factor = 1.5
         Int? cpus = 8
     }

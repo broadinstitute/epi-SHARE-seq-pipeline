@@ -165,6 +165,46 @@ steps:
   waitFor: ['-']
   timeout: 28800s
 
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'task-merge-rna-counts'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_rna_counts:latest',
+          '-f',
+          'dockerfiles/task_merge_rna_counts.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'task-merge-atac-fragments'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_atac_fragments:latest',
+          '-f',
+          'dockerfiles/task_merge_atac_fragments.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'task-qc-merged-rna'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_qc_merged_rna:latest',
+          '-f',
+          'dockerfiles/task_qc_merged_rna.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'task-qc-merged-atac'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_qc_merged_atac:latest',
+          '-f',
+          'dockerfiles/task_qc_merged_atac.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
 # Docker Push
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -246,6 +286,26 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest']
   waitFor: ['task-find-dorcs']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_rna_counts:latest']
+  waitFor: ['task-merge-rna-counts']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_atac_fragments:latest']
+  waitFor: ['task-merge-atac-fragments']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_qc_merged_rna:latest']
+  waitFor: ['task-qc-merged-rna']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_qc_merged_atac:latest']
+  waitFor: ['task-qc-merged-atac']
 
 timeout: 28800s
 options:

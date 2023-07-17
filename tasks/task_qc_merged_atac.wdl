@@ -1,9 +1,9 @@
 version 1.0
 
 # TASK
-# SHARE-qc-merged-atac
+# qc-merged-atac
 
-task share_qc_merged_atac {
+task qc_merged_atac {
     meta {
         version: 'v0.1'
         author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
@@ -22,7 +22,7 @@ task share_qc_merged_atac {
         # Runtime
         Float? disk_factor = 10.0
         Float? memory_factor = 1.5
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_merged_atac"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_merged_atac"
     }
 
     # Determine the size of the input

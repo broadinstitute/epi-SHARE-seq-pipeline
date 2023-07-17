@@ -1,9 +1,9 @@
 version 1.0
 
 # TASK
-# SHARE-qc-merged-rna
+# qc-merged-rna
 
-task share_qc_merged_rna {
+task qc_merged_rna {
     meta {
         version: 'v0.1'
         author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
@@ -19,7 +19,7 @@ task share_qc_merged_rna {
 
         Float? disk_factor = 1.0
         Float? memory_factor = 1.5
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_merged_rna"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_merged_rna"
     }
 
     # Determine the size of the input
