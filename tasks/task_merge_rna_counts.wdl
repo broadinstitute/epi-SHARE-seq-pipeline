@@ -70,10 +70,20 @@ task merge_counts {
                 help: 'Array of tar.gz files containing raw matrix, features, and barcodes files from STARsolo, one per entity to be merged.',
                 example: ['first.raw.tar.gz', 'second.raw.tar.gz']
             }
+        subpool_names: {
+                description: 'Cellular sub-pool names',
+                help: 'Array of cellular sub-pool names, one per entity to be merged. Sub-pool names will be appended to barcodes.',
+                example: ['SS-PKR-1', 'SS-PKR-2']
+            }
         gene_naming: {
                 description: 'Gene naming convention',
                 help: 'Convention for gene naming in h5 matrix; either "gene_name" (default) or "ensembl".',
                 example: ['gene_name', 'ensembl']
+            }
+        prefix: {
+                description: 'Prefix for output files',
+                help: 'Prefix that will be used to name the output files',
+                example: 'MyExperiment'
             }
     }
 }

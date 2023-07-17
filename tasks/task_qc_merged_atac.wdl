@@ -89,4 +89,42 @@ task qc_merged_atac {
         memory: "${mem_gb} GB"
         memory_retry_multiplier: 2
     }
+
+    parameter_meta {
+        barcode_metadata: {
+                description: 'ATAC barcode metadata files',
+                help: 'Array of TSV files, each containing barcodes and associated statistics; one per entity to be merged.',
+                example: ['first.atac.qc.metadata.tsv', 'second.atac.qc.metadata.tsv']
+            }  
+        fragments: {
+                description: 'Merged fragment file',
+                help: 'Merged ATAC fragment file.',
+                example: 'merged.fragments.tsv.gz'
+            }
+        fragments_index: {
+                description: 'Merged fragment file index',
+                help: 'Index for merged ATAC fragment file.',
+                example: 'merged.fragments.tsv.gz.tbi'
+            }
+        tss: {
+                description: 'TSS bed file',
+                help: 'List of TSSs in BED format.',
+                example: 'refseq.tss.bed'
+            }
+        prefix: {
+                description: 'Prefix for output files',
+                help: 'Prefix that will be used to name the output files',
+                example: 'MyExperiment'
+            }
+        genome_name: {
+                description: 'Reference name',
+                help: 'The name of the reference genome used by the aligner.',
+                examples: ['hg38', 'mm10', 'both']
+            }
+        fragment_cutoff: {
+                description: 'Fragment cutoff',
+                help: 'Cutoff for number of fragments required when making fragment barcode rank plot.',
+                example: 10
+            }
+    }    
 }

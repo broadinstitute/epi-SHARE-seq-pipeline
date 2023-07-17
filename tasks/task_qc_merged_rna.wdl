@@ -61,4 +61,32 @@ task qc_merged_rna {
         docker : "${docker_image}"
         maxRetries:1
     }
+
+    parameter_meta {
+        barcode_metadata: {
+                description: 'Merged RNA barcode metadata file',
+                help: 'TSV file containing barcodes and associated numbers of UMIs and genes.',
+                example: 'merged_rna_barcode_metadata.tsv'
+            }
+        prefix: {
+                description: 'Prefix for output files',
+                help: 'Prefix that will be used to name the output files',
+                example: 'MyExperiment'
+            }
+        genome_name: {
+                description: 'Reference name',
+                help: 'The name of the reference genome used by the aligner.',
+                examples: ['hg38', 'mm10', 'both']
+            }
+        umi_cutoff: {
+                description: 'UMI cutoff',
+                help: 'Cutoff for number of UMIs required when making UMI barcode rank plot.',
+                example: 10
+            }
+        gene_cutoff: {
+                description: 'Gene cutoff',
+                help: 'Cutoff for number of genes required when making gene barcode rank plot.',
+                example: 10
+            }
+    }
 }
