@@ -154,6 +154,7 @@ task seurat {
         File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
         File? seurat_monitor_log = monitor_log
+        File? top_level_csv_out = top_level_csv 
     }
 
     runtime {
