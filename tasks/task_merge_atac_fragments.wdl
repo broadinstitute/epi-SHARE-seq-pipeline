@@ -37,7 +37,7 @@ task merge_fragments {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
         # decompress fragment files, merge sort, bgzip
-        pigz -p ~{cpus} -dc ~{sep=' ' fragments} | sort -k1,1 -k2,2n -m | bgzip -c -@ ~{cpus} > ~{output_file}
+        pigz -p ~{cpus} -dc ~{sep=' ' fragments} | cat | sort -k1,1 -k2,2n | bgzip -c -@ ~{cpus} > ~{output_file}
 
         #cat ~{sep=' ' fragments} | gunzip -c | sort -k1,1 -k2,2n | bgzip -c -@ 4 > ~{output_file}
 
