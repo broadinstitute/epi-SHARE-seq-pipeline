@@ -90,6 +90,7 @@ task seurat {
     String barcode_metadata = '${prefix}.rna.seurat.barcode_metadata.${genome_name}.tsv'
     String plots_zip_dir = '${plots_filepath}.zip'
     #String papermill_log_filename = 'papermill.logfile.txt'
+    String top_level_csv = 'top_level_file.csv'
 
     command {
     
@@ -104,6 +105,7 @@ task seurat {
         fi
         
         papermill $(which seurat_notebook.ipynb) ${output_filename} \
+        -p top_level_csv ${top_level_csv} \
         -p rna_matrix ${rna_matrix} \
         -p genome ${genome_name} \
         -p min_features ${min_features} \

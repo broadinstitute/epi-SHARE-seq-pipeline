@@ -50,7 +50,6 @@ task html_report {
     # need to select from valid files since some are optional
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
-
     # new stuff im adding for the dictionary functionality 
     String other_output_file = "${default="share-seq-data" prefix}.csv"
     
