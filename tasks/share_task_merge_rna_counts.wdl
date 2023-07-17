@@ -12,13 +12,13 @@ task share_merge_counts {
 
     input {
         Array[File] tars
-        Array[String]? pkrs = ''
+        Array[String]? subpool_names = ''
         String? gene_naming
         String? prefix
 
         String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_merge_rna_counts'
         Float? disk_factor = 2.0
-        Float? memory_factor = 120.0
+        Float? memory_factor = 50.0
     }
 
     # Determine the size of the input
@@ -45,7 +45,7 @@ task share_merge_counts {
         python3 $(which merge_rna_counts.py) \
             ~{prefix} \
             ~{sep=' ' tars} \
-            --pkr ~{sep=' ' pkrs} \
+            --pkr ~{sep=' ' subpool_names} \
             ~{ensembl_option} \
 
         tar -cvf ~{prefix}.tar ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
