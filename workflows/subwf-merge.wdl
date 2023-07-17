@@ -22,17 +22,17 @@ workflow merge {
         File genome_tsv
         String? genome_name
         String? prefix = 'merged'
-        String? pipeline_modality = 'full' 
         
         # RNA merge counts inputs
         Array[File] tars
-        Array[String]? pkrs
+        Array[String]? subpool_names
         String? gene_naming = 'gene_name'
         Float? merge_counts_disk_factor
         Float? merge_counts_memory_factor
         String? merge_counts_docker_image
 
         # RNA QC inputs
+        Boolean run_qc_merged_rna = true
         Int? umi_cutoff
         Int? gene_cutoff
         Float? qc_merged_rna_disk_factor
@@ -46,6 +46,7 @@ workflow merge {
         Int? merge_fragments_cpus
 
         # ATAC QC inputs
+        Boolean run_qc_merged_atac = true
         Array[File] atac_barcode_metadata
         File? tss_bed
         Int? fragment_cutoff
@@ -53,7 +54,8 @@ workflow merge {
         Float? qc_merged_atac_memory_factor
         String? qc_merged_atac_docker_image
 
-        # Seurat inputs 
+        # Seurat inputs
+        Boolean run_seurat = true 
         Int? seurat_min_features
         Float? seurat_percent_mt
         Int? seurat_min_cells
@@ -64,11 +66,19 @@ workflow merge {
         String? seurat_docker_image
 
         # ArchR inputs
+        Boolean run_archr = true
         File? peak_set
 
         # Joint QC inputs
+        Boolean run_joint_qc = true
         Int? remove_low_yielding_cells = 10
         String? joint_qc_docker_image
+
+        # DORCs inputs
+        Boolean run_dorcs = true
+
+        # HTML report inputs
+        Boolean run_html_report = true
     }
 
     Boolean aggregate_rna = if length(tars) > 0 then true else false
@@ -83,7 +93,7 @@ workflow merge {
         call share_task_merge_rna_counts.share_merge_counts as merge_counts {
             input:
                 tars = tars,
-                pkrs = pkrs,
+                subpool_names = subpool_names,
                 prefix = prefix,
                 gene_naming = gene_naming,
                 disk_factor = merge_counts_disk_factor,
@@ -91,19 +101,21 @@ workflow merge {
                 docker_image = merge_counts_docker_image
         }
 
-        call share_task_qc_merged_rna.share_qc_merged_rna as qc_merged_rna {
-            input:
-                barcode_metadata = merge_counts.barcode_metadata,
-                prefix = prefix,
-                genome_name = genome_name_,
-                umi_cutoff = umi_cutoff,
-                gene_cutoff = gene_cutoff,
-                disk_factor = qc_merged_rna_disk_factor,
-                memory_factor = qc_merged_rna_memory_factor,
-                docker_image = qc_merged_rna_docker_image
+        if (run_qc_merged_rna) {
+            call share_task_qc_merged_rna.share_qc_merged_rna as qc_merged_rna {
+                input:
+                    barcode_metadata = merge_counts.barcode_metadata,
+                    prefix = prefix,
+                    genome_name = genome_name_,
+                    umi_cutoff = umi_cutoff,
+                    gene_cutoff = gene_cutoff,
+                    disk_factor = qc_merged_rna_disk_factor,
+                    memory_factor = qc_merged_rna_memory_factor,
+                    docker_image = qc_merged_rna_docker_image
+            }
         } 
 
-        if (pipeline_modality == 'full') {
+        if (run_seurat) {
             call share_task_seurat.seurat as seurat {
                 input:
                     rna_matrix = merge_counts.h5_matrix,
@@ -131,21 +143,23 @@ workflow merge {
                 cpus = merge_fragments_cpus
         }
 
-        call share_task_qc_merged_atac.share_qc_merged_atac as qc_merged_atac {
-            input:
-                barcode_metadata = atac_barcode_metadata,
-                fragments = merge_fragments.fragments,
-                fragments_index = merge_fragments.fragments_index,
-                tss = tss_bed_,
-                prefix = prefix,
-                genome_name = genome_name_,
-                fragment_cutoff = fragment_cutoff,
-                disk_factor = qc_merged_atac_disk_factor,
-                memory_factor = qc_merged_atac_memory_factor,
-                docker_image = qc_merged_atac_docker_image
+        if (run_qc_merged_atac) {
+            call share_task_qc_merged_atac.share_qc_merged_atac as qc_merged_atac {
+                input:
+                    barcode_metadata = atac_barcode_metadata,
+                    fragments = merge_fragments.fragments,
+                    fragments_index = merge_fragments.fragments_index,
+                    tss = tss_bed_,
+                    prefix = prefix,
+                    genome_name = genome_name_,
+                    fragment_cutoff = fragment_cutoff,
+                    disk_factor = qc_merged_atac_disk_factor,
+                    memory_factor = qc_merged_atac_memory_factor,
+                    docker_image = qc_merged_atac_docker_image
+            }
         }
 
-        if (pipeline_modality == 'full') {
+        if (run_archr) {
             call share_task_archr.archr as archr {
                 input:
                     atac_frag = merge_fragments.fragments,
@@ -157,16 +171,18 @@ workflow merge {
     }
 
     if (aggregate_atac && aggregate_rna) {
-        call share_task_joint_qc.joint_qc_plotting as joint_qc {
-            input:
-                atac_barcode_metadata = qc_merged_atac.barcode_metadata,
-                rna_barcode_metadata = merge_counts.barcode_metadata,
-                genome_name = genome_name_,
-                prefix = prefix,
-                docker_image = joint_qc_docker_image
+        if (run_joint_qc && run_qc_merged_atac) {
+            call share_task_joint_qc.joint_qc_plotting as joint_qc {
+                input:
+                    atac_barcode_metadata = qc_merged_atac.barcode_metadata,
+                    rna_barcode_metadata = merge_counts.barcode_metadata,
+                    genome_name = genome_name_,
+                    prefix = prefix,
+                    docker_image = joint_qc_docker_image
+            }
         }
 
-        if (pipeline_modality == 'full') {
+        if (run_dorcs) {
             call find_dorcs.wf_dorcs as dorcs {
                 input:
                     rna_matrix = merge_counts.h5_matrix,
@@ -178,11 +194,13 @@ workflow merge {
         }
     }
 
-    call html_report.html_report as html_report {
-        input:
-            prefix = prefix,
-            image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, qc_merged_rna.umi_barcode_rank_plot, qc_merged_rna.gene_barcode_rank_plot, qc_merged_rna.gene_umi_scatter_plot, seurat.seurat_raw_violin_plot, seurat.seurat_raw_qc_scatter_plot, seurat.seurat_filtered_violin_plot, seurat.seurat_filtered_qc_scatter_plot, seurat.seurat_variable_genes_plot, seurat.seurat_PCA_dim_loadings_plot, seurat.seurat_PCA_plot, seurat.seurat_heatmap_plot, seurat.seurat_jackstraw_plot, seurat.seurat_elbow_plot, seurat.seurat_umap_cluster_plot, seurat.seurat_umap_rna_count_plot, seurat.seurat_umap_gene_count_plot, seurat.seurat_umap_mito_plot, qc_merged_atac.barcode_rank_plot, qc_merged_atac.insert_size_hist, qc_merged_atac.tss_enrichment_plot, archr.archr_raw_tss_by_uniq_frags_plot, archr.archr_filtered_tss_by_uniq_frags_plot, archr.archr_raw_frag_size_dist_plot, archr.archr_filtered_frag_size_dist_plot, archr.archr_umap_doublets, archr.archr_umap_cluster_plot, archr.archr_umap_doublets, archr.archr_umap_num_frags_plot, archr.archr_umap_tss_score_plot, archr.archr_umap_frip_plot, archr.archr_heatmap_plot, dorcs.j_plot],
-            log_files = []
+    if (run_html_report) {
+        call html_report.html_report as html_report {
+            input:
+                prefix = prefix,
+                image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, qc_merged_rna.umi_barcode_rank_plot, qc_merged_rna.gene_barcode_rank_plot, qc_merged_rna.gene_umi_scatter_plot, seurat.seurat_raw_violin_plot, seurat.seurat_raw_qc_scatter_plot, seurat.seurat_filtered_violin_plot, seurat.seurat_filtered_qc_scatter_plot, seurat.seurat_variable_genes_plot, seurat.seurat_PCA_dim_loadings_plot, seurat.seurat_PCA_plot, seurat.seurat_heatmap_plot, seurat.seurat_jackstraw_plot, seurat.seurat_elbow_plot, seurat.seurat_umap_cluster_plot, seurat.seurat_umap_rna_count_plot, seurat.seurat_umap_gene_count_plot, seurat.seurat_umap_mito_plot, qc_merged_atac.barcode_rank_plot, qc_merged_atac.insert_size_hist, qc_merged_atac.tss_enrichment_plot, archr.archr_raw_tss_by_uniq_frags_plot, archr.archr_filtered_tss_by_uniq_frags_plot, archr.archr_raw_frag_size_dist_plot, archr.archr_filtered_frag_size_dist_plot, archr.archr_umap_doublets, archr.archr_umap_cluster_plot, archr.archr_umap_doublets, archr.archr_umap_num_frags_plot, archr.archr_umap_tss_score_plot, archr.archr_umap_frip_plot, archr.archr_heatmap_plot, dorcs.j_plot],
+                log_files = []
+        }
     }
 
     output {
@@ -208,6 +226,6 @@ workflow merge {
         File? dorcs_genes_summary = dorcs.dorcs_genes_summary
         File? dorcs_regions_summary = dorcs.dorcs_regions_summary
 
-#        File? html_report = html_report.html_report_file
+        File? html_report = html_report.html_report_file
     }
 }   
