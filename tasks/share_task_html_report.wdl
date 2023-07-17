@@ -45,8 +45,8 @@ task html_report {
 
     String output_file = "${default="share-seq" prefix}.html"
     # need to select from valid files since some are optional
-    Array[File] valid_image_files = select_all(image_files)
-    Array[String] valid_log_files = select_all(log_files)
+    Array[File]? valid_image_files = select_all(image_files)
+    Array[String]? valid_log_files = select_all(log_files)
 
     command <<<
 
