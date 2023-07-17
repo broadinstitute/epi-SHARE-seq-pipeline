@@ -48,8 +48,8 @@ def count_fragments_in_peaks(tabix_filename,
         Value: Number of fragments in peaks.
     """
     # To count the number of fragments in peaks
-    reads_in_peaks_counter = defaultdict(set)
-    fragments_in_peaks_counter = defaultdict(set)
+    reads_in_peaks_counter = defaultdict(int)
+    fragments_in_peaks_counter = defaultdict(int)
 
     tabixfile = pysam.TabixFile(tabix_filename)
 
@@ -69,14 +69,14 @@ def count_fragments_in_peaks(tabix_filename,
                 barcode = fragment_fields[3]
 
                 fragment_id = "-".join(fragment_fields)
-                fragments_in_peaks_counter[barcode].add(fragment_id)
+                fragments_in_peaks_counter[barcode] += 1
 
                 # Increment the counter for the specific barcode.
                 if fragment_start >= peak_start and fragment_start <= peak_end-1:
-                    reads_in_peaks_counter[barcode].add(fragment_id+"start")
+                    reads_in_peaks_counter[barcode] += 1
 
                 if fragment_end >= peak_start and fragment_end <= peak_end-1:
-                    reads_in_peaks_counter[barcode].add(fragment_id+"end")
+                    reads_in_peaks_counter[barcode] += 1
         except ValueError:
             print(f"No reads found for {peak_chr}:{max(1,peak_start)}-{peak_end}.")
 
@@ -116,4 +116,4 @@ if __name__ == '__main__':
     with open(output_fnp,"w") as out_file:
         print(f"barcode\treads_peaks\tfragment_peaks", file=out_file)
         for barcode,fragments_in_peak in fragments_in_peaks.items():
-            print(f"{barcode}\t{len(reads_in_peaks[barcode])}\t{len(fragments_in_peak)}", file=out_file)
+            print(f"{barcode}\t{reads_in_peaks[barcode]}\t{fragments_in_peak}", file=out_file)

@@ -47,8 +47,10 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
             # get gene id; skip read if not present
             gene_id = read.get_tag("GX")
             if gene_id == "-":
-                #logging.warning(f"Skipping {read.qname} because the GX tag is empty")
-                continue
+                gene_id = read.get_tag("gx")
+                if gene_id == "-":
+                    #logging.warning(f"Skipping {read.qname} because the GX tag is empty")
+                    continue
 
             # get UMI; skip read if not present
             umi = read.get_tag("UB")

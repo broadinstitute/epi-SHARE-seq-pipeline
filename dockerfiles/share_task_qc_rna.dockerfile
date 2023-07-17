@@ -3,7 +3,7 @@
 # Based on Debian slim
 ############################################################
 
-FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79
+FROM r-base@sha256:4f0c3a5f1681e03af47991a48d5f8c9db4d8e141a5b77b8a33526a3223a2ea6c
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
