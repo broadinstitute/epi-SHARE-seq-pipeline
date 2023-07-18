@@ -12,7 +12,7 @@ task merge_counts {
 
     input {
         Array[File] tars
-        Array[String]? subpool_names = ''
+        Array[String]? subpool_names = []
         String? gene_naming
         String? prefix
 
