@@ -54,13 +54,13 @@ def get_merged_data(tar_files, subpools, ensembl):
     Genes will be outputted as ENSEMBL IDs if ensembl==True, and as gene symbols otherwise.
     """
     # if subpools supplied, associate subpools with appropriate tars
-    tar_subpool = dict(zip(tar_files, subpools)) if subpools else {}
+    tar_subpool = zip(tar_files, subpools) if subpools else zip(tar_files, "")
     barcode_mappings = []
     gene_mappings = []
     ensembl_to_gene = {}
     
     # get barcode mappings and gene mappings
-    for tar_file in tar_files:
+    for tar_file, subpool in tar_subpool:
         tar = tarfile.open(tar_file, mode="r")
         tar.extract("barcodes.tsv.gz")
         tar.extract("features.tsv.gz")
@@ -69,8 +69,8 @@ def get_merged_data(tar_files, subpools, ensembl):
         barcodes = get_split_lines("barcodes.tsv.gz", delimiter="\t")
         # get mapping of barcode to column index; {barcode:col_idx}
         # append subpool name with underscore if supplied
-        if tar_subpool:
-            barcode_mapping = {line[0] + "_" + tar_subpool[tar_file]:idx for idx, line in enumerate(barcodes)}
+        if subpool:
+            barcode_mapping = {line[0] + "_" + subpool:idx for idx, line in enumerate(barcodes)}
         else:
             basename = os.path.basename(tar_file)
             barcode_mapping = {line[0] + "_" + basename:idx for idx, line in enumerate(barcodes)}
@@ -155,7 +155,7 @@ def write_starsolo_outputs(prefix, count_matrix, barcode_list, ensembl_to_gene):
     with gzip.open(prefix + ".matrix.mtx.gz", "wt") as f:
         # write header lines
         f.write("%%MatrixMarket matrix coordinate integer general\n%\n")
-        f.write("%s %s %s\n") % (count_matrix.shape[0], count_matrix.shape[1], count_matrix.nnz)
+        f.write("%s %s %s\n" % (count_matrix.shape[0], count_matrix.shape[1], count_matrix.nnz))
         for triple in zip(row, col, count_matrix.data):
             f.write("%s %s %s\n" % triple)
     

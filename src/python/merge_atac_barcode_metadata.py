@@ -45,9 +45,6 @@ def merge_barcode_metadata(metadata_files):
                 "pct_reads_peaks":"mean",
                 "pct_mito_reads":"mean"}    
     merged = merged.groupby("barcode").agg(agg_dict).reset_index()
-    
-    # sort barcodes to ensure consistency with TSS enrichment tsv
-    merged = merged.sort_values("barcode")
         
     return(merged)
     

@@ -95,6 +95,7 @@ workflows:
      primaryDescriptorPath: /workflows/subwf-merge-data.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
+             - main
              - merge-pkr
          tags:
              - /.*/

@@ -10,7 +10,7 @@ LABEL software = "Share-seq pipeline"
 LABEL software.version="0.0.1"
 LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
-LABEL software.task="qc_rna"
+LABEL software.task="qc_merged_atac"
 
 ENV R_VERSION=4.1.2
 

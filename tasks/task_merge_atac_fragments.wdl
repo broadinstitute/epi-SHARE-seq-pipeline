@@ -15,7 +15,7 @@ task merge_fragments {
         String? prefix
 
         String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_merge_atac_fragments'
-        Float? disk_factor = 1.5
+        Float? disk_factor = 2
         Int? cpus = 8
     }
 
@@ -23,7 +23,7 @@ task merge_fragments {
     Float input_file_size_gb = size(fragments, 'G')
 
     # Determining disk size based on the size of the input files.
-    Int disk_gb = round(5 + disk_factor * input_file_size_gb)
+    Int disk_gb = round(20 + disk_factor * input_file_size_gb)
 
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
@@ -38,8 +38,6 @@ task merge_fragments {
         
         # decompress fragment files, merge sort, bgzip
         pigz -p ~{cpus} -dc ~{sep=' ' fragments} | cat | sort -k1,1 -k2,2n --parallel=~{cpus} | bgzip -c -@ ~{cpus} > ~{output_file}
-
-        #cat ~{sep=' ' fragments} | gunzip -c | sort -k1,1 -k2,2n | bgzip -c -@ 4 > ~{output_file}
 
         # tabix index
         tabix --zero-based -p bed ~{output_file} 
