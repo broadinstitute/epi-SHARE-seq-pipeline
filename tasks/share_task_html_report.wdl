@@ -85,7 +85,7 @@ task html_report {
         echo ~{rna_duplicate_reads} >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo $percent >> output.txt
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} ~{images_for_csv} output.txt ~{logs_for_csv} ~{joint_barcode_stats} ~{joint_barcode_stats}
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} ~{images_for_csv} output.txt ~{logs_for_csv} ~{joint_barcode_stats} ~{joint_barcode_stats} ~{joint_barcode_stats}
         
         python3 /software/write_csv.py ~{other_output_file} ~{names_for_csv} output.txt ~{images_for_csv} ~{logs_for_csv}
     >>>
@@ -96,7 +96,7 @@ task html_report {
         
         # commenting these outputs out for now, used for debugging write_html
         # and write_csv without running pipeline each time
-        # comment to force push q
+        # comment to force push
         # File csv_report_names = "~{names_for_csv}"
         #File csv_report_images = "~{images_for_csv}"
         # File csv_report_logs = "~{logs_for_csv}"
