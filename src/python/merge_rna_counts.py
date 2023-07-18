@@ -53,15 +53,13 @@ def get_merged_data(tar_files, subpools, ensembl):
     However, if concat==True, each occurrence will be preserved in its own column.
     Genes will be outputted as ENSEMBL IDs if ensembl==True, and as gene symbols otherwise.
     """
-    # if subpools supplied, associate subpools with appropriate tars
-    tar_subpool = zip(tar_files, subpools) if subpools else zip(tar_files, "")
     barcode_mappings = []
     gene_mappings = []
     ensembl_to_gene = {}
     
     # get barcode mappings and gene mappings
-    for tar_file, subpool in tar_subpool:
-        tar = tarfile.open(tar_file, mode="r")
+    for i in range(len(tar_files)):
+        tar = tarfile.open(tar_files[i], mode="r")
         tar.extract("barcodes.tsv.gz")
         tar.extract("features.tsv.gz")
         
@@ -69,10 +67,10 @@ def get_merged_data(tar_files, subpools, ensembl):
         barcodes = get_split_lines("barcodes.tsv.gz", delimiter="\t")
         # get mapping of barcode to column index; {barcode:col_idx}
         # append subpool name with underscore if supplied
-        if subpool:
-            barcode_mapping = {line[0] + "_" + subpool:idx for idx, line in enumerate(barcodes)}
+        if subpools:
+            barcode_mapping = {line[0] + "_" + subpools[i]:idx for idx, line in enumerate(barcodes)}
         else:
-            basename = os.path.basename(tar_file)
+            basename = os.path.basename(tar_files[i])
             barcode_mapping = {line[0] + "_" + basename:idx for idx, line in enumerate(barcodes)}
             
         barcode_mappings.append(barcode_mapping)
