@@ -34,7 +34,7 @@ task merge_counts {
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
     String ensembl_option = if '~{gene_naming}'=='ensembl' then '--ensembl' else ''
-    String subpool_option = if ~{subpool_names}!=[] then '--subpools ~{sep=' ' subpool_names}' else ''
+    String subpool_option = if '~{subpool_names}'!='[]' then '--subpools ~{sep=' ' subpool_names}' else ''
     String monitor_log = 'monitor.log'
 
     command <<<
