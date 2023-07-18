@@ -251,7 +251,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
     
     #need to fix this, going to be something similar to what the images were
     #with open(log_file_list) as fname:
-    
+    #comment to push changes
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
