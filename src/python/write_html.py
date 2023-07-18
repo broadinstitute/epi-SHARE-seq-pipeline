@@ -266,10 +266,10 @@ if __name__ == '__main__':
                        help='file containing calculated stats')
     group.add_argument('log_file_list',
                        help='file containing list of text log files to append to end of HTML file')
-    group.add_argument('qc_stats',
+    group.add_argument('qc_stats_file',
                        help='file containing information for top level tab')
     group.add_argument('--input_file_name',
                        help='optional file with html text to add at top of file', nargs='?') 
 
     args = parser.parse_args()
-    main(args.output_file_name, args.image_file_list, args.stats_info, args.log_file_list, args.qc_stats, args.input_file_name)
+    main(args.output_file_name, args.image_file_list, args.stats_info, args.log_file_list, args.qc_stats_file, args.input_file_name)
