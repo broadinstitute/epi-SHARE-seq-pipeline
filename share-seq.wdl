@@ -281,6 +281,25 @@ workflow share {
         File? rna_barcode_metadata = joint_qc.rna_bardcode_metadata_out
         File? atac_barcode_metadata = joint_qc.atac_barcode_metadata_2
         
+        #numbers to output: 
+                # numbers to output 
+        Int? atac_total_reads = atac.share_atac_total_reads
+        Int? atac_aligned_uniquely = atac.share_atac_aligned_uniquely
+        Int? atac_unaligned = atac.share_atac_unaligned
+        Int? atac_feature_reads = atac.share_atac_feature_reads
+        Int? atac_duplicate_reads = atac.share_atac_duplicate_reads
+        Float? atac_nrf = atac.share_atac_nrf
+        Float? atac_pbc1 = atac.share_atac_pbc1
+        Float? atac_pbc2 = atac.share_atac_pbc2
+        Float? atac_percent_duplicates = atac.share_atac_percent_duplicates
+        Int? rna_total_reads = rna.share_rna_total_reads
+        Int? rna_aligned_uniquely = rna.share_rna_aligned_uniquely
+        Int? rna_aligned_multimap = rna.share_rna_aligned_multimap
+        Int? rna_unaligned = rna.share_rna_unaligned
+        Int? rna_feature_reads = rna.share_rna_feature_reads
+        Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
+
+
     }
 
 }
