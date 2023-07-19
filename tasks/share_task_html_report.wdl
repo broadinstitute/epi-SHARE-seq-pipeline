@@ -94,9 +94,9 @@ task html_report {
         File html_report_file = "~{output_file}"
         File csv_report_file = "~{other_output_file}"
         
-        # commenting these outputs out for now, used for debugging write_html
+        # commenting these outputs out for now, used for debugging write_html 
         # and write_csv without running pipeline each time
-        # comment to force push
+        # comment to force push push 
         # File csv_report_names = "~{names_for_csv}"
         #File csv_report_images = "~{images_for_csv}"
         # File csv_report_logs = "~{logs_for_csv}"
