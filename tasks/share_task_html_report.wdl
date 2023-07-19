@@ -68,6 +68,24 @@ task html_report {
         echo "~{sep="\n" valid_image_files}" >> ~{names_for_csv}
         echo "~{sep="\n" valid_log_files}" >> ~{names_for_csv}
         echo "see if this gets logged"
+        
+        echo ~{atac_total_reads}
+        echo ~{atac_aligned_uniquely} 
+        echo ~{atac_unaligned} 
+        echo ~{atac_feature_reads} 
+        echo ~{atac_duplicate_reads}
+        echo ~{atac_percent_duplicates} 
+        echo ~{atac_nrf} 
+        echo ~{atac_pbc1}
+        echo ~{atac_pbc2}
+        echo ~{rna_total_reads} 
+        echo ~{rna_aligned_uniquely}
+        echo ~{rna_aligned_multimap} 
+        echo ~{rna_unaligned}
+        echo ~{rna_feature_reads}
+        echo ~{rna_duplicate_reads}
+        echo "end of outputs"
+
         echo "thing 1, 1" > stats.csv
         echo "thing 2, 2" >> stats.csv
         echo "thing 3, 3" >> stats.csv
