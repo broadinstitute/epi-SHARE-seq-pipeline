@@ -88,6 +88,8 @@ task qc_atac {
 
     String monitor_log = "atac_qc_monitor.log"
 
+    #file path for output file
+    String tss_out_file = "${prefix}.atac.qc.${genome_name}.tss_nums_out.txt"
 
     command<<<
         set -e
@@ -127,7 +129,8 @@ task qc_atac {
             -e 2000 \
             --tss ~{tss} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
-            in.fragments.tsv.gz
+            in.fragments.tsv.gz \
+            --tss_vals ~{tss_out_file}
 
         # Duplicates per barcode
         echo '------ START: Compute duplication per barcode ------' 1>&2
@@ -206,6 +209,8 @@ task qc_atac {
         File? atac_qc_barcode_rank_plot = fragment_barcode_rank_plot
 
         #File? atac_qc_monitor_log = monitor_log
+
+        File? atac_qc_tss_outfile = tss_out_file
     
     }
 
