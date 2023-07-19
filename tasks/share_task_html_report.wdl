@@ -67,6 +67,7 @@ task html_report {
         echo "~{sep="\n" names_numeric_fields}" > ~{names_for_csv}
         echo "~{sep="\n" valid_image_files}" >> ~{names_for_csv}
         echo "~{sep="\n" valid_log_files}" >> ~{names_for_csv}
+        echo "see if this gets logged"
         echo "thing 1, 1" > stats.csv
         echo "thing 2, 2" >> stats.csv
         echo "thing 3, 3" >> stats.csv
