@@ -59,6 +59,7 @@ task html_report {
     String images_for_csv = "${default="share-seq-data" prefix}images.txt"
     String logs_for_csv = "${default="share-seq-data" prefix}logs.txt"
     Array[String] names_numeric_fields = ['atac_total_reads', 'atac_aligned_uniquely','atac_unaligned', 'atac_feature_reads','atac_duplicate_reads', 'atac_percent_duplicates', 'atac_nrf','atac_pbc1','atac_pbc2', 'rna_total_reads','rna_aligned_uniquely','rna_aligned_multimap','rna_unaligned','rna_feature_reads','rna_duplicate_reads', 'rna_percent_duplicates']
+    String? joint_stats = joint_barcode_stats
     command <<<
 
         echo "~{sep="\n" valid_image_files}" > ~{images_for_csv}
@@ -85,7 +86,7 @@ task html_report {
         echo ~{rna_duplicate_reads} >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo $percent >> output.txt
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} ~{images_for_csv} output.txt ~{logs_for_csv} ~{logs_for_csv}
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} ~{images_for_csv} output.txt ~{logs_for_csv} ~{joint_stats}
         
         python3 /software/write_csv.py ~{other_output_file} ~{names_for_csv} output.txt ~{images_for_csv} ~{logs_for_csv}
     >>>
