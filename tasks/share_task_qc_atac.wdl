@@ -39,7 +39,7 @@ task qc_atac {
         Int? cpus = 8
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac"
     }
 
     # Determine the size of the input

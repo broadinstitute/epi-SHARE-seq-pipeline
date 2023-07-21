@@ -19,7 +19,7 @@ task qc_merged_rna {
 
         Float? disk_factor = 1.0
         Float? memory_factor = 1.5
-        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_merged_rna"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_rna"
     }
 
     # Determine the size of the input

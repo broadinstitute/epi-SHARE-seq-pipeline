@@ -5,6 +5,13 @@
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
 
+LABEL maintainer = "Mei Knudson"
+LABEL software = "Share-seq pipeline"
+LABEL software.version="0.0.1"
+LABEL software.organization="Broad Institute of MIT and Harvard"
+LABEL software.version.is-production="No"
+LABEL software.task="qc_atac"
+
 ENV SAMTOOLS_VERSION 1.9
 ENV BEDTOOLS_VERSION v2.29.0
 ENV PICARD_VERSION 2.27.5
@@ -15,6 +22,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
     autoconf \
+    automake \
+    binutils \
     build-essential \
     git \
     libcurl4-openssl-dev \
@@ -22,7 +31,10 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     libncurses5-dev \
     libbz2-dev \
-    python \
+    python3 \
+    python3-dev \
+    python3-full \
+    python3-pip \
     unzip \
     wget \
     zlib1g-dev &&\
@@ -98,6 +110,7 @@ COPY --chown=$USER:$USER src/python/qc_atac_compute_tss_enrichment.py /usr/local
 COPY --chown=$USER:$USER src/python/qc_atac_count_duplicates_per_barcode.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/qc_atac_compute_reads_in_peaks.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/plot_insert_size_hist.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/merge_atac_barcode_metadata.py /usr/local/bin
 COPY --chown=$USER:$USER src/R/barcode_rank_functions.R /usr/local/bin
 COPY --chown=$USER:$USER src/R/atac_qc_plots.R /usr/local/bin
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
