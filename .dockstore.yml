@@ -90,7 +90,7 @@ workflows:
          tags:
              - /.*/
 
-   - name: "SHARE-seq-merge"
+   - name: "merge-data"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-merge-data.wdl
      filters:  # Only develop or master branches and localAligner/** tags
