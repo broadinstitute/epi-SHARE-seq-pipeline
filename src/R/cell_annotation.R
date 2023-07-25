@@ -243,3 +243,18 @@ tryCatch(
     }
 
 )
+
+## Save Seurat object
+tryCatch(
+    {
+        log_print("# Save Seurat object")
+    
+        saveRDS(obj.query, file = paste0(prefix,".cell.annotation.",genome,".rds"))
+
+        log_print("SUCCESSFUL: Save Seurat object")
+    },
+    error = function(cond) {
+        log_print("ERROR: Save Seurat object")
+        log_print(cond)
+    }
+)

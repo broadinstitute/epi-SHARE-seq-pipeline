@@ -99,5 +99,6 @@ workflows:
              - main
              - dev
              - cell-annotation
+             - mei-cell-annotation
          tags:
              - /.*/
