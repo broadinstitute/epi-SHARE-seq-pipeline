@@ -239,7 +239,7 @@ task share_rna_align {
             --outFilterMultimapNmax 100 \
             --outSAMtype BAM SortedByCoordinate \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
-            --outFileNamePrefix result/
+            --outFileNamePrefix result/ \
             --outReadsUnmapped Fastx \
             --chimOutType WithinBAM \
             --soloCBstart 9 \
