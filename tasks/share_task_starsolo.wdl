@@ -58,6 +58,12 @@ task share_rna_align {
             read_files='~{sep=',' fastq_R2} ~{sep=',' fastq_R1}'
             cb_umi_length=$r1_length
         fi
+
+        # in bacdrop load R1 and then R2
+        if [ '~{chemistry}' == 'bacdrop' ]; then
+            read_files='~{sep=',' fastq_R1} ~{sep=',' fastq_R2}'
+        fi
+
         echo $r1_length
         echo $r2_length
         echo $read_files
@@ -236,7 +242,7 @@ task share_rna_align {
             --soloUMIlen 8 \
             --alignSJDBoverhangMin 1000 \
             --alignIntronMax 1 \
-            --outFilterMultimapNmax 100 \
+            --outFilterMultimapNmax 20 \
             --outSAMtype BAM SortedByCoordinate \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
             --outFileNamePrefix result/ \
@@ -253,7 +259,6 @@ task share_rna_align {
             # Comments:
             # --soloBarcodeReadLength 0 added to avoid checking cb+umi length \
             # consider using alignSJDBoverhangMin 1 as above
-            # consider using outFilterMultimapNmax 20 as above
             # consider adding NM to outSAMattributes as above
             # --sjdbGTFfile ./ is unnecessary since star knows to find it in the tar
             # bacdrop chemistry only: --sjdbGTFfeatureExon CDS \ --sjdbGTFtagExonParentTranscript gene_id \ --sjdbGTFtagExonParentGeneName gene \
