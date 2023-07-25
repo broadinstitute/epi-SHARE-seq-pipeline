@@ -228,29 +228,36 @@ task share_rna_align {
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
-            --soloBarcodeReadLength 0 # added to avoid checking cb+umi length \
+            --soloBarcodeReadLength 0 \
             --soloType CB_UMI_Simple \
             --soloCBwhitelist bacdrop_whitelist.txt \
             --soloCBmatchWLtype Exact \
             --soloCBlen 13 \
             --soloUMIlen 8 \
-            --alignSJDBoverhangMin 1000 \ # consider using 1 as above
+            --alignSJDBoverhangMin 1000 \
             --alignIntronMax 1 \
-            --outFilterMultimapNmax 100 \ # consider using 20 as above
+            --outFilterMultimapNmax 100 \
             --outSAMtype BAM SortedByCoordinate \
-            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \ # consider adding NM as above
+            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
             --outFileNamePrefix result/
             --outReadsUnmapped Fastx \
             --chimOutType WithinBAM \
             --soloCBstart 9 \
             --soloUMIstart 1 \
-            #--sjdbGTFfile ./ \ # how come this doesn't appear above? try this way or figure out how to call this file in the tar
-            --sjdbGTFfeatureExon CDS \ # bacdrop chemistry only
-            --sjdbGTFtagExonParentTranscript gene_id \ # bacdrop chemistry only
-            --sjdbGTFtagExonParentGeneName gene \ # bacdrop chemistry only
-            --soloBarcodeMate 1 \ # for paired end alignment - identifies which read mate contains the barcode and umi
-            --clip5pNbases 21 0 \ # for paired end alignment - clips first 21 bases from read1
+            --sjdbGTFfeatureExon CDS \
+            --sjdbGTFtagExonParentTranscript gene_id \
+            --sjdbGTFtagExonParentGeneName gene \
+            --soloBarcodeMate 1 \
+            --clip5pNbases 21 0 \
 
+            # Comments:
+            # --soloBarcodeReadLength 0 added to avoid checking cb+umi length \
+            # consider using alignSJDBoverhangMin 1 as above
+            # consider using outFilterMultimapNmax 20 as above
+            # consider adding NM to outSAMattributes as above
+            # --sjdbGTFfile ./ is unnecessary since star knows to find it in the tar
+            # bacdrop chemistry only: --sjdbGTFfeatureExon CDS \ --sjdbGTFtagExonParentTranscript gene_id \ --sjdbGTFtagExonParentGeneName gene \
+            # for paired end alignment only: --clip5pNbases 21 0 clips first 21 bases from read1, --soloBarcodeMate 1 identifies which read mate contains the barcode and umi
 
             feature_type='Gene'
 
