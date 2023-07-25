@@ -237,7 +237,7 @@ task share_rna_align {
             --soloBarcodeReadLength 0 \
             --soloType CB_UMI_Simple \
             --soloCBwhitelist bacdrop_whitelist.txt \
-            --soloCBmatchWLtype Exact \
+            --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 13 \
             --soloUMIlen 8 \
             --alignSJDBoverhangMin 1000 \
