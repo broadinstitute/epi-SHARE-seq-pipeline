@@ -22,7 +22,9 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     libncurses5-dev \
     libbz2-dev \
-    python \
+    python3 \
+    python3-dev \
+    python3-pip \
     unzip \
     wget \
     zlib1g-dev &&\
@@ -33,6 +35,8 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir /software
 WORKDIR /software
 ENV PATH="/software:${PATH}"
+
+RUN ln -s /usr/bin/python3 /usr/bin/python 
 
 # Install bedtools 2.29.0
 RUN git clone --branch ${BEDTOOLS_VERSION} --single-branch https://github.com/arq5x/bedtools2.git && \
@@ -70,13 +74,13 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-dev \
     python3-pip \
-    openjdk-11-jre \
+    default-jre \
     r-base \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts (pysam, SAMstats)
-RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam --editable=git+https://github.com/kundajelab/SAMstats@75e60f1e67c6d5d066371a0b53729e4b1f6f76c5#egg=SAMstats
+RUN python3 -m pip install --no-cache-dir --ignore-installed --break-system-packages numpy matplotlib pandas plotnine pysam --editable=git+https://github.com/kundajelab/SAMstats@75e60f1e67c6d5d066371a0b53729e4b1f6f76c5#egg=SAMstats
 
 # Create and setup new user
 ENV USER=shareseq
