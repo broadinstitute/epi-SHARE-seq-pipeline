@@ -250,7 +250,6 @@ task share_rna_align {
             --chimOutType WithinBAM \
             --soloCBstart 9 \
             --soloUMIstart 1 \
-            --sjdbGTFtagExonParentGeneName gene \
             --soloBarcodeMate 1 \
             --clip5pNbases 21 0 \
 
@@ -262,7 +261,7 @@ task share_rna_align {
             # bacdrop chemistry only:
                 # --sjdbGTFfeatureExon CDS \ (I removed it since it already appeared in genome generating step)
                 # --sjdbGTFtagExonParentTranscript gene_id \ (I removed this, consider adding it back)
-                # --sjdbGTFtagExonParentGeneName gene \ (since our gtf file has gene instead of gene_name)
+                # --sjdbGTFtagExonParentGeneName gene \ (I removed it - consider adding since our gtf file has gene instead of gene_name)
             # for paired end alignment only:
                 # --clip5pNbases 21 0 clips first 21 bases from read1 
                 # --soloBarcodeMate 1 identifies which read mate contains the barcode and umi
