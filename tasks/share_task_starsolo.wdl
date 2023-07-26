@@ -24,7 +24,7 @@ task share_rna_align {
 
         # Extra parameteres for STARsolo SHARE.
         String soloUMIdedup = "1MM_All"
-        String soloMultiMappers = "Unique"
+        String soloMultiMappers = "Unique EM"
         Int outFilterMultimapNmax = 20
         Float outFilterScoreMinOverLread = 0.3
         Float outFilterMatchNminOverLread = 0.3
