@@ -235,7 +235,7 @@ task share_rna_align {
         # tar and gzip barcodes, features, and matrix files
         cd result/Solo.out/$feature_type/raw/
         gzip *
-        tar -cvzf ~{prefix}.raw.mtx.tar.gz *.gz
+        tar -cvzf raw.mtx.tar.gz *.gz
 
         # Move files and rename
         # TODO: double check this because might be reporting the wrong files
