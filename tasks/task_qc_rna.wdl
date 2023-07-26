@@ -79,10 +79,8 @@ task qc_rna {
     runtime {
         cpu : cpus
         memory : "~{mem_gb} GB"
-        memory_retry_multiplier: 2
         disks: "local-disk ~{disk_gb} ~{disk_type}"
         docker : "${docker_image}"
-        maxRetries:1
     }
 
     parameter_meta {
