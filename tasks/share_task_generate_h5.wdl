@@ -52,7 +52,7 @@ task generate_h5 {
 
         # Generate h5 file
         python3 $(which generate_h5_rna.py) \
-            ${true='./UniqueAndMult-EM.mtx.gz' false='./matrix.mtx.gz' multimappers} \
+            ~{true='./UniqueAndMult-EM.mtx.gz' false='./matrix.mtx.gz' multimappers} \
             ./features.tsv.gz \
             ./barcodes.tsv.gz \
             ~{h5} \
