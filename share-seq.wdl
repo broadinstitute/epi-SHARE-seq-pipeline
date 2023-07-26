@@ -299,9 +299,11 @@ workflow share {
         Int? rna_feature_reads = rna.share_rna_feature_reads
         Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
 
-        #qc file containing stats
+        #file for atac qc stats needed for terra table 
         File? atac_qc_tss_stats = atac.share_atac_tss_outfile
 
+        #file for joint qc stats needed for terra table 
+        File? joint_qc_stats = joint_qc.joint_barcode_stats
 
     }
 
