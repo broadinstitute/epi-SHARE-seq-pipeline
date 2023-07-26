@@ -6,7 +6,7 @@ import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
 import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
 import "../tasks/share_task_filter_atac.wdl" as share_task_filter
-import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
+import "../tasks/task_qc_atac.wdl" as task_qc_atac
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
 import "../tasks/share_task_archr.wdl" as share_task_archr
 
@@ -187,7 +187,7 @@ workflow wf_atac {
                 memory_factor = filter_memory_factor
         }
 
-        call share_task_qc_atac.qc_atac as qc_atac{
+        call task_qc_atac.qc_atac as qc_atac{
             input:
                 wdup_bam = filter.atac_filter_alignment_wdup,
                 wdup_bam_index = filter.atac_filter_alignment_wdup_index,

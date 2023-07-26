@@ -21,6 +21,17 @@ task share_rna_align {
         String genome_name
         String prefix
         String chemistry
+
+        # Extra parameteres for STARsolo SHARE.
+        String soloUMIdedup = "1MM_All"
+        String soloMultiMappers = "Unique"
+        Int outFilterMultimapNmax = 20
+        Float outFilterScoreMinOverLread = 0.3
+        Float outFilterMatchNminOverLread = 0.3
+        Float? outFilterMismatchNoverReadLmax
+        Int? outFilterScoreMin
+        Int? winAnchorMultimapNmax
+
         # Runtime parameters
         Int cpus = 16
         Float? disk_factor = 50.0
@@ -91,15 +102,18 @@ task share_rna_align {
             --soloCBmatchWLtype Exact \
             --soloCBstart 1 \
             --soloCBlen 24 \
-            --soloMultiMappers Unique EM \
+            ~{"--soloMultiMappers "+ soloMultiMappers} \
             --soloUMIstart 25 \
             --soloUMIlen 10 \
             --soloUMIdedup 1MM_All \
             --chimOutType WithinBAM \
             --limitOutSJcollapsed 2000000 \
-            --outFilterMultimapNmax 20 \
-            --outFilterScoreMinOverLread 0.3 \
-            --outFilterMatchNminOverLread 0.3 \
+            --outFilterMultimapNmax ~{outFilterMultimapNmax} \
+            --outFilterScoreMinOverLread ~{outFilterScoreMinOverLread} \
+            --outFilterMatchNminOverLread ~{outFilterMatchNminOverLread} \
+            ~{"--outFilterMismatchNoverReadLmax "+ outFilterMismatchNoverReadLmax} \
+            ~{"--winAnchorMultimapNmax " + winAnchorMultimapNmax} \
+            ~{"--outFilterScoreMin " + outFilterScoreMin} \
             --outSAMtype BAM SortedByCoordinate \
             --limitBAMsortRAM 31232551044 \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
