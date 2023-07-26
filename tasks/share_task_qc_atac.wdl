@@ -125,6 +125,7 @@ task qc_atac {
         time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
+        echo "start tss outfile" >> ~{tss_out_file}
         echo '------ START: Compute TSS enrichment ------' 1>&2
         time python3 $(which qc_atac_compute_tss_enrichment.py) \
             -e 2000 \
