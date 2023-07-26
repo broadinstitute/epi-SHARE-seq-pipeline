@@ -73,10 +73,6 @@ workflow wf_atac {
         String? filter_docker_image
 
         # QC-specific inputs
-        File? raw_bam
-        File? raw_bam_index
-        File? filtered_bam
-        File? filtered_bam_index
         Int? qc_fragment_cutoff
         # Runtime parameters
         Int? qc_cpus = 16

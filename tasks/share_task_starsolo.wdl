@@ -102,9 +102,9 @@ task share_rna_align {
             --soloCBmatchWLtype Exact \
             --soloCBstart 1 \
             --soloCBlen 24 \
-            ~{"--soloMultiMappers "+ soloMultiMappers} \
             --soloUMIstart 25 \
             --soloUMIlen 10 \
+            ~{"--soloMultiMappers "+ soloMultiMappers} \
             --soloUMIdedup 1MM_All \
             --chimOutType WithinBAM \
             --limitOutSJcollapsed 2000000 \
@@ -233,7 +233,7 @@ task share_rna_align {
         fi
 
         # tar and gzip barcodes, features, and matrix files
-        ls results/Solo.out/*
+        ls result/Solo.out/*
         cd result/Solo.out/$feature_type/raw/
         gzip *
         tar -cvzf raw.tar.gz *.gz
