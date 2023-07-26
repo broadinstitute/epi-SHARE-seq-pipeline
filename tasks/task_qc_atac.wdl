@@ -124,12 +124,12 @@ task qc_atac {
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.fragments.tsv.gz
 
-        echo '' > ~{hist_log}
-        echo '------ START: Picard CollectInsertSizeMetrics ------' 1>&2
+        echo "insert_size" > ~{hist_log}
+        echo '------ START: Getting fragment sizes ------' 1>&2
         time awk '{print $3-$2}' <(zcat in.fragments.tsv.gz ) | sort --parallel 4 -n | uniq -c | awk -v OFS="\t" '{print $2,$1}' >> ~{hist_log}
 
         # Insert size plot bulk
-        echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
+        echo '------ START: Generating insertions plot ------' 1>&2
         time python3 $(which plot_insert_size_hist.py) ~{hist_log} ~{prefix} ~{hist_log_png}
 
         echo '------ START: Generate metadata ------' 1>&2
@@ -139,7 +139,7 @@ task qc_atac {
         awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_reads_promoter","pct_reads_peaks","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
 
         # Barcode rank plot
-        echo '------ START: Generate barcod rank plot ------' 1>&2
+        echo '------ START: Generate barcode rank plot ------' 1>&2
         time Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_cutoff} ~{fragment_barcode_rank_plot}
     >>>
 

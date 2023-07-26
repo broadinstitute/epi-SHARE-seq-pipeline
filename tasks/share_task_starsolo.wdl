@@ -233,12 +233,12 @@ task share_rna_align {
         fi
 
         # tar and gzip barcodes, features, and matrix files
-        ls result/Solo.out/*
         cd result/Solo.out/$feature_type/raw/
         gzip *
-        tar -cvzf raw.tar.gz *.gz
+        tar -cvzf ~{prefix}.raw.mtx.tar.gz *.gz
 
         # Move files and rename
+        # TODO: double check this because might be reporting the wrong files
         cd ../../../../
         find result -type f -exec mv {} result \;
         cd result
@@ -259,7 +259,7 @@ task share_rna_align {
         File features_stats = "result/~{prefix}.Features.stats"
         File summary_csv = "result/~{prefix}.Summary.csv"
         File umi_per_cell = "result/~{prefix}.UMIperCellSorted.txt"
-        File raw_tar = "result/~{prefix}.raw.tar.gz"
+        File raw_tar = "result/~{prefix}.raw.mtx.tar.gz"
     }
 
     runtime {
