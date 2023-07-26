@@ -26,6 +26,9 @@ workflow wf_rna {
         Array[File] read1
         Array[File] read2
 
+        # Do we want to use the multimappers assigned with EM method
+        Boolean multimappers = false
+
         # Correct-specific inputs
         Boolean correct_barcodes = true
         # Runtime parameters
@@ -127,6 +130,7 @@ workflow wf_rna {
                 genome_name = genome_name,
                 prefix = prefix,
                 pkr = pkr,
+                multimappers = multimappers,
                 gene_naming = gene_naming,
                 disk_factor = generate_h5_disk_factor,
                 memory_factor = generate_h5_memory_factor,
