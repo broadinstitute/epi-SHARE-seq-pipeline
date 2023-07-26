@@ -7,8 +7,8 @@ workflows:
          branches:
              - main
              - release
-             - bowtie2-sambamba
-             - sambamba
+             - dev
+             - merge-pkr
          tags:
              - /.*/
 
