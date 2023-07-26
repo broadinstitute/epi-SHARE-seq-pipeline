@@ -300,7 +300,7 @@ workflow share {
         Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
 
         #qc file containing stats
-        File? qc_stats = share_task_qc_atac.atac_qc_tss_outfile
+        File? atac_qc_tss_stats = atac.share_atac_tss_outfile
 
 
     }

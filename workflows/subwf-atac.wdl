@@ -315,5 +315,8 @@ workflow wf_atac {
         File? share_atac_archr_strict_obj = archr_strict.archr_raw_obj
         File? share_atac_archr_strict_plots_zip = archr_strict.plots_zip
 
+        #tss values to save in terra
+        File? share_atac_tss_outfile = share_task_qc_atac.atac_qc_tss_outfile
+
     }
 }
