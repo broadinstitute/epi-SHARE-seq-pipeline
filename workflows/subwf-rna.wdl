@@ -3,7 +3,7 @@ version 1.0
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
-import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
+import "../tasks/task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
 
