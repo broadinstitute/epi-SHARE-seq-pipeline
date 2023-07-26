@@ -126,7 +126,7 @@ task qc_atac {
 
         echo '' > ~{hist_log}
         echo '------ START: Picard CollectInsertSizeMetrics ------' 1>&2
-time awk '{print $3-$2}' <(zcat in.fragments.tsv.gz ) | sort --parallel 4 -n | uniq -c | awk -v OFS="\t" '{print $2,$1}' >> ~{hist_log}
+        time awk '{print $3-$2}' <(zcat in.fragments.tsv.gz ) | sort --parallel 4 -n | uniq -c | awk -v OFS="\t" '{print $2,$1}' >> ~{hist_log}
 
         # Insert size plot bulk
         echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
