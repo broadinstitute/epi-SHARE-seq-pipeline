@@ -4,7 +4,7 @@ version 1.0
 import "tasks/10x_task_preprocess.wdl" as preprocess_tenx
 import "tasks/10x_create_barcode_mapping.wdl" as tenx_barcode_map
 import "workflows/subwf-atac.wdl" as share_atac
-import "workflows/subwf-rna-starsolo.wdl" as share_rna
+import "workflows/subwf-rna.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report
@@ -187,9 +187,6 @@ workflow share {
                 atac_unaligned = atac.share_atac_unaligned,
                 atac_feature_reads = atac.share_atac_feature_reads,
                 atac_duplicate_reads = atac.share_atac_duplicate_reads,
-                atac_nrf = atac.share_atac_nrf,
-                atac_pbc1 = atac.share_atac_pbc1,
-                atac_pbc2 = atac.share_atac_pbc2,
                 atac_percent_duplicates = atac.share_atac_percent_duplicates,
                 rna_total_reads = rna.share_rna_total_reads,
                 rna_aligned_uniquely = rna.share_rna_aligned_uniquely,

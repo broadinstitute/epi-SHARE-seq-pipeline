@@ -91,6 +91,7 @@ task share_rna_align {
             --soloCBmatchWLtype Exact \
             --soloCBstart 1 \
             --soloCBlen 24 \
+            --soloMultiMappers Unique EM \
             --soloUMIstart 25 \
             --soloUMIlen 10 \
             --soloUMIdedup 1MM_All \
@@ -101,7 +102,7 @@ task share_rna_align {
             --outFilterMatchNminOverLread 0.3 \
             --outSAMtype BAM SortedByCoordinate \
             --limitBAMsortRAM 31232551044 \
-            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
+            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \
 
@@ -151,7 +152,7 @@ task share_rna_align {
             --outFilterMismatchNmax 999 \
             --outFilterMismatchNoverReadLmax 0.04 \
             --outSAMtype BAM SortedByCoordinate \
-            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
+            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN gx gn \
             --outSAMheaderCommentFile COfile.txt \
             --outSAMheaderHD @HD VN:1.4 SO:coordinate \
             --outSAMunmapped Within \
@@ -204,7 +205,7 @@ task share_rna_align {
             --outFilterMismatchNmax 999 \
             --outFilterMismatchNoverReadLmax 0.04 \
             --outSAMtype BAM SortedByCoordinate \
-            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
+            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN gx gn \
             --outSAMheaderCommentFile COfile.txt \
             --outSAMheaderHD @HD VN:1.4 SO:coordinate \
             --outSAMunmapped Within \
@@ -218,6 +219,7 @@ task share_rna_align {
         fi
 
         # tar and gzip barcodes, features, and matrix files
+        ls results/Solo.out/*
         cd result/Solo.out/$feature_type/raw/
         gzip *
         tar -cvzf raw.tar.gz *.gz

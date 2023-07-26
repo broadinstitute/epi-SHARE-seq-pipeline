@@ -3,7 +3,8 @@
 # Based on Debian slim
 ############################################################
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
+#FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
+FROM debian:buster-slim as builder
 
 LABEL maintainer = "Mei Knudson"
 LABEL software = "Share-seq pipeline"
@@ -33,8 +34,8 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     python3 \
     python3-dev \
-    python3-full \
     python3-pip \
+    python \
     unzip \
     wget \
     zlib1g-dev &&\
@@ -62,12 +63,9 @@ RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamb
     mv sambamba_v0.6.6 /usr/local/bin/sambamba && \
     rm -rf sambamba_*
 
-# Install Picard 2.20.7
-RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
 
-
-
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
+#FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
+FROM debian:buster-slim
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
@@ -76,19 +74,21 @@ LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="No"
 LABEL software.task="qc-atac"
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
     gcc \
     git \
     python3 \
     python3-dev \
     python3-pip \
-    openjdk-11-jre \
     r-base \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts (pysam, SAMstats)
-RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam --editable=git+https://github.com/kundajelab/SAMstats@75e60f1e67c6d5d066371a0b53729e4b1f6f76c5#egg=SAMstats
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam
 
 # Create and setup new user
 ENV USER=shareseq
@@ -117,5 +117,4 @@ COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 
 USER ${USER}
-
 
