@@ -52,8 +52,7 @@ task generate_h5 {
 
         # Generate h5 file
         python3 $(which generate_h5_rna.py) \
-            ~{if multimappers then "./matrix.mtx.gz" else "./UniqueAndMult-EM.mtx.gz"} \
-            ./matrix.mtx.gz \
+            ~{if multimappers then "./UniqueAndMult-EM.mtx.gz" else "./matrix.mtx.gz"} \
             ./features.tsv.gz \
             ./barcodes.tsv.gz \
             ~{h5} \
