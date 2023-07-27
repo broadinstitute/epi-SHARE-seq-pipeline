@@ -54,7 +54,6 @@ task make_track {
 
         insertion_number=$(wc -l tn5_insertions.bed)
         scale_factor=$(bc <<< "scale=6;10000000/$(echo $insertion_number)")
-        awk -v OFS="\t" '{print $1,$2-4,$2+4"\n"$1,$3-4,$3+4}' > insertions.bed
 
         bedtools merge -i insertions.bed -c 1 -o count | \
         awk -v scaling=$scale_factor -v OFS="\t" '{$4=$4*scaling; print $0}' | \
