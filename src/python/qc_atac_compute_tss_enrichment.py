@@ -199,11 +199,11 @@ def plot_tss_enrichment(raw_signal, smoothed_signal, out_file, tss_vals):
     plt.ylabel('TSS enrichment')
     plt.xticks([0, 2000, 4000], ['-2000', 'TSS', '+2000'])
     fig.savefig(out_file)
-    file = open(tss_vals)
+    file = open(tss_vals, 'w')
     raw_signal_max = str(raw_signal.max())
     smooth_signal_max = str(smoothed_signal.max())
-    raw_output = "raw signal max is: " + raw_signal_max
-    smooth_output = "smooth signal max is " + smooth_signal_max
+    raw_output = "raw signal max is: " + raw_signal_max + "\n"
+    smooth_output = "smooth signal max is " + smooth_signal_max + "\n"
     file.write(raw_output)
     file.write(smooth_output)
     plt.close(fig)
