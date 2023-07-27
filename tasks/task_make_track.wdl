@@ -49,10 +49,15 @@ task make_track {
         bash $(which monitor_script.sh) 1>&2 &
 
         pigz -c -d -p 8 ~{fragments} | \
-        awk -v OFS="\t" '{print $1,$2-4,$2+4"\n"$1,$3-4,$3+4}' > insertions.bed
+        awk -v OFS="\t" '{print $1,$2-4,$2+4"\n"$1,$3-4,$3+4}' | \
+        sort --parallel=4 -k1,1 -k2,2n > tn5_insertions.bed
+
+        insertion_number=$(wc -l tn5_insertions.bed)
+        scale_factor=$(bc <<< "scale=6;10000000/$(echo $insertion_number)")
 
         bedtools merge -i insertions.bed -c 1 -o count | \
-        sort --parallel=4 -k1,1 -k2,2n > ~{prefix}.bedGraph
+        awk -v scaling=$scale_factor -v OFS="\t" '{$4=$4*scaling; print $0}' | \
+        sort --parallel=8 -k1,1 -k2,2n > ~{prefix}.bedGraph
 
         bedGraphToBigWig ~{prefix}.bedGraph ~{chrom_sizes} ~{prefix}.~{genome_name}.bw
 
