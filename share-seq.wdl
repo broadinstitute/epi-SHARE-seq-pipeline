@@ -227,6 +227,7 @@ workflow share {
         File? share_atac_barcode_metadata = atac.share_atac_barcode_metadata
         File? share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
         File? share_atac_archr_arrow = atac.share_atac_archr_arrow
+        File? atac_track_bigwig = atac.atac_track_bigwig
 
         # DORCS output
         File? dorcs_notebook_output = dorcs.dorcs_notebook_output
