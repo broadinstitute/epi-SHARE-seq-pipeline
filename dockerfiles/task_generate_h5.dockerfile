@@ -27,6 +27,7 @@ RUN groupadd -r $USER &&\
 
 # Copy scripts
 COPY --chown=$USER:$USER src/python/generate_h5_rna.py /usr/local/bin/
+COPY --chown=$USER:$USER src/python/merge_rna_counts.py /usr/local/bin/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 USER ${USER}
