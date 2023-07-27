@@ -33,6 +33,9 @@ RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
 
+# Copy scripts
+COPY --chown=$USER:$USER src/python/generate_h5_rna.py /usr/local/bin/
+COPY --chown=$USER:$USER src/python/merge_rna_counts.py /usr/local/bin/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 
