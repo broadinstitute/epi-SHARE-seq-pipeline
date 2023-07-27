@@ -48,6 +48,8 @@ workflow wf_rna {
         Int? winAnchorMultimapNmax
         Float? outFilterMismatchNoverReadLmax
         Int? outFilterScoreMin
+        String? soloBarcodeMate
+        String? clip5pNbases  # 39 0
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor
@@ -115,6 +117,8 @@ workflow wf_rna {
                 winAnchorMultimapNmax = winAnchorMultimapNmax,
                 outFilterMismatchNoverReadLmax = outFilterMismatchNoverReadLmax,
                 outFilterScoreMin = outFilterScoreMin,
+                soloBarcodeMate = soloBarcodeMate,
+                clip5pNbases = clip5pNbases,
                 genome_name = genome_name,
                 genome_index_tar = idx_tar,
                 prefix = prefix,

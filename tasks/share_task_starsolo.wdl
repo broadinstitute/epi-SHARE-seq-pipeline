@@ -29,6 +29,9 @@ task share_rna_align {
         Float outFilterScoreMinOverLread = 0.3
         Float outFilterMatchNminOverLread = 0.3
         Float? outFilterMismatchNoverReadLmax
+        String? soloBarcodeMate
+        String? clip5pNbases  # 39 0
+
         Int? outFilterScoreMin
         Int? winAnchorMultimapNmax
 
@@ -104,6 +107,8 @@ task share_rna_align {
             --soloCBlen 24 \
             --soloUMIstart 25 \
             --soloUMIlen 10 \
+            ~{"--soloBarcodeMate "+ soloBarcodeMate} \
+            ~{"--clip5pNbases "+ clip5pNbases} \
             ~{"--soloMultiMappers "+ soloMultiMappers} \
             --soloUMIdedup 1MM_All \
             --chimOutType WithinBAM \
