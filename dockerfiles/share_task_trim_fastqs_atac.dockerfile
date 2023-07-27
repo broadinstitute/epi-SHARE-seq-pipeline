@@ -1,4 +1,4 @@
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
+FROM python@sha256:7ad180fdf785219c4a23124e53745fbd683bd6e23d0885e3554aff59eddbc377
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
@@ -9,24 +9,11 @@ LABEL software.task="Trim ATAC fastqs"
 
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
-    autoconf \
-    automake \
-    binutils \
-    build-essential \
-    libcurl4-openssl-dev \
-    liblz4-dev \
-    liblzma-dev \
-    libncurses5-dev \
-    libbz2-dev \
-    pigz \
-    python3-dev \
-    python3-pip \ 
-    wget \
-    zlib1g-dev &&\
+    wget &&\
     rm -rf /var/lib/apt/lists/*
 
 # Install python packages
-RUN pip install --no-cache-dir dnaio Levenshtein
+RUN pip install --break-system-packages --no-cache-dir dnaio Levenshtein
 # Install fastp
 RUN wget http://opengene.org/fastp/fastp.0.20.1 && mv fastp.0.20.1 fastp && chmod a+x ./fastp && mv ./fastp /usr/local/bin
 
