@@ -184,7 +184,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_merge_bams:$BRANCH_NAME']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_bams:$BRANCH_NAME']
   waitFor: ['task-merge-bams']
   
 - name: 'gcr.io/cloud-builders/docker'
