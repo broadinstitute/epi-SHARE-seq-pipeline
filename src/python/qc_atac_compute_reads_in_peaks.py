@@ -59,23 +59,26 @@ def count_fragments_in_peaks(tabix_filename,
         peak_end = int(peak[2])
 
         # Find all the fragments overlapping the promoter.
-        for fragment in tabixfile.fetch(peak_chr, peak_start, peak_end):
-            fragment_fields = fragment.split("\t")
+        try:
+            for fragment in tabixfile.fetch(peak_chr, peak_start, peak_end):
+                fragment_fields = fragment.split("\t")
 
-            fragment_contig = fragment_fields[0]
-            fragment_start = int(fragment_fields[1])
-            fragment_end = int(fragment_fields[2])
-            barcode = fragment_fields[3]
+                fragment_contig = fragment_fields[0]
+                fragment_start = int(fragment_fields[1])
+                fragment_end = int(fragment_fields[2])
+                barcode = fragment_fields[3]
 
-            fragment_id = "-".join(fragment_fields)
-            fragments_in_peaks_counter[barcode].add(fragment_id)
+                fragment_id = "-".join(fragment_fields)
+                fragments_in_peaks_counter[barcode].add(fragment_id)
 
-            # Increment the counter for the specific barcode.
-            if fragment_start >= peak_start and fragment_start <= peak_end-1:
-                reads_in_peaks_counter[barcode].add(fragment_id+"start")
+                # Increment the counter for the specific barcode.
+                if fragment_start >= peak_start and fragment_start <= peak_end-1:
+                    reads_in_peaks_counter[barcode].add(fragment_id+"start")
 
-            if fragment_end >= peak_start and fragment_end <= peak_end-1:
-                reads_in_peaks_counter[barcode].add(fragment_id+"end")
+                if fragment_end >= peak_start and fragment_end <= peak_end-1:
+                    reads_in_peaks_counter[barcode].add(fragment_id+"end")
+        except ValueError:
+            print(f"No reads found for {peak_chr}:{max(1,peak_start)}-{peak_end}.")
 
     return reads_in_peaks_counter, fragments_in_peaks_counter
 

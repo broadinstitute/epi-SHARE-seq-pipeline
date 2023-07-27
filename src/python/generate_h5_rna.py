@@ -46,24 +46,23 @@ def rename_duplicates(duplicate_list):
         
     return renamed_list
 
-def build_count_matrix(matrix):
+def build_count_matrix(matrix_file):
     """Convert contents of mtx file to csc matrix"""
-    # first line of matrix contains dimensions
+    matrix = get_split_lines(matrix_file, delimiter=" ", skip=2)
     dimensions = next(matrix)
     n_rows = int(dimensions[0])
     n_cols = int(dimensions[1])
-
-    gene_indices = []
-    barcode_indices = []
-    counts = []
-
-    for line in matrix:
+    
+    count_mapping = {}
+    
+    for entry in matrix:
         # subtract 1 from indices to convert to zero-based indexing
-        gene_indices.append(int(line[0])-1)
-        barcode_indices.append(int(line[1])-1)
-        counts.append(int(line[2]))
-
-    count_matrix = csc_matrix((counts, (gene_indices,barcode_indices)), shape=(n_rows,n_cols))
+        row_ind = int(entry[0])-1
+        col_ind = int(entry[1])-1
+        count = float(entry[2])
+        count_mapping[(row_ind,col_ind)] = count
+                
+    count_matrix = csc_matrix((list(count_mapping.values()), zip(*count_mapping.keys())), shape=(n_rows,n_cols))
 
     return count_matrix
 
@@ -98,9 +97,6 @@ def main():
     # read input files
     logging.info("Reading input files\n")
     
-    # get indices and counts from matrix file; skip first two lines of matrix file (header)
-    matrix = get_split_lines(matrix_file, delimiter=" ", skip=2)
-    
     # get genes from features file
     features = get_split_lines(features_file, delimiter="\t")
     if ensembl:
@@ -120,7 +116,7 @@ def main():
 
     # generate count matrix
     logging.info("Generating count matrix\n")
-    count_matrix = build_count_matrix(matrix)
+    count_matrix = build_count_matrix(matrix_file)
 
     # write h5 file
     logging.info(f"Writing to {output_file}.h5\n")

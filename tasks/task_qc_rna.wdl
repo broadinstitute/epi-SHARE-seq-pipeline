@@ -23,7 +23,7 @@ task qc_rna {
         Int? cpus = 16
         Float? disk_factor = 1.0
         Float? memory_factor = 1.5
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_rna"
     }
 
     # Determine the size of the input
@@ -79,10 +79,8 @@ task qc_rna {
     runtime {
         cpu : cpus
         memory : "~{mem_gb} GB"
-        memory_retry_multiplier: 2
         disks: "local-disk ~{disk_gb} ~{disk_type}"
         docker : "${docker_image}"
-        maxRetries:1
     }
 
     parameter_meta {

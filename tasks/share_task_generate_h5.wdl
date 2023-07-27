@@ -19,6 +19,8 @@ task generate_h5 {
         String prefix
         String? gene_naming
 
+        Boolean multimappers = false
+
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
         String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
@@ -50,7 +52,7 @@ task generate_h5 {
 
         # Generate h5 file
         python3 $(which generate_h5_rna.py) \
-            ./matrix.mtx.gz \
+            ~{true='./UniqueAndMult-EM.mtx.gz' false='./matrix.mtx.gz' multimappers} \
             ./features.tsv.gz \
             ./barcodes.tsv.gz \
             ~{h5} \

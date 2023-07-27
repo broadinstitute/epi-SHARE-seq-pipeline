@@ -3,7 +3,7 @@ version 1.0
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
-import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
+import "../tasks/task_qc_rna.wdl" as share_task_qc_rna
 import "../tasks/share_task_log_rna.wdl" as share_task_log_rna
 import "../tasks/share_task_seurat.wdl" as share_task_seurat
 
@@ -26,6 +26,9 @@ workflow wf_rna {
         Array[File] read1
         Array[File] read2
 
+        # Do we want to use the multimappers assigned with EM method
+        Boolean multimappers = false
+
         # Correct-specific inputs
         Boolean correct_barcodes = true
         # Runtime parameters
@@ -37,6 +40,16 @@ workflow wf_rna {
         # Align-specific inputs
         File idx_tar
         String? barcode_tag
+        String soloUMIdedup = "1MM_All"
+        String soloMultiMappers = "Unique EM"
+        Int outFilterMultimapNmax = 20
+        Float outFilterScoreMinOverLread = 0.3
+        Float outFilterMatchNminOverLread = 0.3
+        Int? winAnchorMultimapNmax
+        Float? outFilterMismatchNoverReadLmax
+        Int? outFilterScoreMin
+        String? soloBarcodeMate # 2 for SHARE
+        String? clip5pNbases  # 0 34 for SHARE
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor
@@ -96,6 +109,16 @@ workflow wf_rna {
                 fastq_R1 = select_first([correct.corrected_fastq_R1, read1]),
                 fastq_R2 = select_first([correct.corrected_fastq_R2, read2]),
                 whitelist = whitelist,
+                soloMultiMappers = soloMultiMappers,
+                soloUMIdedup = soloUMIdedup,
+                outFilterMultimapNmax = outFilterMultimapNmax,
+                outFilterScoreMinOverLread = outFilterScoreMinOverLread,
+                outFilterMatchNminOverLread = outFilterMatchNminOverLread,
+                winAnchorMultimapNmax = winAnchorMultimapNmax,
+                outFilterMismatchNoverReadLmax = outFilterMismatchNoverReadLmax,
+                outFilterScoreMin = outFilterScoreMin,
+                soloBarcodeMate = soloBarcodeMate,
+                clip5pNbases = clip5pNbases,
                 genome_name = genome_name,
                 genome_index_tar = idx_tar,
                 prefix = prefix,
@@ -111,6 +134,7 @@ workflow wf_rna {
                 genome_name = genome_name,
                 prefix = prefix,
                 pkr = pkr,
+                multimappers = multimappers,
                 gene_naming = gene_naming,
                 disk_factor = generate_h5_disk_factor,
                 memory_factor = generate_h5_memory_factor,

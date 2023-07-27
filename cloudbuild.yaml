@@ -8,7 +8,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-correct-fastq'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_correct_fastq:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_correct_fastq:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_correct_fastq.dockerfile',
           '.' ]
@@ -18,9 +18,9 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-merge-bams'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_merge_bams:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_bams:$BRANCH_NAME',
           '-f',
-          'dockerfiles/share_task_merge_bams.dockerfile',
+          'dockerfiles/task_merge_bams.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -28,7 +28,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-archr'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_archr.dockerfile',
           '.' ]
@@ -38,7 +38,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-10x-preprocess'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/10x_task_preprocess:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/10x_task_preprocess:$BRANCH_NAME',
           '-f',
           'dockerfiles/10x_task_preprocess.dockerfile',
           '.' ]
@@ -48,7 +48,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-filter-atac'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_filter_atac:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_filter_atac:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_filter_atac.dockerfile',
           '.' ]
@@ -58,7 +58,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-trim-fastqs-atac'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_trim_fastqs_atac:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_trim_fastqs_atac:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_trim_fastqs_atac.dockerfile',
           '.' ]
@@ -68,7 +68,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-bowtie2'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_bowtie2.dockerfile',
           '.' ]
@@ -78,7 +78,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-generate-h5'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_generate_h5.dockerfile',
           '.' ]
@@ -88,7 +88,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-html-report'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_html_report:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_html_report:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_html_report.dockerfile',
           '.' ]
@@ -98,7 +98,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-joint-qc'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_qc:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_qc:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_joint_qc.dockerfile',
           '.' ]
@@ -108,7 +108,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-preprocess'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_preprocess:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_preprocess:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_preprocess.dockerfile',
           '.' ]
@@ -118,9 +118,9 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-qc-atac'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_atac:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_qc_atac:$BRANCH_NAME',
           '-f',
-          'dockerfiles/share_task_qc_atac.dockerfile',
+          'dockerfiles/task_qc_atac.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -128,9 +128,9 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-qc-rna'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_rna:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_qc_rna:$BRANCH_NAME',
           '-f',
-          'dockerfiles/share_task_qc_rna.dockerfile',
+          'dockerfiles/task_qc_rna.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -138,7 +138,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-seurat'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_seurat:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_seurat:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_seurat.dockerfile',
           '.' ]
@@ -148,7 +148,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-star'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:$BRANCH_NAME',
           '-f',
           'dockerfiles/share_task_star.dockerfile',
           '.' ]
@@ -158,9 +158,29 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-find-dorcs'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:$BRANCH_NAME',
           '-f',
           'dockerfiles/dorcs_task_find_dorcs.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'task-merge-rna-counts'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_rna_counts:$BRANCH_NAME',
+          '-f',
+          'dockerfiles/task_merge_rna_counts.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'task-merge-atac-fragments'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_atac_fragments:$BRANCH_NAME',
+          '-f',
+          'dockerfiles/task_merge_atac_fragments.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -169,83 +189,93 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_correct_fastq:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_correct_fastq:$BRANCH_NAME']
   waitFor: ['task-correct-fastq']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_merge_bams:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_merge_bams:$BRANCH_NAME']
   waitFor: ['task-merge-bams']
   
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_archr:$BRANCH_NAME']
   waitFor: ['task-archr']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/10x_task_preprocess:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/10x_task_preprocess:$BRANCH_NAME']
   waitFor: ['task-10x-preprocess']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_trim_fastqs_atac:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_trim_fastqs_atac:$BRANCH_NAME']
   waitFor: ['task-trim-fastqs-atac']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_filter_atac:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_filter_atac:$BRANCH_NAME']
   waitFor: ['task-filter-atac']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_bowtie2:$BRANCH_NAME']
   waitFor: ['task-bowtie2']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:$BRANCH_NAME']
   waitFor: ['task-generate-h5']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_html_report:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_html_report:$BRANCH_NAME']
   waitFor: ['task-html-report']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_qc:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_joint_qc:$BRANCH_NAME']
   waitFor: ['task-joint-qc']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_preprocess:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_preprocess:$BRANCH_NAME']
   waitFor: ['task-preprocess']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_atac:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_qc_atac:$BRANCH_NAME']
   waitFor: ['task-qc-atac']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_qc_rna:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_qc_rna:$BRANCH_NAME']
   waitFor: ['task-qc-rna']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_seurat:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_seurat:$BRANCH_NAME']
   waitFor: ['task-seurat']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_star:$BRANCH_NAME']
   waitFor: ['task-star']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:latest']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:$BRANCH_NAME']
   waitFor: ['task-find-dorcs']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_rna_counts:$BRANCH_NAME']
+  waitFor: ['task-merge-rna-counts']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_atac_fragments:$BRANCH_NAME']
+  waitFor: ['task-merge-atac-fragments']
 
 timeout: 28800s
 options:

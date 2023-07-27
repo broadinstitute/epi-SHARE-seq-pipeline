@@ -6,7 +6,7 @@ import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
 import "../tasks/share_task_bowtie2.wdl" as share_task_align
 import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
 import "../tasks/share_task_filter_atac.wdl" as share_task_filter
-import "../tasks/share_task_qc_atac.wdl" as share_task_qc_atac
+import "../tasks/task_qc_atac.wdl" as task_qc_atac
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
 import "../tasks/share_task_archr.wdl" as share_task_archr
 
@@ -73,10 +73,6 @@ workflow wf_atac {
         String? filter_docker_image
 
         # QC-specific inputs
-        File? raw_bam
-        File? raw_bam_index
-        File? filtered_bam
-        File? filtered_bam_index
         Int? qc_fragment_cutoff
         # Runtime parameters
         Int? qc_cpus = 16
@@ -187,13 +183,8 @@ workflow wf_atac {
                 memory_factor = filter_memory_factor
         }
 
-        call share_task_qc_atac.qc_atac as qc_atac{
+        call task_qc_atac.qc_atac as qc_atac{
             input:
-                raw_bam = merge.atac_merged_alignment,
-                raw_bam_index = merge.atac_merged_alignment_index,
-                filtered_bam = filter.atac_filter_alignment_dedup,
-                filtered_bam_index = filter.atac_filter_alignment_dedup_index,
-                queryname_final_bam = filter.atac_filter_alignment_dedup_queryname,
                 wdup_bam = filter.atac_filter_alignment_wdup,
                 wdup_bam_index = filter.atac_filter_alignment_wdup_index,
                 mito_metrics_bulk = filter.atac_filter_mito_metrics_bulk,
@@ -217,8 +208,7 @@ workflow wf_atac {
         call share_task_log_atac.log_atac as log_atac {
         input:
             alignment_log = merge.atac_merged_alignment_log,
-            dups_log = qc_atac.atac_qc_duplicate_stats,
-            pbc_log = qc_atac.atac_qc_pbc_stats
+            dups_log = qc_atac.atac_qc_duplicate_stats
         }
 
         if (  "~{pipeline_modality}" == "full" ) {
@@ -258,7 +248,6 @@ workflow wf_atac {
 
         # QC
         File? share_atac_barcode_metadata = qc_atac.atac_qc_barcode_metadata
-        File? share_atac_qc_final = qc_atac.atac_qc_final_stats
         File? share_atac_qc_hist_plot = qc_atac.atac_qc_final_hist_png
         File? share_atac_qc_hist_txt = qc_atac.atac_qc_final_hist
         File? share_atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
@@ -270,9 +259,6 @@ workflow wf_atac {
         Int? share_atac_unaligned = log_atac.atac_unaligned
         Int? share_atac_feature_reads = log_atac.atac_feature_reads
         Int? share_atac_duplicate_reads = log_atac.atac_duplicate_reads
-        Float? share_atac_nrf = log_atac.atac_nrf
-        Float? share_atac_pbc1 = log_atac.atac_pbc1
-        Float? share_atac_pbc2 = log_atac.atac_pbc2
         Float? share_atac_percent_duplicates = log_atac.atac_pct_dup
 
         # ArchR
