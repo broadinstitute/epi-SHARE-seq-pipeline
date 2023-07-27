@@ -7,6 +7,7 @@ import "../tasks/share_task_bowtie2.wdl" as share_task_align
 import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
 import "../tasks/share_task_filter_atac.wdl" as share_task_filter
 import "../tasks/task_qc_atac.wdl" as task_qc_atac
+import "../tasks/task_make_track.wdl" as task_make_track
 import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
 import "../tasks/share_task_archr.wdl" as share_task_archr
 
@@ -86,6 +87,14 @@ workflow wf_atac {
         Float? trim_disk_factor = 8.0
         Float? trim_memory_factor = 0.15
         String? trim_docker_image
+
+        # Make track inputs
+        # Runtime parameters
+        Int make_track_cpus = 8
+        Float? make_track_disk_factor = 4
+        Float? make_track_memory_factor = 0.3
+        String? make_track_docker_image
+                
         
         # ArchR-specific inputs
         # Runtime parameters
@@ -205,6 +214,18 @@ workflow wf_atac {
                 memory_factor = qc_memory_factor
         }
 
+        call task_make_track.make_track as track {
+            input:
+                fragments = filter.atac_filter_fragments,
+                chrom_sizes = chrom_sizes,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = make_track_cpus,
+                disk_factor = make_track_disk_factor,
+                docker_image = make_track_docker_image,
+                memory_factor = make_track_memory_factor
+        }
+
         call share_task_log_atac.log_atac as log_atac {
         input:
             alignment_log = merge.atac_merged_alignment_log,
@@ -252,6 +273,9 @@ workflow wf_atac {
         File? share_atac_qc_hist_txt = qc_atac.atac_qc_final_hist
         File? share_atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
         File? share_atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
+
+        # Track
+        File? atac_track_bigwig = track.atac_track_bigwig
 
         # Log
         Int? share_atac_total_reads = log_atac.atac_total_reads
