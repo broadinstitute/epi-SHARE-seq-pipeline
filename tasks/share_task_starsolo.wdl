@@ -81,11 +81,12 @@ task share_rna_align {
 
         # SHARE-seq
         if [ '~{chemistry}' == 'shareseq' ]; then
+            # Need to think of a way of doing this. For now off.
             # Check that CB + UMI length is correct
-            if [ $cb_umi_length -ne 34 ]; then
-                echo 'CB + UMI length is $cb_umi_length; expected 34'
-                exit 1
-            fi
+            #if [ $cb_umi_length -ne 34 ]; then
+            #    echo 'CB + UMI length is $cb_umi_length; expected 34'
+            #    exit 1
+            #fi
 
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
@@ -148,6 +149,8 @@ task share_rna_align {
             --genomeDir ./ \
             --genomeLoad NoSharedMemory \
             --soloType CB_UMI_Simple \
+            ~{"--soloBarcodeMate "+ soloBarcodeMate} \
+            ~{"--clip5pNbases "+ clip5pNbases} \
             --soloFeatures Gene SJ \
             --soloStrand Forward \
             --soloCellFilter EmptyDrops_CR \
@@ -211,6 +214,8 @@ task share_rna_align {
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 12 \
+            ~{"--soloBarcodeMate "+ soloBarcodeMate} \
+            ~{"--clip5pNbases "+ clip5pNbases} \
             --soloUMIdedup 1MM_CR \
             --soloUMIfiltering MultiGeneUMI_CR \
             --alignSJoverhangMin 8 \

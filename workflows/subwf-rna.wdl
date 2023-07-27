@@ -48,8 +48,8 @@ workflow wf_rna {
         Int? winAnchorMultimapNmax
         Float? outFilterMismatchNoverReadLmax
         Int? outFilterScoreMin
-        String? soloBarcodeMate
-        String? clip5pNbases  # 39 0
+        String? soloBarcodeMate # 2 for SHARE
+        String? clip5pNbases  # 0 34 for SHARE
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor
