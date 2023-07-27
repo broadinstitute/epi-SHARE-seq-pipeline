@@ -18,23 +18,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
-    autoconf \
-    automake \
-    build-essential \
-    git \
-    libcurl4-openssl-dev \
-    liblz4-dev \
-    liblzma-dev \
-    libncurses5-dev \
-    libbz2-dev \
-    zlib1g-dev &&\
+    pigz \
+    tabix &&\
     rm -rf /var/lib/apt/lists/*
 
-# Install samtools 1.16
-RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
-    cd htslib && git submodule update --init --recursive && autoreconf -i && make && make install && cd ../ && \
-    git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
-    cd samtools && make && make install && cd ../ && rm -rf samtools* && rm -rf htslib*
 
 # Create and setup new user
 ENV USER=shareseq
