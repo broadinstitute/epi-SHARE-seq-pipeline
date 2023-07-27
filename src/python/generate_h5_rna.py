@@ -59,7 +59,7 @@ def build_count_matrix(matrix_file):
         # subtract 1 from indices to convert to zero-based indexing
         row_ind = int(entry[0])-1
         col_ind = int(entry[1])-1
-        count = int(entry[2])
+        count = float(entry[2])
         count_mapping[(row_ind,col_ind)] = count
                 
     count_matrix = csc_matrix((list(count_mapping.values()), zip(*count_mapping.keys())), shape=(n_rows,n_cols))
