@@ -15,6 +15,7 @@ LABEL software.task="make-track"
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
+    bc \
     bedtools \
     libkrb5-3 \
     libcurl4 \
