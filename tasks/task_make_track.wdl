@@ -55,7 +55,7 @@ task make_track {
         insertion_number=$(wc -l tn5_insertions.bed)
         scale_factor=$(bc <<< "scale=6;10000000/$(echo $insertion_number)")
 
-        bedtools merge -i insertions.bed -c 1 -o count | \
+        bedtools merge -i tn5_insertions.bed -c 1 -o count | \
         awk -v scaling=$scale_factor -v OFS="\t" '{$4=$4*scaling; print $0}' | \
         sort --parallel=8 -k1,1 -k2,2n > ~{prefix}.bedGraph
 
@@ -64,7 +64,7 @@ task make_track {
     >>>
 
     output {
-        File atac_track_bigwig = "~{prefix}.bigwig"
+        File atac_track_bigwig = "~{prefix}.~{genome_name}.bw"
     }
 
     runtime {
