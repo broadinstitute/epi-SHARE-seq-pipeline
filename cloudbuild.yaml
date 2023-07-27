@@ -78,9 +78,9 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'task-generate-h5'
   args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:$BRANCH_NAME',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_generate_h5:$BRANCH_NAME',
           '-f',
-          'dockerfiles/share_task_generate_h5.dockerfile',
+          'dockerfiles/task_generate_h5.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -166,16 +166,6 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-merge-rna-counts'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_rna_counts:$BRANCH_NAME',
-          '-f',
-          'dockerfiles/task_merge_rna_counts.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
   id: 'task-merge-atac-fragments'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_atac_fragments:$BRANCH_NAME',
@@ -224,7 +214,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/share_task_generate_h5:$BRANCH_NAME']
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_generate_h5:$BRANCH_NAME']
   waitFor: ['task-generate-h5']
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -266,11 +256,6 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/dorcs_task_find_dorcs:$BRANCH_NAME']
   waitFor: ['task-find-dorcs']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_rna_counts:$BRANCH_NAME']
-  waitFor: ['task-merge-rna-counts']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
