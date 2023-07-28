@@ -66,5 +66,8 @@ workflow wf_rna {
         File? share_rna_seurat_umap_mito_plot = seurat.seurat_umap_mito_plot
         File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
+        
+        #numbers taken from seurat, next level of passing
+        File? share_task_rna_seurat_numbers = seurat.seurat_nums_txt
     }
 }
