@@ -157,7 +157,7 @@ task seurat {
         File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
         File? seurat_monitor_log = monitor_log
-        File? suerat_nums_txt = seurat_nums
+        File? seurat_nums_txt = seurat_nums
     }
 
     runtime {
