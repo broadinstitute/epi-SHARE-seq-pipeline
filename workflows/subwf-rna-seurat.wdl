@@ -69,6 +69,6 @@ workflow wf_rna {
         
         #numbers taken from seurat, next level of passing
         #comment to commit
-        File? share_task_rna_seurat_numbers = seurat.seurat_nums_txt
+        #File? share_task_rna_seurat_numbers = seurat.seurat_nums_txt
     }
 }
