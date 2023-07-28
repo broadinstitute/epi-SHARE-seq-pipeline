@@ -43,8 +43,9 @@ task seurat {
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
         
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
-        
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
+        String docker_image = "mshriver01/share_task_seurat"
+
         #Int mem_gb = 128
         
         Float? disk_factor = 0.1
@@ -90,7 +91,7 @@ task seurat {
     String barcode_metadata = '${prefix}.rna.seurat.barcode_metadata.${genome_name}.tsv'
     String plots_zip_dir = '${plots_filepath}.zip'
     #String papermill_log_filename = 'papermill.logfile.txt'
-    String top_level_csv = 'top_level_file.csv'
+    String seurat_nums = 'seurat_nums.txt'
 
     command {
     
@@ -104,8 +105,10 @@ task seurat {
            rna_matrix="./"
         fi
         
+        echo "start seurat outfile" >> ~{seurat_nums}
+
         papermill $(which seurat_notebook.ipynb) ${output_filename} \
-        -p top_level_csv ${top_level_csv} \
+        -p seurat_nums ${seurat_nums} \
         -p rna_matrix ${rna_matrix} \
         -p genome ${genome_name} \
         -p min_features ${min_features} \
@@ -154,7 +157,7 @@ task seurat {
         File? seurat_filtered_matrix = filtered_seurat_h5
         File? plots_zip = plots_zip_dir
         File? seurat_monitor_log = monitor_log
-        File? top_level_csv_out = top_level_csv 
+        File? suerat_nums_txt = seurat_nums
     }
 
     runtime {

@@ -305,6 +305,9 @@ workflow share {
         #file for joint qc stats needed for terra table 
         File? joint_qc_stats = joint_qc.joint_barcode_stats
 
+        #for for numbers from seurat notebook 
+        File? suerat_numbers = share_rna.share_rna_seurat_nums
+
     }
 
 }

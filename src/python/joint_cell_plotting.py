@@ -26,7 +26,7 @@ def parse_arguments():
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
     parser.add_argument("plot_file", help="Filename for plot png file")
-    parser.add_argument("qc_summary_data", help="Filename for csv with numeric outputs of qc analysis")
+    parser.add_argument("qc_summary_data", help="Filename for txt file with numeric outputs of qc analysis")
     parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
     parser.add_argument("pkr", help="PKR name", nargs='?', default="")
 
@@ -136,15 +136,34 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
     plot.save(filename=plot_file, dpi=1000)
 
 # write information for the top level page (counts of reads) to a csv
-def write_top_level_csv(input_file, output_file): 
+def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, min_genes): 
     data = pd.read_csv(input_file)
     neither_count = get_count_of_type(data, 'neither')
+    neither_count_str = "Neither " + str(neither_count)
     both_count = get_count_of_type(data, 'both')
+    both_count_str = "Both " + str(both_count)
     rna_count = get_count_of_type(data, 'RNA only')
+    rna_count_str = "RNA " + str(rna_count)
     atac_count = get_count_of_type(data, 'ATAC only')
-    df_input = [{'neither': neither_count, 'both': both_count, 'RNA only': rna_count, 'ATAC only': atac_count}]
-    stats_df = pd.DataFrame(df_input)
-    stats_df.to_csv(output_file)
+    atac_count_str = "ATAC "+ str(atac_count)
+    min_tss_str = "joint_min_tss " + str(min_tss)
+    min_frags_str = "joint_min_frags " + str(min_frags)
+    min_umis_str = "joint_min_umis " + str(min_umis)
+    min_genes_str = "joint_min_genes " + str(min_genes) 
+    #df_input = [{'neither': neither_count, 'both': both_count, 'RNA only': rna_count, 'ATAC only': atac_count}]
+    #stats_df = pd.DataFrame(df_input)
+    #stats_df.to_csv(output_file)
+    output_file.write(neither_count_str)
+    output_file.write(both_count_str)
+    output_file.write(rna_count_str)
+    output_file.write(atac_count_str)
+    output_file.write(min_tss_str)
+    output_file.write(min_frags_str)
+    output_file.write(min_umis_str)
+    output_file.write(min_genes_str)
+
+
+
 
 # extract the count information from the QC column for a given category (both,
 # neither, rna only, atac only)
@@ -194,7 +213,7 @@ def main():
     metrics_df.to_csv(barcode_metadata_file)
     
     # write the stats for the top level into a csv, containd joint qc numbers
-    write_top_level_csv(barcode_metadata_file, qc_summary_data)
+    write_top_level_txt(barcode_metadata_file, qc_summary_data, min_tss, min_frags, min_umis, min_genes)
     
     logging.info("All done!")
 
