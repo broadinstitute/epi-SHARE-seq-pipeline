@@ -18,6 +18,7 @@ def parse_arguments():
     parser.add_argument("bam_file", help="Filename for input bam file")
     parser.add_argument("bai_file", help="Filename for bam index file")
     parser.add_argument("barcode_metadata_file", help="Filename for output barcode metadata txt file")
+    parser.add_argument("mapped_to_gene_file", help="Filename for output containing percent reads mapped to genes")
     parser.add_argument("pkr", help="PKR id for shareseq", default = None, nargs='?')
     parser.add_argument("--barcode_tag", help="PKR id for shareseq", default="CB")
 
@@ -29,14 +30,15 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
     Reported metrics are total counts, UMIs (one UMI counted per unique UMI-gene mapping),
     duplicate counts, genes, percent mitochondrial reads
     """
+    reads = mapped_to_gene = 0
     total_counts = defaultdict(int)
     genes = defaultdict(set)
     umi_gene = defaultdict(set)
     mitochondrial_counts = defaultdict(int)
     barcodes = set()
-    formatted_barcodes = {}
 
     for read in bam:
+        reads += 1
         try:
             # get barcode; skip read if not present
             barcode = read.get_tag(barcode_tag)
@@ -49,6 +51,8 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
             if gene_id == "-":
                 #logging.warning(f"Skipping {read.qname} because the GX tag is empty")
                 continue
+            else:
+                mapped_to_gene += 1
 
             # get UMI; skip read if not present
             umi = read.get_tag("UB")
@@ -88,8 +92,11 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
         metrics = [out_barcode, total_val, duplicate_val, umi_val, gene_val, mitochondrial_val]
 
         barcode_metadata.append(metrics)
+    
+    # get percentage of reads mapped to genes
+    pct_mapped_to_gene = round(mapped_to_gene/reads * 100, 1)
 
-    return barcode_metadata
+    return (barcode_metadata, pct_mapped_to_gene)
 
 def write_metadata_file(barcode_metadata, output_file):
     fields = ["barcode", "total_counts", "duplicate_counts", "umis", "genes", "percent_mitochondrial"]
@@ -106,20 +113,23 @@ def main():
     args = parse_arguments()
     bam_file = getattr(args, "bam_file")
     bai_file = getattr(args, "bai_file")
-
     pkr = getattr(args, "pkr")
     barcode_tag = getattr(args, "barcode_tag")
-
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
+    mapped_to_gene_file = getattr(args, "mapped_to_gene_file")
 
     # load bam file
     bam = pysam.AlignmentFile(bam_file, "rb", index_filename=bai_file)
 
     # get metrics for each barcode
-    barcode_metadata = get_metrics(bam, barcode_tag, pkr)
+    barcode_metadata, pct_mapped_to_gene = get_metrics(bam, barcode_tag, pkr)
 
-    # write txt file
+    # write metadata file
     write_metadata_file(barcode_metadata, barcode_metadata_file)
+    
+    # write percentage of reads mapped to genes
+    with open(mapped_to_gene_file, "w") as f:
+        f.write(pct_mapped_to_gene)
 
 if __name__ == "__main__":
 
