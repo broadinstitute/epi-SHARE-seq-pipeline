@@ -276,6 +276,9 @@ workflow wf_atac {
 
         # Track
         File? atac_track_bigwig = track.atac_track_bigwig
+        File? atac_track_bigwig_no_nucleosome = track.atac_track_bigwig_no_nucleosome
+        File? atac_track_bigwig_mono_nucleosome = track.atac_track_bigwig_mono_nucleosome
+        File? atac_track_bigwig_multi_nucleosome = track.atac_track_bigwig_multi_nucleosome
 
         # Log
         Int? share_atac_total_reads = log_atac.atac_total_reads

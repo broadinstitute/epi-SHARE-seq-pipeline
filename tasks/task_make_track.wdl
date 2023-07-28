@@ -48,23 +48,25 @@ task make_track {
         # I am not writing to a file anymore because Google keeps track of it automatically.
         bash $(which monitor_script.sh) 1>&2 &
 
-        pigz -c -d -p 8 ~{fragments} | \
-        awk -v OFS="\t" '{print $1,$2-4,$2+4"\n"$1,$3-4,$3+4}' | \
-        sort --parallel=4 -k1,1 -k2,2n > tn5_insertions.bed
-
-        insertion_number=$(wc -l < tn5_insertions.bed)
-        scale_factor=$(bc <<< "scale=6;10000000/$(echo $insertion_number)")
-
-        bedtools merge -i tn5_insertions.bed -c 1 -o count | \
-        awk -v scaling=$scale_factor -v OFS="\t" '{$4=$4*scaling; print $0}' | \
-        sort --parallel=8 -k1,1 -k2,2n > ~{prefix}.bedGraph
-
-        bedGraphToBigWig ~{prefix}.bedGraph ~{chrom_sizes} ~{prefix}.~{genome_name}.bw
+        # Compute track for all insertion sizes
+        bash make_track.sh -o ~{prefix}.~{genome_name}.bw ~{chrom_sizes} ~{fragments}
+        # Compute track for fragments shorter than 100 nucleotides
+        awk '$3-$2 < 100' ~{fragments} > no_nucleosome.bed
+        bash make_track.sh -o ~{prefix}.size.lt.100.~{genome_name}.bw ~{chrom_sizes} ~{fragments}
+        # Compute track for mono-nuclesome fragments
+        awk '$3-$2 >= 100 && $3-$2 <200' ~{fragments} > mono_nucleosome.bed
+        bash make_track.sh -o ~{prefix}.size.gt.100.lt.200.~{genome_name}.bw ~{chrom_sizes} ~{fragments}
+        # Compute track for fragments spanning multiple nucleosomes
+        awk '$3-$2 >= 200' ~{fragments} > multi_nucleosome.bed
+        bash make_track.sh -o ~{prefix}.size.gt.200.~{genome_name}.bw ~{chrom_sizes} ~{fragments}
 
     >>>
 
     output {
         File atac_track_bigwig = "~{prefix}.~{genome_name}.bw"
+        File atac_track_bigwig_no_nucleosome = "~{prefix}.no.nucleosome.~{genome_name}.bw"
+        File atac_track_bigwig_mono_nucleosome = "~{prefix}.mono.nucleosome.~{genome_name}.bw"
+        File atac_track_bigwig_multi_nucleosome = "~{prefix}.multi.nucleosome.~{genome_name}.bw"
     }
 
     runtime {

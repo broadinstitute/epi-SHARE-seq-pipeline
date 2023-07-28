@@ -228,6 +228,10 @@ workflow share {
         File? share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
         File? share_atac_archr_arrow = atac.share_atac_archr_arrow
         File? atac_track_bigwig = atac.atac_track_bigwig
+        File? atac_track_bigwig_no_nucleosome = atac.atac_track_bigwig_no_nucleosome
+        File? atac_track_bigwig_mono_nucleosome = atac.atac_track_bigwig_mono_nucleosome
+        File? atac_track_bigwig_multi_nucleosome = atac.atac_track_bigwig_multi_nucleosome
+
 
         # DORCS output
         File? dorcs_notebook_output = dorcs.dorcs_notebook_output
