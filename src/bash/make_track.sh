@@ -65,8 +65,9 @@ touch $LOCK_FILE
 TMPBED=$(mktemp)
 TMPGRAPH=$(mktemp)
 
-fragment_file=$1
-chrom_sizes=$2
+chrom_sizes=$1
+fragment_file=$2
+
 
 # --- Body --------------------------------------------------------
 #  SCRIPT LOGIC GOES HERE
@@ -82,4 +83,6 @@ awk -v scaling=$scale_factor -v OFS="\t" '{$4=$4*scaling; print $0}' | \
 sort --parallel=8 -k1,1 -k2,2n > $TMPGRAPH
 
 bedGraphToBigWig $TMPGRAPH $chrom_sizes $output_file
+
+rm $TMPBED $TMPGRAPH
 # -----------------------------------------------------------------
