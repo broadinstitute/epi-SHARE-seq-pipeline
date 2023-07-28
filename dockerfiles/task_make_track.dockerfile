@@ -34,6 +34,7 @@ RUN groupadd -r $USER &&\
     chown $USER:$USER /home/$USER
 
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
+COPY --chown=$USER:$USER src/bash/make_track.sh /usr/local/bin
 
 
 USER ${USER}
