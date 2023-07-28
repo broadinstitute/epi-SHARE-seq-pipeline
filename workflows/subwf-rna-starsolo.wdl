@@ -207,6 +207,6 @@ workflow wf_rna {
         Int? share_rna_duplicate_reads = log_rna.rna_duplicate_reads
 
         #File? share_rna_seurat_nums = seurat.seurat_nums_txt
-        #other push 
+        #other push push
     }
 }
