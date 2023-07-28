@@ -73,12 +73,12 @@ fragment_file=$2
 #  SCRIPT LOGIC GOES HERE
 pigz -c -d -p 8 $fragment_file | \
 awk -v OFS="\t" '{print $1,$2-4,$2+4"\n"$1,$3-4,$3+4}' | \
-sort --parallel=4 -k1,1 -k2,2n > $TMPFILE
+sort --parallel=4 -k1,1 -k2,2n > $TMPBED
 
-insertion_number=$(wc -l < $TEMPFILE)
+insertion_number=$(wc -l < $TMPBED)
 scale_factor=$(bc <<< "scale=6;10000000/$(echo $insertion_number)")
 
-bedtools merge -i $TEMPFILE -c 1 -o count | \
+bedtools merge -i $TMPBED -c 1 -o count | \
 awk -v scaling=$scale_factor -v OFS="\t" '{$4=$4*scaling; print $0}' | \
 sort --parallel=8 -k1,1 -k2,2n > $TMPGRAPH
 
