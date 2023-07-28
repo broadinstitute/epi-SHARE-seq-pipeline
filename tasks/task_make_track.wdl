@@ -53,15 +53,15 @@ task make_track {
         # Compute track for fragments shorter than 100 nucleotides
         pigz -d -c -p 4 ~{fragments} | awk '$3-$2 < 100' | pigz -p 8 -c > no_nucleosome.bed.gz
         library_size=$(pigz -dc -p 8 no_nucleosome.bed.gz | wc -l | cut -f1)
-        bash make_track.sh -f $library_size -o ~{prefix}.no.nucleosome.~{genome_name}.bw ~{chrom_sizes} no_nucleosome.bed.gz
+        bash make_track.sh -d $library_size -o ~{prefix}.no.nucleosome.~{genome_name}.bw ~{chrom_sizes} no_nucleosome.bed.gz
         # Compute track for mono-nuclesome fragments
         pigz -d -c -p 4 ~{fragments} | awk '$3-$2 >= 100 && $3-$2 <200' | pigz -p 8 -c > mono_nucleosome.bed.gz
         library_size=$(pigz -dc -p 8 mono_nucleosome.bed.gz | wc -l | cut -f1)
-        bash make_track.sh -f $library_size -o ~{prefix}.mono.nucleosome.~{genome_name}.bw ~{chrom_sizes} mono_nucleosome.bed.gz
+        bash make_track.sh -d $library_size -o ~{prefix}.mono.nucleosome.~{genome_name}.bw ~{chrom_sizes} mono_nucleosome.bed.gz
         # Compute track for fragments spanning multiple nucleosomes
         pigz -d -c -p 4 ~{fragments} | awk '$3-$2 >= 200' | pigz -p 8 -c > multi_nucleosome.bed.gz
         library_size=$(pigz -dc -p 8 multi_nucleosome.bed.gz | wc -l | cut -f1)
-        bash make_track.sh -f $library_size -o ~{prefix}.multi.nucleosome.~{genome_name}.bw ~{chrom_sizes} multi_nucleosome.bed.gz
+        bash make_track.sh -d $library_size -o ~{prefix}.multi.nucleosome.~{genome_name}.bw ~{chrom_sizes} multi_nucleosome.bed.gz
 
     >>>
 
