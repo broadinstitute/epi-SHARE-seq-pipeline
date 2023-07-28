@@ -303,7 +303,7 @@ workflow share {
         File? atac_qc_tss_stats = atac.share_atac_tss_outfile
 
         #file for joint qc stats needed for terra table 
-        File? joint_qc_stats = joint_qc.joint_barcode_stats
+        #File? joint_qc_stats = joint_qc.joint_barcode_stats
 
         #for for numbers from seurat notebook, other change for change 
         #File? seurat_numbers = share_rna.share_rna_seurat_nums
