@@ -206,6 +206,6 @@ workflow wf_rna {
         Int? share_rna_feature_reads = log_rna.rna_feature_reads
         Int? share_rna_duplicate_reads = log_rna.rna_duplicate_reads
 
-        File? share_rna_seurat_nums = share_task_seurat.seurat_nums_txt
+        File? share_rna_seurat_nums = seurat.seurat_nums_txt
     }
 }
