@@ -41,6 +41,7 @@ task qc_rna {
     String assay = "RNA"
     String bai = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.bam.bai"
     String barcode_metadata = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.metadata.tsv"
+    String mapped_to_gene = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.reads.mapped.to.genes.txt"
     String duplicates_log = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.duplicates.log.txt"
     String umi_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.umi.barcode.rank.plot.png"
     String gene_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.barcode.rank.plot.png"
@@ -59,6 +60,7 @@ task qc_rna {
         python3 $(which rna_barcode_metadata.py) ~{bam} \
                                                  ~{bai} \
                                                  ~{barcode_metadata} \
+                                                 ~{mapped_to_gene} \
                                                  ~{pkr} ~{"--barcode_tag " + barcode_tag}
 
         awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
@@ -69,6 +71,7 @@ task qc_rna {
 
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
+        File rna_reads_mapped_to_genes = "~{mapped_to_gene}"
         File rna_duplicates_log = "~{duplicates_log}"
         File rna_barcode_metadata_log = "barcode_metadata.log"
         File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"

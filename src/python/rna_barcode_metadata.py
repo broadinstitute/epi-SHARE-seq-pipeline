@@ -129,7 +129,7 @@ def main():
     
     # write percentage of reads mapped to genes
     with open(mapped_to_gene_file, "w") as f:
-        f.write(pct_mapped_to_gene)
+        f.write(str(pct_mapped_to_gene))
 
 if __name__ == "__main__":
 
