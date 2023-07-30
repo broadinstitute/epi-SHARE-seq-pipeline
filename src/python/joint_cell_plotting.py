@@ -49,8 +49,8 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     rna_barcodes = []
     # remove cells that have fewer than 10 UMIs
     for line in rna_metrics_contents:
-        if int(line[3]) >= remove_low_yielding_cells:
-            umis.append(int(line[3]))
+        if int(line[8]) >= remove_low_yielding_cells:
+            umis.append(int(line[8]))
             genes.append(int(line[4]))
             rna_barcodes.append(line[0])
     rna_metrics = dict(zip(rna_barcodes, zip(umis, genes)))
@@ -69,12 +69,12 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
 
     # merge metrics by barcodes
     metrics = merge_dicts(rna_metrics, atac_metrics)
-    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["umis","genes","tss","frags"])
+    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["unique_umi","genes","tss","frags"])
 
     return(df)
 
 def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
-    pass_umis = df["umis"] >= min_umis
+    pass_umis = df["unique_umi"] >= min_umis
     pass_genes = df["genes"] >= min_genes
     pass_tss = df["tss"] >= min_tss
     pass_frags = df["frags"] >= min_frags
@@ -103,10 +103,10 @@ def label_func(breaks):
 def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
     # get max x and y coords to set plot limits
     max_x = max(df["frags"])
-    max_y = max(df["umis"])
+    max_y = max(df["unique_umi"])
     xy_lim = round_to_power_10(max(max_x, max_y))
 
-    plot = (ggplot(df, aes("frags", "umis", color="QC_count"))
+    plot = (ggplot(df, aes("frags", "unique_umi", color="QC_count"))
              + geom_point(size=0.5)
              + labs(title = f"Joint Cell Calling ({pkr})",
                     caption = f"ATAC cutoffs: TSS ≥ {min_tss}, frags ≥ {min_frags}. RNA cutoffs: UMIs ≥ {min_umis}, genes ≥ {min_genes}",

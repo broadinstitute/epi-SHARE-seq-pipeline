@@ -59,7 +59,7 @@ task qc_rna {
 
         zcat matrix.mtx.gz | awk -v OFS="\t" 'NR>3{count[$2]+=$3; tot[$2]+=1}END{for (bc in count){ print bc,count[bc],tot[bc]} }' | sort -k1,1n > barcode_count_statistics_dedup.raw.tsv
         echo -e "barcode\tunique_umi\tgenes_final\n" > barcode_count_statistics_dedup.tsv
-        paste <(zcat barcodes.tsv.gz) barcode_count_statistics_dedup.raw.tsv | awk -v pkr=~{if defined(subpool) then "_~{subpool}" else ""} -v OFS="\t" '{print $1pkr,$3,$4}' >> barcode_count_statistics_dedup.tsv
+        awk -v pkr=~{if defined(subpool) then "_~{subpool}" else ""} -v OFS="\t" 'FNR==NR{bc[NR]=$1}FNR!=NR{print bc[$1]pkr,$2,$3; delete bc[$1]}END{for(idx in bc){print bc[idx]pkr,0,0}}' <(zcat barcodes.tsv.gz) barcode_count_statistics_dedup.raw.tsv | sort -k1,1 >> barcode_count_statistics_dedup.tsv
 
         # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
         python3 $(which rna_barcode_metadata.py) ~{bam} \
