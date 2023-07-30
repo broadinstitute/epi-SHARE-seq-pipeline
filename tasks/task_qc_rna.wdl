@@ -68,7 +68,7 @@ task qc_rna {
                                                  ~{subpool} \
                                                  ~{"--barcode_tag " + barcode_tag}
 
-        join -t $'\t' -j1 <(cat tmp_metadata.tsv | (sed -u 1q;sort -k1,1)) barcode_count_statistics_dedup.tsv | \
+        join -t $'\t' -e 0 -j1 <(cat tmp_metadata.tsv | (sed -u 1q;sort -k1,1)) barcode_count_statistics_dedup.tsv | \
         awk -v OFS="\t" 'NR==1{print $0,"FRIG"}NR>1{printf "%s\t%4.2f\n",$0,$9/$2}' > ~{barcode_metadata}
 
         awk 'NR>1{total+=$2; duplicate+=$2-$9; unique+=$9} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate; print "FRIG:",unique/total}' ~{barcode_metadata} > ~{duplicates_log}
