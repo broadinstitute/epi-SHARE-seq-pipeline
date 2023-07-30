@@ -29,7 +29,7 @@ task log_rna {
         echo $(($total_reads - $aligned_uniquely - $aligned_multimap)) > unaligned.txt
         awk -F":" '$1~/total reads/{print $2}' ~{dups_log} > feature_reads.txt
         awk -F":" '$1~/duplicate reads/{print $2}' ~{dups_log} > duplicate_reads.txt
-        awk -F":" '$1~/frig/{print $2}' ~{dups_log} > frig.txt
+        awk -F":" '$1~/FRIG/{print $2}' ~{dups_log} > frig.txt
     >>>
     output {
         Int rna_total_reads = read_int("total_reads.txt")
