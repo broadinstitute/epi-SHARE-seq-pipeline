@@ -16,7 +16,7 @@ round_to_power_10 <- function(x){
   return(10^ceiling(log10(x)))
 }
 max_x <- max(passing_df$frags)
-max_y <- max(passing_df$umis)
+max_y <- max(passing_df$unique_umi)
 xy_lim <- round_to_power_10(max(max_x, max_y))
 
 # palette from https://rdrr.io/github/GreenleafLab/ArchR/src/R/ColorPalettes.R
@@ -25,7 +25,7 @@ sambaNight <- c("6"='#1873CC',"2"='#1798E5',"8"='#00BFFF',"5"='#4AC596',"1"='#00
 if (sum(barcode_metadata$QC=="both") > 0) {
     png(plot_file, width=8.75, height=6, units="in", res=300)
 
-    density_plot <- ggplot(passing_df, aes(x=frags, y=umis)) +
+    density_plot <- ggplot(passing_df, aes(x=frags, y=unique_umi)) +
                             geom_pointdensity(size=0.7) +
                             scale_color_gradientn(colors=sambaNight) +
                             labs(title=paste0("Joint Cell Calling (", pkr, "): Density Plot", sep=""),

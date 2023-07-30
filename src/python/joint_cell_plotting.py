@@ -51,7 +51,7 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     for line in rna_metrics_contents:
         if int(line[8]) >= remove_low_yielding_cells:
             umis.append(int(line[8]))
-            genes.append(int(line[4]))
+            genes.append(int(line[9]))
             rna_barcodes.append(line[0])
     rna_metrics = dict(zip(rna_barcodes, zip(umis, genes)))
 
@@ -69,13 +69,13 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
 
     # merge metrics by barcodes
     metrics = merge_dicts(rna_metrics, atac_metrics)
-    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["unique_umi","genes","tss","frags"])
+    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["unique_umi","genes_final","tss","frags"])
 
     return(df)
 
 def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
     pass_umis = df["unique_umi"] >= min_umis
-    pass_genes = df["genes"] >= min_genes
+    pass_genes = df["genes_final"] >= min_genes
     pass_tss = df["tss"] >= min_tss
     pass_frags = df["frags"] >= min_frags
 
