@@ -55,7 +55,7 @@ task qc_rna {
         # Index bam file
         samtools index -@ ~{cpus} ~{bam} ~{bai}
 
-        tar -xvzf mtx_tar
+        tar -xvzf ~{mtx_tar}
 
         zcat matrix.mtx.gz | awk -v OFS="\t" 'NR>3{count[$2]+=$3; tot[$2]+=1}END{for (bc in count){ print bc,count[bc],tot[bc]} }' | sort -k1,1n > barcode_count_statistics_dedup.raw.tsv
         echo -e "barcode\tunique_umi\tgenes_final\n" > barcode_count_statistics_dedup.tsv
