@@ -144,9 +144,10 @@ workflow wf_rna {
         call share_task_qc_rna.qc_rna as qc_rna {
             input:
                 bam = align.output_bam,
+                mtx_tar = align.raw_tar,
                 umi_cutoff = umi_cutoff,
                 gene_cutoff = gene_cutoff,
-                pkr = pkr,
+                subpool = pkr,
                 barcode_tag = barcode_tag,
                 genome_name = genome_name,
                 prefix = prefix,
@@ -229,5 +230,6 @@ workflow wf_rna {
         Int? share_rna_unaligned = log_rna.rna_unaligned
         Int? share_rna_feature_reads = log_rna.rna_feature_reads
         Int? share_rna_duplicate_reads = log_rna.rna_duplicate_reads
+        Float? rna_frig = log_rna.rna_frig
     }
 }

@@ -23,7 +23,7 @@ barcode_metadata <- read.table(barcode_metadata_file, header=T)
 ## Get plot inputs
 
 # Impose UMI cutoff, sort in decreasing order, assign rank
-umi_filtered <- barcode_metadata$umis[barcode_metadata$umis >= umi_cutoff]
+umi_filtered <- barcode_metadata$total_counts[barcode_metadata$total_counts >= umi_cutoff]
 umi_filtered_sort <- sort(umi_filtered, decreasing=T)
 umi_rank <- 1:length(umi_filtered_sort)
 
@@ -154,7 +154,7 @@ dev.off()
 # Make genes vs UMIs scatter plot
 png(gene_umi_plot_file, width=8, height=8, units='in', res=300)
 
-plot(x=barcode_metadata$umis,
+plot(x=barcode_metadata$total_counts,
      y=barcode_metadata$genes,
      xlab="UMIs",
      ylab="Genes",

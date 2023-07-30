@@ -31,6 +31,7 @@ task html_report {
         Int? rna_unaligned
         Int? rna_feature_reads
         Int? rna_duplicate_reads
+        Float? rna_frig
 
         ## JPEG files to be encoded and appended to html
         Array[File?] image_files
