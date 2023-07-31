@@ -153,6 +153,7 @@ def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, m
     #df_input = [{'neither': neither_count, 'both': both_count, 'RNA only': rna_count, 'ATAC only': atac_count}]
     #stats_df = pd.DataFrame(df_input)
     #stats_df.to_csv(output_file)
+    output_file = open(output_file, 'w')
     output_file.write(neither_count_str)
     output_file.write(both_count_str)
     output_file.write(rna_count_str)
