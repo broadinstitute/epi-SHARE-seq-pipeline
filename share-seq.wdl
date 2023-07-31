@@ -306,7 +306,7 @@ workflow share {
         #File? joint_qc_stats = joint_qc.joint_barcode_stats
 
         #for for numbers from seurat notebook, other change for change 
-        #File? seurat_numbers = share_rna.share_rna_seurat_nums
+        File? seurat_numbers = rna.share_rna_seurat_nums
         #comment to push
 
     }
