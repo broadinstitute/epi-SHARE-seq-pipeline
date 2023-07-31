@@ -68,7 +68,8 @@ workflow wf_rna {
         File? share_rna_plots_zip = seurat.plots_zip
         
         #numbers taken from seurat, next level of passing
-        #comment to commit
+        #for some reason it is ok with this, but the main script does not have 
+        #access to this, and only imports the starsolo subworkflow
         File? share_task_rna_seurat_numbers = seurat.seurat_nums_txt
     }
 }

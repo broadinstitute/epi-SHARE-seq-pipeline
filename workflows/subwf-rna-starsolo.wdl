@@ -206,9 +206,13 @@ workflow wf_rna {
         Int? share_rna_feature_reads = log_rna.rna_feature_reads
         Int? share_rna_duplicate_reads = log_rna.rna_duplicate_reads
 
+        #neither of these seem to work, even though womtools only has the 
+        #whitespace issues, whitespace issue might supress other ones though as
+        #womtools did not complain about clearly invalid inputs as long as 
+        #they were formatted corretly
+        
         #File? share_rna_seurat_nums = seurat.seurat_nums_txt
         #File? share_rna_seurat_numbers = share_task_seurat.seurat_nums_txt
-        #change to push
 
     }
 }
