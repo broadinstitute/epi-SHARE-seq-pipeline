@@ -321,7 +321,7 @@ workflow wf_atac {
 
         #archr values to save in terra
         #comment push change
-        File? share_atac_archr_numbers = archr.archr_numbers
+        #File? share_atac_archr_numbers = archr.archr_numbers
 
         
 
