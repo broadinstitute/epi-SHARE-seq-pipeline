@@ -63,7 +63,7 @@ task qc_merged_atac {
         paste <(sort -k1,1 ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv) <(sort -k1,1 merged_barcode_metadata | cut -f 6-15) > ~{final_barcode_metadata} 
 
         # Insert size plot bulk
-        awk '{print $3-$2}' ~{fragments} > insert_sizes
+        gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
         echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
         time python3 $(which plot_insert_size_hist.py) insert_sizes ~{prefix} ~{insert_size_hist}
 
