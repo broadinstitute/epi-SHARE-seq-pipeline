@@ -60,7 +60,7 @@ task qc_merged_atac {
         time python3 $(which merge_atac_barcode_metadata.py) merged_barcode_metadata ~{sep=' ' barcode_metadata}
         
         # Add TSS enrichment to barcode metadata
-        paste <(head -1 ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv; tail -n +2 ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | sort -k1,1) <(head -1 merged_barcode_metadata; tail -n +2 merged_barcode_metadata | sort -k1,1 | cut -f 6-15) > ~{final_barcode_metadata} 
+        paste <(sed -u 1q ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv; sort -k1,1) <(sed -u 1q merged_barcode_metadata; sort -k1,1 | cut -f 6-15) > ~{final_barcode_metadata} 
 
         # Insert size plot bulk
         gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
