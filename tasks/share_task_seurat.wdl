@@ -159,7 +159,7 @@ task seurat {
         File? seurat_monitor_log = monitor_log
         
         #numbers taken from seurat 
-        File? seurat_nums_txt = seurat_nums
+        File seurat_nums_txt = seurat_nums
     }
 
     runtime {

@@ -90,6 +90,9 @@ workflow wf_atac {
         Float? trim_disk_factor = 8.0
         Float? trim_memory_factor = 0.15
         String? trim_docker_image
+
+        #add file as parameter here so it doesnt pass as file?
+        File share_atac_tss_outfile_in = qc_atac.atac_qc_tss_outfile
     }
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
@@ -317,7 +320,8 @@ workflow wf_atac {
 
         #tss values to save in terra
         #comment to push change
-        File? share_atac_tss_outfile = qc_atac.atac_qc_tss_outfile
+        #File share_atac_tss_outfile = qc_atac.atac_qc_tss_outfile
+        File share_atac_tss_outfile = share_atac_tss_outfile_in
 
         #archr values to save in terra
         #comment push change

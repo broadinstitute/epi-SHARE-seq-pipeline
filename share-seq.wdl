@@ -70,6 +70,15 @@ workflow share {
 
         File genome_tsv
         String? genome_name
+
+        #add files as input parameters, i think if they dont show up here then
+        #they are passed as type file? and wont work with the readlines
+        #function
+        File atac_qc_tss_stats_in = atac.share_atac_tss_outfile
+        File seurat_numbers_in = rna.share_rna_seurat_nums
+        File joint_qc_stats_in = joint_qc.joint_barcode_stats
+
+
     }
 
     Map[String, File] annotations = read_map(genome_tsv)
@@ -229,7 +238,43 @@ workflow share {
                 joint_barcode_stats = joint_qc.joint_barcode_stats
         }
     
-    
+        
+        #values to pull from tss_enrichment stats
+        String tss_raw_output_max = "0"
+        String tss_smooth_output_max = "0"
+        Array[String] tss_values = [tss_raw_output_max, tss_smooth_output_max]
+        #Array[String] tss_values_in = read_lines(atac.share_atac_tss_outfile)
+        
+
+        #values to pull from joint_qc stats
+        String joint_qc_neither = "0"
+        String joint_qc_both = "0"
+        String joint_rna = "0"
+        String joint_atac = "0"
+        String joint_min_tss = "0"
+        String joint_min_frags = "0"
+        String joint_min_umis = "0"
+        String joint_min_genes = "0"
+        Array[String] joint_qc_values = [joint_qc_neither, joint_qc_both, joint_rna, joint_atac, joint_min_tss, joint_min_frags, joint_min_umis, joint_min_genes]
+        #File joint_qc_cast = joint_qc.joint_barcode_metadata
+        #Array[String] joint_qc_values_in = read_lines(joint_qc_cast)
+        
+        #values from seurat numbers
+        String seurat_genes = "0"
+        String seurat_barcodes = "0"
+        String seurat_mt_percent = "0"
+        Array[String] seurat_values = [seurat_genes, seurat_barcodes, seurat_mt_percent]
+        #Array[String] seurat_values_in = read_lines(rna.share_rna_seurat_nums)
+
+
+        #values from archr
+        String archr_total_barcodes = "0"
+        String archr_median_frags = "0"
+        String archr_median_tss_enrichment = "0"
+        String archr_unique_frags = "0"
+        String archr_tss_cutoff = "0"
+        Array[String] archr_values = [archr_total_barcodes, archr_median_frags, archr_median_tss_enrichment, archr_unique_frags, archr_tss_cutoff]
+        #Array[String] archr_values_in = read_lines(atac.share_atac_archr_numbers)
     
     }
 
@@ -306,17 +351,17 @@ workflow share {
         #file for atac qc stats needed for terra table 
         #this (text) file contains: 
         #raw output and smooth output max values
-        File? atac_qc_tss_stats = atac.share_atac_tss_outfile
+        File atac_qc_tss_stats = atac_qc_tss_stats_in
 
         #file for joint qc stats needed for terra table 
         #this (text) file contains: 
         #joint both, neither, rna, atac, min tss, min frags, min umis, min genes
-        File? joint_qc_stats = joint_qc.joint_barcode_stats
+        File joint_qc_stats = joint_qc_stats_in
 
         #file for numbers needed out of the seurat notebook
         #this (text) file contains: 
         #seurat genes, seurat barcodes
-        File? seurat_numbers = rna.share_rna_seurat_nums
+        File seurat_numbers = seurat_numbers_in
         #File? arhcr_numbers = atac.share_atac_archr_numbers
 
     }

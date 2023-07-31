@@ -69,6 +69,9 @@ workflow wf_rna {
         Float? seurat_disk_factor
         Float? seurat_memory_factor
         String? seurat_docker_image
+
+        #pass the file as an input here to avoid conversion to File? 
+        File share_rna_seurat_nums_in = seurat.seurat_nums_txt
     }
 
     if ( chemistry == "shareseq" && correct_barcodes ) {
@@ -211,7 +214,7 @@ workflow wf_rna {
         #womtools did not complain about clearly invalid inputs as long as 
         #they were formatted corretly
                                              
-        File? share_rna_seurat_nums = seurat.seurat_nums_txt
+        File share_rna_seurat_nums = share_rna_seurat_nums_in
         #File? share_rna_seurat_numbers = share_task_seurat.seurat_nums_txt
 
     }

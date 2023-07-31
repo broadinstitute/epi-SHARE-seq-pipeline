@@ -71,7 +71,7 @@ task joint_qc_plotting {
         File? joint_qc_plot = "${joint_qc_plot}"
         File? joint_density_plot = "${joint_density_plot}"
         File joint_barcode_metadata = "${joint_barcode_metadata}"
-        File? joint_barcode_stats = "${joint_barcode_stats}"
+        File joint_barcode_stats = "${joint_barcode_stats}"
         #outputs needed for joint_cell_plotting
         File? rna_bardcode_metadata_out = "~{rna_barcode_metadata}"
         File? atac_barcode_metadata_2 = "~{atac_barcode_metadata}"

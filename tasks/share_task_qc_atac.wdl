@@ -213,7 +213,7 @@ task qc_atac {
         #File? atac_qc_monitor_log = monitor_log
 
         #file output of values needed from the tss
-        File? atac_qc_tss_outfile = tss_out_file
+        File atac_qc_tss_outfile = tss_out_file
     
     }
 
