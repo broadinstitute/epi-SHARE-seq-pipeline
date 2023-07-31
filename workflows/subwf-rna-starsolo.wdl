@@ -210,8 +210,8 @@ workflow wf_rna {
         #whitespace issues, whitespace issue might supress other ones though as
         #womtools did not complain about clearly invalid inputs as long as 
         #they were formatted corretly
-        
-        #File? share_rna_seurat_nums = seurat.seurat_nums_txt
+                                             
+        File? share_rna_seurat_nums = seurat.seurat_nums_txt
         #File? share_rna_seurat_numbers = share_task_seurat.seurat_nums_txt
 
     }
