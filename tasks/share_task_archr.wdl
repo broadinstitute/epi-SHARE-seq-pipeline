@@ -89,11 +89,16 @@ task archr {
     String barcode_metadata = '${prefix}.atac.archr.barcode_metadata.${genome}.tsv'
     String plots_zip_dir = '${plots_filepath}.zip'
     #String papermill_log_filename = 'papermill.logfile.txt'
+    #numbers to output from archr
+    String archr_nums = 'archr_nums.txt'
 
 
     command {
 
+        echo "start archr outfile" >> ~{archr_nums}
+        
         papermill $(which archr_notebook.ipynb) ${output_filename} \
+        -p archr_nums ${archr_nums}
         -p atac_frag ${atac_frag} \
         -p genome ${genome} \
         -p peak_set ${peak_set} \
@@ -139,6 +144,9 @@ task archr {
         File? archr_filtered_obj = filtered_archr_rds
         File? archr_raw_matrix = raw_archr_h5
         File? archr_filtered_matrix = filtered_archr_h5
+
+        #output file of relevant numbers from archr
+        File? archr_numbers = archr_nums
     }
 
     runtime {

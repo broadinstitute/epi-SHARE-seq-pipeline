@@ -135,7 +135,7 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 
     plot.save(filename=plot_file, dpi=1000)
 
-# write information for the top level page (counts of reads) to a csv
+# write information for the top level page (counts of reads) to a txt file 
 def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, min_genes): 
     data = pd.read_csv(input_file)
     neither_count = get_count_of_type(data, 'neither')

@@ -270,6 +270,10 @@ workflow share {
         File? html_summary = html_report.html_report_file
 
         # csv output
+        #this file contains: 
+        #atac total reads, atac aligned uniquely, atac unaligned, atac feature reads, atac_duplicate reads, 
+        # atac percent duplicates, atac nrf, atac pbc1, atac pbc2, rna total read, rna aligned uniquely, 
+        #rna aligned multimap, rna unaligned, rna feature reads, rna duplicate reads, rna percent duplicates 
         File? csv_summary = html_report.csv_report_file
     
         # Inputs to write html report script, used for debugging
@@ -278,11 +282,11 @@ workflow share {
         # File? logs_for_csv = html_report.csv_report_logs
         
         # inputs to joint calling py script
-        File? rna_barcode_metadata = joint_qc.rna_bardcode_metadata_out
-        File? atac_barcode_metadata = joint_qc.atac_barcode_metadata_2
+        #File? rna_barcode_metadata = joint_qc.rna_bardcode_metadata_out
+        #File? atac_barcode_metadata = joint_qc.atac_barcode_metadata_2
         
         #numbers to output: 
-                # numbers to output 
+        # numbers to output, these are all the same numbers that are in the csv summary output
         Int? atac_total_reads = atac.share_atac_total_reads
         Int? atac_aligned_uniquely = atac.share_atac_aligned_uniquely
         Int? atac_unaligned = atac.share_atac_unaligned
@@ -300,14 +304,21 @@ workflow share {
         Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
 
         #file for atac qc stats needed for terra table 
+        #this (text) file contains: 
+        #raw output and smooth output max values
         File? atac_qc_tss_stats = atac.share_atac_tss_outfile
 
         #file for joint qc stats needed for terra table 
-        #File? joint_qc_stats = joint_qc.joint_barcode_stats
+        #this (text) file contains: 
+        #joint both, neither, rna, atac, min tss, min frags, min umis, min genes
+        File? joint_qc_stats = joint_qc.joint_barcode_stats
 
-        #for for numbers from seurat notebook, other change for change 
+        #file for numbers needed out of the seurat notebook
+        #this (text) file contains: 
+        #seurat genes, seurat barcodes
         File? seurat_numbers = rna.share_rna_seurat_nums
         #comment to push
+        File? arhcr_numbers = atac.share_atac_archr_numbers
 
     }
 
