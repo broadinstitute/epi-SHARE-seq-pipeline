@@ -317,7 +317,6 @@ workflow share {
         #this (text) file contains: 
         #seurat genes, seurat barcodes
         File? seurat_numbers = rna.share_rna_seurat_nums
-        #comment to push
         File? arhcr_numbers = atac.share_atac_archr_numbers
 
     }
