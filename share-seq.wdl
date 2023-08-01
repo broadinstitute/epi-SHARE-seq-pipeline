@@ -267,9 +267,12 @@ workflow share {
         #String seurat_mt_percent = "0"
         #Array[String] seurat_values = [seurat_genes, seurat_barcodes, seurat_mt_percent]
         Array[String] seurat_values_in = read_lines(seurat_numbers_in)
-        String seurat_genes = seurat_values_in[0]
-        String seurat_barcodes = seurat_values_in[1]
-        String seurat_mt_percent = seurat_values_in[2]
+        #String seurat_genes = seurat_values_in[0]
+        #String seurat_barcodes = seurat_values_in[1]
+        #String seurat_mt_percent = seurat_values_in[2]
+        String seurat_genes = "seurat genes"
+        String seurat_barcodes = "seurat barcodes"
+        String seurat_mt_percent = "seurat mt percent" 
 
 
         #values from archr
