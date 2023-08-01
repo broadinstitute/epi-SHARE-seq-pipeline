@@ -240,31 +240,36 @@ workflow share {
     
         
         #values to pull from tss_enrichment stats
-        String tss_raw_output_max = "0"
-        String tss_smooth_output_max = "0"
-        Array[String] tss_values = [tss_raw_output_max, tss_smooth_output_max]
+        #String tss_smooth_output_max = "0"
         #Array[String] tss_values_in = read_lines(atac.share_atac_tss_outfile)
+        #String tss_raw_output_max = tss_values_in[0]
+        #Strinf tss_smoot_output_max = tss_values_in[1]
+
+        
         
 
-        #values to pull from joint_qc stats
-        String joint_qc_neither = "0"
-        String joint_qc_both = "0"
-        String joint_rna = "0"
-        String joint_atac = "0"
-        String joint_min_tss = "0"
-        String joint_min_frags = "0"
-        String joint_min_umis = "0"
-        String joint_min_genes = "0"
-        Array[String] joint_qc_values = [joint_qc_neither, joint_qc_both, joint_rna, joint_atac, joint_min_tss, joint_min_frags, joint_min_umis, joint_min_genes]
-        #File joint_qc_cast = joint_qc.joint_barcode_metadata
-        #Array[String] joint_qc_values_in = read_lines(joint_qc_cast)
+
+        #Array[String] joint_qc_values = [joint_qc_neither, joint_qc_both, joint_rna, joint_atac, joint_min_tss, joint_min_frags, joint_min_umis, joint_min_genes]
+        #File joint_qc_cast = joint_qc_stats 
+        Array[String] joint_qc_values_in = read_lines(joint_qc_stats_in)
+        String joint_qc_neither = joint_qc_values_in[0]
+        String joint_qc_both = joint_qc_values_in[1]
+        String joint_rna = joint_qc_values_in[2]
+        String joint_atac = joint_qc_values_in[3]
+        String joint_min_tss = joint_qc_values_in[4]
+        String joint_min_frags = joint_qc_values_in[5]
+        String joint_min_umis = joint_qc_values_in[6]
+        String joint_min_genes = joint_qc_values_in[7]
         
         #values from seurat numbers
-        String seurat_genes = "0"
-        String seurat_barcodes = "0"
-        String seurat_mt_percent = "0"
-        Array[String] seurat_values = [seurat_genes, seurat_barcodes, seurat_mt_percent]
-        #Array[String] seurat_values_in = read_lines(rna.share_rna_seurat_nums)
+        #String seurat_genes = "0"
+        #String seurat_barcodes = "0"
+        #String seurat_mt_percent = "0"
+        #Array[String] seurat_values = [seurat_genes, seurat_barcodes, seurat_mt_percent]
+        Array[String] seurat_values_in = read_lines(seurat_numbers_in)
+        String seurat_genes = seurat_values_in[0]
+        String seurat_barcodes = seurat_values_in[1]
+        String seurat_mt_percent = seurat_values_in[2]
 
 
         #values from archr
@@ -273,7 +278,7 @@ workflow share {
         String archr_median_tss_enrichment = "0"
         String archr_unique_frags = "0"
         String archr_tss_cutoff = "0"
-        Array[String] archr_values = [archr_total_barcodes, archr_median_frags, archr_median_tss_enrichment, archr_unique_frags, archr_tss_cutoff]
+        #Array[String] archr_values = [archr_total_barcodes, archr_median_frags, archr_median_tss_enrichment, archr_unique_frags, archr_tss_cutoff]
         #Array[String] archr_values_in = read_lines(atac.share_atac_archr_numbers)
     
     }
@@ -363,6 +368,29 @@ workflow share {
         #seurat genes, seurat barcodes
         File seurat_numbers = seurat_numbers_in
         #File? arhcr_numbers = atac.share_atac_archr_numbers
+
+        #output strings, change to numbers soon
+        #joint qc 
+        String? joint_qc_neither_out = joint_qc_neither
+        String? joint_qc_both_out = joint_qc_both
+        String? joint_rna_out = joint_rna
+        String? joint_atac_out = joint_atac
+        String? joint_min_tss_out = joint_min_tss
+        String? joint_min_frags_out = joint_min_frags
+        String? joint_min_umis_out = joint_min_umis
+        String? joint_min_genes_out = joint_min_genes
+
+        #seurat 
+        String? seurat_genes_out = seurat_genes
+        String? seurat_barcodes_out = seurat_barcodes
+        String? seurat_mt_percent_out = seurat_mt_percent
+
+        #archr 
+        String? archr_total_barcodes_out = archr_total_barcodes
+        String? archr_median_frags_out = archr_median_frags
+        String? archr_median_tss_enrichment_out = archr_median_tss_enrichment
+        String? archr_unique_frags_out = archr_unique_frags
+        String? archr_tss_cutoff_out = archr_tss_cutoff
 
     }
 
