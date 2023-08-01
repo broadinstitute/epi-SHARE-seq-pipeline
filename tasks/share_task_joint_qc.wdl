@@ -51,7 +51,7 @@ task joint_qc_plotting {
 
     #add another return from the function/parameter to the python script that
     #is a file containing the metadata
-    String joint_barcode_stats = '${default="share-seq" prefix}.joint.barcode.stats.${genome_name}.csv'
+    String joint_barcode_stats = '${default="share-seq" prefix}.joint.barcode.stats.${genome_name}.txt'
     
     command {
         set -e
