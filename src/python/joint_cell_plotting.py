@@ -139,11 +139,11 @@ def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, m
     data = pd.read_csv(input_file)
     neither_count = get_count_of_type(data, 'neither')
     neither_count_str = "Neither " + str(neither_count) + '\n'
-    both_count = get_count_of_type(data, 'both') + '\n'
+    both_count = get_count_of_type(data, 'both')
     both_count_str = "Both " + str(both_count) + '\n'
-    rna_count = get_count_of_type(data, 'RNA only') + '\n'
+    rna_count = get_count_of_type(data, 'RNA only')
     rna_count_str = "RNA " + str(rna_count) + '\n'
-    atac_count = get_count_of_type(data, 'ATAC only') + '\n'
+    atac_count = get_count_of_type(data, 'ATAC only')
     atac_count_str = "ATAC "+ str(atac_count) + '\n'
     min_tss_str = "joint_min_tss " + str(min_tss) + '\n'
     min_frags_str = "joint_min_frags " + str(min_frags) + '\n'
