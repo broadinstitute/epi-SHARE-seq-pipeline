@@ -252,14 +252,14 @@ workflow share {
         #Array[String] joint_qc_values = [joint_qc_neither, joint_qc_both, joint_rna, joint_atac, joint_min_tss, joint_min_frags, joint_min_umis, joint_min_genes]
         #File joint_qc_cast = joint_qc_stats 
         Array[String] joint_qc_values_in = read_lines(joint_qc_stats_in)
-        String joint_qc_neither = joint_qc_values_in[0]
-        String joint_qc_both = joint_qc_values_in[1]
-        String joint_rna = joint_qc_values_in[2]
-        String joint_atac = joint_qc_values_in[3]
-        String joint_min_tss = joint_qc_values_in[4]
-        String joint_min_frags = joint_qc_values_in[5]
-        String joint_min_umis = joint_qc_values_in[6]
-        String joint_min_genes = joint_qc_values_in[7]
+        #String joint_qc_neither = joint_qc_values_in[0]
+        #String joint_qc_both = joint_qc_values_in[1]
+        #String joint_rna = joint_qc_values_in[2]
+        #String joint_atac = joint_qc_values_in[3]
+        #String joint_min_tss = joint_qc_values_in[4]
+        #String joint_min_frags = joint_qc_values_in[5]
+        #String joint_min_umis = joint_qc_values_in[6]
+        #String joint_min_genes = joint_qc_values_in[7]
         
         #values from seurat numbers
         #String seurat_genes = "0"
@@ -374,14 +374,15 @@ workflow share {
 
         #output strings, change to numbers soon
         #joint qc 
-        String? joint_qc_neither_out = joint_qc_neither
-        String? joint_qc_both_out = joint_qc_both
-        String? joint_rna_out = joint_rna
-        String? joint_atac_out = joint_atac
-        String? joint_min_tss_out = joint_min_tss
-        String? joint_min_frags_out = joint_min_frags
-        String? joint_min_umis_out = joint_min_umis
-        String? joint_min_genes_out = joint_min_genes
+        #String? joint_qc_neither_out = joint_qc_neither
+        #String? joint_qc_both_out = joint_qc_both
+        #String? joint_rna_out = joint_rna
+        #String? joint_atac_out = joint_atac
+        #String? joint_min_tss_out = joint_min_tss
+        #String? joint_min_frags_out = joint_min_frags
+        #String? joint_min_umis_out = joint_min_umis
+        #String? joint_min_genes_out = joint_min_genes
+        Array[String]? joint_qc_values_out = joint_qc_values_in
 
         #seurat 
         String? seurat_genes_out = seurat_genes
