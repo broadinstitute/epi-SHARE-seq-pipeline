@@ -70,8 +70,9 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
         #get values for all the bumbers
         stats_values = csv_stats[1]
         #remove first field of csv (contained indexing information for df)
-        #stats_values.pop(0)
+        stats_values.pop(0)
         #caclulate total cells from both, atac, and rna numbers
+        print("stats values is: ", stats_values)
         total_cells = int(stats_values[1]) + int(stats_values[2]) + int(stats_values[3])
         outfile.write("<center> <span style='font-size: 50;'>" + str(total_cells) + " cells </span> <br> <br>")
         outfile.write("<span style='font-size: 30;'> " + stats_values[1] + " both " + stats_values[2] + " RNA " + stats_values[3] + " ATAC </span> <br> <br>")
