@@ -93,6 +93,7 @@ workflow wf_atac {
 
         #add file as parameter here so it doesnt pass as file?
         File share_atac_tss_outfile_in = qc_atac.atac_qc_tss_outfile
+        File share_atac_archr_numbers_in = archr.archr_numbers
     }
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
@@ -325,7 +326,7 @@ workflow wf_atac {
 
         #archr values to save in terra
         #comment push change
-        #File? share_atac_archr_numbers = archr.archr_numbers
+        File share_atac_archr_numbers = share_atac_archr_numbers_in
 
         
 

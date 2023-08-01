@@ -91,10 +91,9 @@ task archr {
     String plots_zip_dir = '${plots_filepath}.zip'
     #String papermill_log_filename = 'papermill.logfile.txt'
     #numbers to output from archr
-    #String archr_nums = 'archr_nums.txt'
+    String archr_nums = 'archr_nums.txt'
 
     # re-add -p archr_nums ${archr_nums} 
-    #         echo "start archr outfile" >> ~{archr_nums}
     # when everything else is working
     command {
 
@@ -120,6 +119,9 @@ task archr {
         -p heatmap_transpose ${heatmap_transpose} \
         -p heatmap_label_n ${heatmap_label_n} \
         -p heatmap_cutoff ${heatmap_cutoff}
+    
+        echo "start archr outfile" >> ~{archr_nums}
+    
     }
 
     output {
@@ -147,7 +149,7 @@ task archr {
         File? archr_filtered_matrix = filtered_archr_h5
 
         #output file of relevant numbers from archr
-        #File? archr_numbers = archr_nums
+        File archr_numbers = archr_nums
     }
 
     runtime {
