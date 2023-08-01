@@ -67,7 +67,6 @@ task html_report {
         echo "~{sep="\n" names_numeric_fields}" > ~{names_for_csv}
         echo "~{sep="\n" valid_image_files}" >> ~{names_for_csv}
         echo "~{sep="\n" valid_log_files}" >> ~{names_for_csv}
-        echo "see if this gets logged"
         
         echo ~{atac_total_reads}
         echo ~{atac_aligned_uniquely} 
