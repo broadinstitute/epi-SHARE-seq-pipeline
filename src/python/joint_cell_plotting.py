@@ -13,6 +13,10 @@ import pandas as pd
 from plotnine import *
 
 def parse_arguments():
+    #for qc plots, TSS, frags, UMIS, and genes cuttoff are all passed here as 
+    #arguments, so can write them into seperate file to move them around, or 
+    #add to the already exisiting csv output file. First option is probably 
+    #easier down the line
     parser = argparse.ArgumentParser(description="Plot barcodes by RNA and ATAC QC status")
     parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv file")
     parser.add_argument("atac_metrics_file", help="Filename for ATAC metrics tsv file")
@@ -22,6 +26,7 @@ def parse_arguments():
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
     parser.add_argument("plot_file", help="Filename for plot png file")
+    parser.add_argument("qc_summary_data", help="Filename for txt file with numeric outputs of qc analysis")
     parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
     parser.add_argument("pkr", help="PKR name", nargs='?', default="")
 
@@ -49,8 +54,8 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     rna_barcodes = []
     # remove cells that have fewer than 10 UMIs
     for line in rna_metrics_contents:
-        if int(line[3]) >= remove_low_yielding_cells:
-            umis.append(int(line[3]))
+        if int(float(line[3])) >= remove_low_yielding_cells:
+            umis.append(int(float(line[3])))
             genes.append(int(line[4]))
             rna_barcodes.append(line[0])
     rna_metrics = dict(zip(rna_barcodes, zip(umis, genes)))
@@ -70,7 +75,6 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     # merge metrics by barcodes
     metrics = merge_dicts(rna_metrics, atac_metrics)
     df = pd.DataFrame.from_dict(metrics, orient="index", columns=["umis","genes","tss","frags"])
-
     return(df)
 
 def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
@@ -130,6 +134,52 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 
     plot.save(filename=plot_file, dpi=1000)
 
+# write information for the top level page (counts of reads) to a txt file 
+def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, min_genes): 
+    data = pd.read_csv(input_file)
+    neither_count = get_count_of_type(data, 'neither')
+    neither_count_str = "Neither " + str(neither_count)
+    both_count = get_count_of_type(data, 'both')
+    both_count_str = "Both " + str(both_count)
+    rna_count = get_count_of_type(data, 'RNA only')
+    rna_count_str = "RNA " + str(rna_count)
+    atac_count = get_count_of_type(data, 'ATAC only')
+    atac_count_str = "ATAC "+ str(atac_count)
+    min_tss_str = "joint_min_tss " + str(min_tss)
+    min_frags_str = "joint_min_frags " + str(min_frags)
+    min_umis_str = "joint_min_umis " + str(min_umis)
+    min_genes_str = "joint_min_genes " + str(min_genes) 
+    #df_input = [{'neither': neither_count, 'both': both_count, 'RNA only': rna_count, 'ATAC only': atac_count}]
+    #stats_df = pd.DataFrame(df_input)
+    #stats_df.to_csv(output_file)
+    output_file = open(output_file, 'w')
+    output_file.write(neither_count_str)
+    output_file.write(both_count_str)
+    output_file.write(rna_count_str)
+    output_file.write(atac_count_str)
+    output_file.write(min_tss_str)
+    output_file.write(min_frags_str)
+    output_file.write(min_umis_str)
+    output_file.write(min_genes_str)
+
+
+
+
+# extract the count information from the QC column for a given category (both,
+# neither, rna only, atac only)
+def get_count_of_type(dataframe, classifier):
+    data_one_kind = dataframe.loc[dataframe['QC'] == classifier]
+    if data_one_kind.empty:
+        return 0
+    field = data_one_kind.at[data_one_kind.index[1], 'QC_count']
+    count = ""
+    # extract the digits from other characters in the string
+    for char in field: 
+        if char.isdigit():
+            count = count + char
+    return int(count)
+
+
 def main():
     # create log file
     logging.basicConfig(filename="joint_cell_plotting.log", level=logging.INFO)
@@ -146,6 +196,7 @@ def main():
     min_tss = getattr(args, "min_tss")
     min_frags = getattr(args, "min_frags")
     plot_file = getattr(args, "plot_file")
+    qc_summary_data = getattr(args, "qc_summary_data")
 
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
@@ -162,9 +213,12 @@ def main():
     # save dataframe
     logging.info("Saving dataframe as csv\n")
     metrics_df.to_csv(barcode_metadata_file)
+    
+    # write the stats for the top level into a csv, containd joint qc numbers
+    write_top_level_txt(barcode_metadata_file, qc_summary_data, min_tss, min_frags, min_umis, min_genes)
+    
     logging.info("All done!")
 
 
 if __name__ == "__main__":
     main()
-

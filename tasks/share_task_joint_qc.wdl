@@ -59,13 +59,11 @@ task joint_qc_plotting {
         bash $(which monitor_script.sh) > monitoring.log &
 
         # Make joint qc plot
-        python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${default="share-seq" prefix}
+        python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_stats} ${joint_barcode_metadata} ${default="share-seq" prefix}
 
         # Make joint density plot
         Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}
     
-        #write something to ouput file
-        echo "some text" >> ~{joint_barcode_stats}
     
     }
 
