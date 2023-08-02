@@ -19,7 +19,7 @@ task qc_rna {
         File? genes_annotations_bed
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna:release"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna:v0.0.1"
     }
 
     #Float input_file_size_gb = size(input[0], "G")

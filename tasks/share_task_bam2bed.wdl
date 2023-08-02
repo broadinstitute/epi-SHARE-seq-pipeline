@@ -21,7 +21,7 @@ task share_atac_bam2bed {
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
         String genome_name
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bam2bed:release"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bam2bed:v0.0.1"
         String? prefix = "sample"
 
 

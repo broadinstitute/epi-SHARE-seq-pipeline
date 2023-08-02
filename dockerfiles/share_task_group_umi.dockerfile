@@ -66,7 +66,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install system/math python packages (python3)
-RUN pip install --no-cache-dir common python-Levenshtein==0.12.2 umi_tools==1.1.2
+RUN pip install --break-system-packages --no-cache-dir common python-Levenshtein==0.12.2 umi_tools==1.1.2
 
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/python/rm_dup_barcode_UMI_v3.py src/R/sum_reads.R /usr/local/bin/

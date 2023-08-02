@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts
-RUN python3 -m pip install matplotlib numpy pandas plotnine
+RUN python3 -m pip install --break-system-packages matplotlib numpy pandas plotnine
 
 # Install packages for R scripts
 RUN R -e "install.packages(c('ggplot2', 'remotes'))"

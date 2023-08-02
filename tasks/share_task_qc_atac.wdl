@@ -23,7 +23,7 @@ task qc_atac {
         File tss
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:release"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:v0.0.1"
     }
 
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)

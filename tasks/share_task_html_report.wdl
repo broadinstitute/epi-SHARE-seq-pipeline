@@ -67,6 +67,6 @@ task html_report {
     }
 
     runtime {
-        docker: 'us.gcr.io/buenrostro-share-seq/share_task_html_report:release'
+        docker: 'us.gcr.io/buenrostro-share-seq/share_task_html_report:v0.0.1'
     }
 }

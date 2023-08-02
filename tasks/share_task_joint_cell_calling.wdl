@@ -24,7 +24,7 @@ task joint_cell_calling {
         Int disk_gb = 50
         Int mem_gb = 64
         String genome_name
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_cell_calling:release"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_cell_calling:v0.0.1"
     }
 
     Int dsk_gb = disk_gb

@@ -22,7 +22,7 @@ task feature_counts_rna {
         String gene_naming = "gene_name"
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_count_rna:release"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_count_rna:v0.0.1"
         Int cpus= 6
     }
 

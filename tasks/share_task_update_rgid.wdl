@@ -17,7 +17,7 @@ task share_rna_update_rgid {
         File bam
         String genome_name
         String? prefix
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_update_rgid:release"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_update_rgid:v0.0.1"
         Int cpus = 4
     }
 

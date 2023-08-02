@@ -43,13 +43,8 @@ RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('Biostrings','
 
 RUN R --no-echo --no-restore --no-save -e  "remotes::install_github('caleblareau/BuenColors')"
 
-ENV USER=shareseq
-WORKDIR /home/$USER
-RUN groupadd -r $USER &&\
-    useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
-    chown $USER:$USER /home/$USER
 
-RUN python3 -m pip install jupyter papermill
+RUN python3 -m pip install --break-system-packages jupyter papermill
 
 RUN chown $USER:$USER /usr/local/lib/R
 

@@ -3,7 +3,7 @@
 # Based on Debian slim
 ############################################################
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
+FROM debian:buster-slim as builder
 
 ENV SAMTOOLS_VERSION 1.9
 ENV BEDTOOLS_VERSION v2.29.0
@@ -44,7 +44,7 @@ RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/sa
     cd htslib && autoreconf -i && make && make install && cd ../ && rm -rf htslib*
 
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
+FROM debian:buster-slim
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
