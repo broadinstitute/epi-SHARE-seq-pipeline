@@ -59,26 +59,20 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
                 outfile.write("<tr> <td>" + txt[index] + "</td> <td>No matching number</td> </tr>")
         outfile.write("</table>")
         
-    # write a top level stats summary with numbers of cells in various
-    # conditions
+        
     def write_stats_from_csv(qc_stats_file, outfile, aligned, duplicate):
-        csv_stats = []
+        file_stats = []
         with open(qc_stats_file, mode='r') as stats_file: 
-            stats_reader = csv.reader(stats_file)
-            for row in stats_reader: 
-                csv_stats.append(row)
-        #get values for all the bumbers
-        stats_values = csv_stats[1]
-        #remove first field of csv (contained indexing information for df)
-        stats_values.pop(0)
-        #caclulate total cells from both, atac, and rna numbers
-        print("stats values is: ", stats_values)
-        total_cells = int(stats_values[1]) + int(stats_values[2]) + int(stats_values[3])
+            file_stats = stats_file.readlines()
+        for i in range(len(file_stats)):
+            file_stats[i] = ''.join(filter(str.isdigit, file_stats[i]))
+  
+        total_cells = int(file_stats[0]) + int(file_stats[1]) + int(file_stats[2])
         outfile.write("<center> <span style='font-size: 50;'>" + str(total_cells) + " cells </span> <br> <br>")
-        outfile.write("<span style='font-size: 30;'> " + stats_values[1] + " both " + stats_values[2] + " RNA " + stats_values[3] + " ATAC </span> <br> <br>")
+        outfile.write("<span style='font-size: 30;'> " + file_stats[0] + " both " + file_stats[1] + " RNA " + file_stats[2] + " ATAC </span> <br> <br>")
         outfile.write("<span style='font-size: 25;'> RNA:   / " +  aligned + " ( " + duplicate + "% dup) </span> </center>")
-        #utfile.write(stats_names)
-        #outfile.write(stats_values)
+    
+    
     
     # Sets up the style for the tabs. Also links each tab to the content that
     # should be displayed when the tab is checked

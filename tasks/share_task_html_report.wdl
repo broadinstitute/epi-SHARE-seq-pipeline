@@ -85,9 +85,6 @@ task html_report {
         echo ~{rna_duplicate_reads}
         echo "end of outputs"
 
-        echo "thing 1, 1" > stats.csv
-        echo "thing 2, 2" >> stats.csv
-        echo "thing 3, 3" >> stats.csv
         
         echo ~{atac_total_reads} >> output.txt
         echo ~{atac_aligned_uniquely} >> output.txt
@@ -107,7 +104,7 @@ task html_report {
 
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo $percent >> output.txt
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} ~{images_for_csv} output.txt ~{logs_for_csv} stats.csv
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} ~{images_for_csv} output.txt ~{logs_for_csv} ~{joint_barcode_stats}
         
         python3 /software/write_csv.py ~{other_output_file} ~{names_for_csv} output.txt ~{images_for_csv} ~{logs_for_csv}
     >>>
