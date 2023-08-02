@@ -21,7 +21,7 @@ task qc_merged_atac {
 
         # Runtime
         Float? disk_factor = 10.0
-        Float? memory_factor = 4.0
+        Float? memory_factor = 2.0
         String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac"
     }
 
@@ -60,7 +60,6 @@ task qc_merged_atac {
         
         # Add TSS enrichment to barcode metadata
         join -j 1 <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q; sort -k1,1)) <(cut -f 1,6-15 merged_barcode_metadata | (sed -u 1q; sort -k1,1)) > ~{final_barcode_metadata}
-        head ~{final_barcode_metadata}
 
         # Insert size plot bulk
         gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
