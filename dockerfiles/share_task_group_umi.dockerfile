@@ -57,16 +57,23 @@ RUN groupadd -r $USER &&\
 ENV R_LIBS_USER=/usr/local/lib/R
 
 RUN apt-get update && apt-get install -y \
+    build-essential \
     gcc \
+    libffi-dev \
     pigz \
-    python3 \
-    python3-dev \
-    python3-pip \
-    zlib1g-dev &&\
+    libssl-dev \
+    openssl \
+    zlib1g-dev \
+    wget &&\
     rm -rf /var/lib/apt/lists/*
 
+RUN wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz
+RUN tar xzvf Python-3.10.0.tgz && cd Python-3.10.0 && ./configure && make && make install
+
+
 # Install system/math python packages (python3)
-RUN pip install --break-system-packages --no-cache-dir common python-Levenshtein==0.12.2 umi_tools==1.1.2
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir common python-Levenshtein==0.12.2 umi_tools==1.1.2
 
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/python/rm_dup_barcode_UMI_v3.py src/R/sum_reads.R /usr/local/bin/
