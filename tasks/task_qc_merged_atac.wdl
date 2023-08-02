@@ -40,7 +40,6 @@ task qc_merged_atac {
     String final_barcode_metadata = '${default='merged' prefix}.atac.qc.${genome_name}.metadata.tsv'
     String insert_size_hist = '${default='merged' prefix}.atac.qc.hist.${genome_name}.png'
     String fragment_barcode_rank_plot = '${default='merged' prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png'
-    String monitor_log = 'qc_merged_atac_monitor.log'
 
     command <<<
         set -e
@@ -74,7 +73,6 @@ task qc_merged_atac {
     >>>
 
     output {
-        File monitor_log = monitor_log
         File tss_enrichment_barcode_stats = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
         File tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
         File enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
