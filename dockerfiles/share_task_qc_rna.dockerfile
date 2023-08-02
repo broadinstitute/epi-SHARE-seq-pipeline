@@ -60,7 +60,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install system/math python packages (python3)
-RUN pip install --no-cache-dir common RSeQC
+RUN pip install --no-cache-dir --break-system-packages common RSeQC
 
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/R/Read_distribution.R /usr/local/bin/
