@@ -41,6 +41,26 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
             data_base64 = data_base64.decode('utf-8')    # convert bytes to string
             output_file.write('<img style="width:100%;" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
 
+    
+    #take a string representing a number, and return a string represenation of
+    #of that number rounded
+    def format_number(txt_num):
+        num = float(txt_num)
+        if num > 1000000:
+            num = round(num, -6)
+            num = int(num / 1000000)
+            num = str(num) + " B"
+        elif num > 1000:
+            num = int(round(num, -3))
+            num = num / 1000
+            num = str(num) + " K"
+        elif num < 1: 
+            num = str(round(num))
+        else: 
+            num = str(num)
+        return num
+    
+    
     # write a table in html to the specified output table with the text data on
     # the right side and the numberic data on the left
     def write_summary_table(txt, nums, outfile):
@@ -51,7 +71,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
             if index < len(nums):
                 #cast string reperesnting number from the text file and print 
                 #formated with commas
-                outfile.write("<tr> <td>" + txt[index] + "</td> <td>" + "{:,}".format(float(nums[index])) + " </td> </tr>")
+                outfile.write("<tr> <td>" + txt[index] + "</td> <td>" + format_number(float(nums[index]))+ " </td> </tr>")
                 #write rna tab into the table after all of the atac data
                 if index == 8:
                     outfile.write("<tr><td colspan=2>RNA</td></tr>")

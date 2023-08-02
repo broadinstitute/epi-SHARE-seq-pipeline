@@ -134,9 +134,14 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 
     plot.save(filename=plot_file, dpi=1000)
 
-# write information for the top level page (counts of reads) to a txt file 
+#write the counts of atac, rna, both, and neither to an output text file so they 
+#can be used in the html report and output by the pipeline
 def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, min_genes): 
+    
+    #open file that has the values for the reads of atac, rna, both, and neither
     data = pd.read_csv(input_file)
+    
+    #get counts and cast to strings so they can be written to the file
     neither_count = get_count_of_type(data, 'neither')
     neither_count_str = str(neither_count) + '\n'
     both_count = get_count_of_type(data, 'both')
@@ -145,13 +150,15 @@ def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, m
     rna_count_str = str(rna_count) + '\n'
     atac_count = get_count_of_type(data, 'ATAC only')
     atac_count_str = str(atac_count) + '\n'
+    
+    #cast passed in numbers for thresholds to strings so they can be writen 
+    #to the file
     min_tss_str = str(min_tss) + '\n'
     min_frags_str = str(min_frags) + '\n'
     min_umis_str = str(min_umis) + '\n'
     min_genes_str = str(min_genes) 
-    #df_input = [{'neither': neither_count, 'both': both_count, 'RNA only': rna_count, 'ATAC only': atac_count}]
-    #stats_df = pd.DataFrame(df_input)
-    #stats_df.to_csv(output_file)
+    
+    #open the specified output file and write all the values
     output_file = open(output_file, 'w')
     output_file.write(neither_count_str)
     output_file.write(both_count_str)
@@ -169,8 +176,13 @@ def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, m
 # neither, rna only, atac only)
 def get_count_of_type(dataframe, classifier):
     data_one_kind = dataframe.loc[dataframe['QC'] == classifier]
+    #return with the value 0 if QC column is never equal to the specified
+    #classifier
     if data_one_kind.empty:
         return 0
+    
+    #extract number contents of QC_count field of the first entry (QC count 
+    # should be the same for any of the entries in the dataframe)
     field = data_one_kind.at[data_one_kind.index[1], 'QC_count']
     count = ""
     # extract the digits from other characters in the string

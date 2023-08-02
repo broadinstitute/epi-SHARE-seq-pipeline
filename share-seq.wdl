@@ -323,25 +323,11 @@ workflow share {
 
         # Report
         File? html_summary = html_report.html_report_file
-
-        # csv output
-        #this file contains: 
-        #atac total reads, atac aligned uniquely, atac unaligned, atac feature reads, atac_duplicate reads, 
-        # atac percent duplicates, atac nrf, atac pbc1, atac pbc2, rna total read, rna aligned uniquely, 
-        #rna aligned multimap, rna unaligned, rna feature reads, rna duplicate reads, rna percent duplicates 
-        File? csv_summary = html_report.csv_report_file
     
-        # Inputs to write html report script, used for debugging
-        # File? names_for_csv = html_report.csv_report_names
-        # File? images_for_csv = html_report.csv_report_images
-        # File? logs_for_csv = html_report.csv_report_logs
-        
-        # inputs to joint calling py script
-        #File? rna_barcode_metadata = joint_qc.rna_bardcode_metadata_out
-        #File? atac_barcode_metadata = joint_qc.atac_barcode_metadata_2
         
         #numbers to output: 
-        # numbers to output, these are all the same numbers that are in the csv summary output
+        #numbers passed to the html report, contain overall atac and 
+        #rna statistics
         Int? atac_total_reads = atac.share_atac_total_reads
         Int? atac_aligned_uniquely = atac.share_atac_aligned_uniquely
         Int? atac_unaligned = atac.share_atac_unaligned
@@ -358,24 +344,8 @@ workflow share {
         Int? rna_feature_reads = rna.share_rna_feature_reads
         Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
 
-        #file for atac qc stats needed for terra table 
-        #this (text) file contains: 
-        #raw output and smooth output max values
-        File atac_qc_tss_stats = atac_qc_tss_stats_in
 
-        #file for joint qc stats needed for terra table 
-        #this (text) file contains: 
-        #joint both, neither, rna, atac, min tss, min frags, min umis, min genes
-        File joint_qc_stats = joint_qc_stats_in
-
-        #file for numbers needed out of the seurat notebook
-        #this (text) file contains: 
-        #seurat genes, seurat barcodes
-        File seurat_numbers = seurat_numbers_in
-        File arhcr_numbers = archr_numbers_in
-
-        #output strings, change to numbers soon
-        #joint qc 
+        #numbers generated and thresholds used in the joint_qc calculation 
         Int? joint_qc_neither_out = joint_qc_neither
         Int? joint_qc_both_out = joint_qc_both
         Int? joint_rna_out = joint_rna
@@ -386,18 +356,44 @@ workflow share {
         Int? joint_min_genes_out = joint_min_genes
         Array[Int]? joint_qc_values_out = joint_qc_values_in
 
-        #seurat 
+        #placeholders for numbers from seurat, need to get them out of the 
+        #notebook or one of its outputs
         String? seurat_genes_out = seurat_genes
         String? seurat_barcodes_out = seurat_barcodes
         String? seurat_mt_percent_out = seurat_mt_percent
 
-        #archr 
+        #placeholders for numbers from archr, need to get them out of the 
+        #notebook or one of its outputs
         String? archr_total_barcodes_out = archr_total_barcodes
         String? archr_median_frags_out = archr_median_frags
         String? archr_median_tss_enrichment_out = archr_median_tss_enrichment
         String? archr_unique_frags_out = archr_unique_frags
         String? archr_tss_cutoff_out = archr_tss_cutoff
 
+        # csv output
+        #this file contains: 
+        #atac total reads, atac aligned uniquely, atac unaligned, atac feature reads, atac_duplicate reads, 
+        # atac percent duplicates, atac nrf, atac pbc1, atac pbc2, rna total read, rna aligned uniquely, 
+        #rna aligned multimap, rna unaligned, rna feature reads, rna duplicate reads, rna percent duplicates 
+        #File? csv_summary = html_report.csv_report_file
+
+        #file for atac qc stats needed for terra table 
+        #this (text) file contains: 
+        #raw output and smooth output max values
+        #File atac_qc_tss_stats = atac_qc_tss_stats_in
+
+        #file for joint qc stats needed for terra table 
+        #this (text) file contains: 
+        #joint both, neither, rna, atac, min tss, min frags, min umis, min genes
+        #File joint_qc_stats = joint_qc_stats_in
+
+        #file for numbers needed out of the seurat notebook
+        #this (text) file contains: 
+        #seurat genes, seurat barcodes
+        #File seurat_numbers = seurat_numbers_in
+        #File arhcr_numbers = archr_numbers_in
+    
+    
     }
 
 }
