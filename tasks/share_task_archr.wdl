@@ -120,7 +120,8 @@ task archr {
         -p heatmap_label_n ${heatmap_label_n} \
         -p heatmap_cutoff ${heatmap_cutoff}
     
-        echo "start archr outfile" >> ~{archr_nums}
+        echo ${min_frags} >> ${archr_nums}
+        echo ${min_tss} >> ${archr_nums}
     
     }
 

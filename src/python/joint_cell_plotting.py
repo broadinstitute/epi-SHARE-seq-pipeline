@@ -138,17 +138,17 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, min_genes): 
     data = pd.read_csv(input_file)
     neither_count = get_count_of_type(data, 'neither')
-    neither_count_str = "Neither " + str(neither_count) + '\n'
+    neither_count_str = str(neither_count) + '\n'
     both_count = get_count_of_type(data, 'both')
-    both_count_str = "Both " + str(both_count) + '\n'
+    both_count_str = str(both_count) + '\n'
     rna_count = get_count_of_type(data, 'RNA only')
-    rna_count_str = "RNA " + str(rna_count) + '\n'
+    rna_count_str = str(rna_count) + '\n'
     atac_count = get_count_of_type(data, 'ATAC only')
-    atac_count_str = "ATAC "+ str(atac_count) + '\n'
-    min_tss_str = "joint_min_tss " + str(min_tss) + '\n'
-    min_frags_str = "joint_min_frags " + str(min_frags) + '\n'
-    min_umis_str = "joint_min_umis " + str(min_umis) + '\n'
-    min_genes_str = "joint_min_genes " + str(min_genes) 
+    atac_count_str = str(atac_count) + '\n'
+    min_tss_str = str(min_tss) + '\n'
+    min_frags_str = str(min_frags) + '\n'
+    min_umis_str = str(min_umis) + '\n'
+    min_genes_str = str(min_genes) 
     #df_input = [{'neither': neither_count, 'both': both_count, 'RNA only': rna_count, 'ATAC only': atac_count}]
     #stats_df = pd.DataFrame(df_input)
     #stats_df.to_csv(output_file)

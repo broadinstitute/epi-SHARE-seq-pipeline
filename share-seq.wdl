@@ -252,15 +252,15 @@ workflow share {
 
         #Array[String] joint_qc_values = [joint_qc_neither, joint_qc_both, joint_rna, joint_atac, joint_min_tss, joint_min_frags, joint_min_umis, joint_min_genes]
         #File joint_qc_cast = joint_qc_stats 
-        Array[String] joint_qc_values_in = read_lines(joint_qc_stats_in)
-        String joint_qc_neither = joint_qc_values_in[0]
-        String joint_qc_both = joint_qc_values_in[1]
-        String joint_rna = joint_qc_values_in[2]
-        String joint_atac = joint_qc_values_in[3]
-        String joint_min_tss = joint_qc_values_in[4]
-        String joint_min_frags = joint_qc_values_in[5]
-        String joint_min_umis = joint_qc_values_in[6]
-        String joint_min_genes = joint_qc_values_in[7]
+        Array[Int] joint_qc_values_in = read_lines(joint_qc_stats_in)
+        Int joint_qc_neither = joint_qc_values_in[0]
+        Int joint_qc_both = joint_qc_values_in[1]
+        Int joint_rna = joint_qc_values_in[2]
+        Int joint_atac = joint_qc_values_in[3]
+        Int joint_min_tss = joint_qc_values_in[4]
+        Int joint_min_frags = joint_qc_values_in[5]
+        Int joint_min_umis = joint_qc_values_in[6]
+        Int joint_min_genes = joint_qc_values_in[7]
         
         #values from seurat numbers
         #String seurat_genes = "0"
@@ -277,11 +277,12 @@ workflow share {
 
 
         #values from archr
+        Array[Int] archr_values_in = read_lines(archr_numbers_in)
         String archr_total_barcodes = "0"
         String archr_median_frags = "0"
         String archr_median_tss_enrichment = "0"
-        String archr_unique_frags = "0"
-        String archr_tss_cutoff = "0"
+        Int archr_unique_frags = archr_values_in[0]
+        Int archr_tss_cutoff = archr_values_in[1]
         #Array[String] archr_values = [archr_total_barcodes, archr_median_frags, archr_median_tss_enrichment, archr_unique_frags, archr_tss_cutoff]
         #Array[String] archr_values_in = read_lines(atac.share_atac_archr_numbers)
     
@@ -375,15 +376,15 @@ workflow share {
 
         #output strings, change to numbers soon
         #joint qc 
-        String? joint_qc_neither_out = joint_qc_neither
-        String? joint_qc_both_out = joint_qc_both
-        String? joint_rna_out = joint_rna
-        String? joint_atac_out = joint_atac
-        String? joint_min_tss_out = joint_min_tss
-        String? joint_min_frags_out = joint_min_frags
-        String? joint_min_umis_out = joint_min_umis
-        String? joint_min_genes_out = joint_min_genes
-        Array[String]? joint_qc_values_out = joint_qc_values_in
+        Int? joint_qc_neither_out = joint_qc_neither
+        Int? joint_qc_both_out = joint_qc_both
+        Int? joint_rna_out = joint_rna
+        Int? joint_atac_out = joint_atac
+        Int? joint_min_tss_out = joint_min_tss
+        Int? joint_min_frags_out = joint_min_frags
+        Int? joint_min_umis_out = joint_min_umis
+        Int? joint_min_genes_out = joint_min_genes
+        Array[Int]? joint_qc_values_out = joint_qc_values_in
 
         #seurat 
         String? seurat_genes_out = seurat_genes
