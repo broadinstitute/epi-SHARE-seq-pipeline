@@ -81,7 +81,9 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 
-
+# Install packages for python3 scripts
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir --ignore-installed pysam 
 
 # Create and setup new user
 ENV USER=shareseq
@@ -94,9 +96,6 @@ RUN groupadd -r $USER &&\
 # Add folder with software to the path
 ENV PATH="/software:${PATH}"
 
-# Install packages for python3 scripts
-RUN python3 -m pip install --no-cache-dir --ignore-installed pysam
-
 # Copy the compiled software from the builder
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
@@ -104,9 +103,6 @@ COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 COPY --chown=$USER:$USER src/python/filter_mito_reads.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/bam_to_fragments.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/assign_multimappers.py /usr/local/bin
-
-
-
 
 
 USER ${USER}
