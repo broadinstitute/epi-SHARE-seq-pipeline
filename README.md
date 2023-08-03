@@ -6,3 +6,4 @@ Epigenomics Program pipeline to analyze SHARE-seq data.
 - The tasks directory contains the tasks called from the workflows
 - The src directory contains python and R code called within tasks
 - The dockerfiles directory contains dockerfiles needed for running the workflows
+
