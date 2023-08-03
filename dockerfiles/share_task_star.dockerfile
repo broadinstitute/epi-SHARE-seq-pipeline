@@ -50,6 +50,10 @@ LABEL software.task="STAR"
 
 ENV STAR_VERSION 2.5.1b
 
+RUN apt-get update && apt-get install -y \
+    libgc-dev &&\
+    rm -rf /var/lib/apt/lists/*
+
 # Create and setup new user
 ENV USER=shareseq
 WORKDIR /home/$USER
