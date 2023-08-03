@@ -7,8 +7,7 @@ workflows:
          branches:
              - main
          tags:
-             - v0.0.1
-             - v1.0.0
+             - /.*/
 
    - name: "dorcs-find-dorcs"
      subclass: WDL
@@ -17,9 +16,7 @@ workflows:
          branches:
              - main
          tags:
-             - v0.0.1
-             - v1.0.0
-
+             - /.*/
    - name: "SHARE-seq-atac-archr"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-atac-archr.wdl
@@ -28,8 +25,7 @@ workflows:
              - main
              - dev
          tags:
-             - v0.0.1
-             - v1.0.0
+             - /.*/
 
    - name: "SHARE-seq-rna-seurat"
      subclass: WDL
@@ -39,8 +35,7 @@ workflows:
              - main
              - dev
          tags:
-             - v0.0.1
-             - v1.0.0
+             - /.*/
 
    - name: "SHARE-seq-sample-demultiplexing"
      subclass: WDL
@@ -49,5 +44,4 @@ workflows:
          branches:
              - main
          tags:
-             - v0.0.1
-             - v1.0.0
+             - /.*/
