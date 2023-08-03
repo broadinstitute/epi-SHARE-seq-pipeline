@@ -119,7 +119,7 @@ task qc_atac {
         # library complexity
         # queryname_final_bam from filter
         echo '------ START: Compute library complexity ------' 1>&2
-        time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
+        time samtools view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2

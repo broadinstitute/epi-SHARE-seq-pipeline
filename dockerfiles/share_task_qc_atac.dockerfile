@@ -3,7 +3,7 @@
 # Based on Debian slim
 ############################################################
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
+FROM debian:buster-slim as builder
 
 ENV SAMTOOLS_VERSION 1.9
 ENV BEDTOOLS_VERSION v2.29.0
@@ -43,12 +43,6 @@ RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/sa
     git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
     cd samtools && make && make install && cd ../ && rm -rf samtools* && \
     cd htslib && autoreconf -i && make && make install && cd ../ && rm -rf htslib*
-
-# Install sambamba 0.6.6
-RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && \
-    tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && \
-    mv sambamba_v0.6.6 /usr/local/bin/sambamba && \
-    rm -rf sambamba_*
 
 # Install Picard 2.20.7
 RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar && chmod +x picard.jar && mv picard.jar /usr/local/bin
