@@ -8,7 +8,7 @@ workflows:
             - main
             - rc-v0.0.1
          tags:
-            - v0.0.1
+            - /.*/
 
    - name: "Combinomics-peak-to-gene"
      subclass: WDL
