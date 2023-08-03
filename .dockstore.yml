@@ -27,7 +27,6 @@ workflows:
          branches:
             - main
             - rc-v0.0.1
-
          tags:
             - /.*/
 
