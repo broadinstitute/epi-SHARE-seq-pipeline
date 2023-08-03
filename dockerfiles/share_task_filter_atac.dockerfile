@@ -81,8 +81,7 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 
-# Install packages for python3 scripts
-RUN python3 -m pip install --no-cache-dir --ignore-installed pysam
+
 
 # Create and setup new user
 ENV USER=shareseq
@@ -94,6 +93,9 @@ RUN groupadd -r $USER &&\
 
 # Add folder with software to the path
 ENV PATH="/software:${PATH}"
+
+# Install packages for python3 scripts
+RUN python3 -m pip install --no-cache-dir --ignore-installed pysam
 
 # Copy the compiled software from the builder
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
