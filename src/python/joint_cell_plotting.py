@@ -43,28 +43,36 @@ def merge_dicts(dict_1, dict_2):
 
 def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     """Read files and aggregate metrics into Pandas dataframe"""
-    rna_metrics_contents = get_split_lines(rna_metrics_file, delimiter="\t", skip_header=True)
+    rna_metrics_contents = get_split_lines(rna_metrics_file, delimiter="\t")
+    rna_metrics_header = next(rna_metrics_contents)
+    rna_barcode_ind = rna_metrics_header.index("barcode")
+    umi_ind = rna_metrics_header.index("unique_umi")
+    gene_ind = rna_metrics_header.index("genes_final")
     umis = []
     genes = []
     rna_barcodes = []
-    # remove cells that have fewer than 10 UMIs
+    
     for line in rna_metrics_contents:
-        if int(line[8]) >= remove_low_yielding_cells:
-            umis.append(int(line[8]))
-            genes.append(int(line[9]))
-            rna_barcodes.append(line[0])
+        if int(umi_ind) >= remove_low_yielding_cells:
+            umis.append(int(umi_ind))
+            genes.append(int(gene_ind))
+            rna_barcodes.append(rna_barcode_ind)
     rna_metrics = dict(zip(rna_barcodes, zip(umis, genes)))
 
-    atac_metrics_contents = get_split_lines(atac_metrics_file, delimiter="\t", skip_header=True)
+    atac_metrics_contents = get_split_lines(atac_metrics_file, delimiter="\t")
+    atac_metrics_header = next(atac_metrics_contents)
+    atac_barcode_ind = atac_metrics_header.index("barcode")
+    reads_ind = atac_metrics_header.index("reads_unique")
+    tss_ind = atac_metrics_header.index("tss_enrichment")
     tss = []
     frags = []
     atac_barcodes = []
     # remove cells that have fewer than 10 fragments
     for line in atac_metrics_contents:
-        if int(line[6])/2 >= remove_low_yielding_cells:
-            tss.append(float(line[4]))
-            frags.append(int(line[6])/2)
-            atac_barcodes.append(line[0])
+        if int(reads_ind)/2 >= remove_low_yielding_cells:
+            tss.append(float(tss_ind))
+            frags.append(int(reads_ind)/2)
+            atac_barcodes.append(atac_barcode_ind)
     atac_metrics = dict(zip(atac_barcodes, zip(tss, frags)))
 
     # merge metrics by barcodes

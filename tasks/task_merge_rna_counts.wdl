@@ -34,7 +34,6 @@ task merge_counts {
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
     String ensembl_option = if '~{gene_naming}'=='ensembl' then '--ensembl' else ''
-    String subpool_option = if '~{subpool_names}'!='[]' then '--subpools ~{sep=' ' subpool_names}' else ''
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -46,7 +45,7 @@ task merge_counts {
         python3 $(which merge_rna_counts.py) \
             ~{prefix} \
             ~{sep=' ' tars} \
-            ~{subpool_option} \
+            --subpools ~{sep=' ' subpool_names} \
             ~{ensembl_option} \
 
         tar -cvf ~{prefix}.tar ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
