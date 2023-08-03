@@ -18,7 +18,7 @@ task share_trim_fastqs_atac {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_trim_fastqs_atac"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_trim_fastqs_atac:v1.0.0"
     }
 
     # Determine the size of the input
@@ -72,9 +72,7 @@ task share_trim_fastqs_atac {
         cpu: cpus
         docker: "${docker_image}"
         disks: "local-disk ${disk_gb} ${disk_type}"
-        maxRetries: 1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

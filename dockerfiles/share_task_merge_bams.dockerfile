@@ -46,9 +46,9 @@ FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e94141
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
+LABEL software.version="1.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
+LABEL software.version.is-production="Yes"
 LABEL software.task="merge"
 
 RUN apt-get update && apt-get install -y \
