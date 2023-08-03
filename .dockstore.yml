@@ -6,7 +6,7 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
         branches:
             - main
-            - rc-v1.0.0
+            - rc-v0.0.1
         tags:
             - /.*/
 
@@ -16,7 +16,7 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
         branches:
             - main
-            - rc-v1.0.0
+            - rc-v0.0.1
         tags:
             - /.*/
 
@@ -26,7 +26,7 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
         branches:
             - main
-            - rc-v1.0.0
+            - rc-v0.0.1
         tags:
             - /.*/
 
@@ -36,7 +36,7 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
         branches:
             - main
-            - rc-v1.0.0
+            - rc-v0.0.1
         tags:
             - /.*/
 
@@ -46,6 +46,6 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
         branches:
             - main
-            - rc-v1.0.0
+            - rc-v0.0.1
         tags:
             - /.*/
