@@ -4,48 +4,48 @@ workflows:
      subclass: WDL
      primaryDescriptorPath: /share-seq.wdl
      filters:  # Only develop or master branches and localAligner/** tags
-         branches:
+        branches:
             - main
             - rc-v0.0.1
-         tags:
+        tags:
             - /.*/
 
    - name: "Combinomics-peak-to-gene"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-find-dorcs.wdl
      filters:  # Only develop or master branches and localAligner/** tags
-         branches:
+        branches:
             - main
             - rc-v0.0.1
-         tags:
+        tags:
             - /.*/
 
    - name: "Combinomics-atac-archr"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-atac-archr.wdl
      filters:  # Only develop or master branches and localAligner/** tags
-         branches:
+        branches:
             - main
             - rc-v0.0.1
-         tags:
+        tags:
             - /.*/
 
    - name: "Combinomics-rna-seurat"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-rna-seurat.wdl
      filters:  # Only develop or master branches and localAligner/** tags
-         branches:
+        branches:
             - main
             - rc-v0.0.1
-         tags:
+        tags:
             - /.*/
 
    - name: "Combinomics-sample-demultiplexing"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-preprocess.wdl
      filters:  # Only develop or master branches and localAligner/** tags
-         branches:
+        branches:
             - main
             - rc-v0.0.1
-         tags:
+        tags:
             - /.*/
