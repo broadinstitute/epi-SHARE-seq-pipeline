@@ -6,35 +6,9 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - release
-             - bowtie2-sambamba
-             - sambamba
          tags:
-             - /.*/
-
-   - name: "SHARE-seq-atac-processing"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
-     filters:  # All tags, no branches
-         branches:
-             - main
-             - dev
-             - knudson
-             - neva
-         tags:
-             - /.*/
-
-   - name: "SHARE-seq-rna-processing"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-rna-single-organism.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
-             - main
-             - dev
-             - neva
-             - knudson
-         tags:
-             - /.*/
+             - v0.0.1
+             - v1.0.0
 
    - name: "dorcs-find-dorcs"
      subclass: WDL
@@ -42,10 +16,9 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - dev
-             - neva
          tags:
-             - /.*/
+             - v0.0.1
+             - v1.0.0
 
    - name: "SHARE-seq-atac-archr"
      subclass: WDL
@@ -55,7 +28,8 @@ workflows:
              - main
              - dev
          tags:
-             - /.*/
+             - v0.0.1
+             - v1.0.0
 
    - name: "SHARE-seq-rna-seurat"
      subclass: WDL
@@ -65,7 +39,8 @@ workflows:
              - main
              - dev
          tags:
-             - /.*/
+             - v0.0.1
+             - v1.0.0
 
    - name: "SHARE-seq-sample-demultiplexing"
      subclass: WDL
@@ -73,19 +48,6 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - release
-             - kdong
-             - neva
          tags:
-             - /.*/
-
-   - name: "SHARE-seq-rna-starsolo"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-rna-starsolo.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
-             - main
-             - dev
-             - starsolo
-         tags:
-             - /.*/
+             - v0.0.1
+             - v1.0.0
