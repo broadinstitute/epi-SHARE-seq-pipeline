@@ -39,7 +39,8 @@ task qc_atac {
         Int? cpus = 8
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
+        String docker_image = "mshriver01/share_task_qc_atac"
     }
 
     # Determine the size of the input
@@ -88,6 +89,9 @@ task qc_atac {
 
     String monitor_log = "atac_qc_monitor.log"
 
+    #string with path for file to write tss values to 
+    String tss_out_file = "${prefix}.atac.qc.${genome_name}.tss_nums_out.txt"
+
 
     command<<<
         set -e
@@ -128,6 +132,7 @@ task qc_atac {
             --tss ~{tss} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.fragments.tsv.gz
+            --tss_vals ~{tss_out_file}
 
         # Duplicates per barcode
         echo '------ START: Compute duplication per barcode ------' 1>&2
@@ -206,6 +211,9 @@ task qc_atac {
         File? atac_qc_barcode_rank_plot = fragment_barcode_rank_plot
 
         #File? atac_qc_monitor_log = monitor_log
+
+        #values from tss for final pipeline output
+        File atac_qc_tss_outfile = tss_out_file
     }
 
     runtime {

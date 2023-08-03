@@ -28,7 +28,8 @@ task joint_qc_plotting {
         String? prefix
         String genome_name
 
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
+        String docker_image = "mshriver01/share_task_joint_qc:latest"
     }
 
     # Determine the size of the input
@@ -47,13 +48,16 @@ task joint_qc_plotting {
     String joint_density_plot = '${default="share-seq" prefix}.${genome_name}.joint.density.plot.png'
     String joint_barcode_metadata = '${default="share-seq" prefix}.joint.barcode.metadata.${genome_name}.csv'
 
+    #file with values from the joint qc calculations
+    String joint_qc_stats = '${default="share-seq" prefix}.joint.qc.stats.${genome_name}.txt'
+
     command {
         set -e
 
         bash $(which monitor_script.sh) > monitoring.log &
 
         # Make joint qc plot
-        python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${default="share-seq" prefix}
+        python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_qc_stats} ${joint_barcode_metadata} ${default="share-seq" prefix}
 
         # Make joint density plot
         Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}
@@ -65,6 +69,9 @@ task joint_qc_plotting {
         File? joint_qc_plot = "${joint_qc_plot}"
         File? joint_density_plot = "${joint_density_plot}"
         File joint_barcode_metadata = "${joint_barcode_metadata}"
+
+        #file containg qc values for final output
+        File joint_qc_stats = "${joint_qc_stats}"
     }
 
     runtime {

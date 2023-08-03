@@ -189,7 +189,7 @@ def _add_read_to_dictionary(fragment_counter,
             reads_in_tss[barcode].add(fragment_id)
     return
 
-def plot_tss_enrichment(raw_signal, smoothed_signal, out_file):
+def plot_tss_enrichment(raw_signal, smoothed_signal, out_file, tss_vals):
     fig=plt.figure(figsize=(8.0, 5.0))
     plt.plot(raw_signal,'k.')
     plt.plot(smoothed_signal,'r')
@@ -198,8 +198,16 @@ def plot_tss_enrichment(raw_signal, smoothed_signal, out_file):
     plt.xticks([0, 2000, 4000], ['-2000', 'TSS', '+2000'])
     fig.savefig(out_file)
     plt.close(fig)
+    file = open(tss_vals, 'w')
+    raw_signal_max = str(raw_signal.max())
+    smooth_signal_max = str(smoothed_signal.max())
+    raw_output = "raw signal max is: " + raw_signal_max + "\n"
+    smooth_output = "smooth signal max is " + smooth_signal_max + "\n"
+    file.write(raw_output)
+    file.write(smooth_output)
 
-def compute_tss_enrichment(array_counts, window_size, png_file):
+
+def compute_tss_enrichment(array_counts, window_size, png_file, tss_vals):
     size = len(array_counts)
     # We want to normalize the plot using the signal in the first and last 200 bps.
     normalization_factor = np.mean(array_counts[np.r_[0:100, size-100-1:size]])
@@ -208,7 +216,7 @@ def compute_tss_enrichment(array_counts, window_size, png_file):
     # Smooth using a window
     smoothed_signal = np.convolve(array_counts, np.ones(window_size),'same')/window_size/normalization_factor
 
-    plot_tss_enrichment(raw_signal, smoothed_signal, png_file)
+    plot_tss_enrichment(raw_signal, smoothed_signal, png_file, tss_vals)
 
     return max(smoothed_signal)
 
@@ -240,6 +248,7 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--window", help= "Smoothing window size for plotting. (default= 20)", type= int, default= 20)
     parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
     parser.add_argument("--tss", help= "TSS bed file")
+    parser.add_argument("--tss_vals", help="values from the tss file that should be saved")
 
     # Read arguments from command line
     args = parser.parse_args()

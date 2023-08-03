@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
     parser.add_argument("plot_file", help="Filename for plot png file")
+    parser.add_argument("qc_summary_data", help="text file that numbers for the final pipeline output are written to")
     parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
     parser.add_argument("pkr", help="PKR name", nargs='?', default="")
 
@@ -130,6 +131,63 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 
     plot.save(filename=plot_file, dpi=1000)
 
+def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, min_genes): 
+    """write the counts of atac, rna, both, and neither to a text file so that they can be 
+       outputs of the pipeline"""
+
+
+    #open file that has the values for the reads of atac, rna, both, and neither
+    data = pd.read_csv(input_file)
+    
+    #get counts and cast to strings so they can be written to the file
+    neither_count = get_count_of_type(data, 'neither')
+    neither_count_str = str(neither_count) + '\n'
+    both_count = get_count_of_type(data, 'both')
+    both_count_str = str(both_count) + '\n'
+    rna_count = get_count_of_type(data, 'RNA only')
+    rna_count_str = str(rna_count) + '\n'
+    atac_count = get_count_of_type(data, 'ATAC only')
+    atac_count_str = str(atac_count) + '\n'
+    
+    #cast passed in numbers for thresholds to strings so they can be writen 
+    #to the file
+    min_tss_str = str(min_tss) + '\n'
+    min_frags_str = str(min_frags) + '\n'
+    min_umis_str = str(min_umis) + '\n'
+    min_genes_str = str(min_genes) 
+    
+    #open the specified output file and write all the values
+    output_file = open(output_file, 'w')
+    output_file.write(neither_count_str)
+    output_file.write(both_count_str)
+    output_file.write(rna_count_str)
+    output_file.write(atac_count_str)
+    output_file.write(min_tss_str)
+    output_file.write(min_frags_str)
+    output_file.write(min_umis_str)
+    output_file.write(min_genes_str)
+
+
+def get_count_of_type(dataframe, classifier):
+    """extract the count information from the QC column for a given category (both, neither, rna only, atac only)"""
+    
+    data_one_kind = dataframe.loc[dataframe['QC'] == classifier]
+    #return with the value 0 if QC column is never equal to the specified
+    #classifier
+    if data_one_kind.empty:
+        return 0
+    
+    #extract number contents of QC_count field of the first entry (QC count 
+    # should be the same for any of the entries in the dataframe)
+    field = data_one_kind.at[data_one_kind.index[1], 'QC_count']
+    count = ""
+    # extract the digits from other characters in the string
+    for char in field: 
+        if char.isdigit():
+            count = count + char
+    return int(count)
+
+
 def main():
     # create log file
     logging.basicConfig(filename="joint_cell_plotting.log", level=logging.INFO)
@@ -146,6 +204,7 @@ def main():
     min_tss = getattr(args, "min_tss")
     min_frags = getattr(args, "min_frags")
     plot_file = getattr(args, "plot_file")
+    qc_summary_data = getattr(args, "qc_summary_data")
 
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
@@ -159,6 +218,10 @@ def main():
     logging.info("Generating joint cell calling plot\n")
     plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file)
 
+    # write the stats for the top level into a csv, containd joint qc numbers
+    write_top_level_txt(barcode_metadata_file, qc_summary_data, min_tss, min_frags, min_umis, min_genes)
+
+    
     # save dataframe
     logging.info("Saving dataframe as csv\n")
     metrics_df.to_csv(barcode_metadata_file)
