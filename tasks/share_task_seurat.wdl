@@ -158,7 +158,7 @@ task seurat {
         File? plots_zip = plots_zip_dir
         File? seurat_monitor_log = monitor_log
         
-        #numbers taken from seurat 
+        #numbers taken from seurat needed as pipeline outputs
         File seurat_nums_txt = seurat_nums
     }
 

@@ -89,7 +89,8 @@ task qc_atac {
 
     String monitor_log = "atac_qc_monitor.log"
 
-    #file path for output file
+    # make path for file that will contain values used in tss that are needed
+    # as pipeline outputs
     String tss_out_file = "${prefix}.atac.qc.${genome_name}.tss_nums_out.txt"
 
     command<<<

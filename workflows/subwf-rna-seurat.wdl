@@ -67,9 +67,7 @@ workflow wf_rna {
         File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
         
-        #numbers taken from seurat, next level of passing
-        #for some reason it is ok with this, but the main script does not have 
-        #access to this, and only imports the starsolo subworkflow
+        #numbers from seurat to output to terra
         File share_task_rna_seurat_numbers = seurat.seurat_nums_txt
     }
 }

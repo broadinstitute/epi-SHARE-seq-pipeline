@@ -52,7 +52,7 @@ def main(output_file_name, image_file_list, stats_info, log_file_list, qc_stats_
             num = str(num) + " B"
         elif num > 1000:
             num = int(round(num, -3))
-            num = num / 1000
+            num = int(num / 1000)
             num = str(num) + " K"
         elif num < 1: 
             num = str(round(num))

@@ -149,7 +149,8 @@ task archr {
         File? archr_raw_matrix = raw_archr_h5
         File? archr_filtered_matrix = filtered_archr_h5
 
-        #output file of relevant numbers from archr
+        # file containing relevant numbers from archr to be used as pipeline
+        # outputs
         File archr_numbers = archr_nums
     }
 
