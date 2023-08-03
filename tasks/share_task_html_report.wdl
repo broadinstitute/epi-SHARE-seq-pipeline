@@ -77,6 +77,6 @@ task html_report {
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:14'
+        docker: 'us.gcr.io/buenrostro-share-seq/share_task_html_report:v1.0.0'
     }
 }

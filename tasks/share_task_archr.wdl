@@ -43,7 +43,7 @@ task archr {
         String papermill = "TRUE"
 
         String output_filename = "${prefix}.atac.archr.notebook.${genome}.ipynb"
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_archr"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_archr:v1.0.0"
         String log_filename = "log/${prefix}.atac.archr.logfile.${genome}.txt"
 
         Float? disk_factor = 8.0
@@ -146,9 +146,7 @@ task archr {
         memory : mem_gb+'G'
         docker : docker_image
         disks : 'local-disk ${disk_gb} ${disk_type}'
-        maxRetries : 1
         bootDiskSizeGb: 50
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

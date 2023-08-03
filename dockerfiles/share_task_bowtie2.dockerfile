@@ -3,7 +3,7 @@
 # Based on Debian slim
 ############################################################
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
+FROM debian:buster-slim as builder
 
 ENV BOWTIE2_VERSION 2.4.3
 ENV SAMTOOLS_VERSION 1.9
@@ -48,10 +48,14 @@ FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e94141
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
+LABEL software.version="1.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
+LABEL software.version.is-production="Yes"
 LABEL software.task="Bowtie2"
+
+RUN apt-get update && apt-get install -y \
+    cpanminus && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create and setup new user
 ENV USER=shareseq
@@ -68,7 +72,6 @@ ENV PATH="/software:${PATH}"
 COPY --from=builder --chown=$USER:$USER /software/bowtie2* /software/
 COPY --from=builder --chown=$USER:$USER /usr/local/bin/* /usr/local/bin/
 COPY --from=builder --chown=$USER:$USER /lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/perl/5.32 /usr/lib/x86_64-linux-gnu/perl/5.32/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 
