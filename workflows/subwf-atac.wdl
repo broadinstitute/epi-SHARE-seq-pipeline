@@ -99,6 +99,7 @@ workflow wf_atac {
     
         #file containing values from tss for final output
         File share_atac_tss_outfile_in = qc_atac.atac_qc_tss_outfile
+        File share_atac_archr_nums_in = archr.archr_numbers
     }
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
@@ -300,5 +301,6 @@ workflow wf_atac {
 
         # values from tss for final pipeline output 
         File share_atac_tss_outfile = share_atac_tss_outfile_in
+        File share_atac_archr_numbers = share_atac_archr_nums_in
     }
 }

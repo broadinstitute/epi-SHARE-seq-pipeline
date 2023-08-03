@@ -70,6 +70,11 @@ workflow share {
 
         File genome_tsv
         String? genome_name
+
+        #files with data pulled from other tasks for final output
+        File atac_tss_stats_in = atac.share_atac_tss_outfile
+        File joint_qc_stats_in = joint_qc.joint_qc_stats
+        File archr_numbers_in = atac.share_atac_archr_numbers
     }
 
     Map[String, File] annotations = read_map(genome_tsv)
@@ -205,6 +210,27 @@ workflow share {
                 ## Links to files and logs to append to end of html
                 log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
         }
+    
+        #get the numbers for the values to output out of the text file they are passed in 
+        
+        #values from qc
+        Array[Int] joint_qc_values_in = read_lines(joint_qc_stats_in)
+        Int joint_qc_neither = joint_qc_values_in[0]
+        Int joint_qc_both = joint_qc_values_in[1]
+        Int joint_rna = joint_qc_values_in[2]
+        Int joint_atac = joint_qc_values_in[3]
+        Int joint_min_tss = joint_qc_values_in[4]
+        Int joint_min_frags = joint_qc_values_in[5]
+        Int joint_min_umis = joint_qc_values_in[6]
+        Int joint_min_genes = joint_qc_values_in[7]
+
+        #values from archr
+        Array[Int] archr_values_in = read_lines(archr_numbers_in)
+        String archr_median_tss_enrichment = "0"
+        Int archr_unique_frags = archr_values_in[0]
+        Int archr_tss_cutoff = archr_values_in[1]
+
+
     }
 
     output{
@@ -258,6 +284,17 @@ workflow share {
         Int? rna_unaligned = rna.share_rna_unaligned
         Int? rna_feature_reads = rna.share_rna_feature_reads
         Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
+        Int? joint_qc_neither_out = joint_qc_neither
+        Int? joint_qc_both_out = joint_qc_both
+        Int? joint_rna_out = joint_rna
+        Int? joint_atac_out = joint_atac
+        Int? joint_min_tss_out = joint_min_tss
+        Int? joint_min_frags_out = joint_min_frags
+        Int? joint_min_umis_out = joint_min_umis
+        Int? joint_min_genes_out = joint_min_genes
+        String? archr_unique_frags_out = archr_unique_frags
+        String? archr_tss_cutoff_out = archr_tss_cutoff
+
     }
 
 }
