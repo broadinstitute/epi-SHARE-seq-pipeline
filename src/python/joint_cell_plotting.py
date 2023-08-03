@@ -27,13 +27,15 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def get_split_lines(file_name, delimiter, skip_header):
-    with open(file_name, "r") as f:
-        if skip_header:
+def get_split_lines(file_name, delimiter, skip=0):
+    """
+    Read file contents and yield generator with line entries
+    """
+    with open(file_name, "rt") as f:
+        for i in range(skip):
             next(f)
         for line in f:
             yield line.rstrip().split(sep=delimiter)
-
 def merge_dicts(dict_1, dict_2):
     """Merge dictionaries by key; combine values into quadruple, fill with 0s if key not in both dicts"""
     keys = set(dict_1.keys() | dict_2.keys())
