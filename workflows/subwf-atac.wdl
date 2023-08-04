@@ -217,8 +217,7 @@ workflow wf_atac {
         call share_task_log_atac.log_atac as log_atac {
         input:
             alignment_log = merge.atac_merged_alignment_log,
-            dups_log = qc_atac.atac_qc_duplicate_stats,
-            pbc_log = qc_atac.atac_qc_pbc_stats
+            dups_log = qc_atac.atac_qc_duplicate_stats
         }
 
         if (  "~{pipeline_modality}" == "full" ) {
@@ -270,9 +269,6 @@ workflow wf_atac {
         Int? share_atac_unaligned = log_atac.atac_unaligned
         Int? share_atac_feature_reads = log_atac.atac_feature_reads
         Int? share_atac_duplicate_reads = log_atac.atac_duplicate_reads
-        Float? share_atac_nrf = log_atac.atac_nrf
-        Float? share_atac_pbc1 = log_atac.atac_pbc1
-        Float? share_atac_pbc2 = log_atac.atac_pbc2
         Float? share_atac_percent_duplicates = log_atac.atac_pct_dup
 
         # ArchR
