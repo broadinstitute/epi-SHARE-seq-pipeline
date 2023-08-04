@@ -43,7 +43,8 @@ task archr {
         String papermill = "TRUE"
 
         String output_filename = "${prefix}.atac.archr.notebook.${genome}.ipynb"
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_archr"
+        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_archr"
+        String docker_image = "mshriver01/share_task_archr"
         String log_filename = "log/${prefix}.atac.archr.logfile.${genome}.txt"
 
         Float? disk_factor = 8.0
