@@ -205,6 +205,7 @@ def plot_tss_enrichment(raw_signal, smoothed_signal, out_file, tss_vals):
     smooth_output = "smooth signal max is " + smooth_signal_max + "\n"
     file.write(raw_output)
     file.write(smooth_output)
+    plt.close(fig)
 
 
 def compute_tss_enrichment(array_counts, window_size, png_file, tss_vals):
