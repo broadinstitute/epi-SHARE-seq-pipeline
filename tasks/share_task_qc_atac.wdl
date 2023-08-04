@@ -128,7 +128,7 @@ task qc_atac {
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2
         
-        #make file to write numbers to
+        #make file to write numbers to  
         echo "start tss outfile" >> ~{tss_out_file}
         time python3 $(which qc_atac_compute_tss_enrichment.py) \
             -e 2000 \
