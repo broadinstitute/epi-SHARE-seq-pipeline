@@ -27,7 +27,7 @@ task log_atac {
         echo $(($total_reads - $aligned_uniquely)) > unaligned.txt
         awk 'NR>1{sum += $2}END{print sum/2}' ~{dups_log} > feature_reads.txt
         awk 'NR>1{sum += $3}END{print sum/2}' ~{dups_log} > duplicate_reads.txt
-        awk 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f%", 100*dups/(unique+dups)}' ~{dups_log} > pct_duplicate_reads.txt
+        awk 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f%%", 100*dups/(unique+dups)}' ~{dups_log} > pct_duplicate_reads.txt
     >>>
     output {
         Int atac_total_reads = read_int("total_reads.txt")
