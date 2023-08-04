@@ -54,6 +54,7 @@ LABEL software.version.is-production="No"
 LABEL software.task="Bowtie2"
 
 RUN apt-get update && apt-get install -y \
+    libgc-dev \
     cpanminus  &&\
     rm -rf /var/lib/apt/lists/*
 
