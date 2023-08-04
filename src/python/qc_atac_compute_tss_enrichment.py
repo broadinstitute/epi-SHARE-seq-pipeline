@@ -259,6 +259,8 @@ if __name__ == '__main__':
     else:
         prefix = args.bam[:-4]
 
+    print("passed in value for tss_vals is", args.tss_vals)
+    
     # It is extremely fast. Don't think we need parallel processing.
     #cpus = len(os.sched_getaffinity(0))/2
     # Using column chr, start, end and what user input contains the strand information.
@@ -281,6 +283,7 @@ if __name__ == '__main__':
         for barcode, fragments_in_promoter in stats.items():
             tss_enrichment,reads_sum = compute_tss_enrichment_barcode(barcode_counts[barcode])
             print(f"{barcode}\t{len(fragments_in_promoter)}\t{len(reads_in_tss[barcode])}\t{len(reads_in_promoter[barcode])}\t{tss_enrichment}\t{reads_sum}", file=out_file)
+
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:
         tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp, args.tss_vals)

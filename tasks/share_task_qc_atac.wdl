@@ -40,7 +40,7 @@ task qc_atac {
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
         #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
-        String docker_image = "mshriver01/share_task_qc_atac"
+        String docker_image = "mshriver01/share_task_joint_qc:latest"
     }
 
     # Determine the size of the input
@@ -130,6 +130,9 @@ task qc_atac {
         
         #make file to write numbers to  
         echo "start tss outfile" >> ~{tss_out_file}
+        
+        cat ~{tss_out_file}
+
         time python3 $(which qc_atac_compute_tss_enrichment.py) \
             -e 2000 \
             --tss ~{tss} \
