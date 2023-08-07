@@ -1,5 +1,7 @@
 # Broad Institute of MIT and Harvard Single-Cell/Nucleus Multiomic Processing Pipeline
 
+Combinomics v1
+
 Pipeline specifications can be found [here](https://docs.google.com/document/d/1J-NWpDLkEGLsLjVe6h6-Rx4nxzTdgy1TJZvuMnYiiyg/edit?usp=sharing).
 
 Pipeline main page on [dockstore](https://dockstore.org/workflows/github.com/broadinstitute/epi-SHARE-seq-pipeline/SHARE-seq:release?tab=info).
