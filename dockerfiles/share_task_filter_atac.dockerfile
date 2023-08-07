@@ -82,7 +82,8 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts
-RUN python3 -m pip install --no-cache-dir --ignore-installed pysam
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir --ignore-installed pysam 
 
 # Create and setup new user
 ENV USER=shareseq
@@ -104,9 +105,4 @@ COPY --chown=$USER:$USER src/python/bam_to_fragments.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/assign_multimappers.py /usr/local/bin
 
 
-
-
-
 USER ${USER}
-
-
