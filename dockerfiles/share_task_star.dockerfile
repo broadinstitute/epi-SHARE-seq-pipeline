@@ -49,6 +49,10 @@ LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="Yes"
 LABEL software.task="STAR"
 
+RUN apt-get update && apt-get install -y \
+    libgc-dev &&\
+    rm -rf /var/lib/apt/lists/*
+
 # Create and setup new user
 ENV USER=shareseq
 WORKDIR /home/$USER
