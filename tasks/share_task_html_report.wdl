@@ -7,7 +7,7 @@ version 1.0
 
 task html_report {
     meta {
-        version: 'v0.1'
+        version: 'v1.0'
         author: 'Neva C. Durand (neva@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: create html report task'
     }
@@ -31,6 +31,7 @@ task html_report {
         Int? rna_unaligned
         Int? rna_feature_reads
         Int? rna_duplicate_reads
+        Float? rna_frig
 
         ## JPEG files to be encoded and appended to html
         Array[File?] image_files
@@ -64,6 +65,7 @@ task html_report {
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
+        echo "<tr><td>Fraction of Reads in Genes</td><td>" ~{rna_frig} "</td></tr></table>" >> output.txt
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt
     >>>
     output {

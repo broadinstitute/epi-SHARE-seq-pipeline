@@ -22,7 +22,7 @@ task share_atac_align {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2:dev"
     }
 
     # Determine the size of the input
@@ -119,9 +119,7 @@ task share_atac_align {
         cpu: cpus
         docker: "${docker_image}"
         disks: "local-disk ${disk_gb} ${disk_type}"
-        maxRetries:1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

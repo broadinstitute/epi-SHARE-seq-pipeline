@@ -194,6 +194,7 @@ workflow share {
                 rna_unaligned = rna.share_rna_unaligned,
                 rna_feature_reads = rna.share_rna_feature_reads,
                 rna_duplicate_reads = rna.share_rna_duplicate_reads,
+                rna_frig = rna.rna_frig,
 
                 ## JPEG files to be encoded and appended to html
                 # RNA plots

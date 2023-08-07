@@ -160,7 +160,7 @@ def write_starsolo_outputs(prefix, count_matrix, barcode_list, ensembl_to_gene):
 def write_barcode_metadata(prefix, count_matrix, barcode_list):
     umis = count_matrix.sum(axis=0, dtype="int32").tolist()[0]
     genes = np.diff(count_matrix.indptr)
-    fields = ["barcode", "umis", "genes"]
+    fields = ["barcode", "unique_umis", "genes_final"]
     
     with open(prefix + "_rna_barcode_metadata.tsv", "w") as f:
         # write header

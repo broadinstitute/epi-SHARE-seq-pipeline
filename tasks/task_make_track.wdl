@@ -23,7 +23,8 @@ task make_track {
         Int? cpus = 8
         Float? disk_factor = 4
         Float? memory_factor = 0.3
-        String docker_image = "us.gcr.io/buenrostro-share-seq/task_make_track"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_make_track:dev"
+
     }
 
     # Determine the size of the input

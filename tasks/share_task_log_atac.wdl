@@ -44,7 +44,7 @@ task log_atac {
     parameter_meta {
         alignment_log: {
             description: 'ATAC alignment log file',
-        help: 'Log file from ATAC alignment step.',
+            help: 'Log file from ATAC alignment step.',
             example: 'SS-PKR-30-96-ENTIRE-PLATE.atac.align.hg38.Log.out'
         }
         dups_log: {

@@ -13,24 +13,25 @@ task qc_rna {
     input {
         # This function takes in input the sorted bam file produced by STARsolo
         File bam
+        File mtx_tar
         Int? umi_cutoff = 100
         Int? gene_cutoff = 100
         String genome_name
         String? barcode_tag = "CB"
-        String? pkr
+        String? subpool
         String? prefix
 
-        Int? cpus = 16
+        Int? cpus = 2
         Float? disk_factor = 1.0
-        Float? memory_factor = 1.5
-        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_rna"
+        Float? memory_factor = 0.5
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_rna:dev"
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(bam, "G")
+    Float input_file_size_gb = size(bam, "G") + size(mtx_tar, "G")
 
     # Determining memory size based on the size of the input files.
-    Float mem_gb = 5.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 4.0 + memory_factor * input_file_size_gb
 
     # Determining disk size based on the size of the input files.
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
@@ -38,7 +39,6 @@ task qc_rna {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String assay = "RNA"
     String bai = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.bam.bai"
     String barcode_metadata = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.metadata.tsv"
     String mapped_to_gene = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.reads.mapped.to.genes.txt"
@@ -56,14 +56,24 @@ task qc_rna {
         # Index bam file
         samtools index -@ ~{cpus} ~{bam} ~{bai}
 
+        tar -xvzf ~{mtx_tar}
+
+        zcat matrix.mtx.gz | awk -v OFS="\t" 'NR>3{count[$2]+=$3; tot[$2]+=1}END{for (bc in count){ print bc,count[bc],tot[bc]} }' | sort -k1,1n > barcode_count_statistics_dedup.raw.tsv
+        echo -e "barcode\tunique_umi\tgenes_final\n" > barcode_count_statistics_dedup.tsv
+        awk -v pkr=~{if defined(subpool) then "_~{subpool}" else ""} -v OFS="\t" 'FNR==NR{bc[NR]=$1}FNR!=NR{print bc[$1]pkr,$2,$3; delete bc[$1]}END{for(idx in bc){print bc[idx]pkr,0,0}}' <(zcat barcodes.tsv.gz) barcode_count_statistics_dedup.raw.tsv | sort -k1,1 >> barcode_count_statistics_dedup.tsv
+
         # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
         python3 $(which rna_barcode_metadata.py) ~{bam} \
                                                  ~{bai} \
-                                                 ~{barcode_metadata} \
-                                                 ~{mapped_to_gene} \
-                                                 ~{pkr} ~{"--barcode_tag " + barcode_tag}
+                                                 tmp_metadata.tsv \
+                                                 ~{subpool} \
+                                                 ~{"--barcode_tag " + barcode_tag}
 
-        awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
+        join -t $'\t' -e 0 -j1 <(cat tmp_metadata.tsv | (sed -u 1q;sort -k1,1)) barcode_count_statistics_dedup.tsv | \
+        awk -v OFS="\t" 'NR==1{print $0,"FRIG"}NR>1{printf "%s\t%4.2f\n",$0,$9/$2}' > ~{barcode_metadata}
+
+
+        awk 'NR>1{total+=$2; duplicate+=$2-$9; unique+=$9} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate; print "FRIG:",unique/total}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
         Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_cutoff} ~{gene_cutoff} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot}
@@ -102,9 +112,9 @@ task qc_rna {
                 help: 'Cutoff for number of genes required when making gene barcode rank plot.',
                 example: 10
             }
-        pkr: {
-                description: 'Experiment pkr',
-                help: 'Id of the sample pkr (share-seq specific).',
+        subpool: {
+                description: 'Experiment subpool',
+                help: 'Id of the sample subpool. Can be used to distinguish the 10X lanes.',
                 examples: ['SS-PKR-000']
             }
         genome_name: {

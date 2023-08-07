@@ -3,7 +3,6 @@ version 1.0
 import "../tasks/task_merge_rna_counts.wdl" as task_merge_rna_counts
 import "../tasks/task_merge_atac_fragments.wdl" as task_merge_atac_fragments
 import "../tasks/task_qc_merged_atac.wdl" as task_qc_merged_atac
-import "../tasks/task_qc_merged_rna.wdl" as task_qc_merged_rna
 import "../tasks/share_task_seurat.wdl" as share_task_seurat 
 import "../tasks/share_task_archr.wdl" as share_task_archr
 import "../tasks/share_task_joint_qc.wdl" as share_task_joint_qc
@@ -30,14 +29,6 @@ workflow merge {
         Float? merge_counts_disk_factor
         Float? merge_counts_memory_factor
         String? merge_counts_docker_image
-
-        # RNA QC inputs
-        Boolean run_qc_merged_rna = true
-        Int? umi_cutoff
-        Int? gene_cutoff
-        Float? qc_merged_rna_disk_factor
-        Float? qc_merged_rna_memory_factor
-        String? qc_merged_rna_docker_image
 
         # ATAC merge fragments inputs
         Array[File] fragments
@@ -100,20 +91,6 @@ workflow merge {
                 memory_factor = merge_counts_memory_factor,
                 docker_image = merge_counts_docker_image
         }
-
-        if (run_qc_merged_rna) {
-            call task_qc_merged_rna.qc_merged_rna as qc_merged_rna {
-                input:
-                    barcode_metadata = merge_counts.barcode_metadata,
-                    prefix = prefix,
-                    genome_name = genome_name_,
-                    umi_cutoff = umi_cutoff,
-                    gene_cutoff = gene_cutoff,
-                    disk_factor = qc_merged_rna_disk_factor,
-                    memory_factor = qc_merged_rna_memory_factor,
-                    docker_image = qc_merged_rna_docker_image
-            }
-        } 
 
         if (run_seurat) {
             call share_task_seurat.seurat as seurat {
@@ -198,7 +175,7 @@ workflow merge {
         call html_report.html_report as html_report {
             input:
                 prefix = prefix,
-                image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, qc_merged_rna.umi_barcode_rank_plot, qc_merged_rna.gene_barcode_rank_plot, qc_merged_rna.gene_umi_scatter_plot, seurat.seurat_raw_violin_plot, seurat.seurat_raw_qc_scatter_plot, seurat.seurat_filtered_violin_plot, seurat.seurat_filtered_qc_scatter_plot, seurat.seurat_variable_genes_plot, seurat.seurat_PCA_dim_loadings_plot, seurat.seurat_PCA_plot, seurat.seurat_heatmap_plot, seurat.seurat_jackstraw_plot, seurat.seurat_elbow_plot, seurat.seurat_umap_cluster_plot, seurat.seurat_umap_rna_count_plot, seurat.seurat_umap_gene_count_plot, seurat.seurat_umap_mito_plot, qc_merged_atac.barcode_rank_plot, qc_merged_atac.insert_size_hist, qc_merged_atac.tss_enrichment_plot, archr.archr_raw_tss_by_uniq_frags_plot, archr.archr_filtered_tss_by_uniq_frags_plot, archr.archr_raw_frag_size_dist_plot, archr.archr_filtered_frag_size_dist_plot, archr.archr_umap_doublets, archr.archr_umap_cluster_plot, archr.archr_umap_doublets, archr.archr_umap_num_frags_plot, archr.archr_umap_tss_score_plot, archr.archr_umap_frip_plot, archr.archr_heatmap_plot, dorcs.j_plot],
+                image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, seurat.seurat_raw_violin_plot, seurat.seurat_raw_qc_scatter_plot, seurat.seurat_filtered_violin_plot, seurat.seurat_filtered_qc_scatter_plot, seurat.seurat_variable_genes_plot, seurat.seurat_PCA_dim_loadings_plot, seurat.seurat_PCA_plot, seurat.seurat_heatmap_plot, seurat.seurat_jackstraw_plot, seurat.seurat_elbow_plot, seurat.seurat_umap_cluster_plot, seurat.seurat_umap_rna_count_plot, seurat.seurat_umap_gene_count_plot, seurat.seurat_umap_mito_plot, qc_merged_atac.barcode_rank_plot, qc_merged_atac.insert_size_hist, qc_merged_atac.tss_enrichment_plot, archr.archr_raw_tss_by_uniq_frags_plot, archr.archr_filtered_tss_by_uniq_frags_plot, archr.archr_raw_frag_size_dist_plot, archr.archr_filtered_frag_size_dist_plot, archr.archr_umap_doublets, archr.archr_umap_cluster_plot, archr.archr_umap_doublets, archr.archr_umap_num_frags_plot, archr.archr_umap_tss_score_plot, archr.archr_umap_frip_plot, archr.archr_heatmap_plot, dorcs.j_plot],
                 log_files = []
         }
     }

@@ -21,8 +21,8 @@ task qc_merged_atac {
 
         # Runtime
         Float? disk_factor = 10.0
-        Float? memory_factor = 4.0
-        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac"
+        Float? memory_factor = 2.0
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
     }
 
     # Determine the size of the input
@@ -40,7 +40,6 @@ task qc_merged_atac {
     String final_barcode_metadata = '${default='merged' prefix}.atac.qc.${genome_name}.metadata.tsv'
     String insert_size_hist = '${default='merged' prefix}.atac.qc.hist.${genome_name}.png'
     String fragment_barcode_rank_plot = '${default='merged' prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png'
-    String monitor_log = 'qc_merged_atac_monitor.log'
 
     command <<<
         set -e
@@ -60,10 +59,10 @@ task qc_merged_atac {
         time python3 $(which merge_atac_barcode_metadata.py) merged_barcode_metadata ~{sep=' ' barcode_metadata}
         
         # Add TSS enrichment to barcode metadata
-        paste <(sort -k1,1 ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv) <(sort -k1,1 merged_barcode_metadata | cut -f 2-11) > ~{final_barcode_metadata} 
+        join -j 1 -t $'\t' <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q; sort -k1,1)) <(cut -f 1,6-15 merged_barcode_metadata | (sed -u 1q; sort -k1,1)) > ~{final_barcode_metadata}
 
         # Insert size plot bulk
-        awk '{print $3-$2}' ~{fragments} > insert_sizes
+        gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
         echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
         time python3 $(which plot_insert_size_hist.py) insert_sizes ~{prefix} ~{insert_size_hist}
 
@@ -73,7 +72,6 @@ task qc_merged_atac {
     >>>
 
     output {
-        File monitor_log = monitor_log
         File tss_enrichment_barcode_stats = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
         File tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
         File enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
@@ -85,9 +83,7 @@ task qc_merged_atac {
     runtime {
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
-        maxRetries: 1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

@@ -14,3 +14,4 @@ Cargo.lock
 .ipynb_checkpoints*
 
 .dockstore.yml
+tmp/

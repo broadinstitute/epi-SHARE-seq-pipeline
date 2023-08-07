@@ -16,35 +16,18 @@ ENV R_VERSION=4.1.2
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
-ENV SAMTOOLS_VERSION 1.9
 
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
-    autoconf \
-    automake \
-    binutils \
-    build-essential \
-    git \
-    libcurl4-openssl-dev \
-    liblz4-dev \
-    liblzma-dev \
-    libncurses5-dev \
-    libbz2-dev \
+    samtools \
     python3 \
     python3-dev \
     python3-full \
-    python3-pip \
-    wget \
-    zlib1g-dev &&\
+    python3-pip &&\
     rm -rf /var/lib/apt/lists/*
 
-# Install samtools 1.9
-RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
-    git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/htslib.git && \
-    cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
-
 # Install python packages
-RUN pip install --no-cache-dir --break-system-packages pysam
+RUN pip install --no-cache-dir --break-system-packages pysam numpy
 
 # Create and setup new user
 ENV USER=shareseq
