@@ -7,7 +7,7 @@ version 1.0
 
 task html_report {
     meta {
-        version: 'v0.1'
+        version: 'v1.0'
         author: 'Neva C. Durand (neva@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: create html report task'
     }

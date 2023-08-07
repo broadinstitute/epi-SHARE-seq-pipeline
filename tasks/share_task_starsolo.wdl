@@ -39,7 +39,7 @@ task share_rna_align {
         Int cpus = 16
         Float? disk_factor = 50.0
         Float? memory_factor = 2.0
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star'
+        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star:dev'
         
     }
 

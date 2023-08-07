@@ -8,7 +8,7 @@ version 1.0
 
 task share_atac_filter {
     meta {
-        version: 'v0.1'
+        version: 'v1.0'
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: ATAC filter task'
     }
@@ -32,7 +32,7 @@ task share_atac_filter {
         Int? cpus = 16
         Float? disk_factor = 10.0
         Float? memory_factor = 0.15
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter_atac"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter_atac:dev"
     }
 
 
@@ -209,9 +209,7 @@ task share_atac_filter {
         cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
-        maxRetries: 1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

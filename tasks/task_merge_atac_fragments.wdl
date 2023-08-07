@@ -14,7 +14,7 @@ task merge_fragments {
         Array[File] fragments
         String? prefix
 
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_merge_atac_fragments'
+        String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_merge_atac_fragments:dev'
         Float? disk_factor = 2
         Int? cpus = 8
     }

@@ -6,7 +6,7 @@ version 1.0
 
 task joint_qc_plotting {
     meta {
-        version: 'v0.1'
+        version: 'v1.0'
         author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Joint QC plot'
     }
@@ -28,7 +28,7 @@ task joint_qc_plotting {
         String? prefix
         String genome_name
 
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc:dev"
     }
 
     # Determine the size of the input

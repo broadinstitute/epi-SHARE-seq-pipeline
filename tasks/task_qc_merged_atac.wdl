@@ -22,7 +22,7 @@ task qc_merged_atac {
         # Runtime
         Float? disk_factor = 10.0
         Float? memory_factor = 2.0
-        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
     }
 
     # Determine the size of the input
@@ -83,9 +83,7 @@ task qc_merged_atac {
     runtime {
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
-        maxRetries: 1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

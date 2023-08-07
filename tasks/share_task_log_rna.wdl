@@ -47,7 +47,7 @@ task log_rna {
     parameter_meta {
         alignment_log: {
             description: 'RNA alignment log file',
-	    help: 'Log file from RNA alignment step.',
+	        help: 'Log file from RNA alignment step.',
             example: 'SS-PKR-30-96-ENTIRE-PLATE.rna.align.hg38.Log.out'
         }
 
