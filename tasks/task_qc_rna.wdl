@@ -41,6 +41,7 @@ task qc_rna {
 
     String bai = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.bam.bai"
     String barcode_metadata = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.barcode.metadata.tsv"
+    String mapped_to_gene = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.reads.mapped.to.genes.txt"
     String duplicates_log = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.duplicates.log.txt"
     String umi_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.umi.barcode.rank.plot.png"
     String gene_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.barcode.rank.plot.png"
@@ -71,6 +72,7 @@ task qc_rna {
         join -t $'\t' -e 0 -j1 <(cat tmp_metadata.tsv | (sed -u 1q;sort -k1,1)) barcode_count_statistics_dedup.tsv | \
         awk -v OFS="\t" 'NR==1{print $0,"FRIG"}NR>1{printf "%s\t%4.2f\n",$0,$9/$2}' > ~{barcode_metadata}
 
+
         awk 'NR>1{total+=$2; duplicate+=$2-$9; unique+=$9} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate; print "FRIG:",unique/total}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
@@ -79,6 +81,7 @@ task qc_rna {
 
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
+        File rna_reads_mapped_to_genes = "~{mapped_to_gene}"
         File rna_duplicates_log = "~{duplicates_log}"
         File rna_barcode_metadata_log = "barcode_metadata.log"
         File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
