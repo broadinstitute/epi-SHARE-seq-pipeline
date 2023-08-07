@@ -64,9 +64,9 @@ FROM debian:buster-slim
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
+LABEL software.version="1.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
+LABEL software.version.is-production="Yes"
 LABEL software.task="filter"
 
 RUN apt-get update && apt-get install -y \
@@ -82,7 +82,8 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts
-RUN python3 -m pip install --no-cache-dir --ignore-installed pysam
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir --ignore-installed pysam 
 
 # Create and setup new user
 ENV USER=shareseq
@@ -102,9 +103,6 @@ COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 COPY --chown=$USER:$USER src/python/filter_mito_reads.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/bam_to_fragments.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/assign_multimappers.py /usr/local/bin
-
-
-
 
 
 USER ${USER}
