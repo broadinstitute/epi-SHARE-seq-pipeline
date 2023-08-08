@@ -142,6 +142,7 @@ def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, m
     data = pd.read_csv(input_file)
     
     #get counts and cast to strings so they can be written to the file
+    #add annotations back in here
     neither_count = get_count_of_type(data, 'neither')
     neither_count_str = str(neither_count) + '\n'
     both_count = get_count_of_type(data, 'both')
