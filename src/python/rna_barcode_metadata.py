@@ -40,7 +40,6 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
 
 
     for read in bam:
-        reads += 1
         try:
             # get barcode; skip read if not present
             barcode = read.get_tag(barcode_tag)
