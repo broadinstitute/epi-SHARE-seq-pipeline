@@ -129,7 +129,7 @@ task qc_atac {
         echo '------ START: Compute TSS enrichment ------' 1>&2
         
         #make file to write numbers to  
-        echo "start tss outfile" >> ~{tss_out_file}
+        echo "start tss outfile" > ~{tss_out_file}
         
         cat ~{tss_out_file}
 
