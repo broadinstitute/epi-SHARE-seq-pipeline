@@ -104,7 +104,7 @@ task html_report {
     >>>
     output {
         File html_report_file = "~{output_file}"
-        File csv_summary_file = "output_csv_file"
+        File csv_summary_file = "~{output_csv_file}"
     }
 
     runtime {
