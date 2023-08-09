@@ -43,8 +43,8 @@ task seurat {
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
         
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
-        String docker_image = "mshriver01/share_task_seurat"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
+        #String docker_image = "mshriver01/share_task_seurat"
 
         #Int mem_gb = 128
         
