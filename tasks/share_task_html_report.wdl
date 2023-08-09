@@ -42,8 +42,8 @@ task html_report {
         Array[String?] log_files
 
         ##values needed for the csv report
-        Array[String] joint_qc_vals
-        Array[String] archr_vals
+        File joint_qc_vals
+        File archr_vals
 
     }
 
@@ -91,12 +91,9 @@ task html_report {
         echo "rna_unaligned, " ~{rna_unaligned} >> csv_in.txt
         echo "rna_feature_reads, " ~{rna_feature_reads} >> csv_in.txt
         echo "rna_duplicate_reads, " ~{rna_duplicate_reads} >> csv_in.txt
-
-        echo "~{sep="\n" joint_qc_vals}" > csv_joint_qc_in.txt
-        echo "~{sep="\n" archr_vals}" > archr_vals_in.txt
         
         
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} csv_in.txt csv_joint_qc.txt archr_vals_in.txt --input_file_name output.txt
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} {csv_in.txt} ~{joint_qc_vals} {archr_val} --input_file_name output.txt
     
     
 

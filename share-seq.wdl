@@ -95,22 +95,6 @@ workflow share {
     File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
     File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
 
-    Array[String] joint_qc_values_in = read_lines(joint_qc_stats_in)
-    String joint_qc_neither = joint_qc_values_in[0]
-    String joint_qc_both = joint_qc_values_in[1]
-    String joint_rna = joint_qc_values_in[2]
-    String joint_atac = joint_qc_values_in[3]
-    String joint_min_tss = joint_qc_values_in[4]
-    String joint_min_frags = joint_qc_values_in[5]
-    String joint_min_umis = joint_qc_values_in[6]
-    String joint_min_genes = joint_qc_values_in[7]
-
-    #values from archr
-    Array[String] archr_values_in = read_lines(archr_numbers_in)
-    String archr_median_tss_enrichment = "0"
-    String archr_unique_frags = archr_values_in[0]
-    String archr_tss_cutoff = archr_values_in[1]
-
     if ( chemistry != "shareseq" && process_atac) {
         scatter (idx in range(length(read1_atac))) {
             call preprocess_tenx.preprocess_tenx as preprocess_tenx{
@@ -228,8 +212,8 @@ workflow share {
                 log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log],
 
                 #other values for the csv report 
-                joint_qc_vals = joint_qc_values_in, 
-                archr_vals = archr_values_in
+                joint_qc_vals = joint_qc_stats_in, 
+                archr_vals = archr_numbers_in
         }
     
 
