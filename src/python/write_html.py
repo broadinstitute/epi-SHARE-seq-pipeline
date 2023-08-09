@@ -91,5 +91,5 @@ if __name__ == '__main__':
     group.add_argument('--input_file_name',
                        help='optional file with html text to add at top of file', nargs='?') 
     args = parser.parse_args()
-    main(args.output_file_name, args.image_file_list, args.log_file_list, args.output_csv_name, args.summary_stats_txt, args.joint_qc_vals_txt, args.archr_vals.txt, args.input_file_name)
+    main(args.output_file_name, args.image_file_list, args.log_file_list, args.output_csv_name, args.summary_stats_txt, args.joint_qc_vals_txt, args.archr_vals_txt, args.input_file_name)
 
