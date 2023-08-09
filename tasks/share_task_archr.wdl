@@ -118,8 +118,8 @@ task archr {
         -p heatmap_label_n ${heatmap_label_n} \
         -p heatmap_cutoff ${heatmap_cutoff}
 
-        echo ${min_frags} >> ${archr_nums}
-        echo ${min_tss} >> ${archr_nums}
+        echo "archr_min_grafs, " ${min_frags} >> ${archr_nums}
+        echo "archr_min_tss, "${min_tss} >> ${archr_nums}
     }
 
     output {

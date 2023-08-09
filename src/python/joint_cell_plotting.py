@@ -141,20 +141,20 @@ def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, m
     
     #get counts and cast to strings so they can be written to the file
     neither_count = get_count_of_type(data, 'neither')
-    neither_count_str = str(neither_count) + '\n'
+    neither_count_str = "qc_neither_atac_nor_rna, " + str(neither_count) + '\n'
     both_count = get_count_of_type(data, 'both')
-    both_count_str = str(both_count) + '\n'
+    both_count_str = "qc_atac_and_rna, " + str(both_count) + '\n'
     rna_count = get_count_of_type(data, 'RNA only')
-    rna_count_str = str(rna_count) + '\n'
+    rna_count_str = "qc_rna_count, " + str(rna_count) + '\n'
     atac_count = get_count_of_type(data, 'ATAC only')
-    atac_count_str = str(atac_count) + '\n'
+    atac_count_str = "qc_atac_count, " + str(atac_count) + '\n'
     
     #cast passed in numbers for thresholds to strings so they can be writen 
     #to the file
-    min_tss_str = str(min_tss) + '\n'
-    min_frags_str = str(min_frags) + '\n'
-    min_umis_str = str(min_umis) + '\n'
-    min_genes_str = str(min_genes) 
+    min_tss_str = "qc_min_tss, " + str(min_tss) + '\n'
+    min_frags_str = "qc_min_frags, " + str(min_frags) + '\n'
+    min_umis_str = "qc_min_umis, " + str(min_umis) + '\n'
+    min_genes_str = "qc_min_genes_, " + str(min_genes) 
     
     #open the specified output file and write all the values
     output_file = open(output_file, 'w')

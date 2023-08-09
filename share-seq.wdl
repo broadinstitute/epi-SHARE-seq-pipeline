@@ -184,6 +184,22 @@ workflow share {
     }
 
     if ( pipeline_modality != "no_align" ) {
+        Array[String] joint_qc_values_in = read_lines(joint_qc_stats_in)
+        String joint_qc_neither = joint_qc_values_in[0]
+        String joint_qc_both = joint_qc_values_in[1]
+        String joint_rna = joint_qc_values_in[2]
+        String joint_atac = joint_qc_values_in[3]
+        String joint_min_tss = joint_qc_values_in[4]
+        String joint_min_frags = joint_qc_values_in[5]
+        String joint_min_umis = joint_qc_values_in[6]
+        String joint_min_genes = joint_qc_values_in[7]
+
+        #values from archr
+        Array[String] archr_values_in = read_lines(archr_numbers_in)
+        String archr_median_tss_enrichment = "0"
+        String archr_unique_frags = archr_values_in[0]
+        String archr_tss_cutoff = archr_values_in[1]
+        
         call html_report.html_report as html_report {
             input:
                 prefix = prefix,
@@ -208,28 +224,15 @@ workflow share {
                 image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, rna.share_rna_umi_barcode_rank_plot, rna.share_rna_gene_barcode_rank_plot, rna.share_rna_gene_umi_scatter_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_barcode_rank_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment,  atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, dorcs.j_plot],
 
                 ## Links to files and logs to append to end of html
-                log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
+                log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log],
+
+                #other values for the csv report 
+                joint_qc_vals = joint_qc_values_in, 
+                archr_vals = archr_values_in
         }
     
-        #get the numbers for the values to output out of the text file they are passed in 
-        
-        #values from qc
-        Array[Int] joint_qc_values_in = read_lines(joint_qc_stats_in)
-        Int joint_qc_neither = joint_qc_values_in[0]
-        Int joint_qc_both = joint_qc_values_in[1]
-        Int joint_rna = joint_qc_values_in[2]
-        Int joint_atac = joint_qc_values_in[3]
-        Int joint_min_tss = joint_qc_values_in[4]
-        Int joint_min_frags = joint_qc_values_in[5]
-        Int joint_min_umis = joint_qc_values_in[6]
-        Int joint_min_genes = joint_qc_values_in[7]
 
-        #values from archr
-        Array[Int] archr_values_in = read_lines(archr_numbers_in)
-        String archr_median_tss_enrichment = "0"
-        Int archr_unique_frags = archr_values_in[0]
-        Int archr_tss_cutoff = archr_values_in[1]
-
+    
 
     }
 
@@ -267,33 +270,34 @@ workflow share {
 
         # Report
         File? html_summary = html_report.html_report_file
+        File? csv_summary = html_report.csv_summary_file
 
         # numbers to output 
-        Int? atac_total_reads = atac.share_atac_total_reads
-        Int? atac_aligned_uniquely = atac.share_atac_aligned_uniquely
-        Int? atac_unaligned = atac.share_atac_unaligned
-        Int? atac_feature_reads = atac.share_atac_feature_reads
-        Int? atac_duplicate_reads = atac.share_atac_duplicate_reads
-        Float? atac_nrf = atac.share_atac_nrf
-        Float? atac_pbc1 = atac.share_atac_pbc1
-        Float? atac_pbc2 = atac.share_atac_pbc2
-        Float? atac_percent_duplicates = atac.share_atac_percent_duplicates
-        Int? rna_total_reads = rna.share_rna_total_reads
-        Int? rna_aligned_uniquely = rna.share_rna_aligned_uniquely
-        Int? rna_aligned_multimap = rna.share_rna_aligned_multimap
-        Int? rna_unaligned = rna.share_rna_unaligned
-        Int? rna_feature_reads = rna.share_rna_feature_reads
-        Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
-        Int? joint_qc_neither_out = joint_qc_neither
-        Int? joint_qc_both_out = joint_qc_both
-        Int? joint_rna_out = joint_rna
-        Int? joint_atac_out = joint_atac
-        Int? joint_min_tss_out = joint_min_tss
-        Int? joint_min_frags_out = joint_min_frags
-        Int? joint_min_umis_out = joint_min_umis
-        Int? joint_min_genes_out = joint_min_genes
-        String? archr_unique_frags_out = archr_unique_frags
-        String? archr_tss_cutoff_out = archr_tss_cutoff
+        #Int? atac_total_reads = atac.share_atac_total_reads
+        #Int? atac_aligned_uniquely = atac.share_atac_aligned_uniquely
+        #Int? atac_unaligned = atac.share_atac_unaligned
+        #Int? atac_feature_reads = atac.share_atac_feature_reads
+        #Int? atac_duplicate_reads = atac.share_atac_duplicate_reads
+        #Float? atac_nrf = atac.share_atac_nrf
+        #Float? atac_pbc1 = atac.share_atac_pbc1
+        #Float? atac_pbc2 = atac.share_atac_pbc2
+        #Float? atac_percent_duplicates = atac.share_atac_percent_duplicates
+        #Int? rna_total_reads = rna.share_rna_total_reads
+        #Int? rna_aligned_uniquely = rna.share_rna_aligned_uniquely
+        #Int? rna_aligned_multimap = rna.share_rna_aligned_multimap
+        #Int? rna_unaligned = rna.share_rna_unaligned
+        #Int? rna_feature_reads = rna.share_rna_feature_reads
+        #Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
+        #Int? joint_qc_neither_out = joint_qc_neither
+        #Int? joint_qc_both_out = joint_qc_both
+        #Int? joint_rna_out = joint_rna
+        #Int? joint_atac_out = joint_atac
+        #Int? joint_min_tss_out = joint_min_tss
+        #Int? joint_min_frags_out = joint_min_frags
+        #Int? joint_min_umis_out = joint_min_umis
+        #Int? joint_min_genes_out = joint_min_genes
+        #String? archr_unique_frags_out = archr_unique_frags
+        #String? archr_tss_cutoff_out = archr_tss_cutoff
 
     }
 

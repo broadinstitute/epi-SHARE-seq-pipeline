@@ -9,7 +9,7 @@ import base64
 import io
 import os.path
 
-def main(output_file_name, image_file_list, log_file_list, input_file_name=None):
+def main(output_file_name, image_file_list, log_file_list, output_csv_name, summary_stats_txt, joint_qc_vals_txt, archr_vals_txt, input_file_name=None):
     """
     Write to the input file
     Image file list is list of png images
@@ -25,6 +25,8 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
         with open(input_file_name) as input_file:
            output_file.write(input_file.read())
     
+    csv_output_file = io.open(output_csv_name, 'w', encoding='utf8')
+    
     with open(image_file_list) as fname:
         images = fname.read().splitlines() 
 
@@ -35,6 +37,7 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
         data_base64 = data_base64.decode('utf-8')    # convert bytes to string
         output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
+        csv_output_file.write(os.path.basename(image) + ", " + data_base64)
 
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
@@ -43,7 +46,27 @@ def main(output_file_name, image_file_list, log_file_list, input_file_name=None)
     for log in logs:
         output_file.write(log)
         output_file.write("<br>")
+        csv_output_file.write("log, " + log)
     output_file.write('</body></html>')
+    
+    #write overall summary stats to output csv file
+    with open (summary_stats_txt) as fname:
+        stats = fname.read().splitlines()
+    for stat in stats:
+        csv_output_file.write(stat)
+    
+    #write stats from qc to output csv file
+    with open (joint_qc_vals_txt) as fname:
+        stats = fname.read().splitlines()
+    for stat in stats:
+        csv_output_file.write(stat)
+    
+    #write stats from archr to output csv file
+    with open (archr_vals_txt) as fname:
+        stats = fname.read().splitlines()
+    for stat in stats:
+        csv_output_file.write(stat)
+
     output_file.close()
 
 if __name__ == '__main__':
@@ -57,6 +80,14 @@ if __name__ == '__main__':
                        help='file containing list of image files to paste in HTML file')
     group.add_argument('log_file_list',
                        help='file containing list of text log files to append to end of HTML file')
+    group.add_argument('output_csv_name',
+                       help='csv file to write values to')
+    group.add_argument('summary_stats_txt',
+                       help='text file containing names and values of summary stats')
+    group.add_argument('joint_qc_vals_txt',
+                       help='file containing names and values of stats from joint qc ')
+    group.add_argument('archr_vals_txt',
+                       help='file containing names and values of stats from archr')
     group.add_argument('--input_file_name',
                        help='optional file with html text to add at top of file', nargs='?') 
     args = parser.parse_args()

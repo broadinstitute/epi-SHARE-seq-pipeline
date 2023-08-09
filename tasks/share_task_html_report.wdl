@@ -41,12 +41,17 @@ task html_report {
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
+        ##values needed for the csv report
+        Array[String] joint_qc_vals
+        Array[String] archr_vals
+
     }
 
     String output_file = "${default="share-seq" prefix}.html"
     # need to select from valid files since some are optional
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
+    String output_csv_file = "${default="share-seq" prefix}.txt"
 
     command <<<
 
@@ -70,10 +75,36 @@ task html_report {
         echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
         percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
         echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt
+        
+        echo "atac_total_reads, " ~{atac_total_reads} > csv_in.txt
+        echo "atac_aligned_uniquely, " ~{atac_aligned_uniquely} >> csv_in.txt
+        echo "atac_unaligned, " ~{atac_unaligned} >> csv_in.txt
+        echo "atac_feature_reads, "~{atac_feature_reads} >> csv_in.txt
+        echo "atac_duplicate_reads, " ~{atac_duplicate_reads} >> csv_in.txt
+        echo "atac_percent_duplicates, " ~{atac_percent_duplicates} >> csv_in.txt
+        echo "atac_nrf, " ~{atac_nrf} >> csv_in.txt
+        echo "atac_pbc1, " ~{atac_pbc1} >> csv_in.txt
+        echo "atac_pbc2, " ~{atac_pbc2} >> csv_in.txt
+        echo "rna_total_reads, "~{rna_total_reads} >> csv_in.txt
+        echo "rna_aligned_uniquely, " ~{rna_aligned_uniquely} >> csv_in.txt
+        echo "rna_aligned_multimap, " ~{rna_aligned_multimap} >> csv_in.txt
+        echo "rna_unaligned, " ~{rna_unaligned} >> csv_in.txt
+        echo "rna_feature_reads, " ~{rna_feature_reads} >> csv_in.txt
+        echo "rna_duplicate_reads, " ~{rna_duplicate_reads} >> csv_in.txt
+
+        echo "~{sep="\n" joint_qc_vals}" > csv_joint_qc_in.txt
+        echo "~{sep="\n" archr_vals}" > archr_vals_in.txt
+        
+        
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} csv_in.txt csv_joint_qc.txt archr_vals_in.txt --input_file_name output.txt
+    
+    
+
+    
     >>>
     output {
         File html_report_file = "~{output_file}"
+        File csv_summary_file = "output_csv_file"
     }
 
     runtime {
