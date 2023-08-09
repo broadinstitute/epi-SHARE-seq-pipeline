@@ -53,19 +53,19 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     with open (summary_stats_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
-        csv_output_file.write("stat, " + stat + '\n')
+        csv_output_file.write(stat + '\n')
     
     #write stats from qc to output csv file
     with open (joint_qc_vals_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
-        csv_output_file.write("stat, " + stat + '\n')
+        csv_output_file.write(stat + '\n')
     
     #write stats from archr to output csv file
     with open (archr_vals_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
-        csv_output_file.write("stat, " + stat + '\n')
+        csv_output_file.write(stat + '\n')
 
     output_file.close()
     csv_output_file.close()
