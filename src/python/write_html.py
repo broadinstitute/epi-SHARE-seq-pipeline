@@ -36,8 +36,11 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         data = open(image, 'rb').read() # read bytes from file
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
         data_base64 = data_base64.decode('utf-8')    # convert bytes to string
-        output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
-        name = os.path.basename(image)
+        zname = os.path.basename(image)
+        idx = name.index('.') + 1
+        name = name[idx:]
+        output_file.write('<img id ="' + name + '" width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
+        zname = os.path.basename(image)
         idx = name.index('.') + 1
         name = name[idx:]
         csv_output_file.write(name + ", " + "some image encoding" + '\n')
@@ -47,12 +50,12 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
 
     # loop through log files in log list and write
     for log in logs:
-        output_file.write(log)
-        output_file.write("<br>")
         log_parts = log.split('/')
         log_name = log_parts[-1]
         idx = log_name.index('.') + 1
         log_name = log_name[idx:]
+        output_file.write("<div id =" + log_name + ">" + log + "</div>")
+        output_file.write("<br>")
         csv_output_file.write(log_name + ", " + log + '\n')
     output_file.write('</body></html>')
     
@@ -63,6 +66,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         csv_output_file.write(stat + '\n')
     
     #write stats from qc to output csv file
+    joint_qc_values = []
     with open (joint_qc_vals_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
