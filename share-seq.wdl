@@ -72,9 +72,9 @@ workflow share {
         String? genome_name
 
         #files with data pulled from other tasks for final output
-        File atac_tss_stats_in = atac.share_atac_tss_outfile
-        File joint_qc_stats_in = joint_qc.joint_qc_stats
-        File archr_numbers_in = atac.share_atac_archr_numbers
+        #File atac_tss_stats_in = atac.share_atac_tss_outfile
+        #File joint_qc_stats_in = joint_qc.joint_qc_stats
+        #File archr_numbers_in = atac.share_atac_archr_numbers
     }
 
     Map[String, File] annotations = read_map(genome_tsv)
@@ -212,9 +212,9 @@ workflow share {
                 log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log],
 
                 #other values for the csv report 
-                joint_qc_vals = joint_qc_stats_in, 
-                archr_vals = archr_numbers_in
-        }
+                joint_qc_vals = joint_qc.joint_qc_stats,
+                archr_vals = atac.share_atac_archr_numbers
+       }
     
 
     

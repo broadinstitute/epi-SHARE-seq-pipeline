@@ -42,8 +42,8 @@ task html_report {
         Array[String?] log_files
 
         ##values needed for the csv report
-        File joint_qc_vals
-        File archr_vals
+        File? joint_qc_vals
+        File? archr_vals
 
     }
 
