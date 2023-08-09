@@ -37,7 +37,10 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
         data_base64 = data_base64.decode('utf-8')    # convert bytes to string
         output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
-        csv_output_file.write(os.path.basename(image) + ", " + "some image encoding" + '\n')
+        name = os.path.basename(image)
+        idx = name.index('.') + 1
+        name = name[idx:]
+        csv_output_file.write(name + ", " + "some image encoding" + '\n')
 
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
@@ -46,7 +49,11 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     for log in logs:
         output_file.write(log)
         output_file.write("<br>")
-        csv_output_file.write("log, " + log + '\n')
+        log_parts = log.split('/')
+        log_name = log_parts[-1]
+        idx = log_name.index('.') + 1
+        log_name = log_name[idx:]
+        csv_output_file.write(log_name + ", " + log + '\n')
     output_file.write('</body></html>')
     
     #write overall summary stats to output csv file
