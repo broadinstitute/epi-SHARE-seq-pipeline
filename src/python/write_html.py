@@ -36,13 +36,10 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         data = open(image, 'rb').read() # read bytes from file
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
         data_base64 = data_base64.decode('utf-8')    # convert bytes to string
-        zname = os.path.basename(image)
+        name = os.path.basename(image)
         idx = name.index('.') + 1
         name = name[idx:]
         output_file.write('<img id ="' + name + '" width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
-        zname = os.path.basename(image)
-        idx = name.index('.') + 1
-        name = name[idx:]
         csv_output_file.write(name + ", " + "some image encoding" + '\n')
 
     with open(log_file_list) as fname:
