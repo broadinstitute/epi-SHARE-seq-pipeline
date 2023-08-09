@@ -37,7 +37,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
         data_base64 = data_base64.decode('utf-8')    # convert bytes to string
         output_file.write('<img width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
-        csv_output_file.write(os.path.basename(image) + ", " + data_base64)
+        csv_output_file.write(os.path.basename(image) + ", " + "some image encoding" + '\n')
 
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
@@ -46,28 +46,29 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     for log in logs:
         output_file.write(log)
         output_file.write("<br>")
-        csv_output_file.write("log, " + log)
+        csv_output_file.write("log, " + log + '\n')
     output_file.write('</body></html>')
     
     #write overall summary stats to output csv file
     with open (summary_stats_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
-        csv_output_file.write(stat)
+        csv_output_file.write("stat, " + stat + '\n')
     
     #write stats from qc to output csv file
     with open (joint_qc_vals_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
-        csv_output_file.write(stat)
+        csv_output_file.write("stat, " + stat + '\n')
     
     #write stats from archr to output csv file
     with open (archr_vals_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
-        csv_output_file.write(stat)
+        csv_output_file.write("stat, " + stat + '\n')
 
     output_file.close()
+    csv_output_file.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

@@ -52,7 +52,7 @@ task html_report {
     #comment
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
-    String output_csv_file = "${default="share-seq" prefix}.txt"
+    String output_csv_file = "${default="share-seq" prefix}.csv"
 
     command <<<
 
