@@ -6,39 +6,7 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - release
-             - neva
-             - minimal-inputs
-             - dynamic-memory
-             - knudson
-             - insert_size_hist
-             - barcode_plot_annotations
              - cellbender
-             - trim-fastqs-atac
-         tags:
-             - /.*/
-
-   - name: "SHARE-seq-atac-processing"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-atac-single-organism.wdl
-     filters:  # All tags, no branches
-         branches:
-             - main
-             - dev
-             - knudson 
-             - neva
-         tags:
-             - /.*/
-
-   - name: "SHARE-seq-rna-processing"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-rna-single-organism.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
-             - main
-             - dev
-             - neva
-             - knudson
          tags:
              - /.*/
 
@@ -48,11 +16,8 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - dev
-             - neva
          tags:
              - /.*/
-
    - name: "SHARE-seq-atac-archr"
      subclass: WDL
      primaryDescriptorPath: /workflows/subwf-atac-archr.wdl
@@ -60,7 +25,6 @@ workflows:
          branches:
              - main
              - dev
-             - neva
          tags:
              - /.*/
 
@@ -71,7 +35,6 @@ workflows:
          branches:
              - main
              - dev
-             - neva
          tags:
              - /.*/
 
@@ -81,19 +44,5 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - dev
-             - neva
-             - kdong
-         tags:
-             - /.*/
-
-   - name: "SHARE-seq-rna-starsolo"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-rna-starsolo.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
-             - main
-             - dev
-             - starsolo
          tags:
              - /.*/

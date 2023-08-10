@@ -13,16 +13,17 @@ task qc_rna {
     input {
         # This function takes in input the sorted bam file produced by STARsolo
         File bam
-        Int? umi_cutoff = 10
-        Int? gene_cutoff = 10
-        String chemistry
+        Int? umi_cutoff = 100
+        Int? gene_cutoff = 100
         String genome_name
+        String? barcode_tag = "CB"
+        String? pkr
         String? prefix
-        
+
         Int? cpus = 16
-        Float? disk_factor = 8.0
+        Float? disk_factor = 1.0
         Float? memory_factor = 1.5
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_rna:v1.0.0"
     }
 
     # Determine the size of the input
@@ -52,33 +53,34 @@ task qc_rna {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Index bam file
-        samtools index -@ ~{cpus} ~{bam} ~{bai} 
-         
+        samtools index -@ ~{cpus} ~{bam} ~{bai}
+
         # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
-        python3 $(which rna_barcode_metadata.py) ~{chemistry} ~{bam} ~{bai} ~{barcode_metadata}
-    
-        # Make duplicates log from barcode metadata file
+        python3 $(which rna_barcode_metadata.py) ~{bam} \
+                                                 ~{bai} \
+                                                 ~{barcode_metadata} \
+                                                 ~{pkr} ~{"--barcode_tag " + barcode_tag}
+
         awk '{total+=$2; duplicate+=$3; unique+=$4} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
-        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_cutoff} ~{gene_cutoff} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot} 
+        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_cutoff} ~{gene_cutoff} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot}
     >>>
 
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
         File rna_duplicates_log = "~{duplicates_log}"
+        File rna_barcode_metadata_log = "barcode_metadata.log"
         File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
         File? rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
-        File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"   
+        File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"
     }
 
     runtime {
         cpu : cpus
         memory : "~{mem_gb} GB"
-        memory_retry_multiplier: 2
         disks: "local-disk ~{disk_gb} ~{disk_type}"
-        docker : docker_image
-        maxRetries:1
+        docker : "${docker_image}"
     }
 
     parameter_meta {
@@ -97,10 +99,10 @@ task qc_rna {
                 help: 'Cutoff for number of genes required when making gene barcode rank plot.',
                 example: 10
             }
-        chemistry: {
-                description: 'Experiment chemistry',
-                help: 'Chemistry/method used in the experiment.',
-                examples: ['shareseq', '10x_v2', '10x_v3']
+        pkr: {
+                description: 'Experiment pkr',
+                help: 'Id of the sample pkr (share-seq specific).',
+                examples: ['SS-PKR-000']
             }
         genome_name: {
                 description: 'Reference name',

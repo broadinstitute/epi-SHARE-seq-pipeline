@@ -17,11 +17,11 @@ task generate_h5 {
         String genome_name
         String? pkr
         String prefix
+        String? gene_naming
 
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
-        #String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5"
-        String docker_image = "mknudson/share_task_generate_h5:test"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_generate_h5:v1.0.0"
     }
 
     # Determine the size of the input
@@ -36,20 +36,27 @@ task generate_h5 {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
+    String ensembl_option = if "${gene_naming}"=="ensembl" then "--ensembl" else ""
     String h5 = "${default="share-seq" prefix}.${genome_name}.rna.h5"
     String monitor_log = "monitor.log"
 
-    command {
+    command <<<
         set -e
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         # Untar
-        tar xzvf ${tar}
+        tar xzvf ~{tar}
 
         # Generate h5 file
-        python3 $(which generate_h5_rna.py) ./matrix.mtx.gz ./features.tsv.gz ./barcodes.tsv.gz ${h5} ${if defined(pkr) then "--pkr ${pkr}" else ""}
-    }
+        python3 $(which generate_h5_rna.py) \
+            ./matrix.mtx.gz \
+            ./features.tsv.gz \
+            ./barcodes.tsv.gz \
+            ~{h5} \
+            ~{pkr} \
+            ~{ensembl_option}
+    >>>
 
     output {
         File h5_matrix = "${h5}"
@@ -58,7 +65,7 @@ task generate_h5 {
     runtime {
         memory : "${mem_gb} GB"
         disks: "local-disk ${disk_gb} ${disk_type}"
-        docker : docker_image
+        docker : "${docker_image}"
     }
 
     parameter_meta {
@@ -74,8 +81,13 @@ task generate_h5 {
             }
         prefix: {
                 description: 'Prefix for output files',
-                help: 'Prefix that will be used to name the output files',
+                help: 'Prefix that will be used to name the output files.',
                 example: 'MyExperiment'
+            }
+	gene_naming: {
+                description: 'Gene naming convention',
+                help: 'Convention for gene naming in h5 matrix; either "gene_name" (default) or "ensembl".',
+                example: ['gene_name', 'ensembl']
             }
         docker_image: {
                 description: 'Docker image.',

@@ -13,22 +13,7 @@ ENV SAMTOOLS_VERSION 1.9
 
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
-    autoconf \
-    binutils \
-    build-essential \
-    gcc \
-    git \
-    libcurl4-openssl-dev \
-    libjpeg-dev \
-    liblz4-dev \
-    liblzma-dev \
-    libncurses5-dev \
-    libbz2-dev \
-    #python3 \ 
-    python3-pip \
-    r-base \
-    wget \
-    zlib1g-dev &&\
+    r-base  &&\
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts

@@ -8,6 +8,7 @@ genes x barcodes count matrix.
 """
 
 import argparse
+from collections import defaultdict
 import gzip
 import h5py
 import logging
@@ -19,7 +20,9 @@ def parse_arguments():
     parser.add_argument("features_file", help="Filename for STARsolo features tsv file")
     parser.add_argument("barcodes_file", help="Filename for STARsolo barcodes tsv file")
     parser.add_argument("output_file", help="Filename for output h5 file")
-    parser.add_argument("-p", "--pkr", help="PKR")
+    parser.add_argument("pkr", help="Experiment prefix", nargs = '?')
+    parser.add_argument("--ensembl", help="Flag for outputting genes using ENSEMBL ID, rather than gene name", action="store_true")
+
     return parser.parse_args()
 
 def get_split_lines(file_name, delimiter, skip=0):
@@ -31,6 +34,17 @@ def get_split_lines(file_name, delimiter, skip=0):
             next(f)
         for line in f:
             yield line.rstrip().split(sep=delimiter)
+
+def rename_duplicates(duplicate_list):
+    """Rename duplicate entries as entry, entry.1, entry.2, etc."""
+    seen = defaultdict(int)
+    renamed_list = []
+    
+    for entry in duplicate_list:
+        renamed_list.append(f"{entry}.{seen[entry]}" if entry in seen else entry)
+        seen[entry] += 1
+        
+    return renamed_list
 
 def build_count_matrix(matrix):
     """Convert contents of mtx file to csc matrix"""
@@ -82,23 +96,39 @@ def main():
     matrix_file = getattr(args, "matrix_file")
     features_file = getattr(args, "features_file")
     barcodes_file = getattr(args, "barcodes_file")
-    pkr = getattr(args, "pkr")
+    pkr = getattr(args, "pkr", None)
     output_file = getattr(args, "output_file")
+    ensembl = getattr(args, "ensembl")
 
     # read input files
     logging.info("Reading input files\n")
-    # skip first two lines of matrix file (header)
+    
+    # get indices and counts from matrix file; skip first two lines of matrix file (header)
     matrix = get_split_lines(matrix_file, delimiter=" ", skip=2)
+    
     # get genes from features file
     features = get_split_lines(features_file, delimiter="\t")
-    gene_list = [line[1] for line in features]
-    # get barcodes from barcodes file, reformat as R1,R2,R3,PKR
+    if ensembl:
+        gene_list = [line[0] for line in features]
+    else:
+        gene_list_duplicated = [line[1] for line in features]
+        # append .1, .2, etc. for duplicated genes
+        gene_list = rename_duplicates(gene_list_duplicated)
+
+    # get barcodes from barcodes file, reformat as R1R2R3_PKR
     barcodes = get_split_lines(barcodes_file, delimiter="\t")
     barcode_list = [line[0] for line in barcodes]
+<<<<<<< HEAD
     if pkr:
         formatted_barcode_list = [barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + pkr for barcode in barcode_list]
     else:
         formatted_barcode_list = [barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] for barcode in barcode_list]
+=======
+    if pkr is None:
+        formatted_barcode_list = barcode_list
+    else:
+        formatted_barcode_list = [barcode + "_" + pkr for barcode in barcode_list]
+>>>>>>> origin
 
     # generate count matrix
     logging.info("Generating count matrix\n")

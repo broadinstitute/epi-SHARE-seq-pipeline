@@ -1,5 +1,6 @@
 version 1.0
 
+import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/share_task_starsolo.wdl" as share_task_starsolo
 import "../tasks/share_task_generate_h5.wdl" as share_task_generate_h5
 import "../tasks/share_task_qc_rna.wdl" as share_task_qc_rna
@@ -16,119 +17,176 @@ workflow wf_rna {
     }
 
     input {
-        # RNA Sub-workflow inputs
-
-        # Align
+        # RNA sub-workflow inputs
+        String? pkr
+        String prefix
+        String genome_name
         String chemistry
+        String pipeline_modality = "full"
+        File whitelist
         Array[File] read1
         Array[File] read2
-        File? whitelist
+
+        # Correct-specific inputs
+        Boolean correct_barcodes = true
+        # Runtime parameters
+        Int? correct_cpus
+        Float? correct_disk_factor
+        Float? correct_memory_factor
+        String? correct_docker_image
+
+        # Align-specific inputs
         File idx_tar
-        String prefix
-        String? pkr
-        String genome_name
-        Int? cpus = 16
-        String? docker
-        # QC
+        String? barcode_tag
+        # Runtime parameters
+        Int? align_cpus
+        Float? align_disk_factor
+        Float? align_memory_factor
+        String? align_docker_image
+        
+        # Generate h5-specific inputs
+        String? gene_naming
+        # Runtime parameters
+        Float? generate_h5_disk_factor
+        Float? generate_h5_memory_factor
+        String? generate_h5_docker_image
+    
+        # QC-specific inputs
         Int? umi_cutoff
         Int? gene_cutoff
         
         # CellBender
         Int? cellbender_expected_cells
         
-        # Seurat
-        Boolean count_only = false
+        # Runtime parameters
+        Int? qc_cpus
+        Float? qc_disk_factor
+        Float? qc_memory_factor
+        String? qc_docker_image
 
-        #Seurat filtering parameters
-        Int? rna_seurat_min_features
-        Float? rna_seurat_percent_mt
-        Int? rna_seurat_min_cells
-
-        #Seurat UMAP
-        Int? rna_seurat_umap_dim
-        Float? rna_seurat_umap_resolution
-
-        # Seurat runtime parameters
-        Float? rna_seurat_disk_factor
-        Float? rna_seurat_memory_factor
-
+        # Seurat-specific inputs
+        Int? seurat_min_features
+        Float? seurat_percent_mt
+        Int? seurat_min_cells
+        Int? seurat_umap_dim
+        Float? seurat_umap_resolution
+        # Runtime parameters
+        Float? seurat_disk_factor
+        Float? seurat_memory_factor
+        String? seurat_docker_image
     }
 
-    call share_task_starsolo.share_rna_align as align {
-        input:
-            chemistry = chemistry,
-            fastq_R1 = read1,
-            fastq_R2 = read2,
-            whitelist = whitelist,
-            genome_name = genome_name,
-            genome_index_tar = idx_tar,
-            prefix = prefix,
-            cpus = cpus
+    if ( chemistry == "shareseq" && correct_barcodes ) {
+        scatter (read_pair in zip(read1, read2)) {
+            call share_task_correct_fastq.share_correct_fastq as correct {
+                input:
+                    fastq_R1 = read_pair.left,
+                    fastq_R2 = read_pair.right,
+                    whitelist = whitelist,
+                    sample_type = "RNA",
+                    pkr = pkr,
+                    prefix = prefix,
+                    cpus = correct_cpus,
+                    disk_factor = correct_disk_factor,
+                    memory_factor = correct_memory_factor,
+                    docker_image = correct_docker_image
+            }
+        }
     }
 
-    call share_task_generate_h5.generate_h5 as generate_h5 {
-        input:
-            tar = align.raw_tar,
-            genome_name = genome_name,
-            prefix = prefix,
-            pkr = pkr
-    }
-
-    call share_task_qc_rna.qc_rna as qc_rna {
-        input:
-            bam = align.output_bam,
-            umi_cutoff = umi_cutoff,
-            gene_cutoff = gene_cutoff,
-            chemistry = chemistry,
-            genome_name = genome_name,
-            prefix = prefix
-    }
-
-    call share_task_log_rna.log_rna as log_rna {
-       input:
-           alignment_log = align.log_final_out,
-           dups_log = qc_rna.rna_duplicates_log
-    }
-
-    if (!count_only) {
-        call share_task_cellbender.cellbender as cellbender {
-            input: 
+    if (  "~{pipeline_modality}" != "no_align" ) {
+        call share_task_starsolo.share_rna_align as align {
+            input:
+                chemistry = chemistry,
+                fastq_R1 = select_first([correct.corrected_fastq_R1, read1]),
+                fastq_R2 = select_first([correct.corrected_fastq_R2, read2]),
+                whitelist = whitelist,
+                genome_name = genome_name,
+                genome_index_tar = idx_tar,
                 prefix = prefix,
-                h5 = generate_h5.h5_matrix,
-                expected_cells = cellbender_expected_cells
+                cpus = align_cpus,
+                disk_factor = align_disk_factor,
+                memory_factor = align_memory_factor,
+                docker_image = align_docker_image
         }
 
-        call share_task_seurat.seurat as seurat {
+        call share_task_generate_h5.generate_h5 as generate_h5 {
             input:
-                rna_matrix = cellbender.cellbender_filtered_h5,
+                tar = align.raw_tar,
                 genome_name = genome_name,
-                min_features = rna_seurat_min_features,
-                percent_mt = rna_seurat_percent_mt,
-                min_cells = rna_seurat_min_cells,
-                umap_dim = rna_seurat_umap_dim,
-                umap_resolution = rna_seurat_umap_resolution,
                 prefix = prefix,
-                disk_factor = rna_seurat_disk_factor,
-                memory_factor = rna_seurat_memory_factor
+                pkr = pkr,
+                gene_naming = gene_naming,
+                disk_factor = generate_h5_disk_factor,
+                memory_factor = generate_h5_memory_factor,
+                docker_image = generate_h5_docker_image
+        }
+
+        call share_task_qc_rna.qc_rna as qc_rna {
+            input:
+                bam = align.output_bam,
+                umi_cutoff = umi_cutoff,
+                gene_cutoff = gene_cutoff,
+                pkr = pkr,
+                barcode_tag = barcode_tag,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = qc_cpus,
+                disk_factor = qc_disk_factor,
+                memory_factor = qc_memory_factor,
+                docker_image = qc_docker_image
+        }
+
+        call share_task_log_rna.log_rna as log_rna {
+        input:
+            alignment_log = align.log_final_out,
+            dups_log = qc_rna.rna_duplicates_log
+        }
+
+        if ( "~{pipeline_modality}" == "full") {
+            call share_task_cellbender.cellbender as cellbender {
+                input:
+                    prefix = prefix,
+                    h5 = generate_h5.h5_matrix,
+                    expected_cells = cellbender_expected_cells
+            }
+            call share_task_seurat.seurat as seurat {
+                input:
+                    rna_matrix = cellbender.cellbender_filtered_h5,
+                    genome_name = genome_name,
+                    min_features = seurat_min_features,
+                    percent_mt = seurat_percent_mt,
+                    min_cells = seurat_min_cells,
+                    umap_dim = seurat_umap_dim,
+                    umap_resolution = seurat_umap_resolution,
+                    prefix = prefix,
+                    disk_factor = seurat_disk_factor,
+                    memory_factor = seurat_memory_factor,
+                    docker_image = seurat_docker_image
+            }
         }
     }
 
     output {
-        File share_task_starsolo_output_bam = align.output_bam
-        File share_rna_alignment_log = align.log_final_out
-        File share_task_starsolo_log_out = align.log_out
-        File share_task_starsolo_log_progress_out = align.log_progress_out
-        File share_task_starsolo_output_sj = align.output_sj
-        File share_task_starsolo_barcodes_stats = align.barcodes_stats
-        File share_task_starsolo_features_stats = align.features_stats
-        File share_task_starsolo_summary_csv = align.summary_csv
-        File share_task_starsolo_umi_per_cell = align.umi_per_cell
-        File share_task_starsolo_raw_tar = align.raw_tar
+        # Correction/trimming
+        Array[File]? rna_read1_processed = correct.corrected_fastq_R1
+        Array[File]? rna_read2_processed = correct.corrected_fastq_R2
+        
+        File? share_task_starsolo_output_bam = align.output_bam
+        File? share_rna_alignment_log = align.log_final_out
+        File? share_task_starsolo_log_out = align.log_out
+        File? share_task_starsolo_log_progress_out = align.log_progress_out
+        File? share_task_starsolo_output_sj = align.output_sj
+        File? share_task_starsolo_barcodes_stats = align.barcodes_stats
+        File? share_task_starsolo_features_stats = align.features_stats
+        File? share_task_starsolo_summary_csv = align.summary_csv
+        File? share_task_starsolo_umi_per_cell = align.umi_per_cell
+        File? share_task_starsolo_raw_tar = align.raw_tar
 
-        File share_rna_h5 = generate_h5.h5_matrix
+        File? share_rna_h5 = generate_h5.h5_matrix
 
-        File share_rna_barcode_metadata  = qc_rna.rna_barcode_metadata
-        File share_rna_duplicates_log = qc_rna.rna_duplicates_log
+        File? share_rna_barcode_metadata  = qc_rna.rna_barcode_metadata
+        File? share_rna_duplicates_log = qc_rna.rna_duplicates_log
         File? share_rna_umi_barcode_rank_plot = qc_rna.rna_umi_barcode_rank_plot
         File? share_rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
         File? share_rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
@@ -156,11 +214,11 @@ workflow wf_rna {
         File? share_rna_seurat_obj = seurat.seurat_filtered_obj
         File? share_rna_plots_zip = seurat.plots_zip
 
-        Int share_rna_total_reads = log_rna.rna_total_reads
-        Int share_rna_aligned_uniquely = log_rna.rna_aligned_uniquely
-        Int share_rna_aligned_multimap = log_rna.rna_aligned_multimap
-        Int share_rna_unaligned = log_rna.rna_unaligned
-        Int share_rna_feature_reads = log_rna.rna_feature_reads
-        Int share_rna_duplicate_reads = log_rna.rna_duplicate_reads
+        Int? share_rna_total_reads = log_rna.rna_total_reads
+        Int? share_rna_aligned_uniquely = log_rna.rna_aligned_uniquely
+        Int? share_rna_aligned_multimap = log_rna.rna_aligned_multimap
+        Int? share_rna_unaligned = log_rna.rna_unaligned
+        Int? share_rna_feature_reads = log_rna.rna_feature_reads
+        Int? share_rna_duplicate_reads = log_rna.rna_duplicate_reads
     }
 }

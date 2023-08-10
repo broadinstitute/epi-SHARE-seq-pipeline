@@ -51,7 +51,7 @@ RUN groupadd -r $USER &&\
 
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('hdf5r','remotes','IRkernel','logr','BiocManager'))"
 
-RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.3.0')"
 
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('rhdf5'), update=F, ask=F)"
 

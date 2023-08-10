@@ -7,9 +7,9 @@ FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1d
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
+LABEL software.version="1.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
+LABEL software.version.is-production="Yes"
 LABEL software.task="qc_rna"
 
 ENV R_VERSION=4.1.2
@@ -32,7 +32,8 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     python3 \
     python3-dev \
-    python3-pip \ 
+    python3-full \
+    python3-pip \
     wget \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
@@ -56,6 +57,7 @@ ENV R_LIBS_USER=/usr/local/lib/R
 
 # Copy scripts
 COPY --chown=$USER:$USER src/python/rna_barcode_metadata.py /usr/local/bin/
+COPY --chown=$USER:$USER src/R/barcode_rank_functions.R /usr/local/bin/
 COPY --chown=$USER:$USER src/R/rna_qc_plots.R /usr/local/bin/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 

@@ -5,7 +5,7 @@
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
 
-ENV STAR_VERSION 2.7.10a
+ENV STAR_VERSION 2.7.10a_alpha_220818
 ENV SAMTOOLS_VERSION 1.9
 
 # To prevent time zone prompt
@@ -31,8 +31,9 @@ WORKDIR /software
 ENV PATH="/software:${PATH}"
 
 # Install STAR 2.7.10a
-RUN wget https://github.com/alexdobin/STAR/archive/refs/tags/${STAR_VERSION}.tar.gz && tar -xzf ${STAR_VERSION}.tar.gz
-RUN cd STAR-${STAR_VERSION}/source && make STAR && rm ../../${STAR_VERSION}.tar.gz && mv /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
+RUN wget https://github.com/alexdobin/STAR/releases/download/2.7.10a_alpha_220818/STAR_2.7.10a_alpha_220818_Linux_x86_64_static.zip && unzip STAR_2.7.10a_alpha_220818_Linux_x86_64_static.zip && mv STAR /usr/local/bin/
+#RUN wget https://github.com/alexdobin/STAR/archive/refs/tags/${STAR_VERSION}.tar.gz && tar -xzf ${STAR_VERSION}.tar.gz
+#RUN cd STAR-${STAR_VERSION}/source && make STAR && rm ../../${STAR_VERSION}.tar.gz && mv /software/STAR-${STAR_VERSION}/bin/Linux_x86_64/* /usr/local/bin/
 
 # Install samtools 1.9
 RUN git clone --branch ${SAMTOOLS_VERSION} --single-branch https://github.com/samtools/samtools.git && \
@@ -43,10 +44,14 @@ FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e94141
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
+LABEL software.version="1.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
+LABEL software.version.is-production="Yes"
 LABEL software.task="STAR"
+
+RUN apt-get update && apt-get install -y \
+    libgc-dev &&\
+    rm -rf /var/lib/apt/lists/*
 
 # Create and setup new user
 ENV USER=shareseq
