@@ -17,6 +17,7 @@ task share_correct_fastq {
         String sample_type
         String? pkr
         String? prefix
+        Boolean paired_rna
 
         Int? cpus = 16
         Float? disk_factor = 8.0
@@ -54,7 +55,8 @@ task share_correct_fastq {
             ~{whitelist} \
             ~{sample_type} \
             ~{prefix} \
-            ~{pkr}
+            ~{pkr} \
+            ~{if paired_rna then "--paired_rna" else ""}
 
         pigz -p ~{cpus} *.fastq
     >>>

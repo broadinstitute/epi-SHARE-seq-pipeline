@@ -81,7 +81,6 @@ task qc_rna {
 
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
-        File rna_reads_mapped_to_genes = "~{mapped_to_gene}"
         File rna_duplicates_log = "~{duplicates_log}"
         File rna_barcode_metadata_log = "barcode_metadata.log"
         File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
