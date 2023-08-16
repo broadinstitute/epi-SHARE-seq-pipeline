@@ -118,17 +118,10 @@ def main():
     # get barcodes from barcodes file, reformat as R1R2R3_PKR
     barcodes = get_split_lines(barcodes_file, delimiter="\t")
     barcode_list = [line[0] for line in barcodes]
-<<<<<<< HEAD
-    if pkr:
-        formatted_barcode_list = [barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] + "," + pkr for barcode in barcode_list]
-    else:
-        formatted_barcode_list = [barcode[:8] + "," + barcode[8:16] + "," + barcode[16:] for barcode in barcode_list]
-=======
     if pkr is None:
         formatted_barcode_list = barcode_list
     else:
         formatted_barcode_list = [barcode + "_" + pkr for barcode in barcode_list]
->>>>>>> origin
 
     # generate count matrix
     logging.info("Generating count matrix\n")
