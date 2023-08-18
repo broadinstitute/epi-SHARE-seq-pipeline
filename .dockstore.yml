@@ -7,12 +7,8 @@ workflows:
          branches:
              - main
              - release
-             - neva
-             - minimal-inputs
-             - dynamic-memory
-             - knudson
-             - insert_size_hist
-             - barcode_plot_annotations
+             - dev
+             - merge-pkr
          tags:
              - /.*/
 
@@ -23,7 +19,7 @@ workflows:
          branches:
              - main
              - dev
-             - knudson 
+             - knudson
              - neva
          tags:
              - /.*/
@@ -58,7 +54,6 @@ workflows:
          branches:
              - main
              - dev
-             - neva
          tags:
              - /.*/
 
@@ -69,7 +64,6 @@ workflows:
          branches:
              - main
              - dev
-             - neva
          tags:
              - /.*/
 
@@ -79,9 +73,9 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - dev
-             - neva
+             - release
              - kdong
+             - neva
          tags:
              - /.*/
 
@@ -93,5 +87,15 @@ workflows:
              - main
              - dev
              - starsolo
+         tags:
+             - /.*/
+
+   - name: "merge-data"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-merge-data.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+             - merge-pkr
          tags:
              - /.*/

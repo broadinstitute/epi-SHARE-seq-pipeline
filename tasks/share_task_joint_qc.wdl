@@ -6,29 +6,29 @@ version 1.0
 
 task joint_qc_plotting {
     meta {
-        version: 'v0.1'
+        version: 'v1.0'
         author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Joint QC plot'
     }
 
     input {
-        # This task generates a plot of barcodes QC'd jointly by RNA and ATAC metrics, as well as a 
+        # This task generates a plot of barcodes QC'd jointly by RNA and ATAC metrics, as well as a
         # density plot of all barcodes passing at least one filter.
         File? atac_barcode_metadata
         File? rna_barcode_metadata
         Int remove_low_yielding_cells = 10
-	Int min_umis = 100
+        Int min_umis = 100
         Int min_genes = 200
         Int min_tss = 4
         Int min_frags = 100
-        
+
         Float? disk_factor = 8.0
         Float? memory_factor = 2.0
 
         String? prefix
-        String genome_name 
+        String genome_name
 
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_joint_qc:dev"
     }
 
     # Determine the size of the input
@@ -53,7 +53,7 @@ task joint_qc_plotting {
         bash $(which monitor_script.sh) > monitoring.log &
 
         # Make joint qc plot
-        python3 $(which joint_cell_plotting.py) ${default="share-seq" prefix} ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata}
+        python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_barcode_metadata} ${default="share-seq" prefix}
 
         # Make joint density plot
         Rscript $(which joint_cell_plotting_density.R) ${default="share-seq" prefix} ${joint_barcode_metadata} ${joint_density_plot}
@@ -69,10 +69,8 @@ task joint_qc_plotting {
 
     runtime {
         memory : "${mem_gb} GB"
-        memory_retry_multiplier: 2
         disks: "local-disk ${disk_gb} ${disk_type}"
-        docker : docker_image
-        maxRetries:1
+        docker : "${docker_image}"
     }
 
     parameter_meta {

@@ -51,7 +51,7 @@ RUN mkdir -p /usr/local/gcloud \
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 
 # Copy the external scripts inside
-COPY src/python/bam_fastq.py /software
+COPY src/python/bam_to_raw_fastq.py /software
 COPY src/python/flexible_import_entities_standard.py /software
 COPY src/python/write_terra_tables.py /software
 COPY src/bash/monitor_script.sh /software

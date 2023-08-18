@@ -2,7 +2,7 @@ version 1.0
 
 # TASK
 # SHARE-atac-log
-# Gather information from log files 
+# Gather information from log files
 
 
 task log_atac {
@@ -25,8 +25,9 @@ task log_atac {
         aligned_uniquely=$(awk 'NR==4{print $1}' ~{alignment_log})
         echo $aligned_uniquely > aligned_uniquely.txt
         echo $(($total_reads - $aligned_uniquely)) > unaligned.txt
-        awk 'NR==2{print $3}' ~{dups_log} > feature_reads.txt
-        awk 'NR==2{print $7}' ~{dups_log} > duplicate_reads.txt
+        awk 'NR>1{sum += $2}END{print sum/2}' ~{dups_log} > feature_reads.txt
+        awk 'NR>1{sum += $3}END{print sum/2}' ~{dups_log} > duplicate_reads.txt
+        awk 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f", 100*dups/(unique+dups)}' ~{dups_log} > pct_duplicate_reads.txt
     >>>
     output {
         Int atac_total_reads = read_int("total_reads.txt")
@@ -34,6 +35,7 @@ task log_atac {
         Int atac_unaligned = read_int("unaligned.txt")
         Int atac_feature_reads = read_int("feature_reads.txt")
         Int atac_duplicate_reads = read_int("duplicate_reads.txt")
+        Float atac_pct_dup = read_float("pct_duplicate_reads.txt")
     }
 
     runtime {
@@ -42,7 +44,7 @@ task log_atac {
     parameter_meta {
         alignment_log: {
             description: 'ATAC alignment log file',
-	    help: 'Log file from ATAC alignment step.',
+            help: 'Log file from ATAC alignment step.',
             example: 'SS-PKR-30-96-ENTIRE-PLATE.atac.align.hg38.Log.out'
         }
         dups_log: {

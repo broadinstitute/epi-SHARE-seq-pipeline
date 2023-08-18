@@ -13,7 +13,7 @@ task seurat {
         String genome_name
 
         Int? min_features = 200
-        Float? percent_mt = 5.0
+        Float? percent_mt = 50.0
         Int? min_cells = 3
 
         String? normalization_method = "LogNormalize"
@@ -43,12 +43,11 @@ task seurat {
         String output_filename = "${prefix}.rna.seurat.notebook.${genome_name}.ipynb"
         String log_filename = "log/${prefix}.rna.seurat.logfile.${genome_name}.txt"
         
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat"
-        
         #Int mem_gb = 128
         
         Float? disk_factor = 0.1
         Float? memory_factor = 0.15
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_seurat:dev"
     }
     
     # Determine the size of the input
@@ -156,10 +155,8 @@ task seurat {
 
     runtime {
         memory : "${mem_gb} GB"
-        memory_retry_multiplier: 2
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker : "${docker_image}"
-        maxRetries:1
     }
 
     parameter_meta {
