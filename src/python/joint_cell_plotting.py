@@ -218,14 +218,15 @@ def main():
     logging.info("Generating joint cell calling plot\n")
     plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file)
 
-    # write the stats for the top level into a csv, containd joint qc numbers
-    write_top_level_txt(barcode_metadata_file, qc_summary_data, min_tss, min_frags, min_umis, min_genes)
-
     
     # save dataframe
     logging.info("Saving dataframe as csv\n")
     metrics_df.to_csv(barcode_metadata_file)
     logging.info("All done!")
+
+    # write the stats for the top level into a csv, containd joint qc numbers
+    write_top_level_txt(barcode_metadata_file, qc_summary_data, min_tss, min_frags, min_umis, min_genes)
+
 
 
 if __name__ == "__main__":
