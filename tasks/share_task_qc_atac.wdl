@@ -137,7 +137,7 @@ task qc_atac {
             -e 2000 \
             --tss ~{tss} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
-            in.fragments.tsv.gz
+            in.fragments.tsv.gz \
             --tss_vals ~{tss_out_file}
 
         # Duplicates per barcode
