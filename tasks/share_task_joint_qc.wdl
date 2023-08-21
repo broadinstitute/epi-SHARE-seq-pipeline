@@ -56,6 +56,11 @@ task joint_qc_plotting {
 
         bash $(which monitor_script.sh) > monitoring.log &
 
+        #make file to write numbers to  
+        echo "start joint qc outfile" > ~{joint_qc_stats}
+        
+        cat ~{joint_qc_stats}
+        
         # Make joint qc plot
         python3 $(which joint_cell_plotting.py) ${rna_barcode_metadata} ${atac_barcode_metadata} ${remove_low_yielding_cells} ${min_umis} ${min_genes} ${min_tss} ${min_frags} ${joint_qc_plot} ${joint_qc_stats} ${joint_barcode_metadata} ${default="share-seq" prefix}
 
