@@ -32,6 +32,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
 
     # loop through images in image list and encode
     output_file.write('<br>')
+    print("start of printing images loop")
     for image in images:
         data = open(image, 'rb').read() # read bytes from file
         data_base64 = base64.b64encode(data)  # encode to base64 (bytes)
@@ -46,6 +47,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         logs = fname.read().splitlines()
 
     # loop through log files in log list and write
+    print("start of printing logs loop")
     for log in logs:
         log_parts = log.split('/')
         log_name = log_parts[-1]
@@ -57,22 +59,28 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     output_file.write('</body></html>')
     
     #write overall summary stats to output csv file
+    print("start of printing summary stats loop")
     with open (summary_stats_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
+        print("stat is " + stat)
         csv_output_file.write(stat + '\n')
     
     #write stats from qc to output csv file
     joint_qc_values = []
+    print("start of joint qc vals text loop")
     with open (joint_qc_vals_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
+        print("stat is " + stat)
         csv_output_file.write(stat + '\n')
     
     #write stats from archr to output csv file
+    print("print archr vals text loop")
     with open (archr_vals_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
+        print("stat is " + stat)
         csv_output_file.write(stat + '\n')
 
     output_file.close()
