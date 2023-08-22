@@ -21,7 +21,7 @@ task share_correct_fastq {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.08
-        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_correct_fastq"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_correct_fastq:v1.0.0"
     }
 
     # Determine the size of the input

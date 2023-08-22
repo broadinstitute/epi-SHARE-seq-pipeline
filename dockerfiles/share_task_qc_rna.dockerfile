@@ -7,9 +7,9 @@ FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1d
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
+LABEL software.version="1.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
+LABEL software.version.is-production="Yes"
 LABEL software.task="qc_rna"
 
 ENV R_VERSION=4.1.2

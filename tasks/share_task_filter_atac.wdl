@@ -32,7 +32,7 @@ task share_atac_filter {
         Int? cpus = 16
         Float? disk_factor = 10.0
         Float? memory_factor = 0.15
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter_atac"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_filter_atac:v1.0.0"
     }
 
 
@@ -209,9 +209,7 @@ task share_atac_filter {
         cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
-        maxRetries: 1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

@@ -24,9 +24,6 @@ task html_report {
         Int? atac_unaligned
         Int? atac_feature_reads
         Int? atac_duplicate_reads
-        Float? atac_nrf
-        Float? atac_pbc1
-        Float? atac_pbc2
         Float? atac_percent_duplicates
         Int? rna_total_reads
         Int? rna_aligned_uniquely
@@ -59,9 +56,6 @@ task html_report {
         echo "<tr><td>Unique Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Percent Duplicates</td><td>" ~{atac_percent_duplicates} "</td></tr>" >> output.txt
-        echo "<tr><td>NRF=Distinct/Total</td><td>" ~{atac_nrf} "</td></tr>" >> output.txt
-        echo "<tr><td>PBC1=OnePair/Distinct</td><td>" ~{atac_pbc1} "</td></tr>" >> output.txt
-        echo "<tr><td>PBC2=OnePair/TwoPair</td><td>" ~{atac_pbc2} "</td></tr>" >> output.txt
         echo "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>" >> output.txt
         echo "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>" >> output.txt
         echo "<tr><td>Aligned multimap</td><td>" ~{rna_aligned_multimap} "</td></tr>" >> output.txt
@@ -77,6 +71,6 @@ task html_report {
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:14'
+        docker: 'us.gcr.io/buenrostro-share-seq/share_task_html_report:v1.0.0'
     }
 }

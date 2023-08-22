@@ -3,7 +3,7 @@
 # Based on Debian slim
 ############################################################
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
+FROM debian:buster-slim as builder
 
 ENV BEDTOOLS_VERSION v2.29.0
 ENV PICARD_VERSION 2.27.5
@@ -60,18 +60,20 @@ RUN wget https://github.com/broadinstitute/picard/releases/download/${PICARD_VER
 
 
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
+FROM debian:buster-slim
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
+LABEL software.version="1.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
+LABEL software.version.is-production="Yes"
 LABEL software.task="filter"
 
 RUN apt-get update && apt-get install -y \
     gcc \
     libcurl4-openssl-dev \
+    libbz2-dev \
+    liblzma-dev \
     python3 \
     python3-dev \
     python3-pip \
@@ -80,7 +82,8 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts
-RUN python3 -m pip install --no-cache-dir --ignore-installed pysam
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir --ignore-installed pysam 
 
 # Create and setup new user
 ENV USER=shareseq
@@ -102,9 +105,4 @@ COPY --chown=$USER:$USER src/python/bam_to_fragments.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/assign_multimappers.py /usr/local/bin
 
 
-
-
-
 USER ${USER}
-
-

@@ -39,7 +39,7 @@ task qc_atac {
         Int? cpus = 8
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac:v1.0.0"
     }
 
     # Determine the size of the input
@@ -119,7 +119,7 @@ task qc_atac {
         # library complexity
         # queryname_final_bam from filter
         echo '------ START: Compute library complexity ------' 1>&2
-        time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
+        #time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2
@@ -189,7 +189,7 @@ task qc_atac {
     output {
         File? atac_qc_samstats_raw = samstats_raw_out
         File? atac_qc_samstats_filtered = samstats_filtered_out
-        File atac_qc_pbc_stats = pbc_stats
+        #File atac_qc_pbc_stats = pbc_stats
 
         File atac_qc_final_stats = stats_log
         File atac_qc_final_hist_png = hist_log_png
@@ -212,9 +212,7 @@ task qc_atac {
         cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
-        maxRetries: 1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

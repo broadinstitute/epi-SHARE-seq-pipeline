@@ -17,7 +17,6 @@ task log_atac {
         # the quality metrics
         File alignment_log
         File dups_log
-        File pbc_log
     }
 
     command <<<
@@ -28,13 +27,7 @@ task log_atac {
         echo $(($total_reads - $aligned_uniquely)) > unaligned.txt
         awk 'NR>1{sum += $2}END{print sum/2}' ~{dups_log} > feature_reads.txt
         awk 'NR>1{sum += $3}END{print sum/2}' ~{dups_log} > duplicate_reads.txt
-        awk 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f%", 100*dups/(unique+dups)}' ~{dups_log} > pct_duplicate_reads.txt
-        nrf=$(awk 'NR==2{print $5}' ~{pbc_log})
-        echo $nrf > nrf.txt
-        pbc1=$(awk 'NR==2{print $6}' ~{pbc_log})
-        echo $pbc1 > pbc1.txt
-        pbc2=$(awk 'NR==2{print $7}' ~{pbc_log})
-        echo $pbc2 > pbc2.txt
+        awk 'NR>1{unique+= $2; dups+=$3}END{printf "%5.1f", 100*dups/(unique+dups)}' ~{dups_log} > pct_duplicate_reads.txt
     >>>
     output {
         Int atac_total_reads = read_int("total_reads.txt")
@@ -43,9 +36,6 @@ task log_atac {
         Int atac_feature_reads = read_int("feature_reads.txt")
         Int atac_duplicate_reads = read_int("duplicate_reads.txt")
         Float atac_pct_dup = read_float("pct_duplicate_reads.txt")
-        Float atac_nrf = read_float("nrf.txt")
-        Float atac_pbc1 = read_float("pbc1.txt")
-        Float atac_pbc2 = read_float("pbc2.txt")
     }
 
     runtime {

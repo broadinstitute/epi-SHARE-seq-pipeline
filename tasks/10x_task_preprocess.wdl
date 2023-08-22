@@ -23,7 +23,7 @@ task preprocess_tenx {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        String docker_image = "us.gcr.io/buenrostro-share-seq/10x_task_preprocess"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/10x_task_preprocess:v1.0.0"
     }
 
     # Determine the size of the input
@@ -103,9 +103,7 @@ task preprocess_tenx {
         cpu: cpus
         docker: "${docker_image}"
         disks: "local-disk ${disk_gb} ${disk_type}"
-        maxRetries: 1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

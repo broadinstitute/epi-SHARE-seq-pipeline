@@ -39,11 +39,6 @@ workflow wf_preprocess {
 		' cp "~{bcl}" . && ' +
 		'tar "~{tar_flags}" "~{basename(bcl)}" SampleSheet.csv'
 
-	call BarcodeMap {
-		input:
-			metaCsv = metaCsv,
-	}
-
 	if (!defined(lanes)){
 		call GetLanes { 
 			input: 
@@ -59,6 +54,13 @@ workflow wf_preprocess {
 	Float memory2 = (ceil(0.8 * bclSize) * 1.25) / lengthLanes # an unusual increase from 0.25 x for black swan
 	
 	scatter (lane in select_first([lanes, GetLanes.lanes])) {
+		call BarcodeMap {
+			input:
+				metaCsv = metaCsv,
+				lane = lane
+		}
+
+
 		call ExtractBarcodes {
 			input:
 				bcl = bcl,
@@ -154,10 +156,16 @@ workflow wf_preprocess {
 task BarcodeMap {
 	input {
 		File metaCsv
+		Int lane
 	}
 
 	command <<<
-		tail -n +6 ~{metaCsv} | cut -d, -f2 |  sed 's/ /\t/' > barcodes.tsv
+		if tail -n +5 ~{metaCsv} | head -1 | grep -q Lanes 
+		then 		
+			tail -n +6 ~{metaCsv} | awk -F "," -v num=~{lane} '{split($6,a," "); for(i in a) {if (a[i] == num) print $0}}' | cut -d, -f2 |  sed 's/ /\t/' > barcodes.tsv
+		else
+			tail -n +6 ~{metaCsv} | cut -d, -f2 |  sed 's/ /\t/' > barcodes.tsv
+		fi
 	>>>
 
 	output {
@@ -494,9 +502,8 @@ task AggregateBarcodeQC {
 	}
 
 	command <<<
-		echo -e "LIB_BARCODE\tEXACT\tPASS\tFAIL_MISMATCH\tFAIL_HOMOPOLYMER" > R1_barcode_stats.txt
+		echo -e "library\texact_match\tnonexact_match\tnonmatch\tpoly_G_barcode" > R1_barcode_stats.txt
 		cat ~{sep=" " barcodeQCs} >> R1_barcode_stats.txt
-		# awk 'BEGIN{FS="\t"; OFS="\t"} {x+=$1; y+=$2; z+=$3} END {print x,y,z}' combined.txt > final.txt
 	>>>
 	
 	output {
