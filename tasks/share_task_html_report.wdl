@@ -93,10 +93,8 @@ task html_report {
         echo "rna_feature_reads, " ~{rna_feature_reads} >> csv_in.txt
         echo "rna_duplicate_reads, " ~{rna_duplicate_reads} >> csv_in.txt
         
-        echo "~{sep="\n" joint_qc_vals}" > joint_qc_numbers.txt
-        echo "~{sep="\n" archr_vals}" > archr_numbers.txt
 
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} csv_in.txt joint_qc_numbers.txt archr_numbers.txt --input_file_name output.txt
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} csv_in.txt ~{joint_qc_vals} ~{archr_vals} --input_file_name output.txt
     
     
 
