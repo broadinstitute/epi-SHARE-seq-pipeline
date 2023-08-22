@@ -57,6 +57,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         output_file.write("<br>")
         csv_output_file.write(log_name + ", " + log + '\n')
     output_file.write('</body></html>')
+    fname.close()
     
     #write overall summary stats to output csv file
     print("start of printing summary stats loop")
@@ -65,15 +66,16 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     for stat in stats:
         print("stat is " + stat)
         csv_output_file.write(stat + '\n')
-    
+    fname.close()
+
     #write stats from qc to output csv file
-    joint_qc_values = []
     print("start of joint qc vals text loop")
     with open (joint_qc_vals_txt) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
         print("stat is " + stat)
         csv_output_file.write(stat + '\n')
+    fname.close()
     
     #write stats from archr to output csv file
     print("print archr vals text loop")
@@ -82,6 +84,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     for stat in stats:
         print("stat is " + stat)
         csv_output_file.write(stat + '\n')
+    fname.close()
 
     output_file.close()
     csv_output_file.close()
