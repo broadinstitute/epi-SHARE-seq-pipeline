@@ -41,7 +41,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         idx = name.index('.') + 1
         name = name[idx:]
         output_file.write('<img id ="' + name + '" width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
-        csv_output_file.write(name + ", " + "some image encoding" + '\n')
+        csv_output_file.write(name + ', data:image/png;base64,"' + data_base64 + '\n')
 
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
