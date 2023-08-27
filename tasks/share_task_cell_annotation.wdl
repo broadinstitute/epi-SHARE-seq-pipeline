@@ -51,7 +51,8 @@ task cell_annotation {
     String monitor_log = "cell_annotation_monitor.log"
     String notebook_log = "log/${prefix}.cell.annotation.logfile.${genome}.txt"
     String prediction = "${prefix}.cell.annotation.prediction.${genome}.csv"
-    String prediction_plot = "${prefix}.cell.annotation.prediction.${genome}.png"
+    String prediction_labels = "${prefix}.cell.annotation.labels.${genome}.png"
+    String prediction_scores = "${prefix}.cell.annotation.scores.${genome}.png"
 
     command {
         set -e
@@ -80,7 +81,8 @@ task cell_annotation {
         File monitor_log = "${monitor_log}"
         File notebook_log = "${notebook_log}"
         File prediction = '${prediction}'
-        File prediction_plot = '${prediction_plot}'
+        File prediction_labels = '${prediction_labels}'
+        File prediction_scores = '${prediction_scores}'
     }
 
     runtime {

@@ -224,17 +224,48 @@ tryCatch(
 ## Plotting
 tryCatch(
     {
-        log_print("# Plotting predicted labels")
+        log_print("# Plotting")
         
         p <- DimPlot(obj.query, group.by = "predicted.id", 
-                    label = FALSE, reduction = "umap")
+                    label = FALSE, reduction = "umap", raster='FALSE')
         
         ggsave(plot = p, 
-              filename = glue::glue("{prefix}.cell.annotation.prediction.{genome}.png"), 
+              filename = glue::glue("{prefix}.cell.annotation.labels.{genome}.png"), 
               width = 15, height = 12)
         
-        log_print("SUCCESSFUL: Plotting predicted labels")
         
+        sel_cols <- grep("prediction.score|seurat_clusters", colnames(obj.query@meta.data), value=TRUE)
+        sel_cols <- sel_cols[1:length(sel_cols) - 1]
+        
+        df <- obj.query@meta.data %>%
+        subset(select = sel_cols) %>%
+        tidyr::gather(key = "celltype", value = "score", -seurat_clusters)
+        df$celltype <- stringr::str_replace_all(df$celltype, "prediction.score.", "")
+        
+        png(file = glue::glue("{prefix}.cell.annotation.scores.{genome}.png"), width = 8, height = 6, units = 'in')
+        
+        for(seurat_cluster in sort(unique(df$seurat_clusters))){
+            p <- subset(df, seurat_clusters == seurat_cluster) %>%
+                ggplot(aes(x = celltype, y = score)) +
+                geom_violin(aes(fill = celltype), scale = "width") +
+                theme_cowplot() +
+                xlab("") + ylab("Predictied score") +
+                ggtitle(glue::glue("cluster: {seurat_cluster}")) +
+                theme(axis.text.x = element_text(angle=60, hjust = 1),
+                     legend.position = "none",
+                     plot.title = element_text(hjust = 0.5))
+            
+            print(p)
+            
+            # ggsave(plot = p, 
+            #   filename = glue::glue("{prefix}.cell.annotation.prediction.{genome}.cluster.{seurat_cluster}.png"), 
+            #   width = 8, height = 6)
+
+        }  
+        
+        dev.off()
+        
+        log_print("SUCCESSFUL: Plotting")  
 
     },
     error = function(cond) {
