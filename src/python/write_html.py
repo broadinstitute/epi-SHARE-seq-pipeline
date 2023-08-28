@@ -27,7 +27,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
            output_file.write(input_file.read())
     
     #csv_output_file = io.open(output_csv_name, 'w', encoding='utf8')
-    csv_writer = csv.writer(open(output_csv_name, 'wb'))
+    csv_writer = csv.writer(open(output_csv_name, 'w'))
     
     with open(image_file_list) as fname:
         images = fname.read().splitlines() 
