@@ -52,7 +52,7 @@ task cell_annotation {
     String notebook_log = "log/${prefix}.cell.annotation.logfile.${genome}.txt"
     String prediction = "${prefix}.cell.annotation.prediction.${genome}.csv"
     String prediction_labels = "${prefix}.cell.annotation.labels.${genome}.png"
-    String prediction_scores = "${prefix}.cell.annotation.scores.${genome}.png"
+    String prediction_scores = "${prefix}.cell.annotation.scores.${genome}.pdf"
 
     command {
         set -e

@@ -4,6 +4,7 @@
 ### perform cell annotation using Seurat label transfer approach.
 
 source("/usr/local/bin/cell_annotation_helper_functions.R")
+#source("/data/pinello/PROJECTS/2023_02_SHARE_Pipeline/epi-SHARE-seq-pipeline/src/R/cell_annotation_helper_functions.R")
 
 suppressMessages(library(Seurat))
 suppressMessages(library(Matrix))
@@ -167,16 +168,13 @@ tryCatch(
             NormalizeData(verbose = FALSE) %>%
             FindVariableFeatures() %>%
             ScaleData() %>%
-            RunPCA(verbose=FALSE) %>%
-            RunUMAP(verbose=FALSE, dims=1:30)
+            RunPCA(verbose=FALSE)
         
         obj.query <- obj.query %>%
             NormalizeData(verbose = FALSE) %>%
             FindVariableFeatures() %>%
             ScaleData() %>%
-            RunPCA(verbose=FALSE) %>%
-            RunUMAP(verbose=FALSE, dims=1:30)
-        
+            RunPCA(verbose=FALSE)
         
         log_print(glue::glue("# Found {length(gene.common)} common genes between reference and query data"))
         log_print("SUCCESSFUL: Subseting reference and query data with common genes")
@@ -205,8 +203,6 @@ tryCatch(
                                     weight.reduction = obj.query[["pca"]],
                                     dims = 1:30,
                                     verbose = TRUE)
-        
-        obj.query <- AddMetaData(obj.query, metadata = predictions)
 
         write.csv(predictions, 
                   file = glue::glue("{prefix}.cell.annotation.prediction.{genome}.csv"),
@@ -226,15 +222,19 @@ tryCatch(
     {
         log_print("# Plotting")
         
+        obj.query <- readRDS(query_data)
+        obj.query <- AddMetaData(obj.query, metadata = predictions)
+        
         p <- DimPlot(obj.query, group.by = "predicted.id", 
                     label = FALSE, reduction = "umap", raster='FALSE')
         
         ggsave(plot = p, 
               filename = glue::glue("{prefix}.cell.annotation.labels.{genome}.png"), 
-              width = 15, height = 12)
+              width = 16, height = 12)
         
         
-        sel_cols <- grep("prediction.score|seurat_clusters", colnames(obj.query@meta.data), value=TRUE)
+        sel_cols <- grep("prediction.score|seurat_clusters", 
+                         colnames(obj.query@meta.data), value=TRUE)
         sel_cols <- sel_cols[1:length(sel_cols) - 1]
         
         df <- obj.query@meta.data %>%
@@ -242,7 +242,8 @@ tryCatch(
         tidyr::gather(key = "celltype", value = "score", -seurat_clusters)
         df$celltype <- stringr::str_replace_all(df$celltype, "prediction.score.", "")
         
-        png(file = glue::glue("{prefix}.cell.annotation.scores.{genome}.png"), width = 8, height = 6, units = 'in')
+        pdf(file = glue::glue("{prefix}.cell.annotation.scores.{genome}.pdf"), 
+            width = 8, height = 6)
         
         for(seurat_cluster in sort(unique(df$seurat_clusters))){
             p <- subset(df, seurat_clusters == seurat_cluster) %>%
