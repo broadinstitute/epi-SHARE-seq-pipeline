@@ -8,6 +8,7 @@ import argparse
 import base64
 import io
 import os.path
+import csv
 
 def main(output_file_name, image_file_list, log_file_list, output_csv_name, summary_stats_txt, joint_qc_vals_txt, archr_vals_txt, input_file_name=None):
     """
@@ -25,7 +26,8 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         with open(input_file_name) as input_file:
            output_file.write(input_file.read())
     
-    csv_output_file = io.open(output_csv_name, 'w', encoding='utf8')
+    #csv_output_file = io.open(output_csv_name, 'w', encoding='utf8')
+    csv_writer = csv.writer(open(output_csv_name, 'wb'))
     
     with open(image_file_list) as fname:
         images = fname.read().splitlines() 
@@ -41,7 +43,9 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         idx = name.index('.') + 1
         name = name[idx:]
         output_file.write('<img id ="' + name + '" width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>') # embed in html
-        csv_output_file.write(name + ', data:image/png;base64,"' + data_base64 + '\n')
+        #csv_output_file.write(name + ', data:image/png;base64,"' + data_base64 + '\n')
+        image_field = '<img id ="' + name + '" width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>'
+        csv_writer.writerow([name, image_field])
 
     with open(log_file_list) as fname:
         logs = fname.read().splitlines()
@@ -55,7 +59,8 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         log_name = log_name[idx:]
         output_file.write("<div id =" + log_name + ">" + log + "</div>")
         output_file.write("<br>")
-        csv_output_file.write(log_name + ", " + log + '\n')
+        #csv_output_file.write(log_name + ", " + log + '\n')
+        csv_writer.writerow([log_name, log])
     output_file.write('</body></html>')
     fname.close()
     
@@ -65,7 +70,11 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         stats = fname.read().splitlines()
     for stat in stats:
         print("stat is " + stat)
-        csv_output_file.write(stat + '\n')
+        #csv_output_file.write(stat + '\n')
+        name_and_field = stat.split(',')
+        name = name_and_field[0]
+        stat = name_and_field[1]
+        csv_writer.writerow([name, stat])
     fname.close()
 
     #write stats from qc to output csv file
@@ -74,7 +83,11 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         stats = fname.read().splitlines()
     for stat in stats:
         print("stat is " + stat)
-        csv_output_file.write(stat + '\n')
+        #csv_output_file.write(stat + '\n')
+        name_and_field = stat.split(',')
+        name = name_and_field[0]
+        stat = name_and_field[1]
+        csv_writer.writerow([name, stat])
     fname.close()
     
     #write stats from archr to output csv file
@@ -83,11 +96,16 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         stats = fname.read().splitlines()
     for stat in stats:
         print("stat is " + stat)
-        csv_output_file.write(stat + '\n')
+        #csv_output_file.write(stat + '\n')
+        name_and_field = stat.split(',')
+        name = name_and_field[0]
+        stat = name_and_field[1]
+        csv_writer.writerow([name, stat])
     fname.close()
 
     output_file.close()
-    csv_output_file.close()
+    #csv_output_file.close()
+    csv_writer.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
