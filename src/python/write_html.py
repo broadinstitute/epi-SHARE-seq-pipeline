@@ -105,7 +105,6 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
 
     output_file.close()
     #csv_output_file.close()
-    csv_writer.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
