@@ -187,6 +187,8 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     #write to fourth (summary stats) tab
     output_file.write('<div class="tab content4">') 
     print("start of printing summary stats loop")
+    summary_stats_labels = []
+    summary_stats_values = []
     with open (summary_stats_txt) as fname:
         stats = fname.read().splitlines()
         for stat in stats:
@@ -195,8 +197,12 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
             name_and_field = stat.split(',')
             name = name_and_field[0]
             stat = name_and_field[1]
+            summary_stats_labels.append(name)
+            summary_stats_values.append(stat)
             csv_writer.writerow([name, stat])
-            output_file.write(name + " " + stat + '\n')
+            
+            #output_file.write(name + " " + stat + '\n')
+    write_summary_table(summary_stats_labels, summary_stats_values, output_file)
     fname.close()
     output_file.write("</div>")
     
