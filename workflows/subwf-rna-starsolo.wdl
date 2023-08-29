@@ -36,6 +36,7 @@ workflow wf_rna {
 
         # Align-specific inputs
         File idx_tar
+        String? align_bam_sorting_memory = "31232551044"
         String? barcode_tag
         # Runtime parameters
         Int? align_cpus
@@ -99,6 +100,7 @@ workflow wf_rna {
                 genome_name = genome_name,
                 genome_index_tar = idx_tar,
                 prefix = prefix,
+                bam_sorting_memory = align_bam_sorting_memory,
                 cpus = align_cpus,
                 disk_factor = align_disk_factor,
                 memory_factor = align_memory_factor,
