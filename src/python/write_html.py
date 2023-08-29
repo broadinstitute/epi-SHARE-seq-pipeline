@@ -76,13 +76,14 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
                 outfile.write("<tr> <td>" + txt[index] + "</td> <td>No matching number</td> </tr>")
         outfile.write("</table>")
     
-    # Open output file, write input if exists
     output_file = io.open(output_file_name, 'w', encoding='utf8')
     output_file.write('<!DOCTYPE html><html lang="en"><head><title>Results summary</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><body>')
-    if input_file_name is not None:
-        with open(input_file_name) as input_file:
-           output_file.write(input_file.read())
-           output_file.truncate(0)
+    # depricated
+    # Open output file, write input if exists
+    #if input_file_name is not None:
+        #with open(input_file_name) as input_file:
+           #output_file.write(input_file.read())
+           #output_file.truncate(0)
     
     # Sets up the style for the tabs. Also links each tab to the content that
     # should be displayed when the tab is checked
@@ -158,16 +159,15 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         <input type="radio" name="tabs" id="tab5" />
         <label for="tab5">Log files </label>""")
     
-    #csv_output_file = io.open(output_csv_name, 'w', encoding='utf8')
     csv_writer = csv.writer(open(output_csv_name, 'w'))
     
-    #everything from here until the first break will be under the first tab
+    #everything in this block will be in first tab
     output_file.write('<div class="tab content1">')
     output_file.write('some filler content here')
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
     
-    #write images to rna tab 
+    #write images to second (rna) tab 
     output_file.write('<div class="tab content2">')
     with open(image_file_list) as fname:
         images = fname.read().splitlines() 
@@ -178,13 +178,13 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         output_file.write('<a href="#top">Go to top of page</a>')
         output_file.write("</div>")
 
-    #write images to atac plot section
+    #write images to third (atac) tab
     output_file.write('<div class="tab content3">')
     output_file.write("Plots will go here once things are sorted out")
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
 
-    #write to summary stats tab
+    #write to fourth (summary stats) tab
     output_file.write('<div class="tab content4">') 
     print("start of printing summary stats loop")
     with open (summary_stats_txt) as fname:
@@ -259,6 +259,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         #csv_writer.writerow([name, stat])
     #fname.close()
 
+    #start csv output only
     #write stats from qc to output csv file
     print("start of joint qc vals text loop")
     with open (joint_qc_vals_txt) as fname:

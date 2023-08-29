@@ -18,7 +18,7 @@ task html_report {
 
         String? prefix
 
-        # Stats for ATAC and RNA, will go at top of html
+        # Stats for ATAC and RNA, will go at top of html from terra table
         Int? atac_total_reads
         Int? atac_aligned_uniquely
         Int? atac_unaligned
@@ -41,7 +41,7 @@ task html_report {
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
-        ##values needed for the csv report
+        ##values from tasks
         File? joint_qc_vals
         File? archr_vals
 
