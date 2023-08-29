@@ -45,3 +45,14 @@ workflows:
              - main
          tags:
              - /.*/
+
+   - name: "SHARE-seq-cell-annotation"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-cell-annotation.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+             - dev
+             - cell-annotation
+         tags:
+             - /.*/
