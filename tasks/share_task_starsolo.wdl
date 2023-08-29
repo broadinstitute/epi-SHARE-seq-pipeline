@@ -18,6 +18,7 @@ task share_rna_align {
         Array[File] fastq_R2
         File whitelist
         File genome_index_tar
+        String? bam_sorting_memory = "31232551044"
         String genome_name
         String prefix
         String chemistry
@@ -100,7 +101,7 @@ task share_rna_align {
             --outFilterScoreMinOverLread 0.3 \
             --outFilterMatchNminOverLread 0.3 \
             --outSAMtype BAM SortedByCoordinate \
-            --limitBAMsortRAM 31232551044 \
+            --limitBAMsortRAM ~{bam_sorting_memory} \
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \
