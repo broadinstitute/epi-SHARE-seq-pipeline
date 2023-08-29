@@ -180,7 +180,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
 
     #write images to atac plot section
     output_file.write('<div class="tab content3">')
-    write_pngs("Plots will go here once things are sorted out")
+    output_file.write("Plots will go here once things are sorted out")
     output_file.write('<a href="#top">Go to top of page</a>')
     output_file.write("</div>")
 
