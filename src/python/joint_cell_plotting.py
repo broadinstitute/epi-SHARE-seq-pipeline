@@ -131,6 +131,9 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 
     plot.save(filename=plot_file, dpi=1000)
 
+#this function gets as parameters cutoffs and a file containing qc infromation, 
+#and writes those cuttoffs and qc data to a text file so they can be used in the
+#html and csv report
 def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, min_genes): 
     """write the counts of atac, rna, both, and neither to a text file so that they can be 
        outputs of the pipeline"""
