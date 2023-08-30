@@ -131,8 +131,6 @@ task qc_atac {
         #make file to write numbers to  
         echo "start tss outfile" > ~{tss_out_file}
         
-        cat ~{tss_out_file}
-
         time python3 $(which qc_atac_compute_tss_enrichment.py) \
             -e 2000 \
             --tss ~{tss} \
@@ -219,7 +217,7 @@ task qc_atac {
         #File? atac_qc_monitor_log = monitor_log
 
         #values from tss for final pipeline output
-        File atac_qc_tss_outfile = tss_out_file
+        File? atac_qc_tss_outfile = tss_out_file
     }
 
     runtime {

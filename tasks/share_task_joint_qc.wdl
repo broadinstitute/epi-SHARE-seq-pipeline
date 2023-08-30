@@ -76,7 +76,7 @@ task joint_qc_plotting {
         File joint_barcode_metadata = "${joint_barcode_metadata}"
 
         #file containg qc values for final output
-        File joint_qc_stats = "${joint_qc_stats}"
+        File? joint_qc_stats = "${joint_qc_stats}"
     }
 
     runtime {

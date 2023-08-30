@@ -70,11 +70,6 @@ workflow share {
 
         File genome_tsv
         String? genome_name
-
-        #files with data pulled from other tasks for final output
-        #File atac_tss_stats_in = atac.share_atac_tss_outfile
-        #File joint_qc_stats_in = joint_qc.joint_qc_stats
-        #File archr_numbers_in = atac.share_atac_archr_numbers
     }
 
     Map[String, File] annotations = read_map(genome_tsv)
@@ -256,33 +251,6 @@ workflow share {
         # Report
         File? html_summary = html_report.html_report_file
         File? csv_summary = html_report.csv_summary_file
-
-        # numbers to output 
-        #Int? atac_total_reads = atac.share_atac_total_reads
-        #Int? atac_aligned_uniquely = atac.share_atac_aligned_uniquely
-        #Int? atac_unaligned = atac.share_atac_unaligned
-        #Int? atac_feature_reads = atac.share_atac_feature_reads
-        #Int? atac_duplicate_reads = atac.share_atac_duplicate_reads
-        #Float? atac_nrf = atac.share_atac_nrf
-        #Float? atac_pbc1 = atac.share_atac_pbc1
-        #Float? atac_pbc2 = atac.share_atac_pbc2
-        #Float? atac_percent_duplicates = atac.share_atac_percent_duplicates
-        #Int? rna_total_reads = rna.share_rna_total_reads
-        #Int? rna_aligned_uniquely = rna.share_rna_aligned_uniquely
-        #Int? rna_aligned_multimap = rna.share_rna_aligned_multimap
-        #Int? rna_unaligned = rna.share_rna_unaligned
-        #Int? rna_feature_reads = rna.share_rna_feature_reads
-        #Int? rna_duplicate_reads = rna.share_rna_duplicate_reads
-        #Int? joint_qc_neither_out = joint_qc_neither
-        #Int? joint_qc_both_out = joint_qc_both
-        #Int? joint_rna_out = joint_rna
-        #Int? joint_atac_out = joint_atac
-        #Int? joint_min_tss_out = joint_min_tss
-        #Int? joint_min_frags_out = joint_min_frags
-        #Int? joint_min_umis_out = joint_min_umis
-        #Int? joint_min_genes_out = joint_min_genes
-        #String? archr_unique_frags_out = archr_unique_frags
-        #String? archr_tss_cutoff_out = archr_tss_cutoff
 
     }
 

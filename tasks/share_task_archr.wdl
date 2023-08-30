@@ -147,7 +147,7 @@ task archr {
         File? archr_filtered_matrix = filtered_archr_h5
 
         # file containing numbers from archr for pipeline output
-        File archr_numbers = archr_nums
+        File? archr_numbers = archr_nums
     }
 
     runtime {

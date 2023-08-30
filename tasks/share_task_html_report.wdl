@@ -45,7 +45,7 @@ task html_report {
         File? joint_qc_vals
         File? archr_vals
 
-        String docker_image = "mshriver01/share_task_html_report"
+        String docker_image = 'nchernia/share_task_html_report:14'
 
     }
 
