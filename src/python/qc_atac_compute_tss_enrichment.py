@@ -198,6 +198,8 @@ def plot_tss_enrichment(raw_signal, smoothed_signal, out_file, tss_vals):
     plt.xticks([0, 2000, 4000], ['-2000', 'TSS', '+2000'])
     fig.savefig(out_file)
     plt.close(fig)
+    #write the max value of the raw and smooth signal in name, value format
+    #to the tss vals file 
     file = open(tss_vals, 'w')
     raw_signal_max = str(raw_signal.max())
     smooth_signal_max = str(smoothed_signal.max())
@@ -249,7 +251,7 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--window", help= "Smoothing window size for plotting. (default= 20)", type= int, default= 20)
     parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
     parser.add_argument("--tss", help= "TSS bed file")
-    parser.add_argument("--tss_vals", help="values from the tss file that should be saved")
+    parser.add_argument("--tss_vals", help="file to write values into needed for csv output")
 
     # Read arguments from command line
     args = parser.parse_args()
@@ -258,8 +260,6 @@ if __name__ == '__main__':
         prefix = args.prefix
     else:
         prefix = args.bam[:-4]
-
-    print("passed in value for tss_vals is", args.tss_vals)
     
     # It is extremely fast. Don't think we need parallel processing.
     #cpus = len(os.sched_getaffinity(0))/2
@@ -283,7 +283,6 @@ if __name__ == '__main__':
         for barcode, fragments_in_promoter in stats.items():
             tss_enrichment,reads_sum = compute_tss_enrichment_barcode(barcode_counts[barcode])
             print(f"{barcode}\t{len(fragments_in_promoter)}\t{len(reads_in_tss[barcode])}\t{len(reads_in_promoter[barcode])}\t{tss_enrichment}\t{reads_sum}", file=out_file)
-
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:
         tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp, args.tss_vals)
