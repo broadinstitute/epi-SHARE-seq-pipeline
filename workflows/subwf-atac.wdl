@@ -98,6 +98,7 @@ workflow wf_atac {
         String? archr_docker_image
     
         #file containing values from tss for final output
+        #to remove
         File? share_atac_tss_outfile_in = qc_atac.atac_qc_tss_outfile
         File? share_atac_archr_nums_in = archr.archr_numbers
     }

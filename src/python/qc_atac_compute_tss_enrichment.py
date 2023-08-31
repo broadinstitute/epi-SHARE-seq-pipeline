@@ -285,6 +285,7 @@ if __name__ == '__main__':
             print(f"{barcode}\t{len(fragments_in_promoter)}\t{len(reads_in_tss[barcode])}\t{len(reads_in_promoter[barcode])}\t{tss_enrichment}\t{reads_sum}", file=out_file)
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:
+        #this is max tss value
         tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp, args.tss_vals)
         print(f"tss_enrichment\n{tss_score_bulk}", file=out_file)
 
