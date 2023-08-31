@@ -168,7 +168,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     
     #set up the style and the names for the tabs
     output_file.write("""<input type="radio" name="tabs" id="tab1" checked /> 
-        <label for="tab1">Top level Plots</label> 
+        <label for="tab1">Joint Plots</label> 
         <input type="radio" name="tabs" id="tab2" /> 
         <label for="tab2">RNA plots</label> 
         <input type="radio" name="tabs" id="tab3" /"> 
