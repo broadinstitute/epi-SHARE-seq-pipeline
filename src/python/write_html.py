@@ -184,7 +184,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     joint_images = []
     rna_images = []
     atac_images = []
-    with open(image_file_list as fname)
+    with open(image_file_list) as fname:
         images = fname.read().splitlines()
         split_images(images, joint_images, rna_images, atac_images)
     
