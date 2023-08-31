@@ -18,6 +18,7 @@ def parse_arguments():
     parser.add_argument("sample_type", choices=["ATAC", "RNA"], help="Sample modality")
     parser.add_argument("prefix", help="Prefix for naming output QC txt file")
     parser.add_argument("pkr", nargs="?", help="PKR name")
+    parser.add_argument("--paired_rna", help="Flag for outputting the full RNA read 2 for paired-end alignment, rather than just CB+UMI", action="store_true")
     
     return parser.parse_args()
 
@@ -74,7 +75,7 @@ def check_putative_barcode(barcode_str, barcode_dict, quality_str):
 def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                   output_read1_fastq_file, output_read2_fastq_file,
                   r1_barcode_dict, r2_barcode_dict, r3_barcode_dict,
-                  sample_type, pkr, prefix):
+                  sample_type, pkr, prefix, paired_rna):
     """
     Takes in filenames for input and output FASTQ files, as well as
     dictionaries for R1, R2, R3 barcodes. 
@@ -97,13 +98,11 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
     # process FASTQs together
     with xopen.xopen(input_read1_fastq_file, mode= "r", threads= 8) as read1_fh, xopen.xopen(input_read2_fastq_file, mode= "r", threads= 8) as read2_fh:
         for readline1, readline2 in zip(read1_fh, read2_fh):
-            
             name1 = readline1.strip()
             name2 = readline2.strip()
 
             readline1 = next(read1_fh)
             readline2 = next(read2_fh)
-
 
             sequence1 = readline1.strip()
             sequence2 = readline2.strip()
@@ -116,7 +115,6 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
 
             quality1 = readline1.strip()
             quality2 = readline2.strip()
-
 
             # last 99bp of read 2 contains barcode sequences
             read_2_barcode_sequence = sequence2[-99:]
@@ -146,9 +144,14 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                     # add corrected read 1 to buffer; use corrected header
                     corrected_read1 = f"{corrected_header}\n{sequence1}\n+\n{quality1}\n"
                     buffer1.append(corrected_read1)
-                    # add corrected read 2 to buffer; use corrected header, read has format R1R2R3UMI
-                    corrected_sequence2 = r1 + r2 + r3 + sequence2[:10]
-                    corrected_quality2 = q1 + q2 + q3 + quality2[:10]
+                    # add corrected read 2 to buffer; use corrected header, read has format R1R2R3UMI if not paired-end RNA,
+                    # or R1R2R3UMIread2 if paired-end RNA
+                    if paired_rna:
+                        corrected_sequence2 = r1 + r2 + r3 + sequence2[:-99]
+                        corrected_quality2 = q1 + q2 + q3 + quality2[:-99]
+                    else:
+                        corrected_sequence2 = r1 + r2 + r3 + sequence2[:10]
+                        corrected_quality2 = q1 + q2 + q3 + quality2[:10]
                     corrected_read2 = f"{corrected_header}\n{corrected_sequence2}\n+\n{corrected_quality2}\n"
                     buffer2.append(corrected_read2)
                     buffer_counter += 1
@@ -185,7 +188,6 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
         read2_out_writer.write("".join(buffer2))
         buffer2.clear()
         buffer_counter = 0
-
     
     # write QC stats
     with open(f"{prefix}_barcode_qc.txt", "w") as f:
@@ -203,6 +205,7 @@ def main():
     sample_type = getattr(args, "sample_type")
     prefix = getattr(args, "prefix")
     pkr = getattr(args, "pkr")
+    paired_rna = getattr(args, "paired_rna")
     
     # read whitelist, get lists of barcodes
     (r1_barcodes, r2_barcodes, r3_barcodes) = get_barcodes(whitelist_file)
@@ -216,7 +219,7 @@ def main():
     process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                    output_read1_fastq_file, output_read2_fastq_file,
                    r1_barcode_dict, r2_barcode_dict, r3_barcode_dict,
-                   sample_type, pkr, prefix)
+                   sample_type, pkr, prefix, paired_rna)
 
 if __name__ == "__main__":
     main()

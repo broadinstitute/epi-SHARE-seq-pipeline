@@ -7,8 +7,10 @@ total reads, duplicate reads, UMIs, genes, and percent mitochondrial reads for e
 
 import argparse
 import logging
+import numpy as np
 import pysam
 from collections import defaultdict
+from functools import partial
 
 logging.basicConfig(filename='barcode_metadata.log', encoding='utf-8', level=logging.DEBUG)
 logging.debug('Creating the barcode metadata for RNA from bam.')
@@ -29,12 +31,13 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
     Reported metrics are total counts, UMIs (one UMI counted per unique UMI-gene mapping),
     duplicate counts, genes, percent mitochondrial reads
     """
-    total_counts = defaultdict(int)
-    genes = defaultdict(set)
-    umi_gene = defaultdict(set)
-    mitochondrial_counts = defaultdict(int)
-    barcodes = set()
-    formatted_barcodes = {}
+
+    # Reads per barcode is a vector of length 2.
+    # [x_mito_reads, mito_reads]
+    reads_per_barcode = defaultdict(partial(np.zeros,2))
+    genes_per_barcode = defaultdict(set)
+    mito_genes_per_barcode = defaultdict(set)
+
 
     for read in bam:
         try:
@@ -43,73 +46,70 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
             if barcode == "-":
                 #logging.warning(f"Skipping {read.qname} because the {barcode_tag} tag is empty") slowing down
                 continue
-
-            # get gene id; skip read if not present
-            gene_id = read.get_tag("GX")
-            if gene_id == "-":
-                #logging.warning(f"Skipping {read.qname} because the GX tag is empty")
-                continue
-
+                
             # get UMI; skip read if not present
             umi = read.get_tag("UB")
             if umi == "-":
                 #logging.warning(f"Skipping {read.qname} because the UB tag is empty")
                 continue
 
-            barcodes.add(barcode)
+            reads_per_barcode[barcode][0] += 1
+            
+            if read.reference_name == "chrM":
+                reads_per_barcode[barcode][1] += 1
 
-            total_counts[barcode] += 1
+        except KeyError:
+            #logging.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing.")
+            continue
 
-            genes[barcode].add(gene_id)
-
-            umi_gene[barcode].add(umi + gene_id)
+        try:
+            # get gene id; skip read if not present
+            gene_id = read.get_tag("GX")
+            if gene_id == "-":
+                #logging.warning(f"Skipping {read.qname} because the GX tag is empty")
+                continue
 
             if read.reference_name == "chrM":
-                mitochondrial_counts[barcode] += 1
+                mito_genes_per_barcode[barcode].add(gene_id)
+            else:
+                genes_per_barcode[barcode].add(gene_id)
         except KeyError:
-            logging.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing.")
-
-    # count unique genes per barcode
-    genes_per_barcode = {barcode:len(gene_set) for (barcode, gene_set) in genes.items()}
-
-    # count unique umi-gene mappings per barcode
-    umis_per_barcode = {barcode:len(umi_gene_set) for (barcode, umi_gene_set) in umi_gene.items()}
+            #logging.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing.")
+            continue
 
     # create list with barcodes and associated metrics
     barcode_metadata = []
-    for barcode in barcodes:
-        total_val = str(total_counts[barcode])
-        umi_val = str(umis_per_barcode.get(barcode, 0))
-        duplicate_val = str(total_counts[barcode] - umis_per_barcode.get(barcode, 0))
-        gene_val = str(genes_per_barcode.get(barcode, 0))
-        mitochondrial_val = str(round(mitochondrial_counts.get(barcode, 0) / total_counts[barcode] * 100, 2))
+    for barcode, reads_vector in reads_per_barcode.items():
+        # Reminder that reads_vector is [x_mito_reads, mito_reads].
+        genes = len(genes_per_barcode[barcode])
+        mito_genes = len(mito_genes_per_barcode[barcode])
+        fraction_mitochondrial_reads = round(reads_vector[1]/np.sum(reads_vector) * 100, 2)
         out_barcode = barcode + "_" + pkr if pkr else barcode
 
-        metrics = [out_barcode, total_val, duplicate_val, umi_val, gene_val, mitochondrial_val]
+        metrics = list(map(str,[out_barcode, int(np.sum(reads_vector)), reads_vector[0], reads_vector[1], genes+mito_genes, genes, mito_genes, fraction_mitochondrial_reads]))
 
         barcode_metadata.append(metrics)
 
-    return barcode_metadata
+    return (barcode_metadata)
+
 
 def write_metadata_file(barcode_metadata, output_file):
-    fields = ["barcode", "total_counts", "duplicate_counts", "umis", "genes", "percent_mitochondrial"]
+    fields = ["barcode", "total_counts", "reads_non_mito", "reads_mito", "genes", "genes_non_mito", "genes_mito", "percent_mitochondrial"]
 
     with open(output_file, "w") as f:
         # write header
         f.write("\t".join(fields) + "\n")
         # write rows
         for metrics_list in barcode_metadata:
-            f.write("\t".join(metrics_list[:]) + "\n")
+            f.write("\t".join(metrics_list) + "\n")
 
 def main():
     # get arguments
     args = parse_arguments()
     bam_file = getattr(args, "bam_file")
     bai_file = getattr(args, "bai_file")
-
     pkr = getattr(args, "pkr")
     barcode_tag = getattr(args, "barcode_tag")
-
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
 
     # load bam file
@@ -118,9 +118,9 @@ def main():
     # get metrics for each barcode
     barcode_metadata = get_metrics(bam, barcode_tag, pkr)
 
-    # write txt file
+    # write metadata file
     write_metadata_file(barcode_metadata, barcode_metadata_file)
-
+    
 if __name__ == "__main__":
 
     main()

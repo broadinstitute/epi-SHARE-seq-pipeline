@@ -7,8 +7,8 @@ workflows:
          branches:
              - main
              - release
-             - bowtie2-sambamba
-             - sambamba
+             - dev
+             - merge-pkr
              - michael-nums-output
          tags:
              - /.*/
@@ -76,6 +76,7 @@ workflows:
              - main
              - release
              - kdong
+             - neva
          tags:
              - /.*/
 
@@ -87,5 +88,15 @@ workflows:
              - main
              - dev
              - starsolo
+         tags:
+             - /.*/
+
+   - name: "merge-data"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-merge-data.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+             - merge-pkr
          tags:
              - /.*/

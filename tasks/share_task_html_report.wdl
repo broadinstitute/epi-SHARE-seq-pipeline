@@ -7,7 +7,7 @@ version 1.0
 
 task html_report {
     meta {
-        version: 'v0.1'
+        version: 'v1.0'
         author: 'Neva C. Durand (neva@broadinstitute.org) at Broad Institute of MIT and Harvard'
         description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: create html report task'
     }
@@ -24,9 +24,6 @@ task html_report {
         Int? atac_unaligned
         Int? atac_feature_reads
         Int? atac_duplicate_reads
-        Float? atac_nrf
-        Float? atac_pbc1
-        Float? atac_pbc2
         Float? atac_percent_duplicates
         Int? rna_total_reads
         Int? rna_aligned_uniquely
@@ -34,6 +31,7 @@ task html_report {
         Int? rna_unaligned
         Int? rna_feature_reads
         Int? rna_duplicate_reads
+        Float? rna_frig
 
         ## JPEG files to be encoded and appended to html
         Array[File?] image_files
@@ -45,13 +43,12 @@ task html_report {
         File? joint_qc_vals
         File? archr_vals
 
-        String docker_image = 'nchernia/share_task_html_report:14'
+        String docker_image = 'mshriver01/share_task_html_report'
 
     }
 
     String output_file = "${default="share-seq" prefix}.html"
     # need to select from valid files since some are optional
-    #comment
     Array[File] valid_image_files = select_all(image_files)
     Array[String] valid_log_files = select_all(log_files)
     String output_csv_file = "${default="share-seq" prefix}.csv"
@@ -79,12 +76,7 @@ task html_report {
         echo "rna_feature_reads, " ~{rna_feature_reads} >> csv_in.txt
         echo "rna_duplicate_reads, " ~{rna_duplicate_reads} >> csv_in.txt
         
-
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} csv_in.txt ~{joint_qc_vals} ~{archr_vals} --input_file_name output.txt
-    
-    
-
-    
     >>>
     output {
         File html_report_file = "~{output_file}"

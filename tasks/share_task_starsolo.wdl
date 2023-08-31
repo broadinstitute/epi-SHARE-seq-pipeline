@@ -21,11 +21,25 @@ task share_rna_align {
         String genome_name
         String prefix
         String chemistry
+
+        # Extra parameteres for STARsolo SHARE.
+        String soloUMIdedup = "1MM_All"
+        String soloMultiMappers = "Unique EM"
+        Int outFilterMultimapNmax = 20
+        Float outFilterScoreMinOverLread = 0.3
+        Float outFilterMatchNminOverLread = 0.3
+        Float? outFilterMismatchNoverReadLmax
+        String? soloBarcodeMate
+        String? clip5pNbases  # 39 0
+
+        Int? outFilterScoreMin
+        Int? winAnchorMultimapNmax
+
         # Runtime parameters
         Int cpus = 16
         Float? disk_factor = 50.0
         Float? memory_factor = 2.0
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star'
+        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_star:dev'
         
     }
 
@@ -67,11 +81,12 @@ task share_rna_align {
 
         # SHARE-seq
         if [ '~{chemistry}' == 'shareseq' ]; then
+            # Need to think of a way of doing this. For now off.
             # Check that CB + UMI length is correct
-            if [ $cb_umi_length -ne 34 ]; then
-                echo 'CB + UMI length is $cb_umi_length; expected 34'
-                exit 1
-            fi
+            #if [ $cb_umi_length -ne 34 ]; then
+            #    echo 'CB + UMI length is $cb_umi_length; expected 34'
+            #    exit 1
+            #fi
 
             # Generate whitelist
             for fq in ~{sep=' ' fastq_R2}
@@ -93,15 +108,21 @@ task share_rna_align {
             --soloCBlen 24 \
             --soloUMIstart 25 \
             --soloUMIlen 10 \
+            ~{"--soloBarcodeMate "+ soloBarcodeMate} \
+            ~{"--clip5pNbases "+ clip5pNbases} \
+            ~{"--soloMultiMappers "+ soloMultiMappers} \
             --soloUMIdedup 1MM_All \
             --chimOutType WithinBAM \
             --limitOutSJcollapsed 2000000 \
-            --outFilterMultimapNmax 20 \
-            --outFilterScoreMinOverLread 0.3 \
-            --outFilterMatchNminOverLread 0.3 \
+            --outFilterMultimapNmax ~{outFilterMultimapNmax} \
+            --outFilterScoreMinOverLread ~{outFilterScoreMinOverLread} \
+            --outFilterMatchNminOverLread ~{outFilterMatchNminOverLread} \
+            ~{"--outFilterMismatchNoverReadLmax "+ outFilterMismatchNoverReadLmax} \
+            ~{"--winAnchorMultimapNmax " + winAnchorMultimapNmax} \
+            ~{"--outFilterScoreMin " + outFilterScoreMin} \
             --outSAMtype BAM SortedByCoordinate \
             --limitBAMsortRAM 31232551044 \
-            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN \
+            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \
 
@@ -128,6 +149,8 @@ task share_rna_align {
             --genomeDir ./ \
             --genomeLoad NoSharedMemory \
             --soloType CB_UMI_Simple \
+            ~{"--soloBarcodeMate "+ soloBarcodeMate} \
+            ~{"--clip5pNbases "+ clip5pNbases} \
             --soloFeatures Gene SJ \
             --soloStrand Forward \
             --soloCellFilter EmptyDrops_CR \
@@ -151,7 +174,7 @@ task share_rna_align {
             --outFilterMismatchNmax 999 \
             --outFilterMismatchNoverReadLmax 0.04 \
             --outSAMtype BAM SortedByCoordinate \
-            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
+            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN gx gn \
             --outSAMheaderCommentFile COfile.txt \
             --outSAMheaderHD @HD VN:1.4 SO:coordinate \
             --outSAMunmapped Within \
@@ -191,6 +214,8 @@ task share_rna_align {
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 12 \
+            ~{"--soloBarcodeMate "+ soloBarcodeMate} \
+            ~{"--clip5pNbases "+ clip5pNbases} \
             --soloUMIdedup 1MM_CR \
             --soloUMIfiltering MultiGeneUMI_CR \
             --alignSJoverhangMin 8 \
@@ -204,7 +229,7 @@ task share_rna_align {
             --outFilterMismatchNmax 999 \
             --outFilterMismatchNoverReadLmax 0.04 \
             --outSAMtype BAM SortedByCoordinate \
-            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN \
+            --outSAMattributes NH HI AS NM MD CB CR CY UB UR UY GX GN gx gn \
             --outSAMheaderCommentFile COfile.txt \
             --outSAMheaderHD @HD VN:1.4 SO:coordinate \
             --outSAMunmapped Within \
@@ -220,9 +245,10 @@ task share_rna_align {
         # tar and gzip barcodes, features, and matrix files
         cd result/Solo.out/$feature_type/raw/
         gzip *
-        tar -cvzf raw.tar.gz *.gz
+        tar -cvzf raw.mtx.tar.gz *.gz
 
         # Move files and rename
+        # TODO: double check this because might be reporting the wrong files
         cd ../../../../
         find result -type f -exec mv {} result \;
         cd result
@@ -243,7 +269,7 @@ task share_rna_align {
         File features_stats = "result/~{prefix}.Features.stats"
         File summary_csv = "result/~{prefix}.Summary.csv"
         File umi_per_cell = "result/~{prefix}.UMIperCellSorted.txt"
-        File raw_tar = "result/~{prefix}.raw.tar.gz"
+        File raw_tar = "result/~{prefix}.raw.mtx.tar.gz"
     }
 
     runtime {

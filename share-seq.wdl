@@ -4,7 +4,7 @@ version 1.0
 import "tasks/10x_task_preprocess.wdl" as preprocess_tenx
 import "tasks/10x_create_barcode_mapping.wdl" as tenx_barcode_map
 import "workflows/subwf-atac.wdl" as share_atac
-import "workflows/subwf-rna-starsolo.wdl" as share_rna
+import "workflows/subwf-rna.wdl" as share_rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/share_task_joint_qc.wdl" as joint_qc
 import "tasks/share_task_html_report.wdl" as html_report
@@ -188,9 +188,6 @@ workflow share {
                 atac_unaligned = atac.share_atac_unaligned,
                 atac_feature_reads = atac.share_atac_feature_reads,
                 atac_duplicate_reads = atac.share_atac_duplicate_reads,
-                atac_nrf = atac.share_atac_nrf,
-                atac_pbc1 = atac.share_atac_pbc1,
-                atac_pbc2 = atac.share_atac_pbc2,
                 atac_percent_duplicates = atac.share_atac_percent_duplicates,
                 rna_total_reads = rna.share_rna_total_reads,
                 rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
@@ -198,6 +195,7 @@ workflow share {
                 rna_unaligned = rna.share_rna_unaligned,
                 rna_feature_reads = rna.share_rna_feature_reads,
                 rna_duplicate_reads = rna.share_rna_duplicate_reads,
+                rna_frig = rna.rna_frig,
 
                 ## JPEG files to be encoded and appended to html
                 # RNA plots
@@ -239,6 +237,11 @@ workflow share {
         File? share_atac_barcode_metadata = atac.share_atac_barcode_metadata
         File? share_atac_archr_notebook_output = atac.share_atac_archr_notebook_output
         File? share_atac_archr_arrow = atac.share_atac_archr_arrow
+        File? atac_track_bigwig = atac.atac_track_bigwig
+        File? atac_track_bigwig_no_nucleosome = atac.atac_track_bigwig_no_nucleosome
+        File? atac_track_bigwig_mono_nucleosome = atac.atac_track_bigwig_mono_nucleosome
+        File? atac_track_bigwig_multi_nucleosome = atac.atac_track_bigwig_multi_nucleosome
+
 
         # DORCS output
         File? dorcs_notebook_output = dorcs.dorcs_notebook_output

@@ -41,8 +41,7 @@ task find_dorcs {
         Int topNGene = 20
 
         String output_filename = "${prefix}.dorcs.notebook.${genome}.ipynb"
-        String docker_image = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs"
-        #String docker_image = "swekhande/shareseq-prod:share-task-dorcs"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/dorcs_task_find_dorcs:dev"
         Int mem_gb = 64
         Int disk_gb = 100
     }

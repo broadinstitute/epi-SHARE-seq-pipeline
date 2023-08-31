@@ -22,7 +22,7 @@ task share_atac_align {
         Int? cpus = 16
         Float? disk_factor = 8.0
         Float? memory_factor = 0.15
-        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/share_task_bowtie2:dev"
     }
 
     # Determine the size of the input
@@ -96,7 +96,7 @@ task share_atac_align {
         else
             # Splitting the read name to ge the cell barcode and adding it to the CB tag in the BAM file.
             samtools view -h ~{unsorted_bam} | \
-            awk '{if ($0 ~ /^@/) {print $0} else {split($1,a,"[,_]"); print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4] "_" a[5]);}}' | \
+            awk '{if ($0 ~ /^@/) {print $0} else {n=split($1,a,"[,_]"); if ( n > 4 ) {print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4] "_" a[5]);}else{print($0 "\tCB:Z:" a[2]a[3]a[4] "\tXC:Z:" a[2]a[3]a[4])}}}' | \
             samtools sort \
                 -@ ~{samtools_threads} \
                 -m ~{samtools_memory_per_thread}M \
@@ -119,9 +119,7 @@ task share_atac_align {
         cpu: cpus
         docker: "${docker_image}"
         disks: "local-disk ${disk_gb} ${disk_type}"
-        maxRetries:1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {

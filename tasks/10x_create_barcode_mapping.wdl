@@ -52,8 +52,6 @@ task mapping_tenx_barcodes {
         cpu: cpus
         docker: "${docker_image}"
         disks: "local-disk ${disk_gb} ${disk_type}"
-        maxRetries: 1
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 }

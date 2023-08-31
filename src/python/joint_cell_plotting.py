@@ -28,13 +28,15 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def get_split_lines(file_name, delimiter, skip_header):
-    with open(file_name, "r") as f:
-        if skip_header:
+def get_split_lines(file_name, delimiter, skip=0):
+    """
+    Read file contents and yield generator with line entries
+    """
+    with open(file_name, "rt") as f:
+        for i in range(skip):
             next(f)
         for line in f:
             yield line.rstrip().split(sep=delimiter)
-
 def merge_dicts(dict_1, dict_2):
     """Merge dictionaries by key; combine values into quadruple, fill with 0s if key not in both dicts"""
     keys = set(dict_1.keys() | dict_2.keys())
@@ -44,39 +46,47 @@ def merge_dicts(dict_1, dict_2):
 
 def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     """Read files and aggregate metrics into Pandas dataframe"""
-    rna_metrics_contents = get_split_lines(rna_metrics_file, delimiter="\t", skip_header=True)
+    rna_metrics_contents = get_split_lines(rna_metrics_file, delimiter="\t")
+    rna_metrics_header = next(rna_metrics_contents)
+    rna_barcode_ind = rna_metrics_header.index("barcode")
+    umi_ind = rna_metrics_header.index("unique_umi")
+    gene_ind = rna_metrics_header.index("genes_final")
     umis = []
     genes = []
     rna_barcodes = []
-    # remove cells that have fewer than 10 UMIs
+    
     for line in rna_metrics_contents:
-        if int(line[3]) >= remove_low_yielding_cells:
-            umis.append(int(line[3]))
-            genes.append(int(line[4]))
-            rna_barcodes.append(line[0])
+        if int(umi_ind) >= remove_low_yielding_cells:
+            umis.append(int(umi_ind))
+            genes.append(int(gene_ind))
+            rna_barcodes.append(rna_barcode_ind)
     rna_metrics = dict(zip(rna_barcodes, zip(umis, genes)))
 
-    atac_metrics_contents = get_split_lines(atac_metrics_file, delimiter="\t", skip_header=True)
+    atac_metrics_contents = get_split_lines(atac_metrics_file, delimiter="\t")
+    atac_metrics_header = next(atac_metrics_contents)
+    atac_barcode_ind = atac_metrics_header.index("barcode")
+    reads_ind = atac_metrics_header.index("reads_unique")
+    tss_ind = atac_metrics_header.index("tss_enrichment")
     tss = []
     frags = []
     atac_barcodes = []
     # remove cells that have fewer than 10 fragments
     for line in atac_metrics_contents:
-        if int(line[6])/2 >= remove_low_yielding_cells:
-            tss.append(float(line[4]))
-            frags.append(int(line[6])/2)
-            atac_barcodes.append(line[0])
+        if int(reads_ind)/2 >= remove_low_yielding_cells:
+            tss.append(float(tss_ind))
+            frags.append(int(reads_ind)/2)
+            atac_barcodes.append(atac_barcode_ind)
     atac_metrics = dict(zip(atac_barcodes, zip(tss, frags)))
 
     # merge metrics by barcodes
     metrics = merge_dicts(rna_metrics, atac_metrics)
-    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["umis","genes","tss","frags"])
+    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["unique_umi","genes_final","tss","frags"])
 
     return(df)
 
 def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
-    pass_umis = df["umis"] >= min_umis
-    pass_genes = df["genes"] >= min_genes
+    pass_umis = df["unique_umi"] >= min_umis
+    pass_genes = df["genes_final"] >= min_genes
     pass_tss = df["tss"] >= min_tss
     pass_frags = df["frags"] >= min_frags
 
@@ -104,10 +114,10 @@ def label_func(breaks):
 def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
     # get max x and y coords to set plot limits
     max_x = max(df["frags"])
-    max_y = max(df["umis"])
+    max_y = max(df["unique_umi"])
     xy_lim = round_to_power_10(max(max_x, max_y))
 
-    plot = (ggplot(df, aes("frags", "umis", color="QC_count"))
+    plot = (ggplot(df, aes("frags", "unique_umi", color="QC_count"))
              + geom_point(size=0.5)
              + labs(title = f"Joint Cell Calling ({pkr})",
                     caption = f"ATAC cutoffs: TSS ≥ {min_tss}, frags ≥ {min_frags}. RNA cutoffs: UMIs ≥ {min_umis}, genes ≥ {min_genes}",

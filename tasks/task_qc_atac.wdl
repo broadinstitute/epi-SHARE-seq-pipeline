@@ -14,15 +14,10 @@ task qc_atac {
         # This function takes in input the raw and filtered bams
         # and compute some alignment metrics along with the TSS
         # enrichment plot.
-        File? raw_bam
-        File? raw_bam_index
-        File? filtered_bam
-        File? filtered_bam_index
         File? wdup_bam
         File? wdup_bam_index
         File? fragments
         File? fragments_index
-        File? queryname_final_bam
         File? mito_metrics_bulk # From filter step
         File? mito_metrics_barcode # From filter step
         File? peaks
@@ -39,12 +34,11 @@ task qc_atac {
         Int? cpus = 8
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
-        String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_qc_atac"
-        #String docker_image = "mshriver01/share_task_qc_atac"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(raw_bam, "G") + size(filtered_bam, "G") + size(queryname_final_bam, "G")
+    Float input_file_size_gb = size(wdup_bam, "G") + size(fragments, "G")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 24.0 + memory_factor * input_file_size_gb
@@ -71,7 +65,6 @@ task qc_atac {
     Float picard_java_heap_factor = 0.9
     Int picard_java_memory = round(picard_java_heap_factor * mem_gb)
 
-    String stats_log = '${default="share-seq" prefix}.atac.qc.stats.${genome_name}.log.txt'
     String duplicate_stats = '${default="share-seq" prefix}.atac.qc.duplicate.stats.${genome_name}.tsv'
     # pdf string needed as required input to Picard CollectInsertSizeMetrics
     String hist_log_pdf = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.pdf'
@@ -79,11 +72,6 @@ task qc_atac {
     String hist_log = '${default="share-seq" prefix}.atac.qc.hist.${genome_name}.log.txt'
     String tss_pileup_prefix = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log'
     String tss_pileup_out = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log.png'
-    String samstats_raw_log = "${prefix}.atac.qc.${genome_name}.samstats.raw.log.txt"
-    String samstats_raw_out = "${prefix}.atac.qc.${genome_name}.samstats.raw.txt"
-    String samstats_filtered_log = "${prefix}.atac.qc.${genome_name}.samstats.filtered.log.txt"
-    String samstats_filtered_out = "${prefix}.atac.qc.${genome_name}.samstats.filtered.txt"
-    String pbc_stats = "${prefix}.atac.qc.${genome_name}.pbcstats.log"
     String final_barcode_metadata = '${default="share-seq" prefix}.atac.qc.${genome_name}.metadata.tsv'
     String fragment_barcode_rank_plot = "${default="share-seq" prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png"
 
@@ -101,29 +89,10 @@ task qc_atac {
 
         cp ~{mito_metrics_barcode} mito_metrics
 
-        ln -s ~{raw_bam} in.raw.bam
-        ln -s ~{raw_bam_index} in.raw.bam.bai
-        ln -s ~{filtered_bam} in.filtered.bam
-        ln -s ~{filtered_bam_index} in.filtered.bam.bai
         ln -s ~{wdup_bam} in.wdup.bam
         ln -s ~{wdup_bam_index} in.wdup.bam.bai
         ln -s ~{fragments} in.fragments.tsv.gz
         ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
-
-        # samstats raw
-        # output of bowtie2
-        echo '------ SKIPPING: SAMstats for raw bam ------' 1>&2
-        #time sambamba view -t ~{cpus} in.raw.bam | SAMstats --sorted_sam_file - --outf ~{samstats_raw_out} > ~{samstats_raw_log}
-
-        # SAMstat final filtered file
-        # final bam
-        echo '------ SKIPPING: SAMstats for final bam ------' 1>&2
-        #time sambamba view -t ~{cpus}  in.filtered.bam |  SAMstats --sorted_sam_file - --outf ~{samstats_filtered_out}  > ~{samstats_filtered_log}
-
-        # library complexity
-        # queryname_final_bam from filter
-        echo '------ START: Compute library complexity ------' 1>&2
-        time sambamba view -t ~{cpus} ~{queryname_final_bam} | python3 $(which pbc_stats.py) ~{pbc_stats}
 
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2
@@ -163,25 +132,12 @@ task qc_atac {
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             in.fragments.tsv.gz
 
-        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Raw" > ~{stats_log}
-        echo '------ START: Samtools idxstats on raw ------' 1>&2
-        time samtools idxstats -@ ~{cpus} in.raw.bam >> ~{stats_log}
-
-        echo -e "Chromosome\tLength\tProperPairs\tBadPairs:Filtered" >> ~{stats_log}
-        echo '------ START: Samtools idxstats on final ------' 1>&2
-        time samtools idxstats -@ ~{cpus} in.filtered.bam >> ~{stats_log}
-
-        echo '' > ~{hist_log}
-        echo '------ START: Picard CollectInsertSizeMetrics ------' 1>&2
-        time java -Xmx~{picard_java_memory}G -jar $(which picard.jar) CollectInsertSizeMetrics \
-            VALIDATION_STRINGENCY=SILENT \
-            I=in.raw.bam \
-            O=~{hist_log} \
-            H=~{hist_log_pdf} \
-            W=1000  2>> picard_run.log
+        echo "insert_size" > ~{hist_log}
+        echo '------ START: Getting fragment sizes ------' 1>&2
+        time awk '{print $3-$2}' <(zcat in.fragments.tsv.gz ) | sort --parallel 4 -n | uniq -c | awk -v OFS="\t" '{print $2,$1}' >> ~{hist_log}
 
         # Insert size plot bulk
-        echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
+        echo '------ START: Generating insertions plot ------' 1>&2
         time python3 $(which plot_insert_size_hist.py) ~{hist_log} ~{prefix} ~{hist_log_png}
 
         echo '------ START: Generate metadata ------' 1>&2
@@ -191,16 +147,12 @@ task qc_atac {
         awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_reads_promoter","pct_reads_peaks","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
 
         # Barcode rank plot
-        echo '------ START: Generate barcod rank plot ------' 1>&2
+        echo '------ START: Generate barcode rank plot ------' 1>&2
         time Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_cutoff} ~{fragment_barcode_rank_plot}
     >>>
 
     output {
-        File? atac_qc_samstats_raw = samstats_raw_out
-        File? atac_qc_samstats_filtered = samstats_filtered_out
-        File atac_qc_pbc_stats = pbc_stats
 
-        File atac_qc_final_stats = stats_log
         File atac_qc_final_hist_png = hist_log_png
         File atac_qc_final_hist = hist_log
 
@@ -224,22 +176,11 @@ task qc_atac {
         cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
-        maxRetries: 1
+        maxRetries: 0
         memory: "${mem_gb} GB"
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {
-        raw_bam: {
-                description: 'Unfiltered bam',
-                help: 'Not filtered alignment bam file.',
-                example: 'aligned.hg38.bam'
-            }
-        raw_bam: {
-                description: 'Filtered bam',
-                help: 'Filtered alignment bam file. Typically, no duplicates and quality filtered.',
-                example: 'aligned.hg38.rmdup.filtered.bam'
-            }
         tss: {
                 description: 'TSS bed file',
                 help: 'List of TSS in bed format used for the enrichment plot.',

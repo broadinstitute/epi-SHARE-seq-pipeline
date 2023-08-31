@@ -58,9 +58,9 @@ def count_fragments_in_promoter(tabix_filename,
     promoter_size = flank * 2
     counts_dict_bulk = np.zeros(promoter_size)
     # To count the number of reads in the promoter region.
-    fragments_in_promoter_counter = defaultdict(set)
-    reads_in_tss_counter = defaultdict(set)
-    reads_in_promoter_counter = defaultdict(set)
+    fragments_in_promoter_counter = defaultdict(int)
+    reads_in_tss_counter = defaultdict(int)
+    reads_in_promoter_counter = defaultdict(int)
 
     # 100(flank)signal TSS +/- 50(101)flank(100) = 301
     # Follwoing ArchR heuristic.
@@ -101,7 +101,7 @@ def count_fragments_in_promoter(tabix_filename,
                 fragment_length = fragment_end - fragment_start
 
                 # Increment the counter for the specific barcode.
-                fragments_in_promoter_counter[barcode].add(fragment_id)
+                fragments_in_promoter_counter[barcode] += 1
 
                 # Update the array with the counts around the promoter.
                 # I need 'start' and 'end' to create a unique id for the reads and I can count
@@ -181,12 +181,12 @@ def _add_read_to_dictionary(fragment_counter,
 
         # Finally update the dictionary
         fragment_counter[index] += weight # bulk tss enrichment
-        reads_in_promoter[barcode].add(fragment_id+end)
+        reads_in_promoter[barcode] += 1
 
         if add_count_to_barcode:
             fragment_counter_barcodes[barcode][index_reduced] += weight # per barcode tss enrichment
         if add_count_to_barcode_tss:
-            reads_in_tss[barcode].add(fragment_id)
+            reads_in_tss[barcode] += 1
     return
 
 def plot_tss_enrichment(raw_signal, smoothed_signal, out_file, tss_vals):
@@ -282,10 +282,9 @@ if __name__ == '__main__':
         print(f"barcode\tfragments_promoter\treads_tss\treads_promoter\ttss_enrichment\treads_tss_total", file=out_file)
         for barcode, fragments_in_promoter in stats.items():
             tss_enrichment,reads_sum = compute_tss_enrichment_barcode(barcode_counts[barcode])
-            print(f"{barcode}\t{len(fragments_in_promoter)}\t{len(reads_in_tss[barcode])}\t{len(reads_in_promoter[barcode])}\t{tss_enrichment}\t{reads_sum}", file=out_file)
+            print(f"{barcode}\t{fragments_in_promoter}\t{reads_in_tss[barcode]}\t{reads_in_promoter[barcode]}\t{tss_enrichment}\t{reads_sum}", file=out_file)
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:
         #this is max tss value
         tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp, args.tss_vals)
         print(f"tss_enrichment\n{tss_score_bulk}", file=out_file)
-
