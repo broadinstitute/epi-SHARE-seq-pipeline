@@ -10,8 +10,6 @@ RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-s
 ENV R_LIBS_USER=/usr/local/lib/R
 ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
- RUN apt-get update -qq &&     apt-get install -y -qq --no-install-recommends    binutils     gtk-doc-tools     libssl-dev     libcairo2-dev     libcurl4-openssl-dev     libfreetype6-dev     libfribidi-dev     libgsl-dev     libharfbuzz-dev     libhdf5-dev     libjpeg-dev     libmpfr-dev     libpng-dev     libssl-dev     libtiff5-dev     libxml2-dev     libxt-dev     libgeos-dev     meson     pkg-config     python3     python3-pip
-
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
     binutils \
