@@ -11,13 +11,12 @@ ENV R_LIBS_USER=/usr/local/lib/R
 ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
 RUN apt-get update -qq && \
-    apt-get install -y -qq --no-install-recommends\
+    apt-get install -y --no-install-recommends \
     binutils \
     gtk-doc-tools \
-    libssl-dev \
     libcairo2-dev \
     libcurl4-openssl-dev \
-    libfreetype6-dev \
+    libfreetype-dev \
     libfribidi-dev \
     libgsl-dev \
     libharfbuzz-dev \
@@ -29,11 +28,12 @@ RUN apt-get update -qq && \
     libtiff5-dev \
     libxml2-dev \
     libxt-dev \
+    libmagick++-dev \
     libgeos-dev \
     meson \
-    pkg-config \
     python3 \
-    python3-pip
+    python3-pip && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('dplyr','patchwork','ggplot2','ggrepel','reshape2','circlize','networkD3','GGally','igraph','network','foreach','iterators','hdf5r','ggrastr','BiocManager','remotes','pbmcapply','doSNOW','Rmpfr', 'glue','magrittr','pillar','RcppArmadillo','reticulate','rlang','yaml','rpart','IRkernel','data.table', 'tidyft','qlcMatrix','logr'))"
 
