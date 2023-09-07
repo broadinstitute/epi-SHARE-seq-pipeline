@@ -3,21 +3,22 @@
 # Based on Debian slim
 ############################################################
 
-FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79 as builder
+FROM r-base@sha256:fff003a52d076e963396876b83cfa88c4f40a8bc27e341339cd3cc0236c1db79
 
 RUN echo "options(repos = 'https://cloud.r-project.org')" > $(R --no-echo --no-save -e "cat(Sys.getenv('R_HOME'))")/etc/Rprofile.site
 
 ENV R_LIBS_USER=/usr/local/lib/R
 ENV RETICULATE_MINICONDA_ENABLED=FALSE
 
+ RUN apt-get update -qq &&     apt-get install -y -qq --no-install-recommends    binutils     gtk-doc-tools     libssl-dev     libcairo2-dev     libcurl4-openssl-dev     libfreetype6-dev     libfribidi-dev     libgsl-dev     libharfbuzz-dev     libhdf5-dev     libjpeg-dev     libmpfr-dev     libpng-dev     libssl-dev     libtiff5-dev     libxml2-dev     libxt-dev     libgeos-dev     meson     pkg-config     python3     python3-pip
+
 RUN apt-get update -qq && \
-    apt-get install -y -qq --no-install-recommends\
+    apt-get install -y --no-install-recommends\
     binutils \
     gtk-doc-tools \
-    libssl-dev \
     libcairo2-dev \
     libcurl4-openssl-dev \
-    libfreetype6-dev \
+    libfreetype-dev \
     libfribidi-dev \
     libgsl-dev \
     libharfbuzz-dev \
@@ -29,11 +30,12 @@ RUN apt-get update -qq && \
     libtiff5-dev \
     libxml2-dev \
     libxt-dev \
+    libmagick++-dev \
     libgeos-dev \
     meson \
-    pkg-config \
     python3 \
-    python3-pip
+    python3-pip && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('dplyr','patchwork','ggplot2','ggrepel','reshape2','circlize','networkD3','GGally','igraph','network','foreach','iterators','hdf5r','ggrastr','BiocManager','remotes','pbmcapply','doSNOW','Rmpfr', 'glue','magrittr','pillar','RcppArmadillo','reticulate','rlang','yaml','rpart','IRkernel','data.table', 'tidyft','qlcMatrix','logr'))"
 
