@@ -96,6 +96,6 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
-             - merge-pkr
+             - dev
          tags:
              - /.*/
