@@ -66,9 +66,6 @@ task html_report {
         echo "atac_feature_reads, "~{atac_feature_reads} >> csv_in.txt
         echo "atac_duplicate_reads, " ~{atac_duplicate_reads} >> csv_in.txt
         echo "atac_percent_duplicates, " ~{atac_percent_duplicates} >> csv_in.txt
-        echo "atac_nrf, " ~{atac_nrf} >> csv_in.txt
-        echo "atac_pbc1, " ~{atac_pbc1} >> csv_in.txt
-        echo "atac_pbc2, " ~{atac_pbc2} >> csv_in.txt
         echo "rna_total_reads, "~{rna_total_reads} >> csv_in.txt
         echo "rna_aligned_uniquely, " ~{rna_aligned_uniquely} >> csv_in.txt
         echo "rna_aligned_multimap, " ~{rna_aligned_multimap} >> csv_in.txt
