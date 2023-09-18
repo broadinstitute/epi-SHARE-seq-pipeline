@@ -206,12 +206,11 @@ workflow share {
 
                 #other values for the csv report 
                 joint_qc_vals = joint_qc.joint_qc_stats,
-                archr_vals = atac.share_atac_archr_numbers
+                atac_archr_vals = atac.atac_archr_numbers,
+                atac_tss_vals = atac.atac_tss_outfile
+                
        }
     
-
-    
-
     }
 
     output{

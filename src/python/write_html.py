@@ -10,7 +10,7 @@ import io
 import os.path
 import csv
 
-def main(output_file_name, image_file_list, log_file_list, output_csv_name, summary_stats_txt, joint_qc_vals_txt, archr_vals_txt, input_file_name=None):
+def main(output_file_name, image_file_list, log_file_list, output_csv_name, summary_stats_txt, qc_vals):
     """
     Write to the input file
     Image file list is list of png images
@@ -30,13 +30,13 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
             name = os.path.basename(image)
             idx = name.index('.') + 1
             name = name[idx:]
-            if "joint" in name:
-                joint_images.append(image)
+            if "atac" in name:
+                atac_images.append(image)
             elif "rna" in name:
                 rna_images.append(image)
             else:
-                atac_images.append(image)
-    
+                joint_images.append(image)
+                
     # function takes a list of pngs, encodes them in base64, and writes them in 
     # image format to an output file at a standard size
     def write_pngs(images):
@@ -289,8 +289,8 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
 
     #start csv output only
     #write stats from qc to output csv file
-    print("start of joint qc vals text loop")
-    with open (joint_qc_vals_txt) as fname:
+    print("start of qc vals text loop")
+    with open(qc_vals) as fname:
         stats = fname.read().splitlines()
     for stat in stats:
         print("stat is " + stat)
@@ -301,18 +301,6 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         csv_writer.writerow([name, stat])
     #fname.close()
     
-    #write stats from archr to output csv file
-    print("print archr vals text loop")
-    with open (archr_vals_txt) as fname:
-        stats = fname.read().splitlines()
-    for stat in stats:
-        print("stat is " + stat)
-        #csv_output_file.write(stat + '\n')
-        name_and_field = stat.split(',')
-        name = name_and_field[0]
-        stat = name_and_field[1]
-        csv_writer.writerow([name, stat])
-    #fname.close()
 
     output_file.close()
     #csv_output_file.close()
@@ -332,12 +320,9 @@ if __name__ == '__main__':
                        help='csv file to write values to')
     group.add_argument('summary_stats_txt',
                        help='text file containing names and values of summary stats')
-    group.add_argument('joint_qc_vals_txt',
-                       help='file containing names and values of stats from joint qc ')
-    group.add_argument('archr_vals_txt',
-                       help='file containing names and values of stats from archr')
-    group.add_argument('--input_file_name',
-                       help='optional file with html text to add at top of file', nargs='?') 
+    group.add_argument('qc_vals',
+                       help='file containing names and values of stats')
+     
     args = parser.parse_args()
-    main(args.output_file_name, args.image_file_list, args.log_file_list, args.output_csv_name, args.summary_stats_txt, args.joint_qc_vals_txt, args.archr_vals_txt, args.input_file_name)
+    main(args.output_file_name, args.image_file_list, args.log_file_list, args.output_csv_name, args.summary_stats_txt, args.qc_vals)
 

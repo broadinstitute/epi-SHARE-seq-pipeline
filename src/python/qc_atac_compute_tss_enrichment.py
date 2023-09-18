@@ -189,7 +189,7 @@ def _add_read_to_dictionary(fragment_counter,
             reads_in_tss[barcode] += 1
     return
 
-def plot_tss_enrichment(raw_signal, smoothed_signal, out_file, tss_vals):
+def plot_tss_enrichment(raw_signal, smoothed_signal, out_file):
     fig=plt.figure(figsize=(8.0, 5.0))
     plt.plot(raw_signal,'k.')
     plt.plot(smoothed_signal,'r')
@@ -198,17 +198,6 @@ def plot_tss_enrichment(raw_signal, smoothed_signal, out_file, tss_vals):
     plt.xticks([0, 2000, 4000], ['-2000', 'TSS', '+2000'])
     fig.savefig(out_file)
     plt.close(fig)
-    #write the max value of the raw and smooth signal in name, value format
-    #to the tss vals file 
-    file = open(tss_vals, 'w')
-    raw_signal_max = str(raw_signal.max())
-    smooth_signal_max = str(smoothed_signal.max())
-    raw_output = "tss_raw_max, " + raw_signal_max + "\n"
-    smooth_output = "tss_smooth_max " + smooth_signal_max + "\n"
-    file.write(raw_output)
-    file.write(smooth_output)
-    plt.close(fig)
-
 
 def compute_tss_enrichment(array_counts, window_size, png_file, tss_vals):
     size = len(array_counts)
@@ -220,6 +209,17 @@ def compute_tss_enrichment(array_counts, window_size, png_file, tss_vals):
     smoothed_signal = np.convolve(array_counts, np.ones(window_size),'same')/window_size/normalization_factor
 
     plot_tss_enrichment(raw_signal, smoothed_signal, png_file, tss_vals)
+    
+    #write the max value of the raw and smooth signal in name, value format
+    #to the tss vals file 
+    tss_file = open(tss_vals, 'w')
+    raw_signal_max = str(raw_signal.max())
+    smooth_signal_max = str(smoothed_signal.max())
+    raw_output = "tss_raw_max, " + raw_signal_max + "\n"
+    smooth_output = "tss_smooth_max " + smooth_signal_max + "\n"
+    tss_file.write(raw_output)
+    tss_file.write(smooth_output)
+    tss_file.close()
 
     return max(smoothed_signal)
 

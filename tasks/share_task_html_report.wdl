@@ -39,9 +39,10 @@ task html_report {
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
-        ##values from tasks
+        ## Outputs from tasks
         File? joint_qc_vals
-        File? archr_vals
+        File? atac_archr_vals
+        File? atac_tss_vals
 
         String docker_image = 'mshriver01/share_task_html_report'
 
@@ -57,23 +58,25 @@ task html_report {
 
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
-
-        echo "start_file " > output.txt        
         
-        echo "atac_total_reads, " ~{atac_total_reads} > csv_in.txt
-        echo "atac_aligned_uniquely, " ~{atac_aligned_uniquely} >> csv_in.txt
-        echo "atac_unaligned, " ~{atac_unaligned} >> csv_in.txt
-        echo "atac_feature_reads, "~{atac_feature_reads} >> csv_in.txt
-        echo "atac_duplicate_reads, " ~{atac_duplicate_reads} >> csv_in.txt
-        echo "atac_percent_duplicates, " ~{atac_percent_duplicates} >> csv_in.txt
-        echo "rna_total_reads, "~{rna_total_reads} >> csv_in.txt
-        echo "rna_aligned_uniquely, " ~{rna_aligned_uniquely} >> csv_in.txt
-        echo "rna_aligned_multimap, " ~{rna_aligned_multimap} >> csv_in.txt
-        echo "rna_unaligned, " ~{rna_unaligned} >> csv_in.txt
-        echo "rna_feature_reads, " ~{rna_feature_reads} >> csv_in.txt
-        echo "rna_duplicate_reads, " ~{rna_duplicate_reads} >> csv_in.txt
+        echo "atac_total_reads, " ~{atac_total_reads} > summary_stats.txt
+        echo "atac_aligned_uniquely, " ~{atac_aligned_uniquely} >> summary_stats.txt
+        echo "atac_unaligned, " ~{atac_unaligned} >> summary_stats.txt
+        echo "atac_feature_reads, "~{atac_feature_reads} >> summary_stats.txt
+        echo "atac_duplicate_reads, " ~{atac_duplicate_reads} >> summary_stats.txt
+        echo "atac_percent_duplicates, " ~{atac_percent_duplicates} >> summary_stats.txt
+        echo "rna_total_reads, "~{rna_total_reads} >> summary_stats.txt
+        echo "rna_aligned_uniquely, " ~{rna_aligned_uniquely} >> summary_stats.txt
+        echo "rna_aligned_multimap, " ~{rna_aligned_multimap} >> summary_stats.txt
+        echo "rna_unaligned, " ~{rna_unaligned} >> summary_stats.txt
+        echo "rna_feature_reads, " ~{rna_feature_reads} >> summary_stats.txt
+        echo "rna_duplicate_reads, " ~{rna_duplicate_reads} >> summary_stats.txt
         
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} csv_in.txt ~{joint_qc_vals} ~{archr_vals} --input_file_name output.txt
+        cat ~{joint_qc_vals} >> qc_stats.txt
+        cat ~{atac_archr_vals} >> qc_stats.txt
+        cat ~{atac_tss_vals} >> qc_stats.txt
+        
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} summary_stats.txt qc_csv.csv
     >>>
     output {
         File html_report_file = "~{output_file}"
@@ -81,7 +84,6 @@ task html_report {
     }
 
     runtime {
-        #docker: 'nchernia/share_task_html_report:14'
         docker: "${docker_image}"
     }
 }

@@ -103,7 +103,7 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
 
     df["QC_count"] = [f"{outcome} ({outcome_counts[outcome]})" for outcome in df["QC"]]
 
-    return(df)
+    return(df, outcome_counts)
 
 def round_to_power_10(x):
     return(10**np.ceil(np.log10(x)))
@@ -144,62 +144,34 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 #this function gets as parameters cutoffs and a file containing qc infromation, 
 #and writes those cuttoffs and qc data to a text file so they can be used in the
 #html and csv report
-def write_top_level_txt(input_file, output_file, min_tss, min_frags, min_umis, min_genes): 
-    """write the counts of atac, rna, both, and neither to a text file so that they can be 
+def write_top_level_txt(metrics_df, outcome_counts, output_file, min_tss, min_frags, min_umis, min_genes): 
+    """Write the QC metrics to a text file so that they can be 
        outputs of the pipeline"""
-
-
-    #open file that has the values for the reads of atac, rna, both, and neither
-    data = pd.read_csv(input_file)
     
-    #get counts and cast to strings so they can be written to the file
-    #copy whats in line 92 here
-    neither_count = get_count_of_type(data, 'neither')
-    neither_count_str = "qc_neither_atac_nor_rna, " + str(neither_count) + '\n'
-    both_count = get_count_of_type(data, 'both')
-    both_count_str = "qc_atac_and_rna, " + str(both_count) + '\n'
-    rna_count = get_count_of_type(data, 'RNA only')
-    rna_count_str = "qc_rna_count, " + str(rna_count) + '\n'
-    atac_count = get_count_of_type(data, 'ATAC only')
-    atac_count_str = "qc_atac_count, " + str(atac_count) + '\n'
+    neither_count_str = "qc_neither, " + str(outcome_counts["neither"]) + '\n'
+    both_count_str = "qc_both, " + str(outcome_counts["both"]) + '\n'
+    rna_only_count_str = "qc_rna_only, " + str(outcome_counts["RNA only"]) + '\n'
+    atac_only_count_str = "qc_atac_only, " + str(outcome_counts["ATAC only"]) + '\n'
     
     #cast passed in numbers for thresholds to strings so they can be writen 
     #to the file
     min_tss_str = "qc_min_tss, " + str(min_tss) + '\n'
     min_frags_str = "qc_min_frags, " + str(min_frags) + '\n'
     min_umis_str = "qc_min_umis, " + str(min_umis) + '\n'
-    min_genes_str = "qc_min_genes_, " + str(min_genes) 
+    min_genes_str = "qc_min_genes, " + str(min_genes) 
     
     #open the specified output file and write all the values
     output_file = open(output_file, 'w')
     output_file.write(neither_count_str)
     output_file.write(both_count_str)
-    output_file.write(rna_count_str)
-    output_file.write(atac_count_str)
+    output_file.write(rna_only_count_str)
+    output_file.write(atac_only_count_str)
     output_file.write(min_tss_str)
     output_file.write(min_frags_str)
     output_file.write(min_umis_str)
     output_file.write(min_genes_str)
-
-
-def get_count_of_type(dataframe, classifier):
-    """extract the count information from the QC column for a given category (both, neither, rna only, atac only)"""
     
-    data_one_kind = dataframe.loc[dataframe['QC'] == classifier]
-    #return with the value 0 if QC column is never equal to the specified
-    #classifier
-    if data_one_kind.empty:
-        return 0
-    
-    #extract number contents of QC_count field of the first entry (QC count 
-    # should be the same for any of the entries in the dataframe)
-    field = data_one_kind.at[data_one_kind.index[1], 'QC_count']
-    count = ""
-    # extract the digits from other characters in the string
-    for char in field: 
-        if char.isdigit():
-            count = count + char
-    return int(count)
+    output_file.close()
 
 
 def main():
@@ -226,22 +198,21 @@ def main():
 
     # QC cells based on inputted cutoffs
     logging.info("QCing cells\n")
-    metrics_df = qc_cells(metrics_df, min_umis, min_genes, min_tss, min_frags)
+    metrics_df, outcome_counts = qc_cells(metrics_df, min_umis, min_genes, min_tss, min_frags)
 
     # generate plot
     logging.info("Generating joint cell calling plot\n")
     plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file)
-
-    
+ 
     # save dataframe
-    logging.info("Saving dataframe as csv\n")
+    logging.info("Saving barcode metadata as csv\n")
     metrics_df.to_csv(barcode_metadata_file)
-    logging.info("All done!")
-
+    
     # write the stats for the top level into a csv, containd joint qc numbers
-    write_top_level_txt(barcode_metadata_file, qc_summary_data, min_tss, min_frags, min_umis, min_genes)
-
-
+    logging.info("Saving QC metrics as csv to \n")
+    write_top_level_txt(metrics_df, outcome_counts, qc_summary_data, min_tss, min_frags, min_umis, min_genes)
+    
+    logging.info("All done!")
 
 if __name__ == "__main__":
     main()
