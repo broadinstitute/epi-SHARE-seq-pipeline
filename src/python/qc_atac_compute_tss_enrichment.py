@@ -208,7 +208,7 @@ def compute_tss_enrichment(array_counts, window_size, png_file, tss_vals):
     # Smooth using a window
     smoothed_signal = np.convolve(array_counts, np.ones(window_size),'same')/window_size/normalization_factor
 
-    plot_tss_enrichment(raw_signal, smoothed_signal, png_file, tss_vals)
+    plot_tss_enrichment(raw_signal, smoothed_signal, png_file)
     
     #write the max value of the raw and smooth signal in name, value format
     #to the tss vals file 
