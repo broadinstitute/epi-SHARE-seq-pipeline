@@ -23,7 +23,7 @@ RUN apt-get update -qq && \
     gtk-doc-tools \
     libcairo2-dev \
     libcurl4-openssl-dev \
-    libfreetype6-dev \
+    libfreetype-dev \
     libfribidi-dev \
     libgsl-dev \
     libharfbuzz-dev \
