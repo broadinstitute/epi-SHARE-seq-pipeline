@@ -1,32 +1,37 @@
 #!/usr/bin/env python3
 
 """
-This script takes in a file containing fragment sizes,
-and generates an insert size histogram as a png.
+This script takes in the Picard CollectInsertSizeMetrics histogram txt file output,
+and generates the histogram as a png.
 """
 
 import argparse
 import pandas as pd
-from collections import defaultdict
 from plotnine import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Plot insert size histogram")
-    parser.add_argument("fragment_size_file", help="File containing fragment sizes")
-    parser.add_argument("prefix", help="Prefix for labelling output file")
-    parser.add_argument("out_file", help="Filename for output histogram png")
+    parser.add_argument("histogram_file", help="Histogram txt file name")
+    parser.add_argument("prefix", help="Prefix for plot title")
+    parser.add_argument("out_file", help="Name of output png file")
     
     return parser.parse_args()
 
-def get_hist_vals(fragment_size_file):
+def get_hist_vals(histogram_file):
     """Get dataframe of histogram values"""
-    fragment_size_counts = defaultdict(int)
-    with open(fragment_size_file, "r") as f:
+    with open(histogram_file, "r") as f:
+        begin_vals = False
+        insert_size = []
+        count = []
         for line in f:
-            fragment_size = int(line.rstrip())
-            fragment_size_counts[fragment_size] += 1
+            vals = line.rstrip().split(sep="\t")
+            if begin_vals and len(vals) == 2: # last line is blank
+                insert_size.append(int(vals[0]))
+                count.append(int(vals[1]))
+            elif vals[0] == "insert_size": # desired values occur after line beginning with "insert_size"
+                begin_vals = True
             
-    df = pd.DataFrame(fragment_size_counts.items(), columns=["insert_size","count"])
+    df = pd.DataFrame(list(zip(insert_size, count)), columns=["insert_size","count"])
     
     return(df)
 
@@ -46,14 +51,16 @@ def plot_hist(df, prefix, out_file):
     plot.save(filename = out_file, dpi=1000)
 
 def main():
+    print("Starting histogram plotting script")
     args = parse_arguments() 
-    fragment_size_file = getattr(args, "fragment_size_file")
+    histogram_file = getattr(args, "histogram_file")
     prefix = getattr(args, "prefix")
     out_file = getattr(args, "out_file")
     
-    df = get_hist_vals(fragment_size_file)
+    df = get_hist_vals(histogram_file)
     
     plot_hist(df, prefix, out_file)
+    print("Finished plotting")
 
 if __name__ == "__main__":
     main()    

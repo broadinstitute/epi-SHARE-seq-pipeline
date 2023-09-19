@@ -174,6 +174,16 @@ steps:
           '.' ]
   waitFor: ['-']
   timeout: 28800s
+  
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'task-make-track'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_make_track:$BRANCH_NAME',
+          '-f',
+          'dockerfiles/task_make_track.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
 
 # Docker Push
 
@@ -261,6 +271,11 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_atac_fragments:$BRANCH_NAME']
   waitFor: ['task-merge-atac-fragments']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_make_track:$BRANCH_NAME']
+  waitFor: ['task-make-track']
 
 timeout: 28800s
 options:
