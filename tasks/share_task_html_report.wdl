@@ -59,18 +59,18 @@ task html_report {
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
         
-        echo "atac_total_reads, " ~{atac_total_reads} > summary_stats.txt
-        echo "atac_aligned_uniquely, " ~{atac_aligned_uniquely} >> summary_stats.txt
-        echo "atac_unaligned, " ~{atac_unaligned} >> summary_stats.txt
-        echo "atac_feature_reads, "~{atac_feature_reads} >> summary_stats.txt
-        echo "atac_duplicate_reads, " ~{atac_duplicate_reads} >> summary_stats.txt
-        echo "atac_percent_duplicates, " ~{atac_percent_duplicates} >> summary_stats.txt
-        echo "rna_total_reads, "~{rna_total_reads} >> summary_stats.txt
-        echo "rna_aligned_uniquely, " ~{rna_aligned_uniquely} >> summary_stats.txt
-        echo "rna_aligned_multimap, " ~{rna_aligned_multimap} >> summary_stats.txt
-        echo "rna_unaligned, " ~{rna_unaligned} >> summary_stats.txt
-        echo "rna_feature_reads, " ~{rna_feature_reads} >> summary_stats.txt
-        echo "rna_duplicate_reads, " ~{rna_duplicate_reads} >> summary_stats.txt
+        echo "atac_total_reads," ~{atac_total_reads} > summary_stats.txt
+        echo "atac_aligned_uniquely," ~{atac_aligned_uniquely} >> summary_stats.txt
+        echo "atac_unaligned," ~{atac_unaligned} >> summary_stats.txt
+        echo "atac_feature_reads," ~{atac_feature_reads} >> summary_stats.txt
+        echo "atac_duplicate_reads," ~{atac_duplicate_reads} >> summary_stats.txt
+        echo "atac_percent_duplicates," ~{atac_percent_duplicates} >> summary_stats.txt
+        echo "rna_total_reads,"~{rna_total_reads} >> summary_stats.txt
+        echo "rna_aligned_uniquely," ~{rna_aligned_uniquely} >> summary_stats.txt
+        echo "rna_aligned_multimap," ~{rna_aligned_multimap} >> summary_stats.txt
+        echo "rna_unaligned," ~{rna_unaligned} >> summary_stats.txt
+        echo "rna_feature_reads," ~{rna_feature_reads} >> summary_stats.txt
+        echo "rna_duplicate_reads," ~{rna_duplicate_reads} >> summary_stats.txt
         
         cat ~{joint_qc_vals} >> qc_stats.txt
         cat ~{atac_archr_vals} >> qc_stats.txt

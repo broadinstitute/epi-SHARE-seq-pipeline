@@ -215,8 +215,8 @@ def compute_tss_enrichment(array_counts, window_size, png_file, tss_vals):
     tss_file = open(tss_vals, 'w')
     raw_signal_max = str(raw_signal.max())
     smooth_signal_max = str(smoothed_signal.max())
-    raw_output = "tss_raw_max, " + raw_signal_max + "\n"
-    smooth_output = "tss_smooth_max " + smooth_signal_max + "\n"
+    raw_output = "tss_raw_max," + raw_signal_max + "\n"
+    smooth_output = "tss_smooth_max," + smooth_signal_max + "\n"
     tss_file.write(raw_output)
     tss_file.write(smooth_output)
     tss_file.close()
