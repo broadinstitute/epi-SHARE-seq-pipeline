@@ -148,17 +148,17 @@ def write_top_level_txt(metrics_df, outcome_counts, output_file, min_tss, min_fr
     """Write the QC metrics to a text file so that they can be 
        outputs of the pipeline"""
     
-    neither_count_str = "qc_neither, " + str(outcome_counts["neither"]) + '\n'
-    both_count_str = "qc_both, " + str(outcome_counts["both"]) + '\n'
-    rna_only_count_str = "qc_rna_only, " + str(outcome_counts["RNA only"]) + '\n'
-    atac_only_count_str = "qc_atac_only, " + str(outcome_counts["ATAC only"]) + '\n'
+    neither_count_str = "qc_neither," + str(outcome_counts["neither"]) + '\n'
+    both_count_str = "qc_both," + str(outcome_counts["both"]) + '\n'
+    rna_only_count_str = "qc_rna_only," + str(outcome_counts["RNA only"]) + '\n'
+    atac_only_count_str = "qc_atac_only," + str(outcome_counts["ATAC only"]) + '\n'
     
     #cast passed in numbers for thresholds to strings so they can be writen 
     #to the file
-    min_tss_str = "qc_min_tss, " + str(min_tss) + '\n'
-    min_frags_str = "qc_min_frags, " + str(min_frags) + '\n'
-    min_umis_str = "qc_min_umis, " + str(min_umis) + '\n'
-    min_genes_str = "qc_min_genes, " + str(min_genes) 
+    min_tss_str = "qc_min_tss," + str(min_tss) + '\n'
+    min_frags_str = "qc_min_frags," + str(min_frags) + '\n'
+    min_umis_str = "qc_min_umis," + str(min_umis) + '\n'
+    min_genes_str = "qc_min_genes," + str(min_genes) 
     
     #open the specified output file and write all the values
     output_file = open(output_file, 'w')
@@ -170,6 +170,7 @@ def write_top_level_txt(metrics_df, outcome_counts, output_file, min_tss, min_fr
     output_file.write(min_frags_str)
     output_file.write(min_umis_str)
     output_file.write(min_genes_str)
+    output_file.write('\n')
     
     output_file.close()
 
