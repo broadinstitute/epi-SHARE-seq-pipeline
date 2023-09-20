@@ -76,7 +76,7 @@ task html_report {
         cat ~{atac_archr_vals} >> qc_stats.txt
         cat ~{atac_tss_vals} >> qc_stats.txt
         
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} summary_stats.txt qc_csv.csv
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} summary_stats.txt qc_stats.txt
     >>>
     output {
         File html_report_file = "~{output_file}"
