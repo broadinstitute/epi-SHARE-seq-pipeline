@@ -51,7 +51,8 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
             #csv_output_file.write(name + ', data:image/png;base64,"' + data_base64 + '\n')
             image_field = '<img id ="' + name + '" width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>'
             #csv_writer.writerow([name, image_field])
-            csv_writer.writerow([name, image_field])
+            f.write("%s,%s\n" % (name,image_field))
+            #csv_writer.writerow([name, image_field])
 
     
     #take a string representing a number, and return a string represenation of
@@ -178,8 +179,9 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         <input type="radio" name="tabs" id="tab5" />
         <label for="tab5">Log files </label>""")
     
-    csv_writer = csv.writer(open(output_csv_name, 'w'))
-    
+    #csv_writer = csv.writer(open(output_csv_name, 'w'))
+    f = open(output_csv_name, "w")
+        
     images = []
     joint_images = []
     rna_images = []
@@ -221,8 +223,8 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
             stat = name_and_field[1]
             summary_stats_labels.append(name)
             summary_stats_values.append(stat)
-            csv_writer.writerow([name, stat])
-            
+            #csv_writer.writerow([name, stat])
+            f.write("%s,%s\n" % (name,stat))
             #output_file.write(name + " " + stat + '\n')
     write_summary_table(summary_stats_labels, summary_stats_values, output_file)
     fname.close()
@@ -242,7 +244,8 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         output_file.write("<div id =" + log_name + ">" + log + "</div>")
         output_file.write("<br>")
         #csv_output_file.write(log_name + ", " + log + '\n')
-        csv_writer.writerow([log_name, log])
+        #csv_writer.writerow([log_name, log])
+        f.write("%s,%s\n" % (log_name,log))
     output_file.write("</div>")
     output_file.write("</div>")
     output_file.write('</body></html>')
@@ -298,11 +301,13 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
         name_and_field = stat.split(',')
         name = name_and_field[0]
         stat = name_and_field[1]
-        csv_writer.writerow([name, stat])
+        #csv_writer.writerow([name, stat])
+        f.write("%s,%s\n" % (name,stat))
     #fname.close()
     
 
     output_file.close()
+    f.close()
     #csv_output_file.close()
 
 if __name__ == '__main__':
