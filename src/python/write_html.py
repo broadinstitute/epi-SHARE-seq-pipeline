@@ -51,7 +51,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
             #csv_output_file.write(name + ', data:image/png;base64,"' + data_base64 + '\n')
             image_field = '<img id ="' + name + '" width="1000" src="data:image/png;base64,' + data_base64 + '" alt=' + os.path.basename(image)+ '><br>'
             #csv_writer.writerow([name, image_field])
-            csv_writer.writerow([name, data_base64])
+            csv_writer.writerow([name, image_field])
 
     
     #take a string representing a number, and return a string represenation of

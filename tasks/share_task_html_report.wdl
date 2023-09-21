@@ -77,6 +77,9 @@ task html_report {
         cat ~{atac_tss_vals} >> qc_stats.txt
         
         PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} summary_stats.txt qc_stats.txt
+        
+        echo 'PKR,~{prefix}\n' | cat - ~{output_csv_file} > temp && mv temp ~{output_csv_file} 
+
     >>>
     output {
         File html_report_file = "~{output_file}"
