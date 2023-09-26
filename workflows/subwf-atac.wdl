@@ -2,21 +2,19 @@ version 1.0
 
 # Import the tasks called by the pipeline
 import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
-import "../tasks/share_task_trim_fastqs_atac.wdl" as share_task_trim
-import "../tasks/share_task_bowtie2.wdl" as share_task_align
-import "../tasks/share_task_merge_bams.wdl" as share_task_merge_bams
-import "../tasks/share_task_filter_atac.wdl" as share_task_filter
+import "../tasks/task_trim_fastqs_atac.wdl" as share_task_trim
+import "../tasks/task_chromap.wdl" as task_align
 import "../tasks/task_qc_atac.wdl" as task_qc_atac
 import "../tasks/task_make_track.wdl" as task_make_track
-import "../tasks/share_task_log_atac.wdl" as share_task_log_atac
-import "../tasks/share_task_archr.wdl" as share_task_archr
+import "../tasks/share_task_log_atac.wdl" as task_log_atac
+import "../tasks/share_task_archr.wdl" as task_archr
 
 
 workflow wf_atac {
     meta {
-        version: 'v1'
-        author: 'Eugenio Mattei (emattei@broadinstitute.org) and Sai Ma @ Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard SHARE-Seq pipeline: Sub-workflow to process the ATAC portion of SHARE-seq libraries.'
+        version: 'rc-v2.0.0'
+        author: 'Eugenio Mattei (emattei@broadinstitute.org) @ Broad Institute of MIT and Harvard'
+        description: 'Broad Institute of MIT and Harvard combinomics pipeline: Sub-workflow to process the sc-ATAC libraries.'
     }
 
     input {
@@ -38,7 +36,7 @@ workflow wf_atac {
         # Correct-specific inputs
         Boolean correct_barcodes = true
         File whitelist
-        String? pkr
+        String? subpool
         # Runtime parameters
         Int? correct_cpus = 16
         Float? correct_disk_factor = 8.0
@@ -114,7 +112,7 @@ workflow wf_atac {
                     fastq_R2 = read_pair.right,
                     whitelist = whitelist,
                     sample_type = "ATAC",
-                    pkr = pkr,
+                    pkr = subpool,
                     prefix = prefix,
                     paired_rna = false,
                     cpus = correct_cpus,
