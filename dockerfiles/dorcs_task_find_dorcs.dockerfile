@@ -37,7 +37,7 @@ RUN apt-get update -qq && \
 
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('dplyr','patchwork','ggplot2','ggrepel','reshape2','circlize','networkD3','GGally','igraph','network','foreach','iterators','hdf5r','ggrastr','BiocManager','remotes','pbmcapply','doSNOW','Rmpfr', 'glue','magrittr','pillar','RcppArmadillo','reticulate','rlang','yaml','rpart','IRkernel','data.table', 'tidyft','qlcMatrix','logr'))"
 
-RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.1.1')"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.3.0')"
 
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('Biostrings','rtracklayer','GenomicRanges','motifmatchr','ComplexHeatmap','chromVAR'), update=T, ask=F)"
 
