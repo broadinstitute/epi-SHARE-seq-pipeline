@@ -90,6 +90,8 @@ task archr {
     String plots_zip_dir = '${plots_filepath}.zip'
     #String papermill_log_filename = 'papermill.logfile.txt'
 
+    #name of file to write numbers from archr to 
+    String archr_nums = 'archr_nums.txt'
 
     command {
 
@@ -114,6 +116,9 @@ task archr {
         -p heatmap_transpose ${heatmap_transpose} \
         -p heatmap_label_n ${heatmap_label_n} \
         -p heatmap_cutoff ${heatmap_cutoff}
+
+        echo "archr_min_frags," ${min_frags} >> ${archr_nums}
+        echo "archr_min_tss," ${min_tss} >> ${archr_nums}
     }
 
     output {
@@ -139,6 +144,9 @@ task archr {
         File? archr_filtered_obj = filtered_archr_rds
         File? archr_raw_matrix = raw_archr_h5
         File? archr_filtered_matrix = filtered_archr_h5
+
+        # file containing numbers from archr for pipeline output
+        File? archr_numbers = archr_nums
     }
 
     runtime {

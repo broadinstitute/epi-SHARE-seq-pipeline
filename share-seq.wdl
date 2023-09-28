@@ -179,6 +179,7 @@ workflow share {
     }
 
     if ( pipeline_modality != "no_align" ) {
+        
         call html_report.html_report as html_report {
             input:
                 prefix = prefix,
@@ -201,8 +202,15 @@ workflow share {
                 image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, rna.share_rna_umi_barcode_rank_plot, rna.share_rna_gene_barcode_rank_plot, rna.share_rna_gene_umi_scatter_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.share_atac_qc_barcode_rank_plot, atac.share_atac_qc_hist_plot, atac.share_atac_qc_tss_enrichment,  atac.share_atac_archr_raw_tss_enrichment, atac.share_atac_archr_filtered_tss_enrichment, atac.share_atac_archr_raw_fragment_size_plot, atac.share_atac_archr_filtered_fragment_size_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_cluster_plot, atac.share_atac_archr_umap_doublets, atac.share_atac_archr_umap_num_frags_plot, atac.share_atac_archr_umap_tss_score_plot, atac.share_atac_archr_umap_frip_plot,atac.share_atac_archr_gene_heatmap_plot, dorcs.j_plot],
 
                 ## Links to files and logs to append to end of html
-                log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log]
-        }
+                log_files = [rna.share_rna_alignment_log,  rna.share_task_starsolo_barcodes_stats, rna.share_task_starsolo_features_stats, rna.share_task_starsolo_summary_csv, rna.share_task_starsolo_umi_per_cell, rna.share_task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.share_atac_alignment_log, atac.share_atac_archr_notebook_log, dorcs.dorcs_notebook_log],
+
+                #other values for the csv report 
+                joint_qc_vals = joint_qc.joint_qc_stats,
+                atac_archr_vals = atac.atac_archr_numbers,
+                atac_tss_vals = atac.atac_tss_outfile
+                
+       }
+    
     }
 
     output{
@@ -244,6 +252,8 @@ workflow share {
 
         # Report
         File? html_summary = html_report.html_report_file
+        File? csv_summary = html_report.csv_summary_file
+
     }
 
 }

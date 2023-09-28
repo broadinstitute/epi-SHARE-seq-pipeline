@@ -9,6 +9,7 @@ workflows:
              - release
              - dev
              - merge-pkr
+             - michael-nums-output
          tags:
              - /.*/
 

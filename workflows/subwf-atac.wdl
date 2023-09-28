@@ -101,6 +101,7 @@ workflow wf_atac {
         Float? archr_disk_factor
         Float? archr_memory_factor 
         String? archr_docker_image
+
     }
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
@@ -308,5 +309,9 @@ workflow wf_atac {
         File? share_atac_archr_arrow = archr.archr_arrow
         File? share_atac_archr_obj = archr.archr_raw_obj
         File? share_atac_archr_plots_zip = archr.plots_zip
+
+        # values from tss for final pipeline output 
+        File? atac_tss_outfile = qc_atac.atac_qc_tss_outfile
+        File? atac_archr_numbers = archr.archr_numbers
     }
 }

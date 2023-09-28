@@ -199,7 +199,7 @@ def plot_tss_enrichment(raw_signal, smoothed_signal, out_file):
     fig.savefig(out_file)
     plt.close(fig)
 
-def compute_tss_enrichment(array_counts, window_size, png_file):
+def compute_tss_enrichment(array_counts, window_size, png_file, tss_vals):
     size = len(array_counts)
     # We want to normalize the plot using the signal in the first and last 200 bps.
     normalization_factor = np.mean(array_counts[np.r_[0:100, size-100-1:size]])
@@ -209,6 +209,17 @@ def compute_tss_enrichment(array_counts, window_size, png_file):
     smoothed_signal = np.convolve(array_counts, np.ones(window_size),'same')/window_size/normalization_factor
 
     plot_tss_enrichment(raw_signal, smoothed_signal, png_file)
+    
+    #write the max value of the raw and smooth signal in name, value format
+    #to the tss vals file 
+    tss_file = open(tss_vals, 'w')
+    raw_signal_max = str(raw_signal.max())
+    smooth_signal_max = str(smoothed_signal.max())
+    raw_output = "tss_raw_max," + raw_signal_max + "\n"
+    smooth_output = "tss_smooth_max," + smooth_signal_max + "\n"
+    tss_file.write(raw_output)
+    tss_file.write(smooth_output)
+    tss_file.close()
 
     return max(smoothed_signal)
 
@@ -240,6 +251,7 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--window", help= "Smoothing window size for plotting. (default= 20)", type= int, default= 20)
     parser.add_argument("--prefix", help = "Prefix for the metrics output file.")
     parser.add_argument("--tss", help= "TSS bed file")
+    parser.add_argument("--tss_vals", help="file to write values into needed for csv output")
 
     # Read arguments from command line
     args = parser.parse_args()
@@ -248,7 +260,7 @@ if __name__ == '__main__':
         prefix = args.prefix
     else:
         prefix = args.bam[:-4]
-
+    
     # It is extremely fast. Don't think we need parallel processing.
     #cpus = len(os.sched_getaffinity(0))/2
     # Using column chr, start, end and what user input contains the strand information.
@@ -273,5 +285,6 @@ if __name__ == '__main__':
             print(f"{barcode}\t{fragments_in_promoter}\t{reads_in_tss[barcode]}\t{reads_in_promoter[barcode]}\t{tss_enrichment}\t{reads_sum}", file=out_file)
 
     with open(f"{args.prefix}.tss_score_bulk.txt", "w") as out_file:
-        tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp)
+        #this is max tss value
+        tss_score_bulk = compute_tss_enrichment(bulk_counts, args.window, tss_enrichment_plot_fnp, args.tss_vals)
         print(f"tss_enrichment\n{tss_score_bulk}", file=out_file)

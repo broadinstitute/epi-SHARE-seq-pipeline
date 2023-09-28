@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument("min_tss", type=int, help="Cutoff for minimum TSS score")
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
     parser.add_argument("plot_file", help="Filename for plot png file")
+    parser.add_argument("qc_summary_data", help="text file that numbers for the final pipeline output are written to")
     parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
     parser.add_argument("pkr", help="PKR name", nargs='?', default="")
 
@@ -102,7 +103,7 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
 
     df["QC_count"] = [f"{outcome} ({outcome_counts[outcome]})" for outcome in df["QC"]]
 
-    return(df)
+    return(df, outcome_counts)
 
 def round_to_power_10(x):
     return(10**np.ceil(np.log10(x)))
@@ -140,6 +141,40 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
 
     plot.save(filename=plot_file, dpi=1000)
 
+#this function gets as parameters cutoffs and a file containing qc infromation, 
+#and writes those cuttoffs and qc data to a text file so they can be used in the
+#html and csv report
+def write_top_level_txt(metrics_df, outcome_counts, output_file, min_tss, min_frags, min_umis, min_genes): 
+    """Write the QC metrics to a text file so that they can be 
+       outputs of the pipeline"""
+    
+    neither_count_str = "qc_neither," + str(outcome_counts["neither"]) + '\n'
+    both_count_str = "qc_both," + str(outcome_counts["both"]) + '\n'
+    rna_only_count_str = "qc_rna_only," + str(outcome_counts["RNA only"]) + '\n'
+    atac_only_count_str = "qc_atac_only," + str(outcome_counts["ATAC only"]) + '\n'
+    
+    #cast passed in numbers for thresholds to strings so they can be writen 
+    #to the file
+    min_tss_str = "qc_min_tss," + str(min_tss) + '\n'
+    min_frags_str = "qc_min_frags," + str(min_frags) + '\n'
+    min_umis_str = "qc_min_umis," + str(min_umis) + '\n'
+    min_genes_str = "qc_min_genes," + str(min_genes) 
+    
+    #open the specified output file and write all the values
+    output_file = open(output_file, 'w')
+    output_file.write(neither_count_str)
+    output_file.write(both_count_str)
+    output_file.write(rna_only_count_str)
+    output_file.write(atac_only_count_str)
+    output_file.write(min_tss_str)
+    output_file.write(min_frags_str)
+    output_file.write(min_umis_str)
+    output_file.write(min_genes_str)
+    output_file.write('\n')
+    
+    output_file.close()
+
+
 def main():
     # create log file
     logging.basicConfig(filename="joint_cell_plotting.log", level=logging.INFO)
@@ -156,6 +191,7 @@ def main():
     min_tss = getattr(args, "min_tss")
     min_frags = getattr(args, "min_frags")
     plot_file = getattr(args, "plot_file")
+    qc_summary_data = getattr(args, "qc_summary_data")
 
     # read rna and atac files, get cell metrics
     logging.info("Getting metrics\n")
@@ -163,17 +199,21 @@ def main():
 
     # QC cells based on inputted cutoffs
     logging.info("QCing cells\n")
-    metrics_df = qc_cells(metrics_df, min_umis, min_genes, min_tss, min_frags)
+    metrics_df, outcome_counts = qc_cells(metrics_df, min_umis, min_genes, min_tss, min_frags)
 
     # generate plot
     logging.info("Generating joint cell calling plot\n")
     plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file)
-
+ 
     # save dataframe
-    logging.info("Saving dataframe as csv\n")
+    logging.info("Saving barcode metadata as csv\n")
     metrics_df.to_csv(barcode_metadata_file)
+    
+    # write the stats for the top level into a csv, containd joint qc numbers
+    logging.info("Saving QC metrics as csv to \n")
+    write_top_level_txt(metrics_df, outcome_counts, qc_summary_data, min_tss, min_frags, min_umis, min_genes)
+    
     logging.info("All done!")
-
 
 if __name__ == "__main__":
     main()
