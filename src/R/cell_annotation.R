@@ -80,7 +80,7 @@ query_data <- opt$query_data
 
 # Downsampling parameters
 downsampling <- as.logical(opt$downsampling)
-num_per_cell_type <- as.integer(opt$num_per_cell_type)
+num_per_cell_type <- opt$num_per_cell_type
 
 # Reference genome
 genome <- opt$genome
@@ -199,7 +199,6 @@ tryCatch(
         obj.query <- CreateSeuratObject(counts = counts, 
                                         assay = "RNA",
                                         meta.data = obj.query@meta.data) %>%
-                    obj.query %>%
                     NormalizeData(verbose = FALSE) %>%
                     FindVariableFeatures() %>%
                     ScaleData() %>%
