@@ -31,6 +31,10 @@ workflow wf_cell_annotation {
         # Query data
         File query_data
         
+        String? downsampling = "FALSE"
+        Int? num_per_cell_type = 100
+        
+        
         # Docker images
         String? docker_image="lzj1769/cell_annotation"
     
@@ -50,7 +54,9 @@ workflow wf_cell_annotation {
             prefix = prefix,
             docker_image = docker_image,
             disk_factor = disk_factor,
-            memory_factor = memory_factor
+            memory_factor = memory_factor,
+            downsampling = downsampling,
+            num_per_cell_type = num_per_cell_type,
     }
 
     output {
