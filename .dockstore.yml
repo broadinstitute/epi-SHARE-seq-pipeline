@@ -54,5 +54,6 @@ workflows:
              - main
              - dev
              - cell-annotation
+             - cell-annotation-seurat-v5
          tags:
              - /.*/
