@@ -7,6 +7,7 @@ import argparse
 import logging
 import cellxgene_census
 import scanpy as sc
+import numpy as np
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Download data from cellxgene server")
@@ -14,7 +15,13 @@ def parse_arguments():
                         help="Cellxgene dataset id to download.")
     parser.add_argument("--out", type=str, required=True,
                         help="Output filename", default="reference")
-    
+    parser.add_argument("--downsample", type=str, default='FALSE',
+                        help="Whether ot not down sample the data.")
+    parser.add_argument("--reference_label", type=str, default='cell_type',
+                        help="Category used to down sample the cells. Usually set to cell_type")
+    parser.add_argument("--num_cells", type=int, default=100,
+                        help="Number of cells per category after down sampling.")
+        
     return parser.parse_args()
 
 
@@ -37,6 +44,24 @@ def main():
     if not adata.raw:
         adata.raw = adata.copy()
         
+    if args.downsample == "TRUE":
+        logging.info("Down sampling data\n")
+        
+        rng = np.random.default_rng(seed=42)
+        counts = adata.obs[args.reference_label].value_counts()
+        
+        indices = []
+        for group in counts.index:
+            # no downsampling if there are too few cells
+            if counts[group] <= args.num_cells:
+                indices.append(adata.obs_names[adata.obs[args.reference_label]==group])
+            else:
+                indices.append(np.random.choice(adata.obs_names[adata.obs[args.reference_label]==group], 
+                                                size=num_cells, 
+                                                replace=False))
+        selection = np.hstack(indices)
+        adata = adata[selection].copy()
+
     adata.write_h5ad(f"{args.out}.h5ad")
     
     logging.info("All done!")

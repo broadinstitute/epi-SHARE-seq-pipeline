@@ -43,16 +43,6 @@ option_list = list(
                 help="Query data.", 
                 metavar="character"),
     
-    # downsampling parameters
-    make_option(c("--downsampling"), type="character", default="FALSE", 
-                help="Whether or not down sample the reference data. 
-                      Set it as true when the there are too many cells inrefence. Default: FALSE", 
-                metavar="character"),
-    
-    make_option(c("--num_cells", type="integer", default=5000,
-                 help="Number of cells after downsampling. Default: 5000"),
-                metavar = "number"),
-    
     # reference genome parameters
     make_option(c("--genome"), type="character", default="hg38", 
                 help="Which genome is used as reference. Currently available options: hg38; mm10. Default: hg38", 
@@ -79,10 +69,6 @@ reference_data_name <- opt$reference_data_name
 reference_label <- opt$reference_label
 query_data <- opt$query_data
 
-# Downsampling parameters
-downsampling <- as.logical(opt$downsampling)
-num_cells <- opt$num_cells
-
 # Reference genome
 genome <- opt$genome
 gene_id_to_symbol <- as.logical(opt$gene_id_to_symbol)
@@ -108,6 +94,7 @@ tryCatch(
         metadata <- as.data.frame(adata$obs)
         obj.ref <- CreateSeuratObject(counts = counts, assay = "RNA")
         obj.ref <- AddMetaData(obj.ref, metadata)
+        
         rm(counts)
         gc()
     },
@@ -158,11 +145,14 @@ if(gene_id_to_symbol){
         gene.id$Unique_SYMBOL <- make.unique(gene.id$SYMBOL, "")
 
         # API for Seurat v5
-        counts <- LayerData(obj.ref, layer = 'counts', assay = 'RNA', features=gene.id$GENEID)
+        counts <- LayerData(obj.ref, layer = 'counts', features=gene.id$GENEID)
         rownames(counts) <- gene.id$Unique_SYMBOL
 
         obj.ref <- CreateSeuratObject(counts = counts, 
                                       meta.data = obj.ref@meta.data)
+        
+        rm(counts)
+        gc()
         
         log_print("SUCCESSFUL: Converting gene id to symbol for reference data")
 
@@ -214,27 +204,6 @@ tryCatch(
     }
     
 )
-
-
-# Subset reference data
-if(downsampling){
-    tryCatch(){
-        log_print("# Down sampling reference data")
-        # 
-        obj.ref <- SketchData(object = obj.ref, 
-                             ncells = num_cells, 
-                             method = "LeverageScore", 
-                             sketched.assay = "sketch")
-        DefaultAssay(obj.ref) <- "sketch"
-    
-    },
-     error = function(cond) {
-        log_print("ERROR: Down sampling reference data")
-        log_print(cond)
-    }
-
-
-}
 
 
 # Predict labels for query dataset

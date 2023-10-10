@@ -25,7 +25,7 @@ task cell_annotation {
         File query_data
  
         # Down sampling cells for reference data
-        String? downsampling
+        String? downsample
         Int? num_cells
  
         String? gene_id_to_symbol 
@@ -61,6 +61,7 @@ task cell_annotation {
     String prediction_labels = "${prefix}.cell.annotation.labels.${genome}.png"
     String prediction_scores = "${prefix}.cell.annotation.scores.${genome}.pdf"
 
+
     command {
         set -e
 
@@ -69,8 +70,11 @@ task cell_annotation {
         # Download data from cellxgene
         python3 $(which get_cellxgene_data.py) \
         --id ${reference_data_id} \
-        --out ${reference_data_name}
-
+        --out ${reference_data_name} \
+        --downsample ${downsample} \
+        --reference_label ${reference_label} \
+        --num_cells ${num_cells} \
+        
         # Perform cell annotation
         Rscript $(which cell_annotation.R) \
         --prefix ${prefix} \
@@ -78,9 +82,7 @@ task cell_annotation {
         --reference_label ${reference_label} \
         --query_data ${query_data} \
         --genome ${genome} \
-        --gene_id_to_symbol ${gene_id_to_symbol} \
-        --downsampling ${downsampling} \
-        --num_cells ${num_cells}
+        --gene_id_to_symbol ${gene_id_to_symbol}
 
     }
 
