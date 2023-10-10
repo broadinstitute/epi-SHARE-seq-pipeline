@@ -32,7 +32,7 @@ workflow wf_cell_annotation {
         File query_data
         
         String? downsampling = "FALSE"
-        Int? num_per_cell_type = 100
+        Int? num_cells = 5000
         
         
         # Docker images
@@ -56,7 +56,7 @@ workflow wf_cell_annotation {
             disk_factor = disk_factor,
             memory_factor = memory_factor,
             downsampling = downsampling,
-            num_per_cell_type = num_per_cell_type,
+            num_cells = num_cells,
     }
 
     output {
