@@ -78,8 +78,8 @@ task cell_annotation {
         --reference_label ${reference_label} \
         --query_data ${query_data} \
         --genome ${genome} \
-        --gene_id_to_symbol ${gene_id_to_symbol} \\
-        --downsampling ${downsampling}
+        --gene_id_to_symbol ${gene_id_to_symbol} \
+        --downsampling ${downsampling} \
         --num_per_cell_type ${num_per_cell_type}
 
     }
