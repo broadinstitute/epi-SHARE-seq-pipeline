@@ -26,7 +26,7 @@ task cell_annotation {
  
         # Down sampling cells for reference data
         String? downsampling
-        Int? num_per_cell_type
+        Int? num_cells
  
         String? gene_id_to_symbol 
 
@@ -42,13 +42,13 @@ task cell_annotation {
     }
     
     # Determine the size of the input
-    Float input_file_size_mb = size(query_data, "G")
+    Float input_file_size_gb = size(query_data, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 64.0 + memory_factor * input_file_size_mb
+    Float mem_gb = 64.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
-    Int disk_gb = round(disk_factor * input_file_size_mb)
+    Int disk_gb = round(disk_factor * input_file_size_gb)
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
@@ -80,7 +80,7 @@ task cell_annotation {
         --genome ${genome} \
         --gene_id_to_symbol ${gene_id_to_symbol} \
         --downsampling ${downsampling} \
-        --num_per_cell_type ${num_per_cell_type}
+        --num_cells ${num_cells}
 
     }
 

@@ -18,14 +18,15 @@ def parse_arguments():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
-    # create log file
-    logging.basicConfig(filename="get_cellxgene_data.log", level=logging.INFO)
-
+def main():
     # get arguments
     args = parse_arguments()
     
+    # create log file
+    logging.basicConfig(filename="get_cellxgene_data.log", level=logging.INFO)
+    
     logging.info("Downloading data\n")
+    
     cellxgene_census.download_source_h5ad(
         dataset_id=args.id, 
         to_path=f"{args.out}.h5ad")
@@ -35,7 +36,12 @@ if __name__ == '__main__':
     # get counts
     if not adata.raw:
         adata.raw = adata.copy()
-    
+        
     adata.write_h5ad(f"{args.out}.h5ad")
     
     logging.info("All done!")
+
+
+if __name__ == '__main__':
+    main()
+    

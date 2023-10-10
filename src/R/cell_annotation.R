@@ -22,6 +22,7 @@ suppressMessages(library(optparse))
 
 options("logr.notes" = FALSE)
 options(future.globals.maxSize=10e9)
+options(Seurat.object.assay.version = "v5")
 set.seed(1234)
 
 option_list = list(
@@ -48,8 +49,8 @@ option_list = list(
                       Set it as true when the there are too many cells inrefence. Default: FALSE", 
                 metavar="character"),
     
-    make_option(c("--num_per_cell_type", type="integer", default=100,
-                 help="Number of cells for each cell type in reference data after downsampling. Default: 100"),
+    make_option(c("--num_cells", type="integer", default=5000,
+                 help="Number of cells after downsampling. Default: 5000"),
                 metavar = "number"),
     
     # reference genome parameters
@@ -80,7 +81,7 @@ query_data <- opt$query_data
 
 # Downsampling parameters
 downsampling <- as.logical(opt$downsampling)
-num_per_cell_type <- opt$num_per_cell_type
+num_cells <- opt$num_cells
 
 # Reference genome
 genome <- opt$genome
@@ -173,7 +174,7 @@ if(gene_id_to_symbol){
 )
 }
 
-# Subset data
+# Subset genes
 tryCatch(
     {
         log_print("# Subseting reference and query data with common genes")
@@ -213,6 +214,28 @@ tryCatch(
     }
     
 )
+
+
+# Subset reference data
+if(downsampling){
+    tryCatch(){
+        log_print("# Down sampling reference data")
+        # 
+        obj.ref <- SketchData(object = obj.ref, 
+                             ncells = num_cells, 
+                             method = "LeverageScore", 
+                             sketched.assay = "sketch")
+        DefaultAssay(obj.ref) <- "sketch"
+    
+    },
+     error = function(cond) {
+        log_print("ERROR: Down sampling reference data")
+        log_print(cond)
+    }
+
+
+}
+
 
 # Predict labels for query dataset
 tryCatch(

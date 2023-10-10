@@ -76,6 +76,9 @@ RUN R --no-echo --no-restore --no-save -e "BiocManager::install('rhdf5', update=
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Mmusculus.v79', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install('EnsDb.Hsapiens.v86', update=F, ask=F)"
 RUN R --no-echo --no-restore --no-save -e "install.packages('optparse')"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_github('mojaveazure/seurat-object', 'seurat5')"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_github('stuart-lab/signac', 'seurat5')"
+RUN R --no-echo --no-restore --no-save -e "remotes::install_github('satijalab/azimuth', 'seurat5')"
 
 RUN python3 -m pip install anndata cellxgene-census
 
