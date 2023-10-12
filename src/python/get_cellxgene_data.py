@@ -15,11 +15,9 @@ def parse_arguments():
                         help="Cellxgene dataset id to download.")
     parser.add_argument("--out", type=str, required=True,
                         help="Output filename", default="reference")
-    parser.add_argument("--downsample", type=str, default='FALSE',
-                        help="Whether ot not down sample the data.")
     parser.add_argument("--reference_label", type=str, default='cell_type',
                         help="Category used to down sample the cells. Usually set to cell_type")
-    parser.add_argument("--num_cells", type=int, default=100,
+    parser.add_argument("--downsample_frac", type=float, default=1.0,
                         help="Number of cells per category after down sampling.")
         
     return parser.parse_args()
@@ -43,24 +41,28 @@ def main():
     # get counts
     if not adata.raw:
         adata.raw = adata.copy()
-        
-    if args.downsample == "TRUE":
+    
+    # down sample cells stratified by obs_key
+    if args.downsample_frac < 1:
         logging.info("Down sampling data\n")
         
-        rng = np.random.default_rng(seed=42)
-        counts = adata.obs[args.reference_label].value_counts()
+        obs = adata.obs.groupby(args.reference_label, group_keys=False).apply(lambda x: x.sample(frac=args.downsample_frac))
+        adata = adata[obs.index].copy()
         
-        indices = []
-        for group in counts.index:
-            # no downsampling if there are too few cells
-            if counts[group] <= args.num_cells:
-                indices.append(adata.obs_names[adata.obs[args.reference_label]==group])
-            else:
-                indices.append(np.random.choice(adata.obs_names[adata.obs[args.reference_label]==group], 
-                                                size=num_cells, 
-                                                replace=False))
-        selection = np.hstack(indices)
-        adata = adata[selection].copy()
+#         rng = np.random.default_rng(seed=42)
+#         counts = adata.obs[args.reference_label].value_counts()
+        
+#         indices = []
+#         for group in counts.index:
+#             # no downsampling if there are too few cells
+#             if counts[group] <= args.num_cells:
+#                 indices.append(adata.obs_names[adata.obs[args.reference_label]==group])
+#             else:
+#                 indices.append(np.random.choice(adata.obs_names[adata.obs[args.reference_label]==group], 
+#                                                 size=args.num_cells, 
+#                                                 replace=False))
+#         selection = np.hstack(indices)
+#         adata = adata[selection].copy()
 
     adata.write_h5ad(f"{args.out}.h5ad")
     

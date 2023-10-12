@@ -25,8 +25,7 @@ task cell_annotation {
         File query_data
  
         # Down sampling cells for reference data
-        String? downsample
-        Int? num_cells
+        Float? downsample_frac
  
         String? gene_id_to_symbol 
 
@@ -71,9 +70,8 @@ task cell_annotation {
         python3 $(which get_cellxgene_data.py) \
         --id ${reference_data_id} \
         --out ${reference_data_name} \
-        --downsample ${downsample} \
-        --reference_label ${reference_label} \
-        --num_cells ${num_cells} \
+        --downsample_frac ${downsample_frac} \
+        --reference_label ${reference_label}
         
         # Perform cell annotation
         Rscript $(which cell_annotation.R) \
