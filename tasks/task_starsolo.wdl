@@ -3,7 +3,7 @@ version 1.0
 # TASK
 # SHARE-rna-STARsolo
 
-task share_rna_align {
+task rna_align {
     meta {
         version: 'v0.1'
         author: 'Neva Durand (neva@broadinstitute.org) at Broad Institute of MIT and Harvard'

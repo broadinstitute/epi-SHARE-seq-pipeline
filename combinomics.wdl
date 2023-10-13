@@ -4,7 +4,7 @@ version 1.0
 import "tasks/10x_task_preprocess.wdl" as preprocess_tenx
 import "tasks/10x_create_barcode_mapping.wdl" as tenx_barcode_map
 import "workflows/subwf-atac.wdl" as atac
-import "workflows/subwf-rna.wdl" as share_rna
+import "workflows/subwf-rna.wdl" as rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/task_joint_qc.wdl" as joint_qc
 import "tasks/task_html_report.wdl" as html_report
@@ -21,7 +21,7 @@ workflow combinomics {
         Boolean dorcs_flag = true
         String chemistry
         String prefix = "shareseq-project"
-        String? pkr=""
+        String? subpool=""
         String pipeline_modality = "full" # "full": run everything; "count_only": stops after producing fragment file and count matrix; "no_align": correct and trim raw fastqs.
 
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
@@ -103,7 +103,7 @@ workflow combinomics {
 
     if ( process_rna ) {
         if ( read1_rna[0] != "" ) {
-            call share_rna.wf_rna as rna{
+            call rna.wf_rna as rna{
                 input:
                     chemistry = chemistry,
                     read1 = read1_rna,
@@ -111,7 +111,7 @@ workflow combinomics {
                     whitelist = select_first([whitelist_rna, whitelist_rna_, whitelist, whitelist_]),
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
-                    pkr = pkr,
+                    pkr = subpool,
                     genome_name = genome_name_,
                     pipeline_modality = pipeline_modality,
                     gene_naming = gene_naming
@@ -126,7 +126,7 @@ workflow combinomics {
                     read1 = select_first([preprocess_tenx.fastq_R1_preprocessed ,read1_atac]),
                     read2 = select_first([preprocess_tenx.fastq_R2_preprocessed ,read2_atac]),
                     chemistry = chemistry,
-                    pkr = pkr,
+                    subpool = subpool,
                     whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
                     trim_fastqs = trim_fastqs,
                     chrom_sizes = chrom_sizes_,
@@ -147,8 +147,8 @@ workflow combinomics {
                 if ( dorcs_flag ){
                     call find_dorcs.wf_dorcs as dorcs{
                         input:
-                            rna_matrix = rna.share_rna_h5,
-                            atac_fragments = atac.atac_filter_fragments,
+                            rna_matrix = rna.rna_h5,
+                            atac_fragments = atac.atac_fragments,
                             peak_file = peak_set_,
                             genome = genome_name_,
                             prefix = prefix
@@ -160,7 +160,7 @@ workflow combinomics {
                 call joint_qc.joint_qc_plotting as joint_qc {
                     input:
                         atac_barcode_metadata = atac.atac_barcode_metadata,
-                        rna_barcode_metadata = rna.share_rna_barcode_metadata,
+                        rna_barcode_metadata = rna.rna_barcode_metadata,
                         prefix = prefix,
                         genome_name = genome_name_
                 }
@@ -168,32 +168,32 @@ workflow combinomics {
         }
     }
 
-    if ( pipeline_modality != "no_align" ) {
-        call html_report.html_report as html_report {
-            input:
-                prefix = prefix,
-                atac_total_reads = atac.atac_total_reads,
-                atac_aligned_uniquely = atac.atac_aligned_uniquely,
-                atac_unaligned = atac.atac_unaligned,
-                atac_feature_reads = atac.atac_feature_reads,
-                atac_duplicate_reads = atac.atac_duplicate_reads,
-                atac_percent_duplicates = atac.atac_percent_duplicates,
-                rna_total_reads = rna.share_rna_total_reads,
-                rna_aligned_uniquely = rna.share_rna_aligned_uniquely,
-                rna_aligned_multimap = rna.share_rna_aligned_multimap,
-                rna_unaligned = rna.share_rna_unaligned,
-                rna_feature_reads = rna.share_rna_feature_reads,
-                rna_duplicate_reads = rna.share_rna_duplicate_reads,
-                rna_frig = rna.rna_frig,
+    # if ( pipeline_modality != "no_align" ) {
+    #     call html_report.html_report as html_report {
+    #         input:
+    #             prefix = prefix,
+    #             atac_total_reads = atac.atac_total_reads,
+    #             atac_aligned_uniquely = atac.atac_aligned_uniquely,
+    #             atac_unaligned = atac.atac_unaligned,
+    #             atac_feature_reads = atac.atac_feature_reads,
+    #             atac_duplicate_reads = atac.atac_duplicate_reads,
+    #             atac_percent_duplicates = atac.atac_percent_duplicates,
+    #             rna_total_reads = rna.rna_total_reads,
+    #             rna_aligned_uniquely = rna.rna_aligned_uniquely,
+    #             rna_aligned_multimap = rna.rna_aligned_multimap,
+    #             rna_unaligned = rna.rna_unaligned,
+    #             rna_feature_reads = rna.rna_feature_reads,
+    #             rna_duplicate_reads = rna.rna_duplicate_reads,
+    #             rna_frig = rna.rna_frig,
 
-                ## JPEG files to be encoded and appended to html
-                # RNA plots
-                image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, rna.share_rna_umi_barcode_rank_plot, rna.share_rna_gene_barcode_rank_plot, rna.share_rna_gene_umi_scatter_plot, rna.share_rna_seurat_raw_violin_plot, rna.share_rna_seurat_raw_qc_scatter_plot, rna.share_rna_seurat_filtered_violin_plot, rna.share_rna_seurat_filtered_qc_scatter_plot, rna.share_rna_seurat_variable_genes_plot, rna.share_rna_seurat_PCA_dim_loadings_plot, rna.share_rna_seurat_PCA_plot, rna.share_rna_seurat_heatmap_plot, rna.share_rna_seurat_jackstraw_plot, rna.share_rna_seurat_elbow_plot, rna.share_rna_seurat_umap_cluster_plot, rna.share_rna_seurat_umap_rna_count_plot, rna.share_rna_seurat_umap_gene_count_plot, rna.share_rna_seurat_umap_mito_plot, atac.atac_qc_barcode_rank_plot, atac.atac_qc_hist_plot, atac.atac_qc_tss_enrichment,  atac.atac_archr_raw_tss_enrichment, atac.atac_archr_filtered_tss_enrichment, atac.atac_archr_raw_fragment_size_plot, atac.atac_archr_filtered_fragment_size_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_cluster_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_num_frags_plot, atac.atac_archr_umap_tss_score_plot, atac.atac_archr_umap_frip_plot,atac.atac_archr_gene_heatmap_plot, dorcs.j_plot],
+    #             ## JPEG files to be encoded and appended to html
+    #             # RNA plots
+    #             image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, rna.rna_umi_barcode_rank_plot, rna.rna_gene_barcode_rank_plot, rna.rna_gene_umi_scatter_plot, rna.rna_seurat_raw_violin_plot, rna.rna_seurat_raw_qc_scatter_plot, rna.rna_seurat_filtered_violin_plot, rna.rna_seurat_filtered_qc_scatter_plot, rna.rna_seurat_variable_genes_plot, rna.rna_seurat_PCA_dim_loadings_plot, rna.rna_seurat_PCA_plot, rna.rna_seurat_heatmap_plot, rna.rna_seurat_jackstraw_plot, rna.rna_seurat_elbow_plot, rna.rna_seurat_umap_cluster_plot, rna.rna_seurat_umap_rna_count_plot, rna.rna_seurat_umap_gene_count_plot, rna.rna_seurat_umap_mito_plot, atac.atac_qc_barcode_rank_plot, atac.atac_qc_hist_plot, atac.atac_qc_tss_enrichment,  atac.atac_archr_raw_tss_enrichment, atac.atac_archr_filtered_tss_enrichment, atac.atac_archr_raw_fragment_size_plot, atac.atac_archr_filtered_fragment_size_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_cluster_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_num_frags_plot, atac.atac_archr_umap_tss_score_plot, atac.atac_archr_umap_frip_plot,atac.atac_archr_gene_heatmap_plot, dorcs.j_plot],
 
-                ## Links to files and logs to append to end of html
-                log_files = [rna.share_rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.share_rna_seurat_notebook_log, atac.atac_alignment_log, atac.atac_archr_notebook_log, dorcs.dorcs_notebook_log]
-        }
-    }
+    #             ## Links to files and logs to append to end of html
+    #             log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_alignment_log, atac.atac_archr_notebook_log, dorcs.dorcs_notebook_log]
+    #     }
+    # }
 
     output{
         # Fastq after correction/trimming
@@ -204,17 +204,16 @@ workflow combinomics {
         Array[File]? rna_read2_processed = rna.rna_read2_processed
 
         # RNA outputs
-        File? share_rna_final_bam = rna.task_starsolo_output_bam
-        File? share_rna_starsolo_raw_tar = rna.task_starsolo_raw_tar
-        File? share_rna_h5 = rna.share_rna_h5
-        File? share_rna_barcode_metadata  = rna.share_rna_barcode_metadata
-        File? share_rna_seurat_notebook_output = rna.share_rna_seurat_notebook_output
-        File? share_rna_seurat_obj = rna.share_rna_seurat_obj
+        File? rna_final_bam = rna.task_starsolo_output_bam
+        File? rna_starsolo_raw_tar = rna.task_starsolo_raw_tar
+        File? rna_h5 = rna.rna_h5
+        File? rna_barcode_metadata  = rna.rna_barcode_metadata
+        File? rna_seurat_notebook_output = rna.rna_seurat_notebook_output
+        File? rna_seurat_obj = rna.rna_seurat_obj
 
         # ATAC ouputs
-        File? atac_final_bam_dedup = atac.atac_filter_alignment_dedup
-        File? atac_filter_fragments = atac.atac_filter_fragments
-        File? atac_filter_fragments_index = atac.atac_filter_fragments_index
+        File? atac_fragments = atac.atac_fragments
+        File? atac_fragments_index = atac.atac_fragments_index
         File? atac_barcode_metadata = atac.atac_barcode_metadata
         File? atac_archr_notebook_output = atac.atac_archr_notebook_output
         File? atac_archr_arrow = atac.atac_archr_arrow
@@ -233,7 +232,7 @@ workflow combinomics {
         File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
 
         # Report
-        File? html_summary = html_report.html_report_file
+        #File? html_summary = html_report.html_report_file
     }
 
 }
