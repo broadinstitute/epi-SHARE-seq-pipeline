@@ -3,7 +3,7 @@ version 1.0
 # TASK
 # trim_fastqs_atac
 
-task share_trim_fastqs_atac {
+task trim_fastqs_atac {
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
