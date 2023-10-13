@@ -22,7 +22,6 @@ workflow share {
         String chemistry
         String prefix
         String? subpool = "none"
-        String? parse_strand
         String pipeline_modality = "full" # "full": run everything; "count_only": stops after producing fragment file and count matrix; "no_align": correct and trim raw fastqs.
 
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'

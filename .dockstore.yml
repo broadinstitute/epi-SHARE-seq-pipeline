@@ -8,6 +8,7 @@ workflows:
              - main
              - release
              - IGVF-variant-jamboree
+             - split-seq
          tags:
              - /.*/
 

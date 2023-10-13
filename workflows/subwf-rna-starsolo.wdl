@@ -26,8 +26,12 @@ workflow wf_rna {
         Array[File] read1
         Array[File] read2
 
-        String? parse_strand
-        String? parse_gene_model
+        Boolean rna_barcode_in_R2 = false
+
+        String? parse_strand = "Forward"
+        String? parse_gene_model = "GeneFull_Ex50pAS"
+        File parse_bc1
+        File parse_bc23
 
         # Correct-specific inputs
         Boolean correct_barcodes = true
@@ -103,6 +107,9 @@ workflow wf_rna {
                 genome_index_tar = idx_tar,
                 parse_gene_model = parse_gene_model,
                 parse_strand = parse_strand,
+                parse_bc1 = parse_bc1,
+                parse_bc23 = parse_bc23,
+                rna_barcode_in_R2 = rna_barcode_in_R2,
                 prefix = prefix,
                 cpus = align_cpus,
                 disk_factor = align_disk_factor,

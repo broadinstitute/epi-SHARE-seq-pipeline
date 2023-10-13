@@ -16,6 +16,7 @@ task share_rna_align {
         # and aligns it to the genome using STARsolo.
         Array[File] fastq_R1
         Array[File] fastq_R2
+        Boolean rna_barcode_in_R2
         File whitelist
         File genome_index_tar
         String genome_name
@@ -228,6 +229,12 @@ task share_rna_align {
             # TODO: add the final case in which none of the above is passed.
         # PARSE
         elif [ '~{chemistry}' == 'parse' ]; then
+
+            read_files='~{sep=',' fastq_R1} ~{sep=',' fastq_R2}'
+            
+            if [ ~{rna_barcode_in_R2} == "true" ];then
+                read_files='~{sep=',' fastq_R2} ~{sep=',' fastq_R1}' 
+            fi
 
             STAR --genomeDir ./ \
            --readFilesIn $read_files \
