@@ -81,7 +81,7 @@ task cell_annotation {
         --query_data ${query_data} \
         --genome ${genome} \
         --gene_id_to_symbol ${gene_id_to_symbol} \
-        --save_seurat ${gene_id_to_symbol}
+        --save_seurat ${save_seurat}
 
     }
 
