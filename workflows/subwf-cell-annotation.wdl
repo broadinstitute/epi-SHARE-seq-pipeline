@@ -27,6 +27,8 @@ workflow wf_cell_annotation {
         # Set true if the reference data uses gene id as feature name. 
         # This is usually true for data downloaded from cellxgene server
         String? gene_id_to_symbol = "TRUE"
+        
+        String? save_seurat = "TRUE"
 
         # Query data
         File query_data
@@ -54,7 +56,8 @@ workflow wf_cell_annotation {
             docker_image = docker_image,
             disk_factor = disk_factor,
             memory_factor = memory_factor,
-            downsample_frac = downsample_frac
+            downsample_frac = downsample_frac,
+            save_seurat = save_seurat
     }
 
     output {
