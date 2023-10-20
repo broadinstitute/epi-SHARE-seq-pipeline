@@ -93,6 +93,7 @@ task cell_annotation {
         File prediction = '${prediction}'
         File prediction_labels = '${prediction_labels}'
         File prediction_scores = '${prediction_scores}'
+        File seurat_object = '${seurat_object}'
     }
 
     runtime {
