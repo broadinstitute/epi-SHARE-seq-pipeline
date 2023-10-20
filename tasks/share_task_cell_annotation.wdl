@@ -59,6 +59,7 @@ task cell_annotation {
     String prediction = "${prefix}.cell.annotation.prediction.${genome}.csv"
     String prediction_labels = "${prefix}.cell.annotation.labels.${genome}.png"
     String prediction_scores = "${prefix}.cell.annotation.scores.${genome}.pdf"
+    String seurat_object = "${prefix}.cell.annotation.${genome}.rds"
 
 
     command {

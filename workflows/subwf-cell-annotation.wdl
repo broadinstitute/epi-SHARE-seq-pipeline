@@ -67,5 +67,6 @@ workflow wf_cell_annotation {
         File share_cell_annotation_prediction = cell_annotation.prediction
         File share_cell_annotation_prediction_labels = cell_annotation.prediction_labels
         File share_cell_annotation_prediction_scores = cell_annotation.prediction_scores
+        File share_cell_annotation_seurat_object = cell_annotation.seurat_object
     }
 }
