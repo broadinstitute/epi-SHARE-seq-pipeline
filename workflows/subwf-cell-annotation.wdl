@@ -35,7 +35,11 @@ workflow wf_cell_annotation {
         
         # Proportion for down-sampling
         Float? downsample_frac = 1
-        
+    
+        # Integration
+        String? normalization_method = "SCT"
+        String? anchors_reduction = "pcaproject"
+    
         # Docker images
         String? docker_image="lzj1769/cell_annotation"
     
@@ -57,7 +61,10 @@ workflow wf_cell_annotation {
             disk_factor = disk_factor,
             memory_factor = memory_factor,
             downsample_frac = downsample_frac,
+            normalization_method = normalization_method,
+            anchors_reduction = anchors_reduction,
             save_seurat = save_seurat
+
     }
 
     output {
