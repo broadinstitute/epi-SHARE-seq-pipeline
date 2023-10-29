@@ -56,12 +56,8 @@ option_list = list(
                 metavar="character"),
     
     # integration parameters
-    make_option(c("--normalization_method"), type="character", default="SCT", 
-                help="Which method to use for data normalization, available options: LogNormalize and SCT Default: SCT", 
-                metavar="character"), 
-    
     make_option(c("--anchors_reduction"), type="character", default="pcaproject", 
-                help="Dimensional reduction to perform when finding anchors. Default: pcaproject", 
+                help="Dimensional reduction to perform when finding anchors, available options: cca and pcaproject. Default: pcaproject", 
                 metavar="character"),
     
     # output parameters
@@ -85,7 +81,6 @@ genome <- opt$genome
 gene_id_to_symbol <- as.logical(opt$gene_id_to_symbol)
 
 # integration parameters
-normalize <- opt$normalize
 anchors_reduction <- opt$anchors_reduction
 
 # Output
@@ -197,7 +192,11 @@ tryCatch(
                                       meta.data = obj.ref@meta.data)
         
         # subset query data
-        counts <- LayerData(obj.query, layer = 'counts', assay = 'RNA', features=gene.common)
+        counts <- LayerData(obj.query, 
+                            layer = 'counts', 
+                            assay = 'RNA', 
+                            features=gene.common)
+        
         obj.query <- CreateSeuratObject(counts = counts, 
                                         assay = "RNA",
                                         meta.data = obj.query@meta.data)
@@ -217,39 +216,20 @@ tryCatch(
     {
         log_print("# Normalizing reference and query data!")
         
-        if(normalization_method == 'LogNormalize'){
-            obj.ref <- obj.ref %>%
+        obj.ref <- obj.ref %>%
                 NormalizeData(verbose = FALSE) %>%
                 FindVariableFeatures() %>%
-                ScaleData()
+                ScaleData() %>%
+                RunPCA(verbose = FALSE) %>%
+                RunUMAP(dims = 1:30, verbpse=FALSE)
             
-            obj.query <- obj.query %>%
+        obj.query <- obj.query %>%
                 NormalizeData(verbose = FALSE) %>%
                 FindVariableFeatures() %>%
-                ScaleData()           
-        
-        }else if(normalization_method == 'SCT'){
-            # store mitochondrial percentage in object meta data
-            if(genome == "hg38" | genome == "hg37"){
-                pattern = "^MT-"
-            }else if(genome == "mm10" | genome == "mm9"){
-                pattern = "^mt-"
-            }
-                
-            obj.ref <- PercentageFeatureSet(obj.ref, pattern = pattern, col.name = "percent.mt")
-            obj.query <- PercentageFeatureSet(obj.query, pattern = pattern, col.name = "percent.mt")
+                ScaleData() %>%
+                RunPCA(verbose = FALSE) %>%
+                RunUMAP(dims = 1:30, verbpse=FALSE) 
             
-            obj.ref <- SCTransform(obj.ref, 
-                                   method = "glmGamPoi", 
-                                   vars.to.regress = "percent.mt", 
-                                   verbose = FALSE)
-            
-            obj.query <- SCTransform(obj.query, 
-                                     method = "glmGamPoi", 
-                                     vars.to.regress = "percent.mt", 
-                                     verbose = FALSE)
-        
-        }
         log_print("SUCCESSFUL: Normalizing reference and query data")
     },
      error = function(cond) {
@@ -259,44 +239,20 @@ tryCatch(
     
 )
 
-# Dimension reduction for query and reference dataset
-
-tryCatch(
-    {
-        log_print("# Dimension reduction for reference and query data!")
-        
-        obj.ref <- obj.ref %>% 
-            RunPCA(verbose = FALSE) %>%
-            RunUMAP(dims=1:30, verbose = FALSE)
-        
-        obj.query <- obj.query %>%
-            RunPCA(verbose = FALSE) %>%
-            RunUMAP(dims=1:30, verbose = FALSE)
-        
-        log_print("SUCCESSFUL: Dimension reduction for reference and query data!")
-    },
-     error = function(cond) {
-        log_print("ERROR: Dimension reduction for reference and query data!")
-        log_print(cond)
-    }
-    
-)
-
-
 # Predict labels for query dataset
 tryCatch(
     {
         log_print("# Predicting labels for query data")
         
         # select integration features
-        features <- SelectIntegrationFeatures(c(obj.ref, obj.query), nfeatures = 3000)
+        # features <- SelectIntegrationFeatures(c(obj.ref, obj.query))
         
         transfer.anchors <- FindTransferAnchors(
             reference = obj.ref,
             query = obj.query,
-            normalization.method = normalization_method,
             reduction = anchors_reduction,
-            features = features,
+            dims = 1:30,
+            # features = features,
             verbose = TRUE
         )
         

@@ -30,7 +30,6 @@ task cell_annotation {
         String? gene_id_to_symbol 
 
         # Integration
-        String? normalization_method = "SCT"
         String? anchors_reduction = "pcaproject"
 
         #Output option
@@ -86,7 +85,6 @@ task cell_annotation {
         --query_data ${query_data} \
         --genome ${genome} \
         --gene_id_to_symbol ${gene_id_to_symbol} \
-        --normalization_method ${normalization_method} \
         --anchors_reduction ${anchors_reduction} \
         --save_seurat ${save_seurat}
 
