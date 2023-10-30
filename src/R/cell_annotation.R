@@ -4,7 +4,7 @@
 ### perform cell annotation using Seurat label transfer approach.
 ### Modified from https://satijalab.org/seurat/articles/integration_mapping
 
-source("/usr/local/bin/cell_annotation_helper_functions.R")
+#source("/usr/local/bin/cell_annotation_helper_functions.R")
 #source("/data/pinello/PROJECTS/2023_02_SHARE_Pipeline/epi-SHARE-seq-pipeline/src/R/cell_annotation_helper_functions.R")
 
 suppressMessages(library(Seurat))
@@ -47,7 +47,8 @@ option_list = list(
     
     # reference genome parameters
     make_option(c("--genome"), type="character", default="hg38", 
-                help="Which genome is used as reference. Currently available options: hg38; mm10. Default: hg38", 
+                help="Which genome is used as reference. 
+                     Currently available options: hg38; mm10. Default: hg38", 
                 metavar="character"),
     
     make_option(c("--gene_id_to_symbol"), type="character", default="TRUE", 
@@ -57,7 +58,8 @@ option_list = list(
     
     # integration parameters
     make_option(c("--anchors_reduction"), type="character", default="pcaproject", 
-                help="Dimensional reduction to perform when finding anchors, available options: cca and pcaproject. Default: pcaproject", 
+                help="Dimensional reduction to perform when finding anchors.
+                      Available options: cca and pcaproject. Default: pcaproject", 
                 metavar="character"),
     
     # output parameters
@@ -95,39 +97,17 @@ lf <- log_open(logfile)
 # Loading data
 tryCatch(
     {
-        log_print("# Loading reference data...")
+        log_print("# Loading reference and query data...")
         
-        adata <- read_h5ad(glue::glue("{reference_data_name}.h5ad"))
-        counts <- t(as.matrix(adata$raw$X))
-        colnames(counts) <- adata$obs_names
-        rownames(counts) <- adata$var_names
-        metadata <- as.data.frame(adata$obs)
-        obj.ref <- CreateSeuratObject(counts = counts, assay = "RNA")
-        obj.ref <- AddMetaData(obj.ref, metadata)
-        
-        rm(counts)
-        gc()
+        obj.ref <- readRDS(glue::glue("{reference_data_name}.rds"))
+        obj.query <- readRDS(query_data)
+       
     },
     error = function(cond){
-        log_print("ERROR: loading reference data")
+        log_print("ERROR: Loading reference and query data")
         log_print(cond)
     }
 )
-
-# Read query data
-tryCatch(
-    {
-        log_print("# Reading query data...")
-        obj.query <- readRDS(query_data)
-        log_print("SUCCESSFUL: Reading query data")
-    
-    },
-    error = function(cond) {
-        log_print("ERROR: Reading query data")
-        log_print(cond)
-    }
-)
-
 
 # Convert gene ID to symbol for reference data
 if(gene_id_to_symbol){

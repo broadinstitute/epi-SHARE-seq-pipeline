@@ -1,13 +1,48 @@
 #!/usr/bin/Rscript
 
 ## ---------------------------
-## Helper functions for cell annotation
+## This script converts an h5ad file to Seurat object file
 ## Author: Zhijian Li
 ## Date Created: 2023-05-29
 ## Email: lzj1769@gmail.com
 ## ---------------------------
-library(reticulate)
-use_python("/usr/bin/python3")
+suppressMessages(library(Seurat))
+suppressMessages(library(logr))
+suppressMessages(library(optparse))
+suppressMessages(library(reticulate))
+#use_python("/usr/bin/python3")
+
+options("logr.notes" = FALSE)
+options(future.globals.maxSize=10e9)
+options(Seurat.object.assay.version = "v5")
+set.seed(1234)
+
+option_list = list(
+    # input parameters
+    make_option(c("--prefix"), type="character", default="prefix", 
+                help="Sample or project name", 
+                metavar="character"),
+    
+    make_option(c("--reference_data_name"), type="character", default="reference", 
+                help="Reference data file.", 
+                metavar="character"),
+    
+    # reference genome parameters
+    make_option(c("--genome"), type="character", default="hg38", 
+                help="Which genome is used as reference. Currently available options: hg38; mm10. Default: hg38", 
+                metavar="character")
+)
+
+opt_parser <- OptionParser(option_list=option_list)
+opt <- parse_args(opt_parser)
+
+prefix <- opt$prefix
+reference_data_name <- opt$reference_data_name
+genome <- opt$genome
+
+# Create log file
+logfile <- file.path(glue::glue("{prefix}.cell.annotation.logfile.{genome}.txt"))
+lf <- log_open(logfile)
 
 read_h5ad <- function(
   filename,
@@ -131,3 +166,24 @@ py_to_r.scipy.sparse.csc.csc_matrix <- function(x) {
     dims = as.integer(dim(x))
   )
 }
+
+
+tryCatch(
+    {
+        log_print("# Converting reference data to Seurat object...")
+        
+        adata <- read_h5ad(glue::glue("{reference_data_name}.h5ad"))
+        counts <- t(as.matrix(adata$raw$X))
+        colnames(counts) <- adata$obs_names
+        rownames(counts) <- adata$var_names
+        metadata <- as.data.frame(adata$obs)
+        obj.ref <- CreateSeuratObject(counts = counts, assay = "RNA")
+        obj.ref <- AddMetaData(obj.ref, metadata)
+        
+        saveRDS(obj.ref, file = glue::glue("{reference_data_name}.rds"))
+    },
+    error = function(cond){
+        log_print("ERROR: Converting reference data to Seurat object")
+        log_print(cond)
+    }
+)

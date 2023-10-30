@@ -77,6 +77,12 @@ task cell_annotation {
         --downsample_frac ${downsample_frac} \
         --reference_label ${reference_label}
         
+        # Convert h5ad to Seurat object
+        Rscript $(which h5ad_to_seurat.R) \
+        --prefix ${prefix} \
+        --reference_data_name ${reference_data_name} \
+        --genome ${genome}
+        
         # Perform cell annotation
         Rscript $(which cell_annotation.R) \
         --prefix ${prefix} \

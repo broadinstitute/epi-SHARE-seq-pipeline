@@ -87,5 +87,5 @@ RUN python3 -m pip install anndata cellxgene-census
 COPY src/bash/monitor_script.sh /usr/local/bin
 COPY src/python/get_cellxgene_data.py /usr/local/bin
 COPY src/R/cell_annotation.R /usr/local/bin/
-COPY src/R/cell_annotation_helper_functions.R /usr/local/bin/
+COPY src/R/h5ad_to_seurat.R /usr/local/bin/
 
