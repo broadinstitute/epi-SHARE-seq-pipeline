@@ -48,21 +48,6 @@ def main():
         
         obs = adata.obs.groupby(args.reference_label, group_keys=False).apply(lambda x: x.sample(frac=args.downsample_frac))
         adata = adata[obs.index].copy()
-        
-#         rng = np.random.default_rng(seed=42)
-#         counts = adata.obs[args.reference_label].value_counts()
-        
-#         indices = []
-#         for group in counts.index:
-#             # no downsampling if there are too few cells
-#             if counts[group] <= args.num_cells:
-#                 indices.append(adata.obs_names[adata.obs[args.reference_label]==group])
-#             else:
-#                 indices.append(np.random.choice(adata.obs_names[adata.obs[args.reference_label]==group], 
-#                                                 size=args.num_cells, 
-#                                                 replace=False))
-#         selection = np.hstack(indices)
-#         adata = adata[selection].copy()
 
     adata.write_h5ad(f"{args.out}.h5ad")
     

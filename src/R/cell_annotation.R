@@ -200,15 +200,13 @@ tryCatch(
                 NormalizeData(verbose = FALSE) %>%
                 FindVariableFeatures() %>%
                 ScaleData() %>%
-                RunPCA(verbose = FALSE) %>%
-                RunUMAP(dims = 1:30, verbpse=FALSE)
+                RunPCA(verbose = FALSE)
             
         obj.query <- obj.query %>%
                 NormalizeData(verbose = FALSE) %>%
                 FindVariableFeatures() %>%
                 ScaleData() %>%
-                RunPCA(verbose = FALSE) %>%
-                RunUMAP(dims = 1:30, verbpse=FALSE) 
+                RunPCA(verbose = FALSE) 
             
         log_print("SUCCESSFUL: Normalizing reference and query data")
     },
@@ -232,7 +230,6 @@ tryCatch(
             query = obj.query,
             reduction = anchors_reduction,
             dims = 1:30,
-            # features = features,
             verbose = TRUE
         )
         
