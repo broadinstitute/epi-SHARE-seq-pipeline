@@ -16,6 +16,16 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'task-chromap'
+  args: [ 'build', '-t',
+          '${_GCR_REGISTRY}/${PROJECT_ID}/task_chromap:$BRANCH_NAME',
+          '-f',
+          'dockerfiles/task_chromap.dockerfile',
+          '.' ]
+  waitFor: ['-']
+  timeout: 28800s
+
+- name: 'gcr.io/cloud-builders/docker'
   id: 'task-merge-bams'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_bams:$BRANCH_NAME',
@@ -51,16 +61,6 @@ steps:
           '${_GCR_REGISTRY}/${PROJECT_ID}/task_trim_fastqs_atac:$BRANCH_NAME',
           '-f',
           'dockerfiles/task_trim_fastqs_atac.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
-  id: 'task-bowtie2'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/task_bowtie2:$BRANCH_NAME',
-          '-f',
-          'dockerfiles/task_bowtie2.dockerfile',
           '.' ]
   waitFor: ['-']
   timeout: 28800s
@@ -184,6 +184,11 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
+         '${_GCR_REGISTRY}/${PROJECT_ID}/task_chromap:$BRANCH_NAME']
+  waitFor: ['task-chromap']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/task_merge_bams:$BRANCH_NAME']
   waitFor: ['task-merge-bams']
   
@@ -201,11 +206,6 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/task_trim_fastqs_atac:$BRANCH_NAME']
   waitFor: ['task-trim-fastqs-atac']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/task_bowtie2:$BRANCH_NAME']
-  waitFor: ['task-bowtie2']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
