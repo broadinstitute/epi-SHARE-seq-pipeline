@@ -59,7 +59,6 @@ ENV PATH="/software/:${PATH}"
 # Copy the compiled software from the builder
 COPY --from=builder --chown=$USER:$USER /software/chromap-master /software/
 COPY --from=builder --chown=$USER:$USER /usr/include/* /usr/include/
-COPY --from=builder --chown=$USER:$USER /usr/local/include/* /usr/local/include/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 USER $USER
