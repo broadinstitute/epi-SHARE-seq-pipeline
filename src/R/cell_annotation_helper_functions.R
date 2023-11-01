@@ -10,7 +10,7 @@ suppressMessages(library(Seurat))
 suppressMessages(library(logr))
 suppressMessages(library(optparse))
 suppressMessages(library(reticulate))
-#use_python("/usr/bin/python3")
+use_python("/usr/bin/python3")
 
 options("logr.notes" = FALSE)
 options(future.globals.maxSize=10e9)

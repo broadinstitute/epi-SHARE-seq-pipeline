@@ -4,7 +4,7 @@
 ### perform cell annotation using Seurat label transfer approach.
 ### Modified from https://satijalab.org/seurat/articles/integration_mapping
 
-#source("/usr/local/bin/cell_annotation_helper_functions.R")
+source("/usr/local/bin/cell_annotation_helper_functions.R")
 #source("/data/pinello/PROJECTS/2023_02_SHARE_Pipeline/epi-SHARE-seq-pipeline/src/R/cell_annotation_helper_functions.R")
 
 suppressMessages(library(Seurat))
@@ -99,7 +99,14 @@ tryCatch(
     {
         log_print("# Loading reference and query data...")
         
-        obj.ref <- readRDS(glue::glue("{reference_data_name}.rds"))
+        adata <- read_h5ad(glue::glue("{reference_data_name}.h5ad"))
+        counts <- t(as.matrix(adata$raw$X))
+        colnames(counts) <- adata$obs_names
+        rownames(counts) <- adata$var_names
+        metadata <- as.data.frame(adata$obs)
+        obj.ref <- CreateSeuratObject(counts = counts, assay = "RNA")
+        obj.ref <- AddMetaData(obj.ref, metadata)
+        
         obj.query <- readRDS(query_data)
        
     },

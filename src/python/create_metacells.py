@@ -58,7 +58,6 @@ def main():
     nbrs = NearestNeighbors(n_neighbors=args.n_neighbors).fit(adata.obsm['X_pca'])
     _, indices = nbrs.kneighbors(adata_sub.obsm['X_pca'])
     
-    
     # create metacell profiles
     meta_counts = np.empty(shape=(adata_sub.n_obs, adata_sub.n_vars), dtype=np.float32)
     for i in range(indices.shape[0]):
