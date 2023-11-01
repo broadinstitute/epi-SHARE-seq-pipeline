@@ -15,6 +15,7 @@ def parse_arguments():
     parser.add_argument("input_read2_fastq_file", help="Filename for uncorrected input read 2 FASTQ file")
     parser.add_argument("output_read1_fastq_file", help="Filename for corrected output read 1 FASTQ file")
     parser.add_argument("output_read2_fastq_file", help="Filename for corrected output read 2 FASTQ file")
+    parser.add_argument("output_barcode_fastq_file", help="Filename for corrected output barcode FASTQ file")
     parser.add_argument("whitelist_file", help="Filename for whitelisted combinations of R1R2R3 barcodes, one per line")
     parser.add_argument("sample_type", choices=["ATAC", "RNA"], help="Sample modality")
     parser.add_argument("prefix", help="Prefix for naming output QC txt file")

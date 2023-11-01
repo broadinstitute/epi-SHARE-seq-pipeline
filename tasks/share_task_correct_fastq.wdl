@@ -53,22 +53,12 @@ task share_correct_fastq {
             ~{fastq_R2} \
             ~{corrected_fastq_R1} \
             ~{corrected_fastq_R2} \
+            ~{corrected_fastq_barcode} \
             ~{whitelist} \
             ~{sample_type} \
             ~{prefix} \
             ~{pkr} \
             ~{if paired_rna then "--paired_rna" else ""}
-
-        python3 $(which correct_fastq.py) \
-            ~{fastq_R1} \
-            ~{fastq_R2} \
-            ~{corrected_fastq_R1} \
-            ~{corrected_fastq_R2} \
-            ~{corrected_fastq_barcode} \
-            ~{whitelist} \
-            ~{sample_type} \
-            ~{prefix} \
-            ~{pkr}
 
         pigz -p ~{cpus} *.fastq
     >>>
