@@ -15,7 +15,7 @@ task make_track {
         # and compute some alignment metrics along with the TSS
         # enrichment plot.
         File? chrom_sizes
-        File? fragments
+        File fragments
         String? genome_name
         String? prefix
 

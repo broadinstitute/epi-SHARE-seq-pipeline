@@ -17,7 +17,7 @@ task share_correct_fastq {
         String sample_type
         String? pkr
         String? prefix
-        Boolean paired_rna
+        Boolean paired_rna = false
 
         Int? cpus = 16
         Float? disk_factor = 8.0
@@ -39,6 +39,7 @@ task share_correct_fastq {
 
     String corrected_fastq_R1 = basename(fastq_R1, ".fastq.gz") + "_corrected.fastq"
     String corrected_fastq_R2 = basename(fastq_R2, ".fastq.gz") + "_corrected.fastq"
+    String corrected_fastq_barcode = basename(fastq_R1, ".fastq.gz") + "_corrected_barcode.fastq"
     String monitor_log = "correct_fastqs_monitor.log"
 
     command <<<
@@ -58,12 +59,24 @@ task share_correct_fastq {
             ~{pkr} \
             ~{if paired_rna then "--paired_rna" else ""}
 
+        python3 $(which correct_fastq.py) \
+            ~{fastq_R1} \
+            ~{fastq_R2} \
+            ~{corrected_fastq_R1} \
+            ~{corrected_fastq_R2} \
+            ~{corrected_fastq_barcode} \
+            ~{whitelist} \
+            ~{sample_type} \
+            ~{prefix} \
+            ~{pkr}
+
         pigz -p ~{cpus} *.fastq
     >>>
 
     output {
         File corrected_fastq_R1 = "~{corrected_fastq_R1}.gz"
         File corrected_fastq_R2 = "~{corrected_fastq_R2}.gz"
+        File corrected_fastq_barcode= "~{corrected_fastq_barcode}.gz"
         File barcode_qc = "~{prefix}_barcode_qc.txt"
 	    File monitor_log = "~{monitor_log}"
     }
