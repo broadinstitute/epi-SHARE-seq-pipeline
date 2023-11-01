@@ -30,7 +30,6 @@ task cell_annotation {
         String? gene_id_to_symbol 
 
         # Integration
-        String? normalization_method = "SCT"
         String? anchors_reduction = "pcaproject"
 
         #Output option
