@@ -46,16 +46,6 @@ steps:
   timeout: 28800s
 
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'task-filter-atac'
-  args: [ 'build', '-t',
-          '${_GCR_REGISTRY}/${PROJECT_ID}/task_filter_atac:$BRANCH_NAME',
-          '-f',
-          'dockerfiles/task_filter_atac.dockerfile',
-          '.' ]
-  waitFor: ['-']
-  timeout: 28800s
-
-- name: 'gcr.io/cloud-builders/docker'
   id: 'task-trim-fastqs-atac'
   args: [ 'build', '-t',
           '${_GCR_REGISTRY}/${PROJECT_ID}/task_trim_fastqs_atac:$BRANCH_NAME',
@@ -211,11 +201,6 @@ steps:
   args: ['push',
          '${_GCR_REGISTRY}/${PROJECT_ID}/task_trim_fastqs_atac:$BRANCH_NAME']
   waitFor: ['task-trim-fastqs-atac']
-
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push',
-         '${_GCR_REGISTRY}/${PROJECT_ID}/task_filter_atac:$BRANCH_NAME']
-  waitFor: ['task-filter-atac']
 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push',
