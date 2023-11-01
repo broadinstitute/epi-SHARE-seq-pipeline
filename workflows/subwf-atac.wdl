@@ -109,7 +109,6 @@ workflow wf_atac {
                     sample_type = "ATAC",
                     pkr = subpool,
                     prefix = prefix,
-                    paired_rna = false,
                     cpus = correct_cpus,
                     disk_factor = correct_disk_factor,
                     memory_factor = correct_memory_factor,

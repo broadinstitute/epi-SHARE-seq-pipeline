@@ -18,13 +18,10 @@ task html_report {
 
         String? prefix
 
-        # Stats for ATAC and RNA, will go at top of html
-        Int? atac_total_reads
-        Int? atac_aligned_uniquely
-        Int? atac_unaligned
-        Int? atac_feature_reads
-        Int? atac_duplicate_reads
-        Float? atac_percent_duplicates
+        File? atac_metrics
+        File? rna_metrics
+
+        
         Int? rna_total_reads
         Int? rna_aligned_uniquely
         Int? rna_aligned_multimap
@@ -39,40 +36,42 @@ task html_report {
         ## Raw text logs to append to end of html
         Array[String?] log_files
 
+        String docker_image = 'us.gcr.io/buenrostro-share-seq/task_html_report:dev'
+
     }
 
-    String output_file = "${default="share-seq" prefix}.html"
+    String output_file = "${default="combinomics" prefix}.html"
     # need to select from valid files since some are optional
     Array[File]? valid_image_files = select_all(image_files)
     Array[String]? valid_log_files = select_all(log_files)
+    String output_csv_file = "${default="share-seq" prefix}.csv"
 
     command <<<
 
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
+        
+        echo "rna_total_reads,"~{rna_total_reads} > summary_stats.csv
+        echo "rna_aligned_uniquely," ~{rna_aligned_uniquely} >> summary_stats.csv
+        echo "rna_aligned_multimap," ~{rna_aligned_multimap} >> summary_stats.csv
+        echo "rna_unaligned," ~{rna_unaligned} >> summary_stats.csv
+        echo "rna_feature_reads," ~{rna_feature_reads} >> summary_stats.csv
+        echo "rna_duplicate_reads," ~{rna_duplicate_reads} >> summary_stats.csv
+        echo "rna_frig," ~{rna_frig} >> summary_stats.csv
+        
+        # This can be uncommented once we get the rna_metrics file sorted out
+        #PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} ~{atac_metrics} ~{rna_metrics}
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} ~{atac_metrics} summary_stats.csv
 
-        echo "<h3>Summary Statistics</h3><p><table><tr><td colspan=2>ATAC</td></tr><tr><td>Total reads</td><td>" ~{atac_total_reads} "</td></tr>" > output.txt
-        echo "<tr><td>Aligned uniquely</td><td>" ~{atac_aligned_uniquely} "</td></tr>" >> output.txt
-        echo "<tr><td>Unaligned</td><td>" ~{atac_unaligned} "</td></tr>" >> output.txt
-        echo "<tr><td>Unique Reads</td><td>" ~{atac_feature_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Duplicate Reads</td><td>" ~{atac_duplicate_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Percent Duplicates</td><td>" ~{atac_percent_duplicates} "</td></tr>" >> output.txt
-        echo "<td colspan=2>RNA</td></tr><tr><td>Total reads</td><td>" ~{rna_total_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Aligned uniquely</td><td>" ~{rna_aligned_uniquely} "</td></tr>" >> output.txt
-        echo "<tr><td>Aligned multimap</td><td>" ~{rna_aligned_multimap} "</td></tr>" >> output.txt
-        echo "<tr><td>Unaligned</td><td>" ~{rna_unaligned} "</td></tr>" >> output.txt
-        echo "<tr><td>Filtered (feature) Reads</td><td>" ~{rna_feature_reads} "</td></tr>" >> output.txt
-        echo "<tr><td>Duplicate Reads</td><td>" ~{rna_duplicate_reads} "</td></tr>" >> output.txt
-        percent=$(( ~{default=0 rna_duplicate_reads}*100/~{default=1 rna_feature_reads} ))
-        echo "<tr><td>Percent Duplicates</td><td>" $percent "</td></tr></table>" >> output.txt
-        echo "<tr><td>Fraction of Reads in Genes</td><td>" ~{rna_frig} "</td></tr></table>" >> output.txt
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt --input_file_name output.txt
+        # TODO: this needs to be fix.
+        echo 'PKR,~{prefix}' | cat - ~{output_csv_file} > temp && mv temp ~{output_csv_file} 
     >>>
     output {
         File html_report_file = "~{output_file}"
+        File csv_summary_file = "~{output_csv_file}"
     }
 
     runtime {
-        docker: 'nchernia/share_task_html_report:14'
+        docker: "${docker_image}"
     }
 }

@@ -29,7 +29,7 @@ task qc_atac {
         Int? cpus = 8
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
-        String docker_image = "docker.io/polumechanos/qc_atac:igvf"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
     }
 
     # Determine the size of the input
@@ -98,7 +98,7 @@ task qc_atac {
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             no-singleton.bed.gz
 
-        cut -f 1 ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | grep -v barcode > barcodes_passing_threshold
+         
 
         # Insert size plot bulk
         echo '------ START: Generate Insert size plot ------' 1>&2
@@ -111,9 +111,14 @@ task qc_atac {
 
         awk -v FS=',' -v OFS=" " 'NR==1{$1=$1;print $0,"unique","pct_dup","pct_unmapped";next}{$1=$1;if ($2-$3-$4-$5>0){print $0,($2-$3-$4-$5),$3/($2-$4-$5),($5+$4)/$2} else { print $0,0,0,0}}' temp_summary > tmp-barcode-stats
 
+        cut -f 1 ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv > barcodes_passing_threshold
+
         time join -j 1  <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q;sort -k1,1)) <(grep -wFf barcodes_passing_threshold tmp-barcode-stats | (sed -u 1q;sort -k1,1)) | \
-        (sed -u 1q;sort -k1,1)) | \
-        awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_reads_promoter","pct_mito_reads"}NR>1{print $0,$4*100/$7,$10*100/$7,$13*100/($12+$13)}' | sed 's/ /\t/g'> ~{final_barcode_metadata}
+        (sed -u 1q;sort -k1,1) | \
+        awk -v FS=" " -v OFS=" " 'NR==1{print $0,"pct_reads_promoter"}NR>1{print $0,$4*100/$7}' | sed 's/ /\t/g' > ~{final_barcode_metadata}
+
+        head ~{final_barcode_metadata}
+        head ~{final_barcode_metadata} | awk '{print NF}'
 
         # Barcode rank plot
         echo '------ START: Generate barcod rank plot ------' 1>&2

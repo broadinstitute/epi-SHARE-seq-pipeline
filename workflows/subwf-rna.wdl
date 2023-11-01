@@ -31,7 +31,7 @@ workflow wf_rna {
 
         # Correct-specific inputs
         Boolean correct_barcodes = true
-        Boolean paired_rna = false
+        Boolean? paired_rna = false
         # Runtime parameters
         Int? correct_cpus
         Float? correct_disk_factor

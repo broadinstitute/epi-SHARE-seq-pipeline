@@ -17,7 +17,7 @@ task share_correct_fastq {
         String sample_type
         String? pkr
         String? prefix
-        Boolean paired_rna
+        Boolean paired_rna = false
 
         Int? cpus = 16
         Float? disk_factor = 8.0

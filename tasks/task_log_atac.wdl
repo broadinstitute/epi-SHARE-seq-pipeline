@@ -15,8 +15,8 @@ task log_atac {
     input {
         # This function takes as input the necessary log files and extracts
         # the quality metrics
-        File alignment_log
-        File barcode_log
+        File? alignment_log
+        File? barcode_log
         String? prefix = "sample"
     }
 
