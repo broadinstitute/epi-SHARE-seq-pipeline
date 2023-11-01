@@ -6,11 +6,11 @@
 FROM python@sha256:7ad180fdf785219c4a23124e53745fbd683bd6e23d0885e3554aff59eddbc377
 
 LABEL maintainer = "Eugenio Mattei"
-LABEL software = "Share-seq pipeline"
-LABEL software.version="0.0.1"
+LABEL software = "COMBINOMICS pipeline"
+LABEL software.version="2.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
-LABEL software.version.is-production="No"
-LABEL software.task="correct_fastq"
+LABEL software.version.is-production="Yes"
+LABEL software.task="share_correct_fastq"
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive

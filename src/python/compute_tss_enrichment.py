@@ -5,20 +5,21 @@
 
 import argparse
 import itertools
-import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import multiprocessing
+import numpy as np
 import operator
 import pysam
 
 from collections import defaultdict
 from functools import partial
-from typing import BinaryIO
-from typing import TextIO
+from typing import BinaryIO, TextIO
 
 matplotlib.use('Agg')
-def get_outputs(idx,bulk_signal_counter,barcode_signal_counter, barcode_statistics):
+
+
+def get_outputs(idx, bulk_signal_counter, barcode_signal_counter, barcode_statistics):
     return {
         "idx": idx,
         "bulk_signal": bulk_signal_counter,
@@ -66,7 +67,7 @@ def compute_tss_score(idx: int,
     bulk_signal_counter = np.zeros(promoter_size)
     # 100(flank)signal TSS +/- 50(101)flank(100) = 301
     # Follwoing ArchR heuristic.
-    barcode_signal_counter = defaultdict(partial(np.zeros,301))
+    barcode_signal_counter = defaultdict(partial(np.zeros, 301))
     # To count the number of reads in the promoter region.
     # Array: [0]: reads in tss
     #        [1]: reads in promoter
@@ -126,7 +127,7 @@ def compute_tss_score(idx: int,
         except ValueError:
             print(f"No reads found for {tss[0]}:{max(1,promoter_start)}-{promoter_end}.")
 
-    return get_outputs(idx,bulk_signal_counter,barcode_signal_counter,barcode_statistics)
+    return get_outputs(idx, bulk_signal_counter, barcode_signal_counter, barcode_statistics)
 
 
 def _add_read_to_dictionary(bulk_signal_counter,
@@ -228,9 +229,9 @@ def _prepare_args_for_counting(
     for idx, chunk in enumerate(np.array_split(regions_list, cpus)):
         input_args.append(
             (idx,
-            tabix_file,
-            chunk,
-            flank_size)
+             tabix_file,
+             chunk,
+             flank_size)
             )
 
     return input_args
@@ -258,7 +259,7 @@ def _merge_bulk_signal(results):
 
 if __name__ == '__main__':
 
-    #args = _parse_sanitize_cmdline_arguments()
+    # args = _parse_sanitize_cmdline_arguments()
 
     msg = "Add the description"
     parser = argparse.ArgumentParser(description=msg)
@@ -299,7 +300,6 @@ if __name__ == '__main__':
 
     per_barcode_output = f"{args.prefix}.tss_enrichment_barcode_stats.tsv"
     tss_enrichment_plot_fnp = f"{args.prefix}.tss_enrichment_bulk.png"
-
 
     with open(per_barcode_output, "w") as out_file:
         # reads_tss_total exists to match the counts produced by ArchR.

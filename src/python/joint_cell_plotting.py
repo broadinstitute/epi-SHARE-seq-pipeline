@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from plotnine import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Plot barcodes by RNA and ATAC QC status")
     parser.add_argument("rna_metrics_file", help="Filename for RNA metrics tsv file")
@@ -27,6 +28,7 @@ def parse_arguments():
 
     return parser.parse_args()
 
+
 def get_split_lines(file_name, delimiter, skip=0):
     """
     Read file contents and yield generator with line entries
@@ -36,12 +38,15 @@ def get_split_lines(file_name, delimiter, skip=0):
             next(f)
         for line in f:
             yield line.rstrip().split(sep=delimiter)
+
+
 def merge_dicts(dict_1, dict_2):
     """Merge dictionaries by key; combine values into quadruple, fill with 0s if key not in both dicts"""
     keys = set(dict_1.keys() | dict_2.keys())
-    merged = {k: (dict_1.get(k, (0,0)) + dict_2.get(k, (0,0))) for k in keys}
+    merged = {k: (dict_1.get(k, (0, 0)) + dict_2.get(k, (0, 0))) for k in keys}
 
-    return(merged)
+    return merged
+
 
 def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     """Read files and aggregate metrics into Pandas dataframe"""
@@ -53,7 +58,7 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     umis = []
     genes = []
     rna_barcodes = []
-    
+
     for line in rna_metrics_contents:
         if int(umi_ind) >= remove_low_yielding_cells:
             umis.append(int(umi_ind))
@@ -72,16 +77,17 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     # remove cells that have fewer than 10 fragments
     for line in atac_metrics_contents:
         if int(reads_ind)/2 >= remove_low_yielding_cells:
-            tss.append(float(tss_ind))
-            frags.append(int(reads_ind)/2)
-            atac_barcodes.append(atac_barcode_ind)
+            tss.append(float(line[tss_ind]))
+            frags.append(int(line[reads_ind])/2)
+            atac_barcodes.append(line[atac_barcode_ind])
     atac_metrics = dict(zip(atac_barcodes, zip(tss, frags)))
 
     # merge metrics by barcodes
     metrics = merge_dicts(rna_metrics, atac_metrics)
-    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["unique_umi","genes_final","tss","frags"])
+    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["unique_umi", "genes_final", "tss", "frags"])
 
-    return(df)
+    return df
+
 
 def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
     pass_umis = df["unique_umi"] >= min_umis
@@ -90,10 +96,10 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
     pass_frags = df["frags"] >= min_frags
 
     # add df column with QC outcome
-    qc_conditions  = [(pass_umis & pass_genes & pass_tss & pass_frags),
-                      (pass_umis & pass_genes),
-                      (pass_tss & pass_frags),
-                      (~(pass_umis & pass_genes) & (~(pass_tss & pass_frags)))]
+    qc_conditions = [(pass_umis & pass_genes & pass_tss & pass_frags),
+                     (pass_umis & pass_genes),
+                     (pass_tss & pass_frags),
+                     (~(pass_umis & pass_genes) & (~(pass_tss & pass_frags)))]
     qc_choices = ["both", "RNA only", "ATAC only", "neither"]
     df["QC"] = np.select(qc_conditions, qc_choices)
 
@@ -102,13 +108,16 @@ def qc_cells(df, min_umis, min_genes, min_tss, min_frags):
 
     df["QC_count"] = [f"{outcome} ({outcome_counts[outcome]})" for outcome in df["QC"]]
 
-    return(df)
+    return df
+
 
 def round_to_power_10(x):
-    return(10**np.ceil(np.log10(x)))
+    return 10**np.ceil(np.log10(x))
+
 
 def label_func(breaks):
     return [int(x) for x in breaks]
+
 
 def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
     # get max x and y coords to set plot limits
@@ -139,6 +148,7 @@ def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
              )
 
     plot.save(filename=plot_file, dpi=1000)
+
 
 def main():
     # create log file
@@ -177,4 +187,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

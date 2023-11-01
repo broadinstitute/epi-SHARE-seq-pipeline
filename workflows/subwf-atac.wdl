@@ -59,7 +59,7 @@ workflow wf_atac {
         Int? quality_filter = 0
         Int? bc_error_threshold = 2
         Float? bc_probability_threshold = 0.9
-        String? read_format
+        String? read_format = "bc:0:-1,r1:0:-1,r2:0:-1"
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor = 8.0
@@ -139,7 +139,7 @@ workflow wf_atac {
         input:
             fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
             fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
-            fastq_barcode = fastq_barcode,
+            fastq_barcode = select_first([correct.corrected_fastq_barcode, fastq_barcode]),
             reference_fasta = reference_fasta,
             trim_adapters = trim_adapters,
             genome_name = genome_name,
