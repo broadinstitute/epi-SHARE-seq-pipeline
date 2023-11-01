@@ -9,6 +9,7 @@ LABEL software.task="Trim ATAC fastqs"
 
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
+    pigz \
     wget &&\
     rm -rf /var/lib/apt/lists/*
 

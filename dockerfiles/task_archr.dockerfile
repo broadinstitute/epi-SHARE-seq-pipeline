@@ -23,7 +23,7 @@ RUN apt-get update -qq && \
     gtk-doc-tools \
     libcairo2-dev \
     libcurl4-openssl-dev \
-    libfreetype6-dev \
+    libfreetype-dev \
     libfribidi-dev \
     libgsl-dev \
     libharfbuzz-dev \
@@ -58,7 +58,6 @@ RUN R --no-echo --no-restore --no-save -e "devtools::install_github('GreenleafLa
 RUN R --no-echo --no-restore --no-save -e "devtools::install_github('immunogenomics/presto')"
 
 RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', version = '4.3.0')"
-
 
 RUN R --no-echo --no-restore --no-save -e "install.packages(c('logr','hexbin', 'ggpointdensity'))"
 
