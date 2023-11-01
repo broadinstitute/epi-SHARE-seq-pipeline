@@ -50,7 +50,6 @@ option_list = list(
                 help="Which genome is used as reference. 
                      Currently available options: hg38; mm10. Default: hg38", 
                 metavar="character"),
-    
     make_option(c("--gene_id_to_symbol"), type="character", default="TRUE", 
                 help="Whether or not convert the gene id to symnol. 
                       Set true if the reference data uses gene id as feature name.", 
@@ -60,7 +59,7 @@ option_list = list(
     make_option(c("--anchors_reduction"), type="character", default="pcaproject", 
                 help="Dimensional reduction to perform when finding anchors.
                       Available options: cca and pcaproject. Default: pcaproject", 
-                metavar="character"),
+               metavar="character"),
     
     # output parameters
     make_option(c("--save_seurat"), type="character", default="FALSE", 
