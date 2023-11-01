@@ -21,7 +21,7 @@ workflow combinomics {
         Boolean dorcs_flag = true
         String chemistry
         String prefix = "shareseq-project"
-        String? subpool=""
+        String? subpool
         String pipeline_modality = "full" # "full": run everything; "count_only": stops after producing fragment file and count matrix; "no_align": correct and trim raw fastqs.
 
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
@@ -111,7 +111,7 @@ workflow combinomics {
                     whitelist = select_first([whitelist_rna, whitelist_rna_, whitelist, whitelist_]),
                     idx_tar = idx_tar_rna_,
                     prefix = prefix,
-                    pkr = subpool,
+                    subpool = subpool,
                     genome_name = genome_name_,
                     pipeline_modality = pipeline_modality,
                     gene_naming = gene_naming

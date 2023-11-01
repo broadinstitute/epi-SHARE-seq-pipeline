@@ -17,7 +17,7 @@ workflow wf_rna {
 
     input {
         # RNA sub-workflow inputs
-        String? pkr
+        String? subpool
         String prefix
         String genome_name
         String chemistry
@@ -93,7 +93,7 @@ workflow wf_rna {
                     fastq_R2 = read_pair.right,
                     whitelist = whitelist,
                     sample_type = "RNA",
-                    pkr = pkr,
+                    pkr = subpool,
                     prefix = prefix,
                     paired_rna = paired_rna,
                     cpus = correct_cpus,
@@ -135,7 +135,7 @@ workflow wf_rna {
                 tar = align.raw_tar,
                 genome_name = genome_name,
                 prefix = prefix,
-                pkr = pkr,
+                pkr = subpool,
                 multimappers = multimappers,
                 gene_naming = gene_naming,
                 disk_factor = generate_h5_disk_factor,
@@ -149,7 +149,7 @@ workflow wf_rna {
                 mtx_tar = align.raw_tar,
                 umi_cutoff = umi_cutoff,
                 gene_cutoff = gene_cutoff,
-                subpool = pkr,
+                subpool = subpool,
                 barcode_tag = barcode_tag,
                 genome_name = genome_name,
                 prefix = prefix,
