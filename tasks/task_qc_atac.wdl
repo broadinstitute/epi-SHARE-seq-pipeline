@@ -62,8 +62,12 @@ task qc_atac {
         # I am not writing to a file anymore because Google keeps track of it automatically.
         bash $(which monitor_script.sh) 1>&2 &
 
-        ln -s ~{fragments} in.fragments.tsv.gz
-        ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
+        ln -s ~{fragments} tmp.in.fragments.tsv.gz
+        #ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
+
+
+        gzip -dc tmp.in.fragments.tsv.gz | grep -v random | grep -v chrUn | bgzip -c > in.fragments.tsv.gz
+        tabix --zero-based --preset bed in.fragments.tsv.gz
 
         if [ ~{if defined(barcode_conversion_dict) then "true" else "false"} == "true" ]; then
             echo '------ There is a conversion list ------' 1>&2

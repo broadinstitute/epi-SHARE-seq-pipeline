@@ -26,7 +26,7 @@ workflow wf_atac {
         String? barcode_tag_fragments
         String chemistry
         String? prefix = "sample"
-        String? subpool = "none"
+        String? subpool
         String genome_name
         Int? cutoff
         String pipeline_modality = "full"

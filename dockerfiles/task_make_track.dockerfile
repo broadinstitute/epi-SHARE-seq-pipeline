@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     libkrb5-3 \
     libcurl4 \
     pigz \
+    tabix \
     wget &&\
     rm -rf /var/lib/apt/lists/*
 
