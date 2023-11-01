@@ -49,7 +49,7 @@ task make_track {
         # I am not writing to a file anymore because Google keeps track of it automatically.
         bash $(which monitor_script.sh) 1>&2 &
 
-        gzip -dc tmp.in.fragments.tsv.gz | grep -v random | grep -v chrUn | gzip -c > in.fragments.tsv.gz
+        gzip -dc ~{fragments} | grep -v random | grep -v chrUn | gzip -c > in.fragments.tsv.gz
 
         pigz -d -c -p 8 in.fragments.tsv.gz | awk '{size=$3-$2; if (size < 100){no_nuc+=1}; if(size >= 100 && size < 200){mono+=1}; if(size>=200){multi+=1}}END{print no_nuc*2"\n"mono*2"\n"multi*2}' > lib_sizes
 
