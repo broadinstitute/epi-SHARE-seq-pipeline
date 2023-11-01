@@ -49,20 +49,22 @@ task make_track {
         # I am not writing to a file anymore because Google keeps track of it automatically.
         bash $(which monitor_script.sh) 1>&2 &
 
-        pigz -d -c -p 8 ~{fragments} | awk '{size=$3-$2; if (size < 100){no_nuc+=1}; if(size >= 100 && size < 200){mono+=1}; if(size>=200){multi+=1}}END{print no_nuc*2"\n"mono*2"\n"multi*2}' > lib_sizes
+        gzip -dc tmp.in.fragments.tsv.gz | grep -v random | grep -v chrUn | gzip -c > in.fragments.tsv.gz
+
+        pigz -d -c -p 8 in.fragments.tsv.gz | awk '{size=$3-$2; if (size < 100){no_nuc+=1}; if(size >= 100 && size < 200){mono+=1}; if(size>=200){multi+=1}}END{print no_nuc*2"\n"mono*2"\n"multi*2}' > lib_sizes
 
         # Compute track for all insertion sizes
-        bash make_track.sh -o ~{prefix}.~{genome_name}.bw ~{chrom_sizes} ~{fragments}
+        bash make_track.sh -o ~{prefix}.~{genome_name}.bw ~{chrom_sizes} in.fragments.tsv.gz
         # Compute track for fragments shorter than 100 nucleotides
-        pigz -d -c -p 4 ~{fragments} | awk '$3-$2 < 100' | pigz -p 8 -c > no_nucleosome.bed.gz
+        pigz -d -c -p 4 in.fragments.tsv.gz | awk '$3-$2 < 100' | pigz -p 8 -c > no_nucleosome.bed.gz
         library_size=$(sed -n '1p;3q' lib_sizes)
         bash make_track.sh -d $library_size -o ~{prefix}.no.nucleosome.~{genome_name}.bw ~{chrom_sizes} no_nucleosome.bed.gz
         # Compute track for mono-nuclesome fragments
-        pigz -d -c -p 4 ~{fragments} | awk '$3-$2 >= 100 && $3-$2 <200' | pigz -p 8 -c > mono_nucleosome.bed.gz
+        pigz -d -c -p 4 in.fragments.tsv.gz | awk '$3-$2 >= 100 && $3-$2 <200' | pigz -p 8 -c > mono_nucleosome.bed.gz
         library_size=$(sed -n '2p;3q' lib_sizes)
         bash make_track.sh -d $library_size -o ~{prefix}.mono.nucleosome.~{genome_name}.bw ~{chrom_sizes} mono_nucleosome.bed.gz
         # Compute track for fragments spanning multiple nucleosomes
-        pigz -d -c -p 4 ~{fragments} | awk '$3-$2 >= 200' | pigz -p 8 -c > multi_nucleosome.bed.gz
+        pigz -d -c -p 4 in.fragments.tsv.gz | awk '$3-$2 >= 200' | pigz -p 8 -c > multi_nucleosome.bed.gz
         library_size=$(sed -n '3p;3q' lib_sizes)
         bash make_track.sh -d $library_size -o ~{prefix}.multi.nucleosome.~{genome_name}.bw ~{chrom_sizes} multi_nucleosome.bed.gz
 
