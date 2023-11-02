@@ -107,7 +107,7 @@ def update_main_subsets(key, pkr, r1, whitelist, rna_lib = None, rna_fq1 = None,
 parser = argparse.ArgumentParser( description='Generate tables for Terra')
 parser.add_argument('-i', '--input', type=str, required=True)
 parser.add_argument('-n', '--name', type=str, required=True)
-parser.add_argument('-m', '--meta', type=str, required=True)
+parser.add_argument('-m', '--meta', type=str, required=False)
 args = parser.parse_args()
 
 atac = dict()
