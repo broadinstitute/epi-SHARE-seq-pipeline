@@ -4,7 +4,7 @@
 ############################################################
 
 #FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
-FROM debian:buster-slim
+FROM ubuntu:latest
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
