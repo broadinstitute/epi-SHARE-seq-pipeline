@@ -170,14 +170,14 @@ def main():
     
     # read R2 and R3 barcode files; if not passed in, use R1 barcodes
     if r2_barcode_file:
-        with open(r2_barcode_file) as f:
-            r2_barcodes = [barcode for barcode in f.read().rstrip().split()]
+        r2_barcode_subset_dict = create_barcode_subset_dict(r2_barcode_file)
+        r2_barcodes = r2_barcode_subset_dict.keys()
     else:
         r2_barcodes = r1_barcode_subset_dict.keys()
         
     if r3_barcode_file:
-        with open(r3_barcode_file) as f:
-            r3_barcodes = [barcode for barcode in f.read().rstrip().split()]
+        r3_barcode_subset_dict = create_barcode_subset_dict(r2_barcode_file)
+        r3_barcodes = r3_barcode_subset_dict.keys()
     else:
         r3_barcodes = r1_barcode_subset_dict.keys()
     
