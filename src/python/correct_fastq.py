@@ -39,41 +39,44 @@ def get_barcodes(whitelist_file):
     return list(r1_barcodes), list(r2_barcodes), list(r3_barcodes)
 
 
-def create_barcode_dict(barcode_list):
+def create_barcode_dicts(barcode_list):
     """
-    Adds each barcode and its mismatch possibilities to the dictionary
+    Creates dictionaries containing exact match and 1-mismatch sequences
     """
-    barcode_dict = dict()
+    barcode_dict_exact  = dict() # [seq: seq]
+    barcode_dict_mismatch = dict() # [mismatch: seq]
     for barcode in barcode_list:
-        barcode_dict[barcode] = barcode  # exact match
+        barcode_dict_exact[barcode] = barcode # exact match
         for i, base in enumerate(barcode):
             for x in 'ACGTN':
                 if base != x:
                     # add mismatch possibilities at pos i
                     mismatch = barcode[:i] + x + barcode[i + 1:]
-                    barcode_dict[mismatch] = barcode
+                    barcode_dict_mismatch[mismatch] = barcode
+                    
+    return barcode_dict_exact, barcode_dict_mismatch
 
-    return barcode_dict
-
-def check_putative_barcode(barcode_str, barcode_dict, quality_str):
+def check_putative_barcode(barcode_str, barcode_dict_exact, barcode_dict_mismatch, quality_str):
     """
-    Procedure: check exact match of barcode, then 1 mismatch, then 1bp left/right shift
+    Procedure: check exact match of barcode, then 1 mismatch, then 1bp left/right
+     shift
     """
-    value = barcode_dict.get(barcode_str[1:9]) # check exact location first
+    value = barcode_dict_exact.get(barcode_str[1:9]) # check exact location first
     quality = quality_str[1:9]
     if value is None:
-        value = barcode_dict.get(barcode_str[:8]) # check 1bp shift left
-        quality = quality_str[:8]
+        value = barcode_dict_mismatch.get(barcode_str[1:9])
         if value is None:
-            # check 1bp shift right
-            # round 3 is shorter so add "N" for those
-            if len(barcode_str) < 10: 
-                value = barcode_dict.get(barcode_str[2:]+"N")
-                quality = quality_str[2:]+"F"
-            else:
-                value = barcode_dict.get(barcode_str[2:])
-                quality = quality_str[2:]
-
+            value = barcode_dict_exact.get(barcode_str[:8]) # check 1bp shift left
+            quality = quality_str[:8]
+            if value is None:
+                # check 1bp shift right
+                # round 3 is shorter so add "N" for those
+                if len(barcode_str) < 10: 
+                    value = barcode_dict_exact.get(barcode_str[2:]+"N")
+                    quality = quality_str[2:]+"F"
+                else:
+                    value = barcode_dict_exact.get(barcode_str[2:])
+                    quality = quality_str[2:]
     return value, quality
 
 
@@ -82,9 +85,12 @@ def process_fastqs(input_read1_fastq_file,
                    output_read1_fastq_file,
                    output_read2_fastq_file,
                    output_barcode_fastq_file,
-                   r1_barcode_dict,
-                   r2_barcode_dict,
-                   r3_barcode_dict,
+                   r1_exact_barcode_dict,
+                   r1_mismatch_barcode_dict,
+                   r2_exact_barcode_dict,
+                   r2_mismatch_barcode_dict,
+                   r3_exact_barcode_dict,
+                   r3_mismatch_barcode_dict,
                    sample_type,
                    pkr,
                    prefix,
@@ -140,9 +146,9 @@ def process_fastqs(input_read1_fastq_file,
             q1_str, q2_str, q3_str = read_2_barcode_quality[14:24], read_2_barcode_quality[52:62], read_2_barcode_quality[90:99]
             # get corrected barcodes
             r1 = r2 = r3 = None
-            r1, q1 = check_putative_barcode(r1_str, r1_barcode_dict, q1_str)
-            r2, q2 = check_putative_barcode(r2_str, r2_barcode_dict, q2_str)
-            r3, q3 = check_putative_barcode(r3_str, r3_barcode_dict, q3_str)
+            r1, q1 = check_putative_barcode(r1_str, r1_exact_barcode_dict, r1_mismatch_barcode_dict, q1_str)
+            r2, q2 = check_putative_barcode(r2_str, r2_exact_barcode_dict, r2_mismatch_barcode_dict, q2_str)
+            r3, q3 = check_putative_barcode(r3_str, r3_exact_barcode_dict, r3_mismatch_barcode_dict, q3_str)
 
             # check first ten base pairs of read 2 for homopolymer G
             if sequence2[:10] == "G"*10:
@@ -235,9 +241,9 @@ def main():
     (r1_barcodes, r2_barcodes, r3_barcodes) = get_barcodes(whitelist_file)
 
     # create dictionaries for exact barcode matches and barcode mismatches
-    r1_barcode_dict = create_barcode_dict(r1_barcodes)
-    r2_barcode_dict = create_barcode_dict(r2_barcodes)
-    r3_barcode_dict = create_barcode_dict(r3_barcodes)
+    r1_exact_barcode_dict, r1_mismatch_barcode_dict = create_barcode_dicts(r1_barcodes)
+    r2_exact_barcode_dict, r2_mismatch_barcode_dict = create_barcode_dicts(r2_barcodes)
+    r3_exact_barcode_dict, r3_mismatch_barcode_dict = create_barcode_dicts(r3_barcodes)
 
     # write corrected FASTQs and QC stats
     process_fastqs(input_read1_fastq_file,
@@ -245,9 +251,12 @@ def main():
                    output_read1_fastq_file,
                    output_read2_fastq_file,
                    output_barcode_fastq_file,
-                   r1_barcode_dict,
-                   r2_barcode_dict,
-                   r3_barcode_dict,
+                   r1_exact_barcode_dict,
+                   r1_mismatch_barcode_dict,
+                   r2_exact_barcode_dict,
+                   r2_mismatch_barcode_dict,
+                   r3_exact_barcode_dict,
+                   r3_mismatch_barcode_dict,
                    sample_type,
                    pkr,
                    prefix,
