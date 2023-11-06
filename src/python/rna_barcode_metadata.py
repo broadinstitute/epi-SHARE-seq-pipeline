@@ -90,7 +90,7 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
 
         barcode_metadata.append(metrics)
 
-    return (barcode_metadata)
+    return barcode_metadata
 
 
 def write_metadata_file(barcode_metadata, output_file):
