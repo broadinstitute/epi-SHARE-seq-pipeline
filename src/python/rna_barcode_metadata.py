@@ -80,13 +80,13 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
     # create list with barcodes and associated metrics
     barcode_metadata = []
     for barcode, reads_vector in reads_per_barcode.items():
-        # Reminder that reads_vector is [x_mito_reads, mito_reads].
+        # Reminder that reads_vector is [total_reads, mito_reads].
         genes = len(genes_per_barcode[barcode])
         mito_genes = len(mito_genes_per_barcode[barcode])
-        fraction_mitochondrial_reads = round(reads_vector[1]/np.sum(reads_vector) * 100, 2)
+        fraction_mitochondrial_reads = round(reads_vector[1]/reads_vector[0]) * 100, 2)
         out_barcode = barcode + "_" + pkr if pkr else barcode
 
-        metrics = list(map(str,[out_barcode, int(np.sum(reads_vector)), reads_vector[0], reads_vector[1], genes+mito_genes, genes, mito_genes, fraction_mitochondrial_reads]))
+        metrics = list(map(str,[out_barcode, reads_vector[0], reads_vector[0]-reads_vector[1], reads_vector[1], genes+mito_genes, genes, mito_genes, fraction_mitochondrial_reads]))
 
         barcode_metadata.append(metrics)
 
