@@ -46,39 +46,38 @@ def write_read(fastq, read):
                      'sequence': read.query_sequence})
         
     fastq.write('@{name}\n{sequence}\n+\n{quality}\n'.format(**info))
-    
-def check_putative_barcode(barcode_str, barcode_matching_dict):
-    """
-    Procedure: check exact match of barcode, then 1 mismatch, then 1bp left/right shift
-    """
-    # check exact location first
-    exact = True
-    corrected_barcode = barcode_matching_dict.get(barcode_str[1:9]) 
-    if corrected_barcode is None:
-        exact = False
-        # check 1bp shift left
-        corrected_barcode = barcode_matching_dict.get(barcode_str[:8]) 
-        if corrected_barcode is None:
-            exact = False
-            # check 1bp shift right
-            corrected_barcode = barcode_matching_dict.get(barcode_str[2:])
-    return corrected_barcode, exact
 
-def create_barcode_matching_dict(barcode_list):
+def check_putative_barcode(barcode_str, barcode_exact_dict, barcode_mismatch_dict):
     """
-    Create dictionary mapping barcodes to themselves (exact matches), as well as
-    to their 1bp mismatch possibilities
+    Procedure: check exact match of barcode, then 1 mismatch, then 1bp left/right
+     shift
     """
-    barcode_matching_dict  = dict() # {potential match: original barcode}
+    exact = True
+    value = barcode_exact_dict.get(barcode_str[1:9]) # check exact location first
+    if value is None:
+        exact = False
+        value = barcode_mismatch_dict.get(barcode_str[1:9]) # check mismatch
+        if value is None:
+            value = barcode_exact_dict.get(barcode_str[:8]) # check 1bp shift left
+            if value is None:
+                value = barcode_exact_dict.get(barcode_str[2:]) # check 1bp shift right
+    return value, exact
+
+def create_barcode_dicts(barcode_list):
+    """
+    Creates dictionaries containing exact match and 1-mismatch sequences
+    """
+    barcode_dict_exact  = dict() # [seq: seq]
+    barcode_dict_mismatch = dict() # [mismatch: seq]
     for barcode in barcode_list:
-        barcode_matching_dict[barcode] = barcode # exact match
+        barcode_dict_exact[barcode] = barcode # exact match
         for i, base in enumerate(barcode):
             for x in 'ACGTN':
                 if base != x:
                     # add mismatch possibilities at pos i
-                    mismatch = barcode[:i] + x + barcode[i+1:]
-                    barcode_matching_dict[mismatch] = barcode
-    return barcode_matching_dict
+                    mismatch = barcode[:i] + x + barcode[i + 1:]
+                    barcode_dict_mismatch[mismatch] = barcode
+    return barcode_dict_exact, barcode_dict_mismatch
 
 def create_barcode_subset_dict(file_path):
     """
@@ -93,7 +92,13 @@ def create_barcode_subset_dict(file_path):
                 barcode_subset_dict[barcode] = subset
     return barcode_subset_dict
 
-def write_fastqs(bam_file, read_1_pointers, read_2_pointers, r1_barcode_subset_dict, r1_barcode_matches, prefix):
+def write_fastqs(bam_file,
+                 read_1_pointers,
+                 read_2_pointers,
+                 r1_barcode_subset_dict,
+                 r1_barcode_exact_dict,
+                 r1_barcode_mismatch_dict,
+                 prefix):
     """
     Get reads from BAM file and error-correct R1 barcode to determine which R1 barcode subset's
     FASTQ to write the read to. Barcodes written into FASTQs are not error-corrected. 
@@ -132,7 +137,7 @@ def write_fastqs(bam_file, read_1_pointers, read_2_pointers, r1_barcode_subset_d
                 # get 10bp sequence containing R1 barcode (additional 1bp padding used for checking shifts)
                 r1_barcode_window = barcode_tag[14:24] 
                 # get error-corrected R1 barcode
-                r1_barcode, exact = check_putative_barcode(r1_barcode_window, r1_barcode_matches)
+                r1_barcode, exact = check_putative_barcode(r1_barcode_window, r1_barcode_exact_dict, r1_barcode_mismatch_dict)
                  
                 # write reads to appropriate FASTQ files by checking which R1 barcode subset the corrected R1 barcode belongs to
                 if r1_barcode in r1_barcode_subset_dict.keys():
@@ -166,7 +171,7 @@ def main():
     # create dictionary mapping R1 barcodes to their R1 barcode subsets
     r1_barcode_subset_dict = create_barcode_subset_dict(r1_barcode_set_file)
     # create dictionaries of R1 barcode exact matches and 1bp mismatches
-    r1_barcode_matches = create_barcode_matching_dict(r1_barcode_subset_dict.keys())
+    r1_barcode_exact_dict, r1_barcode_mismatch_dict = create_barcode_dicts(r1_barcode_subset_dict.keys())
     
     # read R2 and R3 barcode files; if not passed in, use R1 barcodes
     if r2_barcode_file:
@@ -198,7 +203,13 @@ def main():
             f.write("\n".join(whitelist_barcodes))
     
     # write reads to FASTQs
-    write_fastqs(bam_file, read_1_pointers, read_2_pointers, r1_barcode_subset_dict, r1_barcode_matches, prefix)
+    write_fastqs(bam_file,
+                 read_1_pointers,
+                 read_2_pointers,
+                 r1_barcode_subset_dict,
+                 r1_barcode_exact_dict,
+                 r1_barcode_mismatch_dict,
+                 prefix)
             
 if __name__ == "__main__":
     main()
