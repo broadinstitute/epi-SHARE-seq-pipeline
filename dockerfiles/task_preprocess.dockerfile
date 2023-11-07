@@ -39,4 +39,5 @@ RUN wget https://github.com/broadinstitute/picard/releases/download/2.26.11/pica
 COPY src/python/bam_to_raw_fastq.py /software
 COPY src/python/flexible_import_entities_standard.py /software
 COPY src/python/write_terra_tables.py /software
+COPY src/python/utils.py /software
 COPY src/bash/monitor_script.sh /software

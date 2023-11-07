@@ -32,6 +32,7 @@ RUN groupadd -r $USER &&\
 
 # Copy scripts
 COPY --chown=$USER:$USER src/python/correct_fastq.py /usr/local/bin/
+COPY --chown=$USER:$USER src/python/utils.py /usr/local/bin/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
 USER ${USER}
