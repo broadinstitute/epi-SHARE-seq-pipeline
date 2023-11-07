@@ -66,7 +66,7 @@ def create_barcode_subset_dict(file_path):
                 barcode_subset_dict[barcode] = subset
     return barcode_subset_dict
 
-
+  
 def write_fastqs(bam_file,
                  read_1_pointers,
                  read_2_pointers,

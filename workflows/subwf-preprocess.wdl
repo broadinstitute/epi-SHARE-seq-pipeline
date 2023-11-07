@@ -21,7 +21,7 @@ workflow wf_preprocess {
 		File metaCsv
 		String terra_project # set to none or make optional
 		String workspace_name
-		String dockerImage = "us.gcr.io/buenrostro-share-seq/share_task_preprocess"
+		String dockerImage = "us.gcr.io/buenrostro-share-seq/task_preprocess:dev"
 	}
 
 	String barcodeStructure = "99M8B"
