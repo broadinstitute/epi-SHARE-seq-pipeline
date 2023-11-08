@@ -20,7 +20,7 @@ def check_putative_barcode(barcode_str, quality_str, barcode_exact_dict, barcode
         if corrected:
             correction_type = "M"
         else:
-            corrected = barcode_mismatch_dict.get(barcode_str[:8])  # check 1bp shift left
+            corrected = barcode_exact_dict.get(barcode_str[:8])  # check 1bp shift left
             quality = quality_str[:8]
             if corrected:
                 correction_type = "L"
