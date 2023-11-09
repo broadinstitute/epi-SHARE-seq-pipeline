@@ -66,7 +66,7 @@ def create_barcode_subset_dict(file_path):
                 barcode_subset_dict[barcode] = subset
     return barcode_subset_dict
 
-  
+
 def write_fastqs(bam_file,
                  read_1_pointers,
                  read_2_pointers,
@@ -89,7 +89,7 @@ def write_fastqs(bam_file,
     """
     bam = pysam.Samfile(bam_file, "rb", check_sq=False)
     query_name = read_1 = read_2 = None
-    exact_match = nonexact_match = nonmatch = poly_g_barcode = 0
+    exact_match = mismatch = left_shift = right_shift = poly_g_barcode = nonmatch = 0
 
     for read in bam:
         if read.is_read1:
@@ -112,22 +112,24 @@ def write_fastqs(bam_file,
                 # get 10bp sequence containing R1 barcode (additional 1bp padding used for checking shifts)
                 r1_barcode_window = barcode_tag[14:24]
                 # get error-corrected R1 barcode
-                r1_barcode, quality, exact = check_putative_barcode(r1_barcode_window,
-                                                                    quality_tag,
-                                                                    r1_barcode_exact_dict,
-                                                                    r1_barcode_mismatch_dict)
+                r1_barcode, quality, correction_type = check_putative_barcode(r1_barcode_window,
+                                                                              quality_tag,
+                                                                              r1_barcode_exact_dict,
+                                                                              r1_barcode_mismatch_dict)
 
-                # write reads to appropriate FASTQ files by checking which R1 barcode subset the corrected R1 barcode belongs to
-                if r1_barcode in r1_barcode_subset_dict.keys():
+                if r1_barcode:
+                    # write reads to appropriate FASTQ files by checking which R1 barcode subset the corrected R1 barcode belongs to
                     write_read(read_1_pointers[r1_barcode_subset_dict[r1_barcode]], read_1)
                     write_read(read_2_pointers[r1_barcode_subset_dict[r1_barcode]], read_2)
-
-                # increment QC counters
-                if r1_barcode:
-                    if exact:
+                    
+                    if correction_type == "E":
                         exact_match += 1
-                    else:
-                        nonexact_match += 1
+                    elif correction_type == "L":
+                        left_shift += 1
+                    elif correction_type == "R":
+                        right_shift += 1
+                    elif correction_type == "M":
+                        mismatch += 1
                 elif "G"*8 in r1_barcode_window:
                     poly_g_barcode += 1
                 else:
@@ -135,7 +137,12 @@ def write_fastqs(bam_file,
 
     # write QC stats
     with open(f"{prefix}_R1_barcode_qc.txt", "w") as f:
-        f.write("%s\t%s\t%s\t%s\t%s\n" % (prefix, exact_match, nonexact_match, nonmatch, poly_g_barcode))
+        f.write("%s\t%s\t%s\t%s\t%s\t%s\n" % (prefix,
+                                              exact_match,
+                                              left_shift,
+                                              right_shift,
+                                              nonmatch,
+                                              poly_g_barcode))
 
 
 def main():

@@ -40,6 +40,38 @@ def get_barcodes(whitelist_file):
     return list(r1_barcodes), list(r2_barcodes), list(r3_barcodes)
 
 
+def make_correction_counts_dict(sample_type):
+    """
+    Initialize a dictionary for counting cell barcode correction combinations.
+    Accepted combinations are those which contain no shifts, and those in which
+    a shift in one round is followed by the same shift in every subseqent round.
+    (ex. ELL ok, but ELE not ok)
+    Add key for counting nonmatches, and for polyG UMIs if RNA.
+    """
+    cellbarcode_correction_counts = {}
+    correction_types = ["E", "M", "R", "L"]  # exact, mismatch, right shift, left shift
+    correction_combos = [c1+c2+c3 for c1 in correction_types for c2 in correction_types for c3 in correction_types]
+
+    for combo in correction_combos:
+        valid = True
+        r_index = combo.find("R")
+        l_index = combo.find("L")
+        if r_index != -1:  # if R in combo, rest of combo must also be R
+            if set(combo[r_index:]) != {"R"}:
+                valid = False
+        if l_index != -1:  # if L in combo, rest of combo must also be L
+            if set(combo[l_index:]) != {"L"}:
+                valid = False
+        if valid:
+            cellbarcode_correction_counts[combo] = 0
+
+    cellbarcode_correction_counts["nonmatch"] = 0
+    if sample_type == "RNA":
+        cellbarcode_correction_counts["polyG_umi"] = 0
+
+    return cellbarcode_correction_counts
+
+
 def process_fastqs(input_read1_fastq_file,
                    input_read2_fastq_file,
                    output_read1_fastq_file,
@@ -64,12 +96,12 @@ def process_fastqs(input_read1_fastq_file,
     exact barcode matches, non-exact barcode matches, non-matches, homopolymer G barcodes,
     homopolymer Gs in first 10bp of read 2 (UMI sequence for RNA, gDNA sequence for ATAC).
     """
-    # QC counters
-    cellbarcode_match = cellbarcode_mismatch = cellbarcode_poly_g = read2_start_poly_g = 0
+    # initialize dictionary with cell barcode correction types
+    cellbarcode_correction_counts = make_correction_counts_dict(sample_type)
 
-    read1_out_writer = xopen.xopen(output_read1_fastq_file, mode='w')
-    read2_out_writer = xopen.xopen(output_read2_fastq_file, mode='w')
-    barcode_out_writer = xopen.xopen(output_barcode_fastq_file, mode='w')
+    read1_out_writer = xopen.xopen(output_read1_fastq_file, mode="w")
+    read2_out_writer = xopen.xopen(output_read2_fastq_file, mode="w")
+    barcode_out_writer = xopen.xopen(output_barcode_fastq_file, mode="w")
 
     buffer1 = deque()
     buffer2 = deque()
@@ -106,17 +138,13 @@ def process_fastqs(input_read1_fastq_file,
             q1_str, q2_str, q3_str = read_2_barcode_quality[14:24], read_2_barcode_quality[52:62], read_2_barcode_quality[90:99]
             # get corrected barcodes
             r1 = r2 = r3 = None
-            r1, q1, exact1 = check_putative_barcode(r1_str, q1_str, r1_barcode_exact_dict, r1_barcode_mismatch_dict)
-            r2, q2, exact2 = check_putative_barcode(r2_str, q2_str, r2_barcode_exact_dict, r2_barcode_mismatch_dict)
-            r3, q3, exact3 = check_putative_barcode(r3_str, q3_str, r3_barcode_exact_dict, r3_barcode_mismatch_dict)
+            r1, q1, c1 = check_putative_barcode(r1_str, q1_str, r1_barcode_exact_dict, r1_barcode_mismatch_dict)
+            r2, q2, c2 = check_putative_barcode(r2_str, q2_str, r2_barcode_exact_dict, r2_barcode_mismatch_dict)
+            r3, q3, c3 = check_putative_barcode(r3_str, q3_str, r3_barcode_exact_dict, r3_barcode_mismatch_dict)
 
-            # check first ten base pairs of read 2 for homopolymer G
-            if sequence2[:10] == "G"*10:
-                read2_start_poly_g += 1
-
-            # if corrected barcodes found, write to both read 1 and read 2 FASTQ files
-            elif r1 and r2 and r3:
-                cellbarcode_match += 1
+            # if corrected barcodes found and correction type is valid,
+            # write to both read 1 and read 2 FASTQ files
+            if r1 and r2 and r3 and c1+c2+c3 in cellbarcode_correction_counts.keys():
                 # correct FASTQ reads
                 if sample_type == "RNA":
                     # add corrected barcodes, PKR, and UMI to header; remove any information after a space
@@ -136,6 +164,11 @@ def process_fastqs(input_read1_fastq_file,
                     corrected_read2 = f"{corrected_header}\n{corrected_sequence2}\n+\n{corrected_quality2}\n"
                     buffer2.append(corrected_read2)
                     buffer_counter += 1
+
+                    # check for polyG UMI
+                    if sequence2[:10] == "G"*10:
+                        cellbarcode_correction_counts["polyG_umi"] += 1
+
                 elif sample_type == "ATAC":
                     # add corrected barcodes and PKR to header; remove any information after a space
                     corrected_header = name1.split(" ")[0] + "_" + ",".join(filter(None, [r1, r2, r3, pkr]))
@@ -145,12 +178,15 @@ def process_fastqs(input_read1_fastq_file,
                     # add corrected read 2 to buffer; use corrected header, remove 99bp barcode
                     corrected_read2 = f"{corrected_header}\n{sequence2[:-99]}\n+\n{quality2[:-99]}\n"
                     buffer2.append(corrected_read2)
-                    #  add corrected barcode to buffer3 AKA fastq barcode
+                    # add corrected barcode to buffer3 AKA fastq barcode
                     corrected_sequence3 = r1 + r2 + r3
                     corrected_quality3 = q1 + q2 + q3
                     corrected_read3 = f"{corrected_header}\n{corrected_sequence3}\n+\n{corrected_quality3}\n"
                     buffer3.append(corrected_read3)
                     buffer_counter += 1
+
+                # add to correction counts dictionary
+                cellbarcode_correction_counts[c1+c2+c3] += 1
 
                 # write to corrected FASTQ files
                 if buffer_counter == 10000000:
@@ -162,11 +198,8 @@ def process_fastqs(input_read1_fastq_file,
                     buffer3.clear()
                     buffer_counter = 0
 
-            # check for homopolymer G in uncorrected barcode windows
-            elif "G"*8 in r1_str and "G"*8 in r2_str and "G"*8 in r3_str:
-                cellbarcode_poly_g += 1
             else:
-                cellbarcode_mismatch += 1
+                cellbarcode_correction_counts["nonmatch"] += 1
 
     if buffer_counter > 0:
         read1_out_writer.write("".join(buffer1))
@@ -179,9 +212,9 @@ def process_fastqs(input_read1_fastq_file,
 
     # write QC stats
     with open(f"{prefix}_barcode_qc.txt", "w") as f:
-        fields = ["library", "match", "mismatch", "poly_G_barcode", "poly_G_in_first_10bp"]
-        f.write("\t".join(fields) + "\n")
-        f.write("%s\t%s\t%s\t%s\t%s" % (prefix, cellbarcode_match, cellbarcode_mismatch, cellbarcode_poly_g, read2_start_poly_g))
+        f.write(f"\t{prefix}\n")
+        for k, v in cellbarcode_correction_counts.items():
+            f.write(f"{k}\t{v}\n")
 
 
 def main():
