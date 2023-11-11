@@ -16,7 +16,7 @@ task merge_counts {
         String? gene_naming
         String? prefix
 
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/share_task_generate_h5:dev'
+        String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_generate_h5:dev'
         Float? disk_factor = 2.0
         Float? memory_factor = 50.0
     }

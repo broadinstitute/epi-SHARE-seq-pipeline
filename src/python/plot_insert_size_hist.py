@@ -1,37 +1,32 @@
 #!/usr/bin/env python3
 
 """
-This script takes in the Picard CollectInsertSizeMetrics histogram txt file output,
-and generates the histogram as a png.
+This script takes in a file containing fragment lengths, one per line,
+and generates an insert size histogram as a png.
 """
 
 import argparse
 import pandas as pd
+from collections import defaultdict
 from plotnine import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Plot insert size histogram")
-    parser.add_argument("histogram_file", help="Histogram txt file name")
+    parser.add_argument("fragment_length_file", help="Fragment length file name")
     parser.add_argument("prefix", help="Prefix for plot title")
     parser.add_argument("out_file", help="Name of output png file")
     
     return parser.parse_args()
 
-def get_hist_vals(histogram_file):
-    """Get dataframe of histogram values"""
-    with open(histogram_file, "r") as f:
-        begin_vals = False
-        insert_size = []
-        count = []
+def get_hist_vals(fragment_length_file):
+    """Get dataframe of insert sizes and corresponding counts"""
+    with open(fragment_length_file, "r") as f:
+        counts = defaultdict(int)
         for line in f:
-            vals = line.rstrip().split(sep="\t")
-            if begin_vals and len(vals) == 2: # last line is blank
-                insert_size.append(int(vals[0]))
-                count.append(int(vals[1]))
-            elif vals[0] == "insert_size": # desired values occur after line beginning with "insert_size"
-                begin_vals = True
+            fragment_length = int(line.rstrip())
+            counts[fragment_length] += 1
             
-    df = pd.DataFrame(list(zip(insert_size, count)), columns=["insert_size","count"])
+    df = pd.DataFrame(counts.items(), columns=["insert_size","count"])
     
     return(df)
 
@@ -51,16 +46,14 @@ def plot_hist(df, prefix, out_file):
     plot.save(filename = out_file, dpi=1000)
 
 def main():
-    print("Starting histogram plotting script")
     args = parse_arguments() 
-    histogram_file = getattr(args, "histogram_file")
+    fragment_length_file = getattr(args, "fragment_length_file")
     prefix = getattr(args, "prefix")
     out_file = getattr(args, "out_file")
     
-    df = get_hist_vals(histogram_file)
+    df = get_hist_vals(fragment_length_file)
     
     plot_hist(df, prefix, out_file)
-    print("Finished plotting")
 
 if __name__ == "__main__":
     main()    
