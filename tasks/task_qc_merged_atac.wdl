@@ -20,6 +20,7 @@ task qc_merged_atac {
         Int? fragment_cutoff = 10
 
         # Runtime
+        Int? cpus = 8
         Float? disk_factor = 10.0
         Float? memory_factor = 2.0
         String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
@@ -82,6 +83,7 @@ task qc_merged_atac {
     }
 
     runtime {
+        cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
         memory: "${mem_gb} GB"
