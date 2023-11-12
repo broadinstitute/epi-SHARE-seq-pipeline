@@ -48,9 +48,10 @@ task qc_merged_atac {
 
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2
-        time python3 $(which qc_atac_compute_tss_enrichment.py) \
+        time python3 $(which compute_tss_enrichment.py) \
             -e 2000 \
-            --tss ~{tss} \
+            -p 8 \
+            --regions ~{tss} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             ~{fragments}
 
