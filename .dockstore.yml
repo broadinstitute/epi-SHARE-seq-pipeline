@@ -48,7 +48,6 @@ workflows:
          branches:
              - dev
              - rc-v2.0.0
-             - demux-qc-fix
          tags:
              - /.*/
 
