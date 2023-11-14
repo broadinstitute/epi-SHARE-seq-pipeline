@@ -502,7 +502,7 @@ task AggregateBarcodeQC {
 	}
 
 	command <<<
-		echo -e "library\texact_match\tnonexact_match\tnonmatch\tpoly_G_barcode" > R1_barcode_stats.txt
+		echo -e "library\texact_match\tmismatch\tleft_shift\tright_shift\tnonmatch\tpoly_G_barcode" > R1_barcode_stats.txt
 		cat ~{sep=" " barcodeQCs} >> R1_barcode_stats.txt
 	>>>
 	
