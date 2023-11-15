@@ -146,9 +146,7 @@ task archr {
         memory : mem_gb+'G'
         docker : docker_image
         disks : 'local-disk ${disk_gb} ${disk_type}'
-        maxRetries : 1
         bootDiskSizeGb: 50
-        memory_retry_multiplier: 2
     }
 
     parameter_meta {
