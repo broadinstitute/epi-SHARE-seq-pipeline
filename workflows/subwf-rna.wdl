@@ -5,6 +5,7 @@ import "../tasks/task_starsolo.wdl" as task_starsolo
 import "../tasks/task_generate_h5.wdl" as task_generate_h5
 import "../tasks/task_qc_rna.wdl" as task_qc_rna
 import "../tasks/task_log_rna.wdl" as task_log_rna
+import "../tasks/task_cellbender.wdl" as task_cellbender
 import "../tasks/task_seurat.wdl" as task_seurat
 
 # Import the tasks called by the pipeline
@@ -72,6 +73,9 @@ workflow wf_rna {
         Float? qc_disk_factor
         Float? qc_memory_factor
         String? qc_docker_image
+
+        # CellBender-specific inputs
+        Int? cellbender_expected_cells
 
         # Seurat-specific inputs
         Int? seurat_min_features
@@ -166,9 +170,16 @@ workflow wf_rna {
         }
 
         if ( "~{pipeline_modality}" == "full") {
+            call task_cellbender.cellbender as cellbender {
+                input:
+                    prefix = prefix,
+                    h5 = generate_h5.h5_matrix,
+                    expected_cells = cellbender_expected_cells
+            }
+
             call task_seurat.seurat as seurat {
                 input:
-                    rna_matrix = generate_h5.h5_matrix,
+                    rna_matrix = cellbender.cellbender_filtered_h5,
                     genome_name = genome_name,
                     min_features = seurat_min_features,
                     percent_mt = seurat_percent_mt,
@@ -206,6 +217,10 @@ workflow wf_rna {
         File? rna_umi_barcode_rank_plot = qc_rna.rna_umi_barcode_rank_plot
         File? rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
         File? rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
+
+        File? rna_cellbender_h5 = cellbender.cellbender_h5
+        File? rna_cellbender_csv = cellbender.cellbender_csv
+        File? rna_cellbender_pdf = cellbender.cellbender_pdf
 
         File? rna_seurat_notebook_output = seurat.notebook_output
         File? rna_seurat_notebook_log = seurat.notebook_log
