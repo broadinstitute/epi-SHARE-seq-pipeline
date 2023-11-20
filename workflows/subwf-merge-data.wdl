@@ -186,6 +186,7 @@ workflow merge {
  
         File? merged_fragments = merge_fragments.fragments
 
+        File? merged_fragments_filtered = qc_merged_atac.filtered_fragments
         File? merged_atac_barcode_metadata = qc_merged_atac.barcode_metadata
 
         File? seurat_notebook_output = seurat.notebook_output
