@@ -69,12 +69,17 @@ def build_count_matrix(matrix_file):
 def write_h5(output_file, count_matrix, barcode_list, gene_list):
     h5_file = h5py.File(output_file, "w")
 
-    # create datasets expected for Seurat import
+    # set string types for datasets (reading via PyTables requires fixed-length strings,
+    # rather than h5py's default of using variable-length string types)
+    barcode_dtype = h5py.string_dtype(encoding="ascii", length=len(barcode_list[0]))
+    gene_dtype = h5py.string_dtype(encoding="ascii", length=len(max(gene_list, key=len)))
+
+    # create datasets
     g = h5_file.create_group("group")
-    g.create_dataset("barcodes", data=barcode_list)
+    g.create_dataset("barcodes", data=barcode_list, dtype=barcode_dtype)
     g.create_dataset("data", data=count_matrix.data)
-    g.create_dataset("gene_names", data=gene_list)
-    g.create_dataset("genes", data=gene_list)
+    g.create_dataset("gene_names", data=gene_list, dtype=gene_dtype)
+    g.create_dataset("genes", data=gene_list, dtype=gene_dtype)
     g.create_dataset("indices", data=count_matrix.indices)
     g.create_dataset("indptr", data=count_matrix.indptr)
     g.create_dataset("shape", data=count_matrix.shape)
