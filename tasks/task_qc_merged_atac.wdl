@@ -22,7 +22,7 @@ task qc_merged_atac {
         # Runtime
         Int? cpus = 8
         Float? disk_factor = 10.0
-        Float? memory_factor = 2.0
+        Float? memory_factor = 20
         String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
     }
 
@@ -30,10 +30,10 @@ task qc_merged_atac {
     Float input_file_size_gb = size(barcode_metadata, "G") + size(fragments, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 4.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 32.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
-    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
+    Int disk_gb = round(100.0 + disk_factor * input_file_size_gb)
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
