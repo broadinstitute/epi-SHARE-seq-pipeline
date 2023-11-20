@@ -16,13 +16,14 @@ task atac_align_chromap {
         Array[File] fastq_R2
         Array[File] fastq_barcode
         File reference_fasta
+        File chrom_sizes
         File? barcode_inclusion_list
         File? barcode_conversion_dict
 
         Boolean? trim_adapters = true
         Boolean? remove_pcr_duplicates = true
         Boolean? remove_pcr_duplicates_at_cell_level = true
-        Boolean? Tn5_shift = true
+        Boolean? Tn5_shift = false
         Boolean? low_mem = true
         Boolean? bed_output = true
         Int? max_insert_size = 2000
@@ -110,23 +111,28 @@ task atac_align_chromap {
                 -b ~{sep="," fastq_barcode} \
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
-                -o ~{fragments} \
+                -o out.fragments.tmp.tsv \
                 --summary ~{barcode_log} > ~{alignment_log} 2>&1
         
         if [[ '~{subpool}' != "none" ]]; then
             echo '------  Add subpool to barcode name ------' 1>&2
-            awk -v OFS="\t" -v subpool=~{subpool} '{$4=$4"_"subpool; print $0}' ~{fragments} > temp
-            mv temp ~{fragments}
+            awk -v OFS="\t" -v subpool=~{subpool} '{$4=$4"_"subpool; print $0}' out.fragments.tmp.tsv > temp
+            mv temp out.fragments.tmp.tsv
             awk -v FS="," -v OFS="," -v subpool=~{subpool} 'NR==1{print $0;next}{$1=$1"_"subpool; print $0}' ~{barcode_log} > temp
             mv temp ~{barcode_log}
         fi
-        #TODO: We might want to correct here for the +4/-4
-        bgzip -c ~{fragments} > ~{fragments}.gz
+
+        bedClup -verbose=2 out.fragments.tmp.tsv ~{chrom_sizes} out.fragments.clipped.tsv 2> ~{prefix}.bedClip.log.txt 
+
+
+        # Asking chromap to not correct and fixing +4/-4 shift here.
+        awk -v OFS="\t" '{print $1,$2+4,$3-4,$4,$5}' out.fragments.clipped.tsv | bgzip -c > ~{fragments}.gz
         tabix --zero-based --preset bed ~{fragments}.gz
 
     >>>
 
     output {
+        File atac_clipping_log = "~{prefix}.bedClip.log.txt"
         File atac_fragments = "~{fragments}.gz"
         File atac_fragments_index = "~{fragments}.gz.tbi"
         File atac_align_barcode_statistics = barcode_log

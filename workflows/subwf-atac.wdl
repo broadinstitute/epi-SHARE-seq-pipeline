@@ -140,6 +140,7 @@ workflow wf_atac {
             fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
             fastq_barcode = select_first([correct.corrected_fastq_barcode, fastq_barcode]),
             reference_fasta = reference_fasta,
+            chrom_sizes = chrom_sizes,
             trim_adapters = trim_adapters,
             genome_name = genome_name,
             subpool = subpool,

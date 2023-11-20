@@ -29,6 +29,8 @@ ENV PATH="/software:${PATH}"
 RUN wget https://github.com/haowenz/chromap/archive/refs/heads/master.zip && unzip master.zip && \ 
     cd chromap-master && make STATIC_BUILD=1
 
+RUN wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/bedClip && chmod a+x bedClip
+
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
 
 LABEL maintainer = "Eugenio Mattei"
@@ -58,6 +60,7 @@ ENV PATH="/software/:${PATH}"
 
 # Copy the compiled software from the builder
 COPY --from=builder --chown=$USER:$USER /software/chromap-master /software/
+COPY --from=builder --chown=$USER:$USER /software/bedClip /software/bedClip
 COPY --from=builder --chown=$USER:$USER /usr/include/* /usr/include/
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 
