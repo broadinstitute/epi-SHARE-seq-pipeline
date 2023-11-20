@@ -38,6 +38,7 @@ task qc_merged_atac {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
+    String filtered_fragments = '${default='merged' prefix}.atac.qc.${genome_name}.filtered.fragments.bed.gz'
     String final_barcode_metadata = '${default='merged' prefix}.atac.qc.${genome_name}.metadata.tsv'
     String insert_size_hist = '${default='merged' prefix}.atac.qc.hist.${genome_name}.png'
     String fragment_barcode_rank_plot = '${default='merged' prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png'
@@ -47,6 +48,18 @@ task qc_merged_atac {
 
         bash $(which monitor_script.sh) 1>&2 &
 
+        # Merge barcode metadata
+        echo '------ START: Merge barcode metadata files ------' 1>&2
+        time python3 $(which merge_atac_barcode_metadata.py) merged_barcode_metadata ~{sep=' ' barcode_metadata}
+
+        # Filter fragments
+        echo '------ Filtering fragments ------' 1>&2
+        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($7/2)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' merged_barcode_metadata <( zcat ~{fragments} ) > no-singleton.bed
+
+        bgzip -l 5 -@ ~{cpus} -c no-singleton.bed > ~{filtered_fragments}
+
+        tabix --zero-based --preset bed ~{filtered_fragments}
+
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment ------' 1>&2
         time python3 $(which compute_tss_enrichment.py) \
@@ -54,12 +67,8 @@ task qc_merged_atac {
             -p 8 \
             --regions ~{tss} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
-            ~{fragments}
+            no-singleton.bed.gz
 
-        # Merge barcode metadata
-        echo '------ START: Merge barcode metadata files ------' 1>&2
-        time python3 $(which merge_atac_barcode_metadata.py) merged_barcode_metadata ~{sep=' ' barcode_metadata}
-        
         # Add TSS enrichment to barcode metadata
         join -j 1 -t $'\t' <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q; sort -k1,1)) <(cut -f 1,6-15 merged_barcode_metadata | (sed -u 1q; sort -k1,1)) > ~{final_barcode_metadata}
 
@@ -74,6 +83,7 @@ task qc_merged_atac {
     >>>
 
     output {
+        File filtered_fragments = filtered_fragments 
         File tss_enrichment_barcode_stats = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
         File tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
         File enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
