@@ -102,7 +102,6 @@ task atac_align_chromap {
                 ~{"--bc-probability-threshold " + bc_probability_threshold} \
                 ~{"--read-format " + read_format} \
                 ~{"--drop-repetitive-reads " + multimappers} \
-                -x chromap_index/index \
                 -r ~{reference_fasta} \
                 ~{"-q " + quality_filter} \
                 -t ~{cpus} \
