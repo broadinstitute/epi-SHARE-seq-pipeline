@@ -204,6 +204,7 @@ workflow combinomics {
         File? rna_final_bam = rna.task_starsolo_output_bam
         File? rna_starsolo_raw_tar = rna.task_starsolo_raw_tar
         File? rna_h5 = rna.rna_h5
+        File? rna_cellbender_filtered_h5 = rna.rna_cellbender_filtered_h5
         File? rna_barcode_metadata  = rna.rna_barcode_metadata
         File? rna_seurat_notebook_output = rna.rna_seurat_notebook_output
         File? rna_seurat_obj = rna.rna_seurat_obj

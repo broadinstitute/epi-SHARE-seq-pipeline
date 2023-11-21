@@ -218,7 +218,7 @@ workflow wf_rna {
         File? rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
         File? rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
 
-        File? rna_cellbender_h5 = cellbender.cellbender_h5
+        File? rna_cellbender_filtered_h5 = cellbender.cellbender_filtered_h5
         File? rna_cellbender_csv = cellbender.cellbender_csv
         File? rna_cellbender_pdf = cellbender.cellbender_pdf
 
