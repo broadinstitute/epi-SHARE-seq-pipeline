@@ -51,7 +51,7 @@ workflow wf_atac {
         File reference_fasta
         Boolean? remove_pcr_duplicates = true
         Boolean? remove_pcr_duplicates_at_cell_level = true
-        Boolean? Tn5_shift = true
+        Boolean? Tn5_shift = false
         Boolean? low_mem = true
         Boolean? bed_output = true
         Boolean? trim_adapters = true
