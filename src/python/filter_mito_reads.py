@@ -23,6 +23,8 @@ def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix, threads=1):
 
     infile = pysam.AlignmentFile(in_path, "rb", threads=threads)
     outfile = pysam.AlignmentFile(out_path, "wb", template=infile, threads=threads)
+    mito_path = f"{prefix}.mito_only.bam"
+    mitofile = pysam.AlignmentFile(mito_path, "wb", template=infile, threads=threads)
     outfile_bulk_metrics = f"{prefix}.mito.bulk-metrics.tsv"
     outfile_barcode_metrics = f"{prefix}.mito.bc-metrics.tsv"
 
@@ -60,8 +62,11 @@ def filter_mito(in_path, out_path, barcode_tag, cutoff, prefix, threads=1):
     for read in infile:
         if read.flag & 260 == 0 and read.reference_name != "chrM" and barcode_metrics[read.get_tag(barcode_tag)][0] > cutoff*2:
             outfile.write(read)
+        if read.flag & 260 == 0 and read.reference_name == "chrM":
+            mitofile.write(read)
 
     outfile.close()
+    mitofile.close()
     return
 
 
