@@ -86,7 +86,7 @@ sort --parallel=4 -k1,1 -k2,2n > $TMPBED
 scale_factor=$(bc <<< "scale=6;10000000/$(echo $library_size)")
 
 bedtools merge -i $TMPBED -c 1 -o count | \
-awk -v scaling=$scale_factor -v OFS="\t" '{$4=$4*scaling; print $0}' | \
+awk -v scaling=$scale_factor -v OFS="\t" 'NF==4 {$4=$4*scaling; print $0}' | \
 sort --parallel=8 -k1,1 -k2,2n > $TMPGRAPH
 
 bedGraphToBigWig $TMPGRAPH $chrom_sizes $output_file

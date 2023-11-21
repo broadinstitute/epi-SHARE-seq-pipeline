@@ -1,9 +1,9 @@
 ############################################################
 # Dockerfile for BROAD GRO share-seq-pipeline
-# Based on Debian slim
+# Based on Ubuntu latest
 ############################################################
 
-FROM debian:buster-slim
+FROM ubuntu:latest
 
 LABEL maintainer = "Eugenio Mattei"
 LABEL software = "Share-seq pipeline"
@@ -16,15 +16,24 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     bc \
-    bedtools \
+    build-essential \
     libkrb5-3 \
     libcurl4 \
+    libbz2-dev \
+    liblz4-dev \
+    liblzma-dev \
+    libncurses5-dev \
+    python3 \
     pigz \
     tabix \
-    wget &&\
+    wget \
+    zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 
 RUN wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig && chmod +x bedGraphToBigWig && mv bedGraphToBigWig /usr/local/bin
+RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.31.1/bedtools-2.31.1.tar.gz && tar -zxvf bedtools-2.31.1.tar.gz && cd bedtools2 && make && make install
+#RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.31.0/bedtools.static && mv bedtools.static bedtools && chmod a+x bedtools && mv bedtools /usr/local/bin
+
 
 # Create and setup new user
 ENV USER=shareseq
