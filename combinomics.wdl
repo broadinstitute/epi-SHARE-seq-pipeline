@@ -206,8 +206,8 @@ workflow combinomics {
         File? rna_h5 = rna.rna_h5
         File? rna_cellbender_filtered_h5 = rna.rna_cellbender_filtered_h5
         File? rna_barcode_metadata  = rna.rna_barcode_metadata
-        File? rna_seurat_notebook_output = rna.rna_seurat_notebook_output
-        File? rna_seurat_obj = rna.rna_seurat_obj
+        File? rna_seurat_notebook_output_cellbender = rna.rna_seurat_notebook_output
+        File? rna_seurat_obj_cellbender = rna.rna_seurat_obj
 
         # ATAC ouputs
         File? atac_fragments = atac.atac_fragments
@@ -230,8 +230,8 @@ workflow combinomics {
         File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
 
         # Report
-        File? html_summary = html_report.html_report_file
-        File? csv_summary_file = html_report.csv_summary_file
+        File? html_summary_cellbender = html_report.html_report_file
+        File? csv_summary_file_cellbender = html_report.csv_summary_file
     }
 
 }
