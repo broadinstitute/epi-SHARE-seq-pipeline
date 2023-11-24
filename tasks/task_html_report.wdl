@@ -61,7 +61,7 @@ task html_report {
         
         # This can be uncommented once we get the rna_metrics file sorted out
         #PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} ~{atac_metrics} ~{rna_metrics}
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} ~{atac_metrics} summary_stats.csv
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} summary_stats.csv ~{if defined(atac_metrics) then '--summary_stats_txt ~{atac_metrics}' else ''}
 
         # TODO: this needs to be fix.
         echo 'PKR,~{prefix}' | cat - ~{output_csv_file} > temp && mv temp ~{output_csv_file} 
