@@ -51,13 +51,13 @@ task html_report {
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
         
-        echo "rna_total_reads,"~{rna_total_reads} > rna_metrics.csv
-        echo "rna_aligned_uniquely," ~{rna_aligned_uniquely} >> rna_metrics.csv
-        echo "rna_aligned_multimap," ~{rna_aligned_multimap} >> rna_metrics.csv
-        echo "rna_unaligned," ~{rna_unaligned} >> rna_metrics.csv
-        echo "rna_feature_reads," ~{rna_feature_reads} >> rna_metrics.csv
-        echo "rna_duplicate_reads," ~{rna_duplicate_reads} >> rna_metrics.csv
-        echo "rna_frig," ~{rna_frig} >> rna_metrics.csv
+        echo "rna_total_reads," ~{if defined(rna_total_reads) then rna_total_reads else 0} > rna_metrics.csv
+        echo "rna_aligned_uniquely," ~{if defined(rna_aligned_uniquely) then rna_aligned_uniquely else 0} >> rna_metrics.csv
+        echo "rna_aligned_multimap," ~{if defined(rna_aligned_multimap) then rna_aligned_multimap else 0} >> rna_metrics.csv
+        echo "rna_unaligned," ~{if defined(rna_unaligned) then rna_unaligned else 0} >> rna_metrics.csv
+        echo "rna_feature_reads," ~{if defined(rna_feature_reads) then rna_feature_reads else 0} >> rna_metrics.csv
+        echo "rna_duplicate_reads," ~{if defined(rna_duplicate_reads) then rna_duplicate_reads else 0} >> rna_metrics.csv
+        echo "rna_frig," ~{if defined(rna_frig) then rna_frig else 0} >> rna_metrics.csv
         
         # This can be uncommented once we get the rna_metrics file sorted out
         #PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} ~{atac_metrics} ~{rna_metrics}
