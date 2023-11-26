@@ -51,17 +51,23 @@ task html_report {
         echo "~{sep="\n" valid_image_files}" > image_list.txt
         echo "~{sep="\n" valid_log_files}" > log_list.txt
         
-        echo "rna_total_reads,"~{rna_total_reads} > summary_stats.csv
-        echo "rna_aligned_uniquely," ~{rna_aligned_uniquely} >> summary_stats.csv
-        echo "rna_aligned_multimap," ~{rna_aligned_multimap} >> summary_stats.csv
-        echo "rna_unaligned," ~{rna_unaligned} >> summary_stats.csv
-        echo "rna_feature_reads," ~{rna_feature_reads} >> summary_stats.csv
-        echo "rna_duplicate_reads," ~{rna_duplicate_reads} >> summary_stats.csv
-        echo "rna_frig," ~{rna_frig} >> summary_stats.csv
+        echo "rna_total_reads,"~{rna_total_reads} > rna_metrics.csv
+        echo "rna_aligned_uniquely," ~{rna_aligned_uniquely} >> rna_metrics.csv
+        echo "rna_aligned_multimap," ~{rna_aligned_multimap} >> rna_metrics.csv
+        echo "rna_unaligned," ~{rna_unaligned} >> rna_metrics.csv
+        echo "rna_feature_reads," ~{rna_feature_reads} >> rna_metrics.csv
+        echo "rna_duplicate_reads," ~{rna_duplicate_reads} >> rna_metrics.csv
+        echo "rna_frig," ~{rna_frig} >> rna_metrics.csv
         
         # This can be uncommented once we get the rna_metrics file sorted out
         #PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} ~{atac_metrics} ~{rna_metrics}
-        PYTHONIOENCODING=utf-8 python3 /software/write_html.py ~{output_file} image_list.txt log_list.txt ~{output_csv_file} summary_stats.csv ~{if defined(atac_metrics) then '--summary_stats_txt ~{atac_metrics}' else ''}
+        PYTHONIOENCODING=utf-8 python3 /software/write_html.py \
+        ~{output_file} \
+        image_list.txt \
+        log_list.txt \
+        ~{output_csv_file} \
+        --rna_metrics rna_metrics.csv \
+        ~{if defined(atac_metrics) then '--atac_metrics ~{atac_metrics}' else ''}
 
         # TODO: this needs to be fix.
         echo 'PKR,~{prefix}' | cat - ~{output_csv_file} > temp && mv temp ~{output_csv_file} 
