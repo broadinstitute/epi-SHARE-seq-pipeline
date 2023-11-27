@@ -11,7 +11,7 @@ import os.path
 import csv
 
 
-def main(output_file_name, image_file_list, log_file_list, output_csv_name, summary_stats_txt, qc_vals):
+def main(output_file_name, image_file_list, log_file_list, output_csv_name, atac_metrics, rna_metrics):
     """
     Write to the input file
     Image file list is list of png images
@@ -60,7 +60,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     def format_number(txt_num):
         num = float(txt_num)
         if num > 1000000000:
-            num = int(num / 1000000)
+            num = int(num / 1000000000)
             num = str(num) + " B"
         elif num > 1000000:
             num = round(num, -6)
@@ -80,21 +80,18 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     #  line split situation
     # write a table in html to the specified output table with the text data on
     # the right side and the numberic data on the left
-    def write_summary_table(txt, nums, outfile):
+    def write_summary_table(summary_stats, outfile):
         outfile.write("<table>")
         outfile.write("<th>Summary Statistics</th>")
-        outfile.write("<tr><td colspan=2>ATAC</td></tr>")
-        for index in range(len(txt)):
-            if index < len(nums):
-                #  cast string reperesnting number from the text file and print 
-                #  formated with commas
-                outfile.write("<tr> <td>" + txt[index] + "</td> <td id=" + txt[index] + ">" + format_number(float(nums[index])) + " </td> </tr>")
-                #  write rna tab into the table after all of the atac data
-                if index == 8:
-                    outfile.write("<tr><td colspan=2>RNA</td></tr>")
-            else:
-                outfile.write("<tr> <td>" + txt[index] + "</td> <td>No matching number</td> </tr>")
-        outfile.write("</table>")
+        if "ATAC" in summary_stats:
+            outfile.write("<tr><td colspan=2>ATAC</td></tr>")
+            for metric in summary_stats["ATAC"]:
+                outfile.write("<tr> <td>" + metric[0] + "</td> <td id=" + metric[0] + ">" + format_number(float(metric[1])) + " </td> </tr>")
+        if "RNA" in summary_stats:
+            outfile.write("<tr><td colspan=2>RNA</td></tr>")
+            for metric in summary_stats["RNA"]:
+                outfile.write("<tr> <td>" + metric[0] + "</td> <td id=" + metric[0] + ">" + format_number(float(metric[1])) + " </td> </tr>")
+        outfile.write("</table>")  
 
     output_file = io.open(output_file_name, 'w', encoding='utf8')
     output_file.write('<!DOCTYPE html><html lang="en"><head><title>Results summary</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><body>')
@@ -211,22 +208,38 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     #  write to fourth (summary stats) tab
     output_file.write('<div class="tab content4">') 
     print("start of printing summary stats loop")
-    summary_stats_labels = []
-    summary_stats_values = []
-    with open(summary_stats_txt) as fname:
-        stats = fname.read().splitlines()
-        for stat in stats:
-            print("stat is " + stat)
-        #csv_output_file.write(stat + '\n')
-            name_and_field = stat.split(',')
-            name = name_and_field[0]
-            stat = name_and_field[1]
-            summary_stats_labels.append(name)
-            summary_stats_values.append(stat)
-            #csv_writer.writerow([name, stat])
-            f.write("%s,%s\n" % (name, stat))
-            #output_file.write(name + " " + stat + '\n')
-    write_summary_table(summary_stats_labels, summary_stats_values, output_file)
+    summary_stats = {}
+    if atac_metrics:
+        with open(atac_metrics) as fname:
+            metrics = []
+            stats = fname.read().splitlines()
+            for stat in stats:
+                print("stat is " + stat)
+            #csv_output_file.write(stat + '\n')
+                name_and_field = stat.split(',')
+                name = name_and_field[0]
+                stat = name_and_field[1]
+                metrics.append((name, stat))
+                #csv_writer.writerow([name, stat])
+                f.write("%s,%s\n" % (name, stat))
+                #output_file.write(name + " " + stat + '\n')
+            summary_stats["ATAC"] = metrics
+    if rna_metrics:
+        with open(rna_metrics) as fname:
+            metrics = []
+            stats = fname.read().splitlines()
+            for stat in stats:
+                print("stat is " + stat)
+            #csv_output_file.write(stat + '\n')
+                name_and_field = stat.split(',')
+                name = name_and_field[0]
+                stat = name_and_field[1]
+                metrics.append((name, stat))
+                #csv_writer.writerow([name, stat])
+                f.write("%s,%s\n" % (name, stat))
+            summary_stats["RNA"] = metrics
+
+    write_summary_table(summary_stats, output_file)
     fname.close()
     output_file.write("</div>")
 
@@ -254,16 +267,12 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, summ
     #  start csv output only
     #  write stats from qc to output csv file
     print("start of qc vals text loop")
-    with open(qc_vals) as fname:
-        stats = fname.read().splitlines()
-    for stat in stats:
-        print("stat is " + stat)
-        #  csv_output_file.write(stat + '\n')
-        name_and_field = stat.split(',')
-        name = name_and_field[0]
-        stat = name_and_field[1]
-        #  csv_writer.writerow([name, stat])
-        f.write("%s,%s\n" % (name, stat))
+    for metrics_list in summary_stats.values():
+        for metric in metrics_list:
+            name = metric[0]
+            stat = metric[1]
+            f.write("%s,%s\n" % (name, stat))
+
     #  fname.close()
 
     output_file.close()
@@ -284,10 +293,10 @@ if __name__ == '__main__':
                        help='file containing list of text log files to append to end of HTML file')
     group.add_argument('output_csv_name',
                        help='csv file to write values to')
-    group.add_argument('summary_stats_txt',
-                       help='text file containing names and values of summary stats')
-    group.add_argument('qc_vals',
-                       help='file containing names and values of stats')
+    group.add_argument('--atac_metrics',
+                       help='file containing names and values of ATAC stats')
+    group.add_argument('--rna_metrics',
+                       help='file containing names and values of RNA stats')
 
     args = parser.parse_args()
-    main(args.output_file_name, args.image_file_list, args.log_file_list, args.output_csv_name, args.summary_stats_txt, args.qc_vals)
+    main(args.output_file_name, args.image_file_list, args.log_file_list, args.output_csv_name, args.atac_metrics, args.rna_metrics)
