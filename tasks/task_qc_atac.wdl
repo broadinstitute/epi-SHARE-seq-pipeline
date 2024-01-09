@@ -95,7 +95,7 @@ task qc_atac {
         echo '------ START: Compute TSS enrichment ------' 1>&2
         time python3 $(which compute_tss_enrichment.py) \
             -e 2000 \
-            -p 8 \
+            -p {cpus} \
             --regions ~{tss} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             no-singleton.bed.gz
