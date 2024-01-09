@@ -95,7 +95,7 @@ task qc_atac {
         echo '------ START: Compute TSS enrichment ------' 1>&2
         time python3 $(which compute_tss_enrichment.py) \
             -e 2000 \
-            -p {cpus} \
+            -p ~{cpus} \
             --regions ~{tss} \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
             no-singleton.bed.gz
@@ -149,7 +149,6 @@ task qc_atac {
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
         memory: "${mem_gb} GB"
-        preemptible: 3
     }
 
     parameter_meta {
