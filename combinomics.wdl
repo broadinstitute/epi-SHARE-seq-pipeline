@@ -173,14 +173,7 @@ workflow combinomics {
             input:
                 prefix = prefix,
                 atac_metrics = atac.atac_qc_metrics_csv,
-
-                rna_total_reads = rna.rna_total_reads,
-                rna_aligned_uniquely = rna.rna_aligned_uniquely,
-                rna_aligned_multimap = rna.rna_aligned_multimap,
-                rna_unaligned = rna.rna_unaligned,
-                rna_feature_reads = rna.rna_feature_reads,
-                rna_duplicate_reads = rna.rna_duplicate_reads,
-                rna_frig = rna.rna_frig,
+                rna_metrics = rna.rna_qc_metrics,
                 ## JPEG files to be encoded and appended to html
                 # RNA plots
                 image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot,

@@ -56,24 +56,26 @@ task qc_rna {
         # Index bam file
         samtools index -@ ~{cpus} ~{bam} ~{bai}
 
+        # Get STARsolo deduped statistics from mtx file
         tar -xvzf ~{mtx_tar}
 
         zcat matrix.mtx.gz | awk -v OFS="\t" 'NR>3{count[$2]+=$3; tot[$2]+=1}END{for (bc in count){ print bc,count[bc],tot[bc]} }' | sort -k1,1n > barcode_count_statistics_dedup.raw.tsv
         echo -e "barcode\tunique_umi\tgenes_final" > barcode_count_statistics_dedup.tsv
         awk -v pkr=~{if defined(subpool) then "_~{subpool}" else ""} -v OFS="\t" 'FNR==NR{bc[NR]=$1}FNR!=NR{print bc[$1]pkr,$2,$3; delete bc[$1]}END{for(idx in bc){print bc[idx]pkr,0,0}}' <(zcat barcodes.tsv.gz) barcode_count_statistics_dedup.raw.tsv | sort -k1,1 >> barcode_count_statistics_dedup.tsv
 
-        # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
+        # Extract barcode metadata from bam file
         python3 $(which rna_barcode_metadata.py) ~{bam} \
                                                  ~{bai} \
                                                  tmp_metadata.tsv \
                                                  ~{subpool} \
                                                  ~{"--barcode_tag " + barcode_tag}
 
+        # Calculate FRIG (fraction of unique reads in genes)
         join -t $'\t' -e 0 -j1 <(cat tmp_metadata.tsv | (sed -u 1q;sort -k1,1)) barcode_count_statistics_dedup.tsv | \
         awk -v OFS="\t" 'NR==1{print $0,"FRIG"}NR>1{printf "%s\t%4.2f\n",$0,$9/$2}' > ~{barcode_metadata}
 
-
-        awk 'NR>1{total+=$2; duplicate+=$2-$9; unique+=$9} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate; print "FRIG:",unique/total}' ~{barcode_metadata} > ~{duplicates_log}
+        # Write aggregate statistics into duplicates log
+        awk 'NR>1{total+=$2; mito+=$4; unique+=$9} END {print "RNA_unique_reads_mapped_to_genes,", unique; printf "RNA_FRIG,%.2f", unique/total; print "RNA_duplicate_reads,", total-unique; printf "RNA_percent_duplicates,%.1f", duplicate/total; printf "RNA_percent_mitochondrial,%.1f", mito/total}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
         Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_cutoff} ~{gene_cutoff} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot}
@@ -82,7 +84,6 @@ task qc_rna {
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
         File rna_duplicates_log = "~{duplicates_log}"
-        File rna_barcode_metadata_log = "barcode_metadata.log"
         File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
         File? rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
         File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"

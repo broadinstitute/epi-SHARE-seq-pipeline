@@ -226,12 +226,6 @@ workflow wf_rna {
         File? rna_seurat_obj = seurat.seurat_filtered_obj
         File? rna_plots_zip = seurat.plots_zip
 
-        Int? rna_total_reads = log_rna.rna_total_reads
-        Int? rna_aligned_uniquely = log_rna.rna_aligned_uniquely
-        Int? rna_aligned_multimap = log_rna.rna_aligned_multimap
-        Int? rna_unaligned = log_rna.rna_unaligned
-        Int? rna_feature_reads = log_rna.rna_feature_reads
-        Int? rna_duplicate_reads = log_rna.rna_duplicate_reads
-        Float? rna_frig = log_rna.rna_frig
+        File? rna_qc_metrics = log_rna.rna_qc_metrics
     }
 }
