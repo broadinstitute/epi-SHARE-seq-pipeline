@@ -70,7 +70,7 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, atac
             num = int(num / 1000)
             num = str(num) + " K"
         elif num < 1:
-            num = str(round(num))
+            num = str(round(num), 2)
         else:
             num = str(num)
         return num
