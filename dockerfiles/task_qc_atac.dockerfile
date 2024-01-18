@@ -31,6 +31,9 @@ RUN apt-get update && apt-get install -y \
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam xopen
 
+# Install R packages
+RUN R --no-echo --no-restore --no-save -e "install.packages('ggplot2')"
+
 # Create and setup new user
 ENV USER=shareseq
 WORKDIR /home/$USER

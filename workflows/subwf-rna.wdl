@@ -65,8 +65,9 @@ workflow wf_rna {
         String? generate_h5_docker_image
     
         # QC-specific inputs
-        Int? umi_cutoff
-        Int? gene_cutoff
+        Int? umi_min_cutoff
+        Int? gene_min_cutoff
+        Int? hist_max_umi
         # Runtime parameters
         Int? qc_cpus
         Float? qc_disk_factor
@@ -147,8 +148,9 @@ workflow wf_rna {
             input:
                 bam = align.output_bam,
                 mtx_tar = align.raw_tar,
-                umi_cutoff = umi_cutoff,
-                gene_cutoff = gene_cutoff,
+                umi_min_cutoff = umi_min_cutoff,
+                gene_min_cutoff = gene_min_cutoff,
+                hist_max_umi = hist_max_umi,
                 subpool = subpool,
                 barcode_tag = barcode_tag,
                 genome_name = genome_name,
@@ -162,7 +164,8 @@ workflow wf_rna {
         call task_log_rna.log_rna as log_rna {
         input:
             alignment_log = align.log_final_out,
-            dups_log = qc_rna.rna_duplicates_log
+            dups_log = qc_rna.rna_duplicates_log,
+            prefix = prefix
         }
 
         if ( "~{pipeline_modality}" == "full") {
@@ -206,6 +209,7 @@ workflow wf_rna {
         File? rna_umi_barcode_rank_plot = qc_rna.rna_umi_barcode_rank_plot
         File? rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
         File? rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
+        File? rna_umi_histogram = qc_rna.rna_umi_histogram
 
         File? rna_seurat_notebook_output = seurat.notebook_output
         File? rna_seurat_notebook_log = seurat.notebook_log
