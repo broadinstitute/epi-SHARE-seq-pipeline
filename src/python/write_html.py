@@ -60,11 +60,11 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, atac
     def format_number(txt_num):
         num = float(txt_num)
         if num > 1000000000:
-            num = int(num / 1000000000)
+            num = round(num / 1000000000, 2)
             num = str(num) + " B"
         elif num > 1000000:
             num = round(num, -6)
-            num = int(num / 1000000)
+            num = round(num / 1000000, 1)
             num = str(num) + " M"
         elif num > 1000:
             num = int(num / 1000)

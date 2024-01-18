@@ -37,9 +37,8 @@ def get_metrics(bam, barcode_tag="CB", subpool=None):
 
 
     for read in bam:
-        # skip read if not primary alignment
-        hit_index = read.get_tag("HI")
-        if hit_index != 1:
+        # skip read if not primary alignment (multimapper)
+        if read.flag & 256:
             continue
 
         # get barcode; skip read if not present
@@ -53,17 +52,20 @@ def get_metrics(bam, barcode_tag="CB", subpool=None):
             continue
 
         reads_per_barcode[barcode][0] += 1
-        
+
+        if read.reference_name == "chrM":
+            reads_per_barcode[barcode][1] += 1
+
         # get gene id; skip read if not present
         gene_id = read.get_tag("GX")
         if gene_id == "-":
             continue
 
         if read.reference_name == "chrM":
-            reads_per_barcode[barcode][1] += 1
             mito_genes_per_barcode[barcode].add(gene_id)
         else:
             genes_per_barcode[barcode].add(gene_id)
+
 
     # create list with barcodes and associated metrics
     barcode_metadata = []

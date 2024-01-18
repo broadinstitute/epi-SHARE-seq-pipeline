@@ -21,9 +21,9 @@ task log_rna {
     }
 
     command <<<
-        total_reads=$(awk -F"|" '$1~/input reads/{print $2}' ~{alignment_log})
-        aligned_uniquely=$(awk -F"|" '$1~/Uniquely mapped reads number/{print $2}' ~{alignment_log})
-        aligned_multimap=$(awk -F"|" '$1~/Number of reads mapped to multiple loci/{print $2}' ~{alignment_log})
+        total_reads=$(awk -F"|\t" '$1~/input reads/{print $2}' ~{alignment_log})
+        aligned_uniquely=$(awk -F"|\t" '$1~/Uniquely mapped reads number/{print $2}' ~{alignment_log})
+        aligned_multimap=$(awk -F"|\t" '$1~/Number of reads mapped to multiple loci/{print $2}' ~{alignment_log})
         aligned=$(($aligned_uniquely + $aligned_multimap))
         unaligned=$(($total_reads - $aligned))
         
@@ -31,7 +31,7 @@ task log_rna {
         echo "RNA_aligned_reads,$aligned" >> ~{prefix}_rna_qc_metrics.csv
         echo "RNA_uniquely_aligned_reads,$aligned_uniquely" >> ~{prefix}_rna_qc_metrics.csv
         echo "RNA_multimapped_reads,$aligned_multimap" >> ~{prefix}_rna_qc_metrics.csv
-        echo "RNA_unaligned_reads,$unaligned" >> ~{prefix}_rna_qc_metrics.csv
+        echo "RNA_unaligned_reads,$unaligned\n" >> ~{prefix}_rna_qc_metrics.csv
 
         cat ~{dups_log} >> ~{prefix}_rna_qc_metrics.csv
     >>>
