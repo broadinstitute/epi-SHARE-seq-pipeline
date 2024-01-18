@@ -47,7 +47,7 @@ task qc_rna {
     String umi_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.umi.barcode.rank.plot.png"
     String gene_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.barcode.rank.plot.png"
     String gene_umi_scatter_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.umi.scatter.plot.png"
-    String umi_histogram_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.umi.scatter.plot.png"
+    String umi_histogram_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.fragment.histogram.png"
     String monitor_log = "monitor.log"
 
     command <<<
@@ -77,7 +77,7 @@ task qc_rna {
         awk -v OFS="\t" 'NR==1{print $0,"FRIG"}NR>1{printf "%s\t%4.2f\n",$0,$9/$2}' > ~{barcode_metadata}
 
         # Write aggregate statistics into duplicates log
-        awk 'NR>1{total+=$2; mito+=$4; unique+=$9} END {print "RNA_unique_reads_mapped_to_genes,", unique; printf "RNA_FRIG,%.2f", unique/total; print "RNA_duplicate_reads,", total-unique; printf "RNA_percent_duplicates,%.1f", duplicate/total*100; printf "RNA_percent_mitochondrial,%.1f\n", mito/total*100}' ~{barcode_metadata} > ~{duplicates_log}
+        awk -v OFS="," 'NR>1{total+=$2; mito+=$4; unique+=$9} END {print "RNA_unique_reads_mapped_to_genes", unique; printf "RNA_FRIG,%.2f\n",unique/total; print "RNA_duplicate_reads", total-unique; printf "RNA_percent_duplicates,%.1f\n", (total-unique)/total*100; printf "RNA_percent_mitochondrial,%.1f\n", mito/total*100}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
         Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_min_cutoff} ~{gene_min_cutoff} ~{hist_max_umi} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot} ~{umi_histogram_plot}
