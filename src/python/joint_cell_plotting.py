@@ -24,7 +24,7 @@ def parse_arguments():
     parser.add_argument("min_frags", type=int, help="Cutoff for minimum number of ATAC fragments")
     parser.add_argument("plot_file", help="Filename for plot png file")
     parser.add_argument("barcode_metadata_file", help="Filename for barcode metadata csv file")
-    parser.add_argument("pkr", help="PKR name", nargs='?', default="")
+    parser.add_argument("subpool", help="Cellular subpool name", nargs="?", default="")
 
     return parser.parse_args()
 
@@ -119,33 +119,33 @@ def label_func(breaks):
     return [int(x) for x in breaks]
 
 
-def plot_cells(df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file):
+def plot_cells(df, subpool, min_umis, min_genes, min_tss, min_frags, plot_file):
     # get max x and y coords to set plot limits
     max_x = max(df["frags"])
     max_y = max(df["unique_umi"])
     xy_lim = round_to_power_10(max(max_x, max_y))
 
     plot = (ggplot(df, aes("frags", "unique_umi", color="QC_count"))
-             + geom_point(size=0.5)
-             + labs(title = f"Joint Cell Calling ({pkr})",
-                    caption = f"ATAC cutoffs: TSS ≥ {min_tss}, frags ≥ {min_frags}. RNA cutoffs: UMIs ≥ {min_umis}, genes ≥ {min_genes}",
-                    x = "ATAC Unique Fragments per Barcode",
-                    y = "RNA UMIs per Barcode",
-                    color = "QC")
-             + theme_light()
-             + theme(figure_size = (8,6),
-                     title = element_text(size=12),
-                     axis_title = element_text(size=10),
-                     axis_text = element_text(size=8),
-                     legend_box_margin = 0,
-                     legend_title = element_text(size=8),
-                     legend_text = element_text(size=6),
-                     legend_key = element_blank(),
-                     plot_caption=element_text(size=8, ha="center", margin={"r": 3.2, "t": -0.2, "units": "in"}),
-                     panel_grid_minor = element_blank())
-             + scale_x_log10(limits=(10,xy_lim), labels=label_func)
-             + scale_y_log10(limits=(10,xy_lim), labels=label_func)
-             )
+            + geom_point(size=0.5)
+            + labs(title=f"Joint Cell Calling ({subpool})",
+                   caption=f"ATAC cutoffs: TSS ≥ {min_tss}, frags ≥ {min_frags}. RNA cutoffs: UMIs ≥ {min_umis}, genes ≥ {min_genes}",
+                   x="ATAC Unique Fragments per Barcode",
+                   y="RNA UMIs per Barcode",
+                   color="QC")
+            + theme_light()
+            + theme(figure_size=(8, 6),
+                    title=element_text(size=12),
+                    axis_title=element_text(size=10),
+                    axis_text=element_text(size=8),
+                    legend_box_margin=0,
+                    legend_title=element_text(size=10),
+                    legend_text=element_text(size=8),
+                    legend_key=element_blank(),
+                    plot_caption=element_text(size=8, ha="center", margin={"r": 3.2, "t": 0.1, "units": "in"}),
+                    panel_grid_minor=element_blank())
+            + scale_x_log10(limits=(10, xy_lim), labels=label_func)
+            + scale_y_log10(limits=(10, xy_lim), labels=label_func)
+            )
 
     plot.save(filename=plot_file, dpi=1000)
 
@@ -156,7 +156,7 @@ def main():
 
     # get arguments
     args = parse_arguments()
-    pkr = getattr(args, "pkr")
+    subpool = getattr(args, "subpool")
     rna_metrics_file = getattr(args, "rna_metrics_file")
     atac_metrics_file = getattr(args, "atac_metrics_file")
     remove_low_yielding_cells = getattr(args, "remove_low_yielding_cells")
@@ -177,7 +177,7 @@ def main():
 
     # generate plot
     logging.info("Generating joint cell calling plot\n")
-    plot_cells(metrics_df, pkr, min_umis, min_genes, min_tss, min_frags, plot_file)
+    plot_cells(metrics_df, subpool, min_umis, min_genes, min_tss, min_frags, plot_file)
 
     # save dataframe
     logging.info("Saving dataframe as csv\n")
