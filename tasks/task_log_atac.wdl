@@ -25,7 +25,7 @@ task log_atac {
         grep "Number of" ~{alignment_log} | grep -v threads| tr -d '.' | sed 's/ /_/g' | sed 's/:_/,/g' | sed 's/Number/ATAC_number/g' > ~{prefix}_qc_metrics.csv
         grep "#" ~{alignment_log}  | sed 's/, /\n/g' | tr -d '# ' | sed 's/:/,/g' | tr -d '.' | sed -e 's/^/ATAC_unique_/'  >> ~{prefix}_qc_metrics.csv
         # Compute the percentage of duplicates from the barcode log file.
-        awk -v FS="," 'NR>1{unique+= $2; dups+=$3}END{printf "ATAC_percentage_duplicates,%5.1f", 100*dups/(unique+dups)}' ~{barcode_log} >> ~{prefix}_qc_metrics.csv
+        awk -v FS="," 'NR>1{unique+= $2; dups+=$3}END{printf "ATAC_percentage_duplicates,%.1f", 100*dups/(unique+dups)}' ~{barcode_log} >> ~{prefix}_qc_metrics.csv
     >>>
     output {
         File atac_statistics_csv = "~{prefix}_qc_metrics.csv"

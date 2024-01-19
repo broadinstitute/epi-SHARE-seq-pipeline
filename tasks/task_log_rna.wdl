@@ -31,7 +31,7 @@ task log_rna {
         echo "RNA_aligned_reads,$aligned" >> ~{prefix}_rna_qc_metrics.csv
         echo "RNA_uniquely_aligned_reads,$aligned_uniquely" >> ~{prefix}_rna_qc_metrics.csv
         echo "RNA_multimapped_reads,$aligned_multimap" >> ~{prefix}_rna_qc_metrics.csv
-        echo "RNA_unaligned_reads,$unaligned\n" >> ~{prefix}_rna_qc_metrics.csv
+        echo "RNA_unaligned_reads,$unaligned" >> ~{prefix}_rna_qc_metrics.csv
 
         cat ~{dups_log} >> ~{prefix}_rna_qc_metrics.csv
     >>>
