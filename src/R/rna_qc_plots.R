@@ -18,7 +18,7 @@ gene_min_cutoff <- as.integer(args[8])
 hist_max_umi <- as.integer(args[9])
 umi_rank_plot_file <- args[10]
 gene_rank_plot_file <- args[11]
-gene_umi_plot_file <- args[12]hi
+gene_umi_plot_file <- args[12]
 umi_histogram_plot_file <- args[13]
 
 barcode_metadata <- read.table(barcode_metadata_file, header=T)
@@ -168,7 +168,7 @@ plot(x=barcode_metadata$total_counts,
 dev.off()
 
 # Make UMI count histogram
-png(umi_histogram_plot_file, width=8, height=6, units='in', res=300)
+png(umi_histogram_plot_file, width=6, height=4, units='in', res=300)
 
 ggplot(mapping=aes(umi_filtered)) + 
   geom_histogram(binwidth=100) + 
