@@ -2,6 +2,8 @@
 
 ### Takes ATAC barcode metadata tsv file, and outputs barcode rank plots as a png file.
 
+library(ggplot2)
+
 ## Import helper functions
 source("/usr/local/bin/barcode_rank_functions.R")
 
@@ -9,8 +11,10 @@ source("/usr/local/bin/barcode_rank_functions.R")
 args <- commandArgs()
 
 barcode_metadata_file <- args[6]
-fragment_cutoff <- as.integer(args[7])
-fragment_rank_plot_file <- args[8]
+fragment_min_cutoff <- as.integer(args[7])
+hist_max_fragment <- as.integer(args[8])
+fragment_rank_plot_file <- args[9]
+fragment_histogram_plot_file <- args[10]
 
 barcode_metadata <- read.table(barcode_metadata_file, header=T)
 
@@ -19,7 +23,7 @@ barcode_metadata <- read.table(barcode_metadata_file, header=T)
 # Impose fragment cutoff, sort in decreasing order, assign rank
 # 1 fragment = 2 reads
 fragment <- barcode_metadata$unique
-fragment_filtered <- fragment[fragment >= fragment_cutoff]
+fragment_filtered <- fragment[fragment >= fragment_min_cutoff]
 fragment_filtered_sort <- sort(fragment_filtered, decreasing=T)
 fragment_rank <- 1:length(fragment_filtered_sort)
 
@@ -82,4 +86,14 @@ if (fragment_plot2) {
        paste("(", fragment_points[3], ", ", 10^(fragment_points[4]), ")", sep=""),
        adj=c(-0.1,-0.5))
 }
+dev.off()
+
+# Make fragment count histogram
+png(fragment_histogram_plot_file, width=6, height=4, units='in', res=300)
+
+ggplot(mapping=aes(fragment_filtered)) + 
+  geom_histogram(binwidth=100) + 
+  xlim(0, hist_max_fragment) +
+  xlab("Fragments per barcode")
+
 dev.off()

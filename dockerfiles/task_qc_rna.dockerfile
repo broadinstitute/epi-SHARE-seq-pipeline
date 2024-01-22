@@ -29,6 +29,9 @@ RUN apt-get update && apt-get install -y \
 # Install python packages
 RUN pip install --no-cache-dir --break-system-packages pysam numpy
 
+# Install R packages
+RUN R --no-echo --no-restore --no-save -e "install.packages('ggplot2')"
+
 # Create and setup new user
 ENV USER=shareseq
 WORKDIR /home/$USER

@@ -20,7 +20,8 @@ task qc_atac {
         File? tss
         File? barcode_conversion_dict
 
-        Int? fragment_cutoff = 10
+        Int? fragment_min_cutoff = 10
+        Int? hist_max_fragment = 5000
         String? genome_name
         String? prefix
         String? subpool="none"
@@ -52,7 +53,7 @@ task qc_atac {
     String tss_pileup_out = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log.png'
     String final_barcode_metadata = '${default="share-seq" prefix}.atac.qc.${genome_name}.metadata.tsv'
     String fragment_barcode_rank_plot = "${default="share-seq" prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png"
-
+    String fragment_histogram = "${default="share-seq" prefix}.atac.qc.${genome_name}.fragment.histogram.png"
     String monitor_log = "atac_qc_monitor.log"
 
 
@@ -82,12 +83,12 @@ task qc_atac {
         wc -l temp_summary
 
         echo '------ Filtering fragments ------' 1>&2
-        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz ) > no-singleton.bed
+        time awk -v threshold=~{fragment_min_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz ) > no-singleton.bed
 
         bgzip -l 5 -@ ~{cpus} -c no-singleton.bed > no-singleton.bed.gz
         
         echo '------ Number of barcodes AFTER filtering------' 1>&2
-        cat temp_summary | grep -v barcode | awk -v FS="," -v threshold=~{fragment_cutoff} '($2-$3-$4-$5)>threshold' | wc -l
+        cat temp_summary | grep -v barcode | awk -v FS="," -v threshold=~{fragment_min_cutoff} '($2-$3-$4-$5)>threshold' | wc -l
         
         tabix --zero-based --preset bed no-singleton.bed.gz
 
@@ -124,7 +125,7 @@ task qc_atac {
 
         # Barcode rank plot
         echo '------ START: Generate barcod rank plot ------' 1>&2
-        time Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_cutoff} ~{fragment_barcode_rank_plot}
+        time Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_min_cutoff} ~{hist_max_fragment} ~{fragment_barcode_rank_plot} ~{fragment_histogram}
     >>>
 
     output {
@@ -142,6 +143,7 @@ task qc_atac {
         File atac_qc_barcode_metadata = final_barcode_metadata
 
         File? atac_qc_barcode_rank_plot = fragment_barcode_rank_plot
+        File? atac_qc_fragment_histogram = fragment_histogram
     }
 
     runtime {
@@ -157,11 +159,16 @@ task qc_atac {
                 help: 'List of TSS in bed format used for the enrichment plot.',
                 example: 'refseq.tss.bed'
             }
-        fragment_cutoff: {
-                description: 'Fragment cutoff',
-                help: 'Cutoff for number of fragments required when making fragment barcode rank plot.',
+        fragment_min_cutoff: {
+                description: 'Fragment minimum cutoff',
+                help: 'Cutoff for minimum number of fragments required when making fragment barcode rank plot.',
                 example: 10
             }
+        hist_max_fragment: {
+                description: 'Histogram fragment maximum',
+                help: 'Maximum number of fragments per barcode when making fragment count histogram (x-axis maximum).',
+                example: 5000
+           }
         genome_name: {
                 description: 'Reference name',
                 help: 'The name of the reference genome used by the aligner.',

@@ -12,20 +12,17 @@ import pysam
 from collections import defaultdict
 from functools import partial
 
-logging.basicConfig(filename='barcode_metadata.log', encoding='utf-8', level=logging.DEBUG)
-logging.debug('Creating the barcode metadata for RNA from bam.')
-
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Get total reads, duplicate reads, UMIs, genes, and percent mitochondrial reads for each barcode from bam file")
     parser.add_argument("bam_file", help="Filename for input bam file")
     parser.add_argument("bai_file", help="Filename for bam index file")
     parser.add_argument("barcode_metadata_file", help="Filename for output barcode metadata txt file")
-    parser.add_argument("pkr", help="PKR id for shareseq", default = None, nargs='?')
-    parser.add_argument("--barcode_tag", help="PKR id for shareseq", default="CB")
+    parser.add_argument("subpool", help="Cellular subpool name", default = None, nargs="?")
+    parser.add_argument("--barcode_tag", help="BAM tag containing cell barcode", default="CB")
 
     return parser.parse_args()
 
-def get_metrics(bam, barcode_tag="CB", pkr=None):
+def get_metrics(bam, barcode_tag="CB", subpool=None):
     """
     Get barcode metrics from bam file; all counts are only for reads overlapping genes.
     Reported metrics are total counts, UMIs (one UMI counted per unique UMI-gene mapping),
@@ -34,48 +31,41 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
 
     # Reads per barcode is a vector of length 2.
     # [x_mito_reads, mito_reads]
-    reads_per_barcode = defaultdict(partial(np.zeros,2))
+    reads_per_barcode = defaultdict(partial(np.zeros, 2, dtype=int))
     genes_per_barcode = defaultdict(set)
     mito_genes_per_barcode = defaultdict(set)
 
 
     for read in bam:
-        try:
-            # get barcode; skip read if not present
-            barcode = read.get_tag(barcode_tag)
-            if barcode == "-":
-                #logging.warning(f"Skipping {read.qname} because the {barcode_tag} tag is empty") slowing down
-                continue
-                
-            # get UMI; skip read if not present
-            umi = read.get_tag("UB")
-            if umi == "-":
-                #logging.warning(f"Skipping {read.qname} because the UB tag is empty")
-                continue
+        # skip read if not primary alignment (multimapper)
+        if read.flag & 256:
+            continue
 
-            reads_per_barcode[barcode][0] += 1
+        # get barcode; skip read if not present
+        barcode = read.get_tag(barcode_tag)
+        if barcode == "-":
+            continue
             
-            if read.reference_name == "chrM":
-                reads_per_barcode[barcode][1] += 1
-
-        except KeyError:
-            #logging.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing.")
+        # get UMI; skip read if not present
+        umi = read.get_tag("UB")
+        if umi == "-":
             continue
 
-        try:
-            # get gene id; skip read if not present
-            gene_id = read.get_tag("GX")
-            if gene_id == "-":
-                #logging.warning(f"Skipping {read.qname} because the GX tag is empty")
-                continue
+        reads_per_barcode[barcode][0] += 1
 
-            if read.reference_name == "chrM":
-                mito_genes_per_barcode[barcode].add(gene_id)
-            else:
-                genes_per_barcode[barcode].add(gene_id)
-        except KeyError:
-            #logging.error(f"Skipping {read.qname} because one of the tags {barcode_tag},GX, or UB is missing.")
+        if read.reference_name == "chrM":
+            reads_per_barcode[barcode][1] += 1
+
+        # get gene id; skip read if not present
+        gene_id = read.get_tag("GX")
+        if gene_id == "-":
             continue
+
+        if read.reference_name == "chrM":
+            mito_genes_per_barcode[barcode].add(gene_id)
+        else:
+            genes_per_barcode[barcode].add(gene_id)
+
 
     # create list with barcodes and associated metrics
     barcode_metadata = []
@@ -84,7 +74,7 @@ def get_metrics(bam, barcode_tag="CB", pkr=None):
         genes = len(genes_per_barcode[barcode])
         mito_genes = len(mito_genes_per_barcode[barcode])
         fraction_mitochondrial_reads = round(reads_vector[1]/reads_vector[0] * 100, 2)
-        out_barcode = barcode + "_" + pkr if pkr else barcode
+        out_barcode = barcode + "_" + subpool if subpool else barcode
 
         metrics = list(map(str,[out_barcode, reads_vector[0], reads_vector[0]-reads_vector[1], reads_vector[1], genes+mito_genes, genes, mito_genes, fraction_mitochondrial_reads]))
 
@@ -108,7 +98,7 @@ def main():
     args = parse_arguments()
     bam_file = getattr(args, "bam_file")
     bai_file = getattr(args, "bai_file")
-    pkr = getattr(args, "pkr")
+    subpool = getattr(args, "subpool")
     barcode_tag = getattr(args, "barcode_tag")
     barcode_metadata_file = getattr(args, "barcode_metadata_file")
 
@@ -116,7 +106,7 @@ def main():
     bam = pysam.AlignmentFile(bam_file, "rb", index_filename=bai_file)
 
     # get metrics for each barcode
-    barcode_metadata = get_metrics(bam, barcode_tag, pkr)
+    barcode_metadata = get_metrics(bam, barcode_tag, subpool)
 
     # write metadata file
     write_metadata_file(barcode_metadata, barcode_metadata_file)

@@ -66,7 +66,8 @@ workflow wf_atac {
         Float? align_memory_factor = 0.15
         String? align_docker_image
 
-        Int? qc_fragment_cutoff
+        Int? qc_fragment_min_cutoff
+        Int? qc_hist_max_fragment
         # Runtime parameters
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
@@ -172,7 +173,8 @@ workflow wf_atac {
                 tss = tss_bed,
                 subpool = subpool,
                 barcode_conversion_dict = barcode_conversion_dict,
-                fragment_cutoff = qc_fragment_cutoff,
+                fragment_min_cutoff = qc_fragment_min_cutoff,
+                hist_max_fragment = qc_hist_max_fragment,
                 genome_name = genome_name,
                 prefix = prefix,
                 cpus = qc_cpus,
@@ -230,6 +232,7 @@ workflow wf_atac {
         File? atac_qc_hist_txt = qc_atac.atac_qc_final_hist
         File? atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
         File? atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
+        File? atac_qc_fragment_histogram = qc_atac.atac_qc_fragment_histogram
         
         # Track
         File? atac_track_bigwig = track.atac_track_bigwig

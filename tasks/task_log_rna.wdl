@@ -17,28 +17,27 @@ task log_rna {
         # the quality metrics
         File alignment_log
         File dups_log
+        String? prefix = "sample"
     }
 
     command <<<
-        total_reads=$(awk -F"|" '$1~/input reads/{print $2}' ~{alignment_log})
-        echo $total_reads > total_reads.txt
-        aligned_uniquely=$(awk -F"|" '$1~/Uniquely mapped reads number/{print $2}' ~{alignment_log})
-        echo $aligned_uniquely > aligned_uniquely.txt
-        aligned_multimap=$(awk -F"|" '$1~/Number of reads mapped to multiple loci/{print $2}' ~{alignment_log})
-        echo $aligned_multimap > aligned_multimap.txt
-        echo $(($total_reads - $aligned_uniquely - $aligned_multimap)) > unaligned.txt
-        awk -F":" '$1~/total reads/{print $2}' ~{dups_log} > feature_reads.txt
-        awk -F":" '$1~/duplicate reads/{print $2}' ~{dups_log} > duplicate_reads.txt
-        awk -F":" '$1~/FRIG/{print $2}' ~{dups_log} > frig.txt
+        total_reads=$(awk -F"|" '$1~/input reads/{print $2}' ~{alignment_log} | tr -d "\t")
+        aligned_uniquely=$(awk -F"|" '$1~/Uniquely mapped reads number/{print $2}' ~{alignment_log} | tr -d "\t")
+        aligned_multimap=$(awk -F"|" '$1~/Number of reads mapped to multiple loci/{print $2}' ~{alignment_log} | tr -d "\t")
+        aligned=$(($aligned_uniquely + $aligned_multimap))
+        unaligned=$(($total_reads - $aligned))
+        
+        echo "RNA_input_reads,$total_reads" > ~{prefix}_rna_qc_metrics.csv
+        echo "RNA_aligned_reads,$aligned" >> ~{prefix}_rna_qc_metrics.csv
+        echo "RNA_uniquely_aligned_reads,$aligned_uniquely" >> ~{prefix}_rna_qc_metrics.csv
+        echo "RNA_multimapped_reads,$aligned_multimap" >> ~{prefix}_rna_qc_metrics.csv
+        echo "RNA_unaligned_reads,$unaligned" >> ~{prefix}_rna_qc_metrics.csv
+
+        cat ~{dups_log} >> ~{prefix}_rna_qc_metrics.csv
     >>>
+
     output {
-        Int rna_total_reads = read_int("total_reads.txt")
-        Int rna_aligned_uniquely = read_int("aligned_uniquely.txt")
-        Int rna_aligned_multimap = read_int("aligned_multimap.txt")
-        Int rna_unaligned = read_int("unaligned.txt")	    
-        Int rna_feature_reads = read_int("feature_reads.txt")
-        Int rna_duplicate_reads = read_int("duplicate_reads.txt")
-        Float rna_frig = read_float("frig.txt")
+        File rna_qc_metrics = "~{prefix}_rna_qc_metrics.csv"
     }
 
     runtime {

@@ -14,8 +14,9 @@ task qc_rna {
         # This function takes in input the sorted bam file produced by STARsolo
         File bam
         File mtx_tar
-        Int? umi_cutoff = 100
-        Int? gene_cutoff = 100
+        Int? umi_min_cutoff = 100
+        Int? gene_min_cutoff = 100
+        Int? hist_max_umi = 5000
         String genome_name
         String? barcode_tag = "CB"
         String? subpool
@@ -46,6 +47,7 @@ task qc_rna {
     String umi_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.umi.barcode.rank.plot.png"
     String gene_barcode_rank_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.barcode.rank.plot.png"
     String gene_umi_scatter_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.gene.umi.scatter.plot.png"
+    String umi_histogram_plot = "~{default="share-seq" prefix}.qc.rna.~{genome_name}.fragment.histogram.png"
     String monitor_log = "monitor.log"
 
     command <<<
@@ -56,36 +58,38 @@ task qc_rna {
         # Index bam file
         samtools index -@ ~{cpus} ~{bam} ~{bai}
 
+        # Get STARsolo deduped statistics from mtx file
         tar -xvzf ~{mtx_tar}
 
         zcat matrix.mtx.gz | awk -v OFS="\t" 'NR>3{count[$2]+=$3; tot[$2]+=1}END{for (bc in count){ print bc,count[bc],tot[bc]} }' | sort -k1,1n > barcode_count_statistics_dedup.raw.tsv
         echo -e "barcode\tunique_umi\tgenes_final" > barcode_count_statistics_dedup.tsv
         awk -v pkr=~{if defined(subpool) then "_~{subpool}" else ""} -v OFS="\t" 'FNR==NR{bc[NR]=$1}FNR!=NR{print bc[$1]pkr,$2,$3; delete bc[$1]}END{for(idx in bc){print bc[idx]pkr,0,0}}' <(zcat barcodes.tsv.gz) barcode_count_statistics_dedup.raw.tsv | sort -k1,1 >> barcode_count_statistics_dedup.tsv
 
-        # Extract barcode metadata (total counts, unique counts, duplicate counts, genes, percent mitochondrial) from bam file
+        # Extract barcode metadata from bam file
         python3 $(which rna_barcode_metadata.py) ~{bam} \
                                                  ~{bai} \
                                                  tmp_metadata.tsv \
                                                  ~{subpool} \
                                                  ~{"--barcode_tag " + barcode_tag}
 
+        # Calculate FRIG (fraction of unique reads in genes)
         join -t $'\t' -e 0 -j1 <(cat tmp_metadata.tsv | (sed -u 1q;sort -k1,1)) barcode_count_statistics_dedup.tsv | \
         awk -v OFS="\t" 'NR==1{print $0,"FRIG"}NR>1{printf "%s\t%4.2f\n",$0,$9/$2}' > ~{barcode_metadata}
 
-
-        awk 'NR>1{total+=$2; duplicate+=$2-$9; unique+=$9} END {print "total reads:", total; print "unique reads:", unique; print "duplicate reads:", duplicate; print "FRIG:",unique/total}' ~{barcode_metadata} > ~{duplicates_log}
+        # Write aggregate statistics into duplicates log
+        awk -v OFS="," 'NR>1{total+=$2; mito+=$4; unique+=$9} END {print "RNA_unique_reads_mapped_to_genes", unique; printf "RNA_FRIG,%.2f\n",unique/total; print "RNA_duplicate_reads", total-unique; printf "RNA_percent_duplicates,%.1f\n", (total-unique)/total*100; printf "RNA_percent_mitochondrial,%.1f\n", mito/total*100}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
-        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_cutoff} ~{gene_cutoff} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot}
+        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_min_cutoff} ~{gene_min_cutoff} ~{hist_max_umi} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot} ~{umi_histogram_plot}
     >>>
 
     output {
         File rna_barcode_metadata = "~{barcode_metadata}"
         File rna_duplicates_log = "~{duplicates_log}"
-        File rna_barcode_metadata_log = "barcode_metadata.log"
         File? rna_umi_barcode_rank_plot = "~{umi_barcode_rank_plot}"
         File? rna_gene_barcode_rank_plot = "~{gene_barcode_rank_plot}"
         File? rna_gene_umi_scatter_plot = "~{gene_umi_scatter_plot}"
+        File? rna_umi_histogram = "~{umi_histogram_plot}"
     }
 
     runtime {
@@ -101,16 +105,21 @@ task qc_rna {
                 help: 'Aligned reads in bam format.',
                 example: 'hg38.aligned.bam'
             }
-        umi_cutoff: {
-                description: 'UMI cutoff',
-                help: 'Cutoff for number of UMIs required when making UMI barcode rank plot.',
+        umi_min_cutoff: {
+                description: 'UMI minimum cutoff',
+                help: 'Cutoff for minimum number of UMIs required when making UMI barcode rank plot.',
                 example: 10
             }
-        gene_cutoff: {
-                description: 'Gene cutoff',
-                help: 'Cutoff for number of genes required when making gene barcode rank plot.',
+        gene_min_cutoff: {
+                description: 'Gene minimum cutoff',
+                help: 'Cutoff for minimum number of genes required when making gene barcode rank plot.',
                 example: 10
             }
+        hist_max_umi: {
+                description: 'Histogram UMI maximum',
+                help: 'Maximum number of UMIs per barcode when making UMI count histogram (x-axis maximum).',
+                example: 5000
+           }
         subpool: {
                 description: 'Experiment subpool',
                 help: 'Id of the sample subpool. Can be used to distinguish the 10X lanes.',

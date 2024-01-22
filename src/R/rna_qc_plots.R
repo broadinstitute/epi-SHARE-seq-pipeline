@@ -2,9 +2,10 @@
 
 ### Takes RNA barcode metadata tsv file, and outputs QC plots as png files.
 ### QC plots include barcode rank by number of UMIs (all barcodes and top-ranked barcodes),
-### barcode rank by number of genes (all barcodes and top-ranked barcodes),
-### and genes vs UMIs scatter plot.
+### barcode rank by number of genes (all barcodes and top-ranked barcodes), genes
+### vs UMIs scatter plot, and UMI count histogram.
 
+library(ggplot2)
 ## Import helper functions
 source("/usr/local/bin/barcode_rank_functions.R")
 
@@ -12,18 +13,20 @@ source("/usr/local/bin/barcode_rank_functions.R")
 args <- commandArgs()
 
 barcode_metadata_file <- args[6]
-umi_cutoff <- as.integer(args[7])
-gene_cutoff <- as.integer(args[8])
-umi_rank_plot_file <- args[9]
-gene_rank_plot_file <- args[10]
-gene_umi_plot_file <- args[11]
+umi_min_cutoff <- as.integer(args[7])
+gene_min_cutoff <- as.integer(args[8])
+hist_max_umi <- as.integer(args[9])
+umi_rank_plot_file <- args[10]
+gene_rank_plot_file <- args[11]
+gene_umi_plot_file <- args[12]
+umi_histogram_plot_file <- args[13]
 
 barcode_metadata <- read.table(barcode_metadata_file, header=T)
 
 ## Get plot inputs
 
 # Impose UMI cutoff, sort in decreasing order, assign rank
-umi_filtered <- barcode_metadata$total_counts[barcode_metadata$total_counts >= umi_cutoff]
+umi_filtered <- barcode_metadata$total_counts[barcode_metadata$total_counts >= umi_min_cutoff]
 umi_filtered_sort <- sort(umi_filtered, decreasing=T)
 umi_rank <- 1:length(umi_filtered_sort)
 
@@ -46,7 +49,7 @@ if (length(umi_points) > 0) { # Elbow found in first plot
 }
 
 # Impose gene cutoff, sort in decreasing order, assign rank
-gene_filtered <- barcode_metadata$genes[barcode_metadata$genes >= gene_cutoff]
+gene_filtered <- barcode_metadata$genes[barcode_metadata$genes >= gene_min_cutoff]
 gene_filtered_sort <- sort(gene_filtered, decreasing=T)
 gene_rank <- 1:length(gene_filtered_sort)
 
@@ -161,5 +164,15 @@ plot(x=barcode_metadata$total_counts,
      main="RNA Genes vs UMIs",
      col="darkblue",
      pch=16)
+
+dev.off()
+
+# Make UMI count histogram
+png(umi_histogram_plot_file, width=6, height=4, units='in', res=300)
+
+ggplot(mapping=aes(umi_filtered)) + 
+  geom_histogram(binwidth=100) + 
+  xlim(0, hist_max_umi) +
+  xlab("UMIs per barcode")
 
 dev.off()

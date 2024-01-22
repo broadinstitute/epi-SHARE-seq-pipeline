@@ -173,19 +173,12 @@ workflow combinomics {
             input:
                 prefix = prefix,
                 atac_metrics = atac.atac_qc_metrics_csv,
-
-                rna_total_reads = rna.rna_total_reads,
-                rna_aligned_uniquely = rna.rna_aligned_uniquely,
-                rna_aligned_multimap = rna.rna_aligned_multimap,
-                rna_unaligned = rna.rna_unaligned,
-                rna_feature_reads = rna.rna_feature_reads,
-                rna_duplicate_reads = rna.rna_duplicate_reads,
-                rna_frig = rna.rna_frig,
+                rna_metrics = rna.rna_qc_metrics,
                 ## JPEG files to be encoded and appended to html
                 # RNA plots
                 image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot,
-                               rna.rna_umi_barcode_rank_plot, rna.rna_gene_barcode_rank_plot, rna.rna_gene_umi_scatter_plot, rna.rna_seurat_raw_violin_plot, rna.rna_seurat_raw_qc_scatter_plot, rna.rna_seurat_filtered_violin_plot, rna.rna_seurat_filtered_qc_scatter_plot, rna.rna_seurat_variable_genes_plot, rna.rna_seurat_PCA_dim_loadings_plot, rna.rna_seurat_PCA_plot, rna.rna_seurat_heatmap_plot, rna.rna_seurat_jackstraw_plot, rna.rna_seurat_elbow_plot, rna.rna_seurat_umap_cluster_plot, rna.rna_seurat_umap_rna_count_plot, rna.rna_seurat_umap_gene_count_plot, rna.rna_seurat_umap_mito_plot,
-                               atac.atac_qc_barcode_rank_plot, atac.atac_qc_hist_plot, atac.atac_qc_tss_enrichment, atac.atac_archr_raw_tss_enrichment, atac.atac_archr_filtered_tss_enrichment, atac.atac_archr_raw_fragment_size_plot, atac.atac_archr_filtered_fragment_size_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_cluster_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_num_frags_plot, atac.atac_archr_umap_tss_score_plot, atac.atac_archr_umap_frip_plot, atac.atac_archr_gene_heatmap_plot,
+                               rna.rna_umi_barcode_rank_plot, rna.rna_gene_barcode_rank_plot, rna.rna_gene_umi_scatter_plot, rna.rna_umi_histogram, rna.rna_seurat_raw_violin_plot, rna.rna_seurat_raw_qc_scatter_plot, rna.rna_seurat_filtered_violin_plot, rna.rna_seurat_filtered_qc_scatter_plot, rna.rna_seurat_variable_genes_plot, rna.rna_seurat_PCA_dim_loadings_plot, rna.rna_seurat_PCA_plot, rna.rna_seurat_heatmap_plot, rna.rna_seurat_jackstraw_plot, rna.rna_seurat_elbow_plot, rna.rna_seurat_umap_cluster_plot, rna.rna_seurat_umap_rna_count_plot, rna.rna_seurat_umap_gene_count_plot, rna.rna_seurat_umap_mito_plot,
+                               atac.atac_qc_barcode_rank_plot, atac.atac_qc_fragment_histogram, atac.atac_qc_hist_plot, atac.atac_qc_tss_enrichment, atac.atac_archr_raw_tss_enrichment, atac.atac_archr_filtered_tss_enrichment, atac.atac_archr_raw_fragment_size_plot, atac.atac_archr_filtered_fragment_size_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_cluster_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_num_frags_plot, atac.atac_archr_umap_tss_score_plot, atac.atac_archr_umap_frip_plot, atac.atac_archr_gene_heatmap_plot,
                                dorcs.j_plot],
                 ## Links to files and logs to append to end of html
                 log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_alignment_log, atac.atac_archr_notebook_log, dorcs.dorcs_notebook_log]
