@@ -59,13 +59,13 @@ def main(output_file_name, image_file_list, log_file_list, output_csv_name, atac
     #  of that number rounded
     def format_number(metric_name, txt_num):
         num = float(txt_num)
-        if num > 1000000000:
+        if num >= 1000000000:
             num = round(num / 1000000000, 2)
             num = str(num) + " B"
-        elif num > 1000000:
+        elif num >= 1000000:
             num = round(num / 1000000, 1)
             num = str(num) + " M"
-        elif num > 1000:
+        elif num >= 1000:
             num = int(num / 1000)
             num = str(num) + " K"
         elif num < 1:
