@@ -8,6 +8,7 @@ workflows:
              - rc-v2.0.0
              - dev
              - chromap-v2
+             - html-fix
          tags:
              - /.*/
 
