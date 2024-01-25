@@ -134,8 +134,8 @@ task atac_align_chromap {
 
     output {
         File atac_clipping_log = "~{prefix}.bedClip.log.txt"
-        File atac_fragments = "~{fragments}.gz"
-        File atac_fragments_index = "~{fragments}.gz.tbi"
+        File atac_fragments = "~{fragments}_unshifted.gz"
+        File atac_fragments_index = "~{fragments}_unshifted.gz.tbi"
         File atac_align_barcode_statistics = barcode_log
         File atac_alignment_log = alignment_log
     }

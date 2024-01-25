@@ -17,7 +17,9 @@ data = snap.pp.import_data(
     fragment_file,
     chrom_sizes=snap.genome.hg38,
     sorted_by_barcode=False,
-    min_num_fragments=min_frag_cutoff
+    min_num_fragments=min_frag_cutoff,
+    shift_left = 4,
+    shift_right = -4
 )
 
 snap.metrics.tsse(data, compressed_gtf_file)
