@@ -43,6 +43,7 @@ LABEL software.task="chromap"
 # Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
     tabix \
+    samtools \
     gcc \
     pigz && \
     rm -rf /var/lib/apt/lists/*

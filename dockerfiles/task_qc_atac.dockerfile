@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install packages for python3 scripts (pysam, SAMstats)
 RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam xopen
+RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam xopen snapatac2
 
 # Install R packages
 RUN R --no-echo --no-restore --no-save -e "install.packages('ggplot2')"
@@ -49,7 +49,9 @@ ENV PATH="/software:${PATH}"
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 COPY --chown=$USER:$USER src/python/merge_atac_barcode_metadata.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/plot_insert_size_hist.py /usr/local/bin
+COPY --chown=$USER:$USER --chmod=755 src/python/snapatac2-tss-enrichment.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/compute_tss_enrichment.py /usr/local/bin
+COPY --chown=$USER:$USER --chmod=755 src/python/compute_tss_enrichment_bulk.py /usr/local/bin
 COPY --chown=$USER:$USER src/R/atac_qc_plots.R /usr/local/bin
 COPY --chown=$USER:$USER src/R/barcode_rank_functions.R /usr/local/bin
 
