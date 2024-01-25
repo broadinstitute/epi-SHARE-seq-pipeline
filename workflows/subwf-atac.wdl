@@ -233,6 +233,7 @@ workflow wf_atac {
         File? atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
         File? atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
         File? atac_qc_fragment_histogram = qc_atac.atac_qc_final_hist_png
+        File? atac_qc_tsse_fragments_plot = qc_atac.atac_qc_tsse_fragments_plot
         
         # Track
         File? atac_track_bigwig = track.atac_track_bigwig
@@ -248,6 +249,7 @@ workflow wf_atac {
         # Int? atac_duplicate_reads = log_atac.atac_duplicate_reads
         # Float? atac_percent_duplicates = log_atac.atac_pct_dup
         File? atac_qc_metrics_csv = log_atac.atac_statistics_csv
+
 
         # ArchR
         File? atac_archr_notebook_output = archr.notebook_output

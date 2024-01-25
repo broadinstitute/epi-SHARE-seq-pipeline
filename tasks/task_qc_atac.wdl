@@ -147,6 +147,8 @@ task qc_atac {
         File atac_qc_raw_barcode_metadata = "tmp-barcode-stats"
         File atac_qc_barcode_metadata = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
 
+        File atac_qc_tsse_fragments_plot = "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"
+
         File? atac_qc_barcode_rank_plot = "fragment_barcode_rank_plot"
     }
 
