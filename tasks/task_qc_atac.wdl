@@ -65,7 +65,12 @@ task qc_atac {
         # I am not writing to a file anymore because Google keeps track of it automatically.
         bash $(which monitor_script.sh) 1>&2 &
 
-        gzip -c ~{gtf} > gtf.gz
+        if [[ '~{gtf}' == *.gz ]]; then
+            cp ~{gtf} gtf.gz
+        else
+            gzip -c ~{gtf} > gtf.gz   
+        fi
+
         ln -s ~{fragments} in.fragments.tsv.gz
         ln -s ~{fragments_index} in.fragments.tsv.gz.tbi
 

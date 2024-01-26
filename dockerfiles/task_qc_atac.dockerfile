@@ -43,10 +43,7 @@ RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
 
-# Add folder with software to the path
-ENV PATH="/software:${PATH}"
-
-RUN wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/bedClip && chmod a+x bedClip && mv bedClip /software
+RUN wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/bedClip && chmod a+x bedClip && mv bedClip /usr/local/bin
 
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
