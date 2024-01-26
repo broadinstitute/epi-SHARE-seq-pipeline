@@ -1,6 +1,7 @@
 import snapatac2 as snap
 import sys
 
+from collections import defaultdict
 
 fragment_file = sys.argv[1]
 compressed_gtf_file = sys.argv[2]
@@ -11,16 +12,20 @@ min_frag_cutoff = int(sys.argv[6])
 metrics_output_file = sys.argv[7]
 tsse_output_file = sys.argv[8]
 
+chrom_sizes_dict = defaultdict(int)
 
+with open(chrom_sizes, "r") as fh:
+    for line in fh:
+        chrom_sizes_dict[line.strip().split("\t")[0]] = int(line.strip().split("\t")[1])
 
 
 data = snap.pp.import_data(
     fragment_file,
-    chrom_sizes=chrom_sizes,
+    chrom_sizes=chrom_sizes_dict,
     sorted_by_barcode=False,
     min_num_fragments=min_frag_cutoff,
-    shift_left = 4,
-    shift_right = -4
+    shift_left=4,
+    shift_right=-4
 )
 
 snap.metrics.tsse(data, compressed_gtf_file)

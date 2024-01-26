@@ -25,6 +25,7 @@ workflow wf_atac {
         String? barcode_tag = "CB"
         String? barcode_tag_fragments
         String chemistry
+        File? gtf
         String? prefix = "sample"
         String? subpool
         String genome_name
@@ -171,6 +172,7 @@ workflow wf_atac {
                 fragments_index = align.atac_fragments_index,
                 barcode_summary = align.atac_align_barcode_statistics,
                 tss = tss_bed,
+                gtf = gtf,
                 subpool = subpool,
                 barcode_conversion_dict = barcode_conversion_dict,
                 fragment_cutoff = qc_fragment_min_cutoff,
