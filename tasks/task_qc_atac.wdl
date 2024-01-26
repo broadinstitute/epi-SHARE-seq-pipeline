@@ -102,10 +102,12 @@ task qc_atac {
             no-singleton.bed.gz
 
         echo '------ START: Compute TSS enrichment snapatac2 ------' 1>&2
-        awk -v OFS="\t" '{if($2-2000<0){$2=0}else{$2=$2-2000};$3=$3+150; print $0}' ~{tss} > tss.extended.bed
+        awk -v OFS="\t" '{if($2-2000<0){$2=0}else{$2=$2-2000};$3=$3+2000; print $0}' ~{tss} > tss.extended.bed
+        bedClip -verbose=2 tss.extended.bed ~{chrom_sizes} tss.extended.clipped.bed 2> tss.bedClip.log.txt
         awk -v OFS="\t" '{if($2-150<0){$2=0}else{$2=$2-150};$3=$3+150; print $0}' ~{tss} > promoter.bed
-        
-        time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.bed.gz gtf.gz tss.extended.bed promoter.bed ~{fragment_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"
+        bedClip -verbose=2 promoter.bed ~{chrom_sizes} promoter.clipped.tsv 2> promoter.bedClip.log.txt
+
+        time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.bed.gz gtf.gz tss.extended.clipped.bed promoter.clipped.bed ~{fragment_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"
         # Insert size plot bulk
         echo '------ START: Generate Insert size plot ------' 1>&2
 

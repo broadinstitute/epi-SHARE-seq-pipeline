@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     r-base \
     tabix \
+    wget \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 
@@ -44,6 +45,8 @@ RUN groupadd -r $USER &&\
 
 # Add folder with software to the path
 ENV PATH="/software:${PATH}"
+
+RUN wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/bedClip && chmod a+x bedClip && mv bedClip /software
 
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
