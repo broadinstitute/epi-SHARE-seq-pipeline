@@ -174,6 +174,7 @@ workflow wf_atac {
                 subpool = subpool,
                 barcode_conversion_dict = barcode_conversion_dict,
                 fragment_cutoff = qc_fragment_min_cutoff,
+                chrom_sizes = chrom_sizes,
                 #hist_max_fragment = qc_hist_max_fragment,
                 genome_name = genome_name,
                 prefix = prefix,
