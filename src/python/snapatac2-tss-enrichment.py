@@ -4,18 +4,19 @@ import sys
 
 fragment_file = sys.argv[1]
 compressed_gtf_file = sys.argv[2]
-tss_bed_file = sys.argv[3]
-promoter_bed_file = sys.argv[4]
-min_frag_cutoff = int(sys.argv[5])
-metrics_output_file = sys.argv[6]
-tsse_output_file = sys.argv[7]
+chrom_sizes = sys.argv[3]
+tss_bed_file = sys.argv[4]
+promoter_bed_file = sys.argv[5]
+min_frag_cutoff = int(sys.argv[6])
+metrics_output_file = sys.argv[7]
+tsse_output_file = sys.argv[8]
 
 
 
 
 data = snap.pp.import_data(
     fragment_file,
-    chrom_sizes=snap.genome.hg38,
+    chrom_sizes=chrom_sizes,
     sorted_by_barcode=False,
     min_num_fragments=min_frag_cutoff,
     shift_left = 4,
