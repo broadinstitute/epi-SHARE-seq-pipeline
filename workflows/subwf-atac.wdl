@@ -52,7 +52,7 @@ workflow wf_atac {
         File reference_fasta
         Boolean? remove_pcr_duplicates = true
         Boolean? remove_pcr_duplicates_at_cell_level = true
-        Boolean? Tn5_shift = false
+        Boolean? Tn5_shift = true
         Boolean? low_mem = true
         Boolean? bed_output = true
         Boolean? trim_adapters = true
@@ -68,7 +68,8 @@ workflow wf_atac {
         String? align_docker_image
 
         Int? qc_fragment_min_cutoff
-        Int? qc_hist_max_fragment
+        Int? qc_hist_max_fragment = 5000
+        Int? qc_hist_min_fragment = 10
         # Runtime parameters
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
@@ -175,9 +176,10 @@ workflow wf_atac {
                 gtf = gtf,
                 subpool = subpool,
                 barcode_conversion_dict = barcode_conversion_dict,
-                fragment_cutoff = qc_fragment_min_cutoff,
+                fragment_min_cutoff = qc_fragment_min_cutoff,
                 chrom_sizes = chrom_sizes,
-                #hist_max_fragment = qc_hist_max_fragment,
+                hist_max_fragment = qc_hist_max_fragment,
+                hist_min_fragment = qc_hist_min_fragment,
                 genome_name = genome_name,
                 prefix = prefix,
                 cpus = qc_cpus,
@@ -231,7 +233,6 @@ workflow wf_atac {
 
         # QC
         File? atac_barcode_metadata = qc_atac.atac_qc_barcode_metadata
-        File? atac_qc_hist_plot = qc_atac.atac_qc_final_hist_png
         File? atac_qc_hist_txt = qc_atac.atac_qc_final_hist
         File? atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
         File? atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot

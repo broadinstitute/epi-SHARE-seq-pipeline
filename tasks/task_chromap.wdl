@@ -23,7 +23,7 @@ task atac_align_chromap {
         Boolean? trim_adapters = true
         Boolean? remove_pcr_duplicates = true
         Boolean? remove_pcr_duplicates_at_cell_level = true
-        Boolean? Tn5_shift = false
+        Boolean? Tn5_shift = true
         Boolean? low_mem = true
         Boolean? bed_output = true
         Int? max_insert_size = 2000
@@ -61,7 +61,7 @@ task atac_align_chromap {
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     # Define the output names
-    String fragments = '${prefix}.atac.fragments.${genome_name}_unshifted.tsv'
+    String fragments = '${prefix}.atac.fragments.${genome_name}.tsv'
     String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.summary.csv"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
 

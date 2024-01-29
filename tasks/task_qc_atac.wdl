@@ -22,7 +22,9 @@ task qc_atac {
         File? tss
         File? barcode_conversion_dict
 
-        Int? fragment_cutoff = 10
+        Int? fragment_min_cutoff = 1
+        Int? hist_max_fragment = 5000
+        Int? hist_min_fragment = 10
         File? gtf
         String? genome_name
         String? prefix
@@ -54,6 +56,7 @@ task qc_atac {
     String tss_pileup_prefix = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log'
     String tss_pileup_out = '${default="share-seq" prefix}.atac.qc.tss.pileup.${genome_name}.log.png'
     String final_barcode_metadata = '${default="share-seq" prefix}.atac.qc.${genome_name}.metadata.tsv'
+    String fragment_histogram = "${default="share-seq" prefix}.atac.qc.${genome_name}.fragment.histogram.png"
     String fragment_barcode_rank_plot = "${default="share-seq" prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png"
 
     String monitor_log = "atac_qc_monitor.log"
@@ -92,10 +95,10 @@ task qc_atac {
         wc -l temp_summary
 
         echo '------ Filtering fragments ------' 1>&2
-        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz )  | bgzip -l 5 -@ ~{cpus} -c > no-singleton.bed.gz
+        time awk -v threshold=~{fragment_min_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz )  | bgzip -l 5 -@ ~{cpus} -c > no-singleton.bed.gz
         
         echo '------ Number of barcodes AFTER filtering------' 1>&2
-        cat temp_summary | grep -v barcode | awk -v FS="," -v threshold=~{fragment_cutoff} '($2-$3-$4-$5)>threshold' | wc -l
+        cat temp_summary | grep -v barcode | awk -v FS="," -v threshold=~{fragment_min_cutoff} '($2-$3-$4-$5)>threshold' | wc -l
         
         tabix --zero-based --preset bed no-singleton.bed.gz
 
@@ -124,7 +127,7 @@ task qc_atac {
         mkdir tmpsort
         gzip -dc no-singleton.bed.gz | sort -k4,4 -k1,1 -k2,2n -S 2G --parallel=8 -T tmpsort | gzip -c > no-singleton.sorted.bed.gz
         echo '------ Snapatac2 ------' 1>&2
-        time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.sorted.bed.gz gtf.gz ~{chrom_sizes} tss.extended.clipped.bed promoter.clipped.bed ~{fragment_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"        # Insert size plot bulk
+        time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.sorted.bed.gz gtf.gz ~{chrom_sizes} tss.extended.clipped.bed promoter.clipped.bed ~{fragment_min_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"        # Insert size plot bulk
         echo '------ START: Generate Insert size plot ------' 1>&2
 
         echo "insert_size" > ~{hist_log}
@@ -147,7 +150,7 @@ task qc_atac {
 
         # Barcode rank plot
         echo '------ START: Generate barcod rank plot ------' 1>&2
-        time Rscript /usr/local/bin/atac_qc_plots.R tmp-barcode-stats ~{fragment_cutoff} ~{fragment_barcode_rank_plot}
+        time Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_min_cutoff} ~{hist_min_fragment} ~{hist_max_fragment} ~{fragment_barcode_rank_plot} ~{fragment_histogram}
     >>>
 
     output {
@@ -183,7 +186,7 @@ task qc_atac {
                 help: 'List of TSS in bed format used for the enrichment plot.',
                 example: 'refseq.tss.bed'
             }
-        fragment_cutoff: {
+        fragment_min_cutoff: {
                 description: 'Fragment cutoff',
                 help: 'Cutoff for number of fragments required when making fragment barcode rank plot.',
                 example: 10

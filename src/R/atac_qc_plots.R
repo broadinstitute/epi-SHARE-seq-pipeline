@@ -12,9 +12,10 @@ args <- commandArgs()
 
 barcode_metadata_file <- args[6]
 fragment_min_cutoff <- as.integer(args[7])
-hist_max_fragment <- as.integer(args[8])
-fragment_rank_plot_file <- args[9]
-fragment_histogram_plot_file <- args[10]
+hist_min_fragment <- as.integer(args[8])
+hist_max_fragment <- as.integer(args[9])
+fragment_rank_plot_file <- args[10]
+fragment_histogram_plot_file <- args[11]
 
 barcode_metadata <- read.table(barcode_metadata_file, header=T)
 
@@ -91,7 +92,7 @@ dev.off()
 # Make fragment count histogram
 png(fragment_histogram_plot_file, width=6, height=4, units='in', res=300)
 
-ggplot(mapping=aes(fragment_filtered)) + 
+ggplot(mapping=aes(fragment[fragment >= hist_min_fragment])) + 
   geom_histogram(binwidth=100) + 
   xlim(0, hist_max_fragment) +
   xlab("Fragments per barcode")

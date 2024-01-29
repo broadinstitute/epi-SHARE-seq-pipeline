@@ -26,8 +26,8 @@ data = snap.pp.import_data(
     chrom_sizes=chrom_sizes_dict,
     sorted_by_barcode=True,
     min_num_fragments=min_frag_cutoff,
-    shift_left=4,
-    shift_right=-4
+    shift_left=0,
+    shift_right=1
 )
 print('TSSe', file=sys.stderr)
 snap.metrics.tsse(data, compressed_gtf_file)
