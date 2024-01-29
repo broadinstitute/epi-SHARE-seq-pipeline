@@ -100,7 +100,7 @@ task qc_atac {
         tabix --zero-based --preset bed no-singleton.bed.gz
 
         cut -f1 ~{chrom_sizes} > list-names-chromosomes
-        grep -wFf list-names-chromosomes ~{tss} filtered.tss.bed
+        grep -wFf list-names-chromosomes ~{tss} > filtered.tss.bed
 
         # TSS enrichment stats
         echo '------ START: Compute TSS enrichment bulk ------' 1>&2
