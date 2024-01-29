@@ -22,7 +22,7 @@ with open(chrom_sizes, "r") as fh:
 
 print('Running import', file=sys.stderr)
 data = snap.pp.import_data(
-    fragment_file,
+    fragment_file=fragment_file,
     chrom_sizes=chrom_sizes_dict,
     sorted_by_barcode=True,
     min_num_fragments=min_frag_cutoff,
