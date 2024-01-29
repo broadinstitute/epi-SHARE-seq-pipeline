@@ -124,9 +124,7 @@ task qc_atac {
         mkdir tmpsort
         gzip -dc no-singleton.bed.gz | sort -k4,4 -k1,1 -k2,2n -S 2G --parallel=8 -T tmpsort | gzip -c > no-singleton.sorted.bed.gz
         echo '------ Snapatac2 ------' 1>&2
-        #time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.sorted.bed.gz gtf.gz ~{chrom_sizes} tss.extended.clipped.bed promoter.clipped.bed ~{fragment_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"
-        time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.sorted.bed.gz gtf.gz ~{chrom_sizes} tss.extended.clipped.bedtss.extended.clipped.bed promoter.bed ~{fragment_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"
-        # Insert size plot bulk
+        time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.sorted.bed.gz gtf.gz ~{chrom_sizes} tss.extended.clipped.bed promoter.clipped.bed ~{fragment_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"        # Insert size plot bulk
         echo '------ START: Generate Insert size plot ------' 1>&2
 
         echo "insert_size" > ~{hist_log}
