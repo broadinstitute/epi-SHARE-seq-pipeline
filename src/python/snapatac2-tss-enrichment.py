@@ -12,24 +12,28 @@ min_frag_cutoff = int(sys.argv[6])
 metrics_output_file = sys.argv[7]
 tsse_output_file = sys.argv[8]
 
+
 chrom_sizes_dict = defaultdict(int)
 
+print('Loading chromosomes', file=sys.stderr)
 with open(chrom_sizes, "r") as fh:
     for line in fh:
         chrom_sizes_dict[line.strip().split("\t")[0]] = int(line.strip().split("\t")[1])
 
-
+print('Running import', file=sys.stderr)
 data = snap.pp.import_data(
     fragment_file,
     chrom_sizes=chrom_sizes_dict,
-    sorted_by_barcode=False,
+    sorted_by_barcode=True,
     min_num_fragments=min_frag_cutoff,
     shift_left=4,
     shift_right=-4
 )
-
+print('TSSe', file=sys.stderr)
 snap.metrics.tsse(data, compressed_gtf_file)
+print('Plot TSSe', file=sys.stderr)
 snap.pl.tsse(data, min_fragment=min_frag_cutoff, width=800, height=1000, show=False, out_file=tsse_output_file)
+print('Fraction in promoter', file=sys.stderr)
 snap.metrics.frip(data, {"tss_frac": tss_bed_file, "promoter_frac": promoter_bed_file})
-
+print('save metrics', file=sys.stderr)
 data.obs.to_csv(metrics_output_file, index_label="barcode", sep="\t")
