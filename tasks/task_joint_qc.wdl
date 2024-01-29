@@ -19,7 +19,7 @@ task joint_qc_plotting {
         Int remove_low_yielding_cells = 10
         Int min_umis = 100
         Int min_genes = 200
-        Int min_tss = 4
+        Int min_tss = 10
         Int min_frags = 100
 
         Float? disk_factor = 8.0

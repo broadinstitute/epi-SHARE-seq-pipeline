@@ -69,8 +69,8 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     atac_metrics_contents = get_split_lines(atac_metrics_file, delimiter="\t")
     atac_metrics_header = next(atac_metrics_contents)
     atac_barcode_ind = atac_metrics_header.index("barcode")
-    reads_ind = atac_metrics_header.index("unique")
-    tss_ind = atac_metrics_header.index("tss_enrichment")
+    reads_ind = atac_metrics_header.index("n_fragment")
+    tss_ind = atac_metrics_header.index("tsse")
     tss = []
     frags = []
     atac_barcodes = []
