@@ -68,6 +68,7 @@ task qc_atac {
         if [[ '~{gtf}' == *.gz ]]; then
             cp ~{gtf} gtf.gz
         else
+            echo '------ Compressing GTF ------' 1>&2
             gzip -c ~{gtf} > gtf.gz   
         fi
 
