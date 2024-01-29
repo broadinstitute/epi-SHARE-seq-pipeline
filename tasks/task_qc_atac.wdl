@@ -110,11 +110,13 @@ task qc_atac {
 
         echo '------ START: Compute TSS enrichment snapatac2 ------' 1>&2
         echo '------ Extend TSS ------' 1>&2
-        #awk -v OFS="\t" '{if($2-150<0){$2=0}else{$2=$2-150};$3=$3+150; print $0}' ~{tss} > tss.extended.bed
-        #bedClip -verbose=2 tss.extended.bed ~{chrom_sizes} tss.extended.clipped.bed 2> tss.bedClip.log.txt
-        #echo '------ Promoter ------' 1>&2
-        #awk -v OFS="\t" '{if($2-2000<0){$2=0}else{$2=$2-2000};$3=$3+2000; print $0}' ~{tss} > promoter.bed
-        #bedClip -verbose=2 promoter.bed ~{chrom_sizes} promoter.clipped.bed 2> promoter.bedClip.log.txt
+        awk -v OFS="\t" '{if($2-150<0){$2=0}else{$2=$2-150};$3=$3+150; print $0}' ~{tss} > tss.extended.bed
+        echo '------ BedClip Extend TSS ------' 1>&2
+        /usr/local/bin/bedClip -verbose=2 tss.extended.bed ~{chrom_sizes} tss.extended.clipped.bed 2> tss.bedClip.log.txt
+        echo '------ Promoter ------' 1>&2
+        awk -v OFS="\t" '{if($2-2000<0){$2=0}else{$2=$2-2000};$3=$3+2000; print $0}' ~{tss} > promoter.bed
+        echo '------ BedClip promoter ------' 1>&2
+        /usr/local/bin/bedClip -verbose=2 promoter.bed ~{chrom_sizes} promoter.clipped.bed 2> promoter.bedClip.log.txt
         echo '------ Sort fragments ------' 1>&2
         mkdir tmpsort
         gzip -dc no-singleton.bed.gz | sort -k4,4 -k1,1 -k2,2n -S 2G --parallel=8 -T tmpsort | gzip -c > no-singleton.sorted.bed.gz
