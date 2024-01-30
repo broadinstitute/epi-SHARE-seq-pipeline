@@ -164,7 +164,7 @@ task qc_atac {
 
         File atac_qc_tsse_fragments_plot = "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"
 
-        File? atac_qc_barcode_rank_plot = "fragment_barcode_rank_plot"
+        File? atac_qc_barcode_rank_plot = "~{fragment_barcode_rank_plot}"
         File? atac_qc_fragments_histogram = "~{fragment_histogram}"
     }
 
