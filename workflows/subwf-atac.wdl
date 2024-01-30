@@ -237,8 +237,9 @@ workflow wf_atac {
         File? atac_qc_hist_txt = qc_atac.atac_qc_final_hist
         File? atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
         File? atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
-        File? atac_qc_fragment_histogram = qc_atac.atac_qc_final_hist_png
+        File? atac_qc_insertion_size_histogram = qc_atac.atac_qc_final_hist_png
         File? atac_qc_tsse_fragments_plot = qc_atac.atac_qc_tsse_fragments_plot
+        File? atac_qc_fragment_histogram = qc_atac.atac_qc_fragments_histogram
         
         # Track
         File? atac_track_bigwig = track.atac_track_bigwig

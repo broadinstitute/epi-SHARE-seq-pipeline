@@ -141,7 +141,7 @@ task qc_atac {
         awk -v FS=',' -v OFS=" " 'NR==1{$1=$1;print $0,"unique","pct_dup","pct_unmapped";next}{$1=$1;if ($2-$3-$4-$5>0){print $0,($2-$3-$4-$5),$3/($2-$4-$5),($5+$4)/$2} else { print $0,0,0,0}}' temp_summary  | sed 's/ /\t/g' > ~{final_chromap_barcode_metadata}
 
         cut -f 1 ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv > barcodes_passing_threshold
-        
+
         cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | sed 's/ /\t/g' > ~{final_snapatac2_barcode_metadata}
 
         # Barcode rank plot
@@ -165,6 +165,7 @@ task qc_atac {
         File atac_qc_tsse_fragments_plot = "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"
 
         File? atac_qc_barcode_rank_plot = "fragment_barcode_rank_plot"
+        File? atac_qc_fragments_histogram = "~{fragment_histogram}"
     }
 
     runtime {
