@@ -232,7 +232,8 @@ workflow wf_atac {
         File? atac_fragments_index = align.atac_fragments_index
 
         # QC
-        File? atac_barcode_metadata = qc_atac.atac_qc_barcode_metadata
+        File? atac_qc_chromap_barcode_metadata = qc_atac.atac_qc_chromap_barcode_metadata
+        File? atac_qc_snapatac2_barcode_metadata = qc_atac.atac_qc_snapatac2_barcode_metadata
         File? atac_qc_hist_txt = qc_atac.atac_qc_final_hist
         File? atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
         File? atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
