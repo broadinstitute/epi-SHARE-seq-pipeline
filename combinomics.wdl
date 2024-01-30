@@ -160,7 +160,7 @@ workflow combinomics {
             if ( pipeline_modality != "no_align" ) {
                 call joint_qc.joint_qc_plotting as joint_qc {
                     input:
-                        atac_barcode_metadata = atac.atac_barcode_metadata,
+                        atac_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata,
                         rna_barcode_metadata = rna.rna_barcode_metadata,
                         prefix = prefix,
                         genome_name = genome_name_
@@ -205,7 +205,6 @@ workflow combinomics {
         # ATAC ouputs
         File? atac_fragments = atac.atac_fragments
         File? atac_fragments_index = atac.atac_fragments_index
-        File? atac_chromap_barcode_metadata = atac.atac_barcode_metadata
         File? atac_chromap_barcode_metadata = atac.atac_qc_chromap_barcode_metadata
         File? atac_snapatac2_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata
         File? atac_archr_notebook_output = atac.atac_archr_notebook_output
