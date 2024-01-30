@@ -127,7 +127,7 @@ task atac_align_chromap {
         # Asking chromap to not correct and fixing +4/-4 shift here.
         # awk -v OFS="\t" '{print $1,$2+4,$3-4,$4,$5}' 
         # Writing non corrected fragments
-        cat out.fragments.clipped.tsv | bgzip -c > ~{fragments}.gz
+        awk -v OFS="\t" -v maxinsert=~{max_insert_size} '$3-$2<=maxinsert' out.fragments.clipped.tsv | bgzip -c > ~{fragments}.gz
         tabix --zero-based --preset bed ~{fragments}.gz
 
     >>>
