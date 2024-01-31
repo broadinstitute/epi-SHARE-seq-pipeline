@@ -25,6 +25,7 @@ workflow wf_atac {
         String? barcode_tag = "CB"
         String? barcode_tag_fragments
         String chemistry
+        File? gtf
         String? prefix = "sample"
         String? subpool
         String genome_name
@@ -51,7 +52,7 @@ workflow wf_atac {
         File reference_fasta
         Boolean? remove_pcr_duplicates = true
         Boolean? remove_pcr_duplicates_at_cell_level = true
-        Boolean? Tn5_shift = false
+        Boolean? Tn5_shift = true
         Boolean? low_mem = true
         Boolean? bed_output = true
         Boolean? trim_adapters = true
@@ -67,7 +68,8 @@ workflow wf_atac {
         String? align_docker_image
 
         Int? qc_fragment_min_cutoff
-        Int? qc_hist_max_fragment
+        Int? qc_hist_max_fragment = 5000
+        Int? qc_hist_min_fragment = 10
         # Runtime parameters
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0
@@ -171,10 +173,13 @@ workflow wf_atac {
                 fragments_index = align.atac_fragments_index,
                 barcode_summary = align.atac_align_barcode_statistics,
                 tss = tss_bed,
+                gtf = gtf,
                 subpool = subpool,
                 barcode_conversion_dict = barcode_conversion_dict,
                 fragment_min_cutoff = qc_fragment_min_cutoff,
+                chrom_sizes = chrom_sizes,
                 hist_max_fragment = qc_hist_max_fragment,
+                hist_min_fragment = qc_hist_min_fragment,
                 genome_name = genome_name,
                 prefix = prefix,
                 cpus = qc_cpus,
@@ -227,12 +232,14 @@ workflow wf_atac {
         File? atac_fragments_index = align.atac_fragments_index
 
         # QC
-        File? atac_barcode_metadata = qc_atac.atac_qc_barcode_metadata
-        File? atac_qc_hist_plot = qc_atac.atac_qc_final_hist_png
+        File? atac_qc_chromap_barcode_metadata = qc_atac.atac_qc_chromap_barcode_metadata
+        File? atac_qc_snapatac2_barcode_metadata = qc_atac.atac_qc_snapatac2_barcode_metadata
         File? atac_qc_hist_txt = qc_atac.atac_qc_final_hist
         File? atac_qc_tss_enrichment = qc_atac.atac_qc_tss_enrichment_plot
         File? atac_qc_barcode_rank_plot = qc_atac.atac_qc_barcode_rank_plot
-        File? atac_qc_fragment_histogram = qc_atac.atac_qc_fragment_histogram
+        File? atac_qc_insertion_size_histogram = qc_atac.atac_qc_final_hist_png
+        File? atac_qc_tsse_fragments_plot = qc_atac.atac_qc_tsse_fragments_plot
+        File? atac_qc_fragment_histogram = qc_atac.atac_qc_fragments_histogram
         
         # Track
         File? atac_track_bigwig = track.atac_track_bigwig
@@ -248,6 +255,7 @@ workflow wf_atac {
         # Int? atac_duplicate_reads = log_atac.atac_duplicate_reads
         # Float? atac_percent_duplicates = log_atac.atac_pct_dup
         File? atac_qc_metrics_csv = log_atac.atac_statistics_csv
+
 
         # ArchR
         File? atac_archr_notebook_output = archr.notebook_output

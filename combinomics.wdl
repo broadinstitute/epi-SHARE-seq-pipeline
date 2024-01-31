@@ -127,6 +127,7 @@ workflow combinomics {
                     read2 = select_first([preprocess_tenx.fastq_R2_preprocessed ,read2_atac]),
                     chemistry = chemistry,
                     subpool = subpool,
+                    gtf = gtf_,
                     whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
                     trim_fastqs = trim_fastqs,
                     chrom_sizes = chrom_sizes_,
@@ -159,7 +160,7 @@ workflow combinomics {
             if ( pipeline_modality != "no_align" ) {
                 call joint_qc.joint_qc_plotting as joint_qc {
                     input:
-                        atac_barcode_metadata = atac.atac_barcode_metadata,
+                        atac_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata,
                         rna_barcode_metadata = rna.rna_barcode_metadata,
                         prefix = prefix,
                         genome_name = genome_name_
@@ -178,7 +179,7 @@ workflow combinomics {
                 # RNA plots
                 image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot,
                                rna.rna_umi_barcode_rank_plot, rna.rna_gene_barcode_rank_plot, rna.rna_gene_umi_scatter_plot, rna.rna_umi_histogram, rna.rna_seurat_raw_violin_plot, rna.rna_seurat_raw_qc_scatter_plot, rna.rna_seurat_filtered_violin_plot, rna.rna_seurat_filtered_qc_scatter_plot, rna.rna_seurat_variable_genes_plot, rna.rna_seurat_PCA_dim_loadings_plot, rna.rna_seurat_PCA_plot, rna.rna_seurat_heatmap_plot, rna.rna_seurat_jackstraw_plot, rna.rna_seurat_elbow_plot, rna.rna_seurat_umap_cluster_plot, rna.rna_seurat_umap_rna_count_plot, rna.rna_seurat_umap_gene_count_plot, rna.rna_seurat_umap_mito_plot,
-                               atac.atac_qc_barcode_rank_plot, atac.atac_qc_fragment_histogram, atac.atac_qc_hist_plot, atac.atac_qc_tss_enrichment, atac.atac_archr_raw_tss_enrichment, atac.atac_archr_filtered_tss_enrichment, atac.atac_archr_raw_fragment_size_plot, atac.atac_archr_filtered_fragment_size_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_cluster_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_num_frags_plot, atac.atac_archr_umap_tss_score_plot, atac.atac_archr_umap_frip_plot, atac.atac_archr_gene_heatmap_plot,
+                               atac.atac_qc_barcode_rank_plot, atac.atac_qc_tsse_fragments_plot, atac.atac_qc_insertion_size_histogram, atac.atac_qc_fragment_histogram,  atac.atac_qc_tss_enrichment, atac.atac_archr_raw_tss_enrichment, atac.atac_archr_filtered_tss_enrichment, atac.atac_archr_raw_fragment_size_plot, atac.atac_archr_filtered_fragment_size_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_cluster_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_num_frags_plot, atac.atac_archr_umap_tss_score_plot, atac.atac_archr_umap_frip_plot, atac.atac_archr_gene_heatmap_plot,
                                dorcs.j_plot],
                 ## Links to files and logs to append to end of html
                 log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_alignment_log, atac.atac_archr_notebook_log, dorcs.dorcs_notebook_log]
@@ -204,7 +205,8 @@ workflow combinomics {
         # ATAC ouputs
         File? atac_fragments = atac.atac_fragments
         File? atac_fragments_index = atac.atac_fragments_index
-        File? atac_barcode_metadata = atac.atac_barcode_metadata
+        File? atac_chromap_barcode_metadata = atac.atac_qc_chromap_barcode_metadata
+        File? atac_snapatac2_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata
         File? atac_archr_notebook_output = atac.atac_archr_notebook_output
         File? atac_archr_arrow = atac.atac_archr_arrow
         File? atac_track_bigwig = atac.atac_track_bigwig

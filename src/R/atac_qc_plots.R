@@ -12,9 +12,10 @@ args <- commandArgs()
 
 barcode_metadata_file <- args[6]
 fragment_min_cutoff <- as.integer(args[7])
-hist_max_fragment <- as.integer(args[8])
-fragment_rank_plot_file <- args[9]
-fragment_histogram_plot_file <- args[10]
+hist_min_fragment <- as.integer(args[8])
+hist_max_fragment <- as.integer(args[9])
+fragment_rank_plot_file <- args[10]
+fragment_histogram_plot_file <- args[11]
 
 barcode_metadata <- read.table(barcode_metadata_file, header=T)
 
@@ -63,7 +64,7 @@ if (fragment_plot1) {
        main="ATAC Fragments per Barcode",
        col=c("dimgrey","darkblue")[is_top_ranked_fragment],
        pch=16,
-       ylim=c(1,100000))
+       ylim=c(1,500000))
   abline(v=fragment_points[1], h=10^(fragment_points[2]))
   text(fragment_points[1], 10^(fragment_points[2]),
        paste0("(", fragment_points[1], ", ", 10^(fragment_points[2]), ")"),
@@ -80,7 +81,7 @@ if (fragment_plot2) {
        main="ATAC Fragments per Top-Ranked Barcode",
        col=c("dimgrey","darkblue")[is_top_top_ranked_fragment],
        pch=16,
-       ylim=c(1,100000))
+       ylim=c(1,500000))
   abline(v=fragment_points[3], h=10^(fragment_points[4]))
   text(fragment_points[3], 10^(fragment_points[4]),
        paste("(", fragment_points[3], ", ", 10^(fragment_points[4]), ")", sep=""),
@@ -91,7 +92,7 @@ dev.off()
 # Make fragment count histogram
 png(fragment_histogram_plot_file, width=6, height=4, units='in', res=300)
 
-ggplot(mapping=aes(fragment_filtered)) + 
+ggplot(mapping=aes(fragment[fragment >= hist_min_fragment])) + 
   geom_histogram(binwidth=100) + 
   xlim(0, hist_max_fragment) +
   xlab("Fragments per barcode")
