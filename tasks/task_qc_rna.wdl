@@ -24,7 +24,7 @@ task qc_rna {
 
         Int? cpus = 2
         Float? disk_factor = 1.0
-        Float? memory_factor = 0.5
+        Float? memory_factor = 1
         String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_rna:dev"
     }
 
@@ -32,7 +32,7 @@ task qc_rna {
     Float input_file_size_gb = size(bam, "G") + size(mtx_tar, "G")
 
     # Determining memory size based on the size of the input files.
-    Float mem_gb = 4.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 16.0 + memory_factor * input_file_size_gb
 
     # Determining disk size based on the size of the input files.
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
