@@ -69,7 +69,7 @@ workflow wf_atac {
 
         Int? qc_fragment_min_cutoff
         Int? qc_hist_max_fragment = 5000
-        Int? qc_hist_min_fragment = 10
+        Int? qc_hist_min_fragment = 100
         # Runtime parameters
         Int? qc_cpus = 16
         Float? qc_disk_factor = 8.0

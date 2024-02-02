@@ -24,7 +24,7 @@ task qc_atac {
 
         Int? fragment_min_cutoff = 1
         Int? hist_max_fragment = 5000
-        Int? hist_min_fragment = 10
+        Int? hist_min_fragment = 100
         Int? fragment_min_snapatac_cutoff = 100
         File? gtf
         String? genome_name
