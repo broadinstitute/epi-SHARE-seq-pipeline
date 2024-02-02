@@ -84,7 +84,7 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
 
     # merge metrics by barcodes
     metrics = merge_dicts(rna_metrics, atac_metrics)
-    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["barcode", "unique_umi", "genes_final", "tss", "frags"])
+    df = pd.DataFrame.from_dict(metrics, orient="index", columns=["unique_umi", "genes_final", "tss", "frags"])
 
     return df
 
