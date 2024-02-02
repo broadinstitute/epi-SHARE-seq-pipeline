@@ -32,7 +32,7 @@ umi_filtered_sort <- sort(umi_filtered, decreasing=T)
 umi_rank <- 1:length(umi_filtered_sort)
 
 # Find elbow/knee of UMI barcode rank plot and top-ranked UMI barcode rank plot
-umi_points <- get_elbow_knee_points(x=umi_rank, y=umi_filtered_sort)
+umi_points <- get_elbow_knee_points(x=umi_rank, y=log10(umi_filtered_sort))
 # For each valid plot, make factor for coloring plot points
 if (length(umi_points) > 0) { # Elbow found in first plot
   umi_plot1 <- TRUE
@@ -55,7 +55,7 @@ gene_filtered_sort <- sort(gene_filtered, decreasing=T)
 gene_rank <- 1:length(gene_filtered_sort)
 
 # Find elbow/knee of gene barcode rank plot and top-ranked gene barcode rank plot
-gene_points <- get_elbow_knee_points(x=gene_rank, y=gene_filtered_sort)
+gene_points <- get_elbow_knee_points(x=gene_rank, y=log10(gene_filtered_sort))
 # For each valid plot, make factor for coloring plot points
 if (length(gene_points) > 0) { # Elbow found in first plot
   gene_plot1 <- TRUE
@@ -91,9 +91,9 @@ if (umi_plot1) {
        col=c("dimgrey","darkblue")[is_top_ranked_umi], 
        pch=16,
        ylim=c(1,100000))
-  abline(v=umi_points[1], h=umi_points[2])
-  text(umi_points[1], umi_points[2],
-       paste0("(", umi_points[1], ", ", umi_points[2], ")"),
+  abline(v=umi_points[1], h=10^(umi_points[2]))
+  text(umi_points[1], 10^(umi_points[2]),
+       paste0("(", umi_points[1], ", ", 10^(umi_points[2]), ")"),
        adj=c(-0.1,-0.5))
 }
 
@@ -108,9 +108,9 @@ if (umi_plot2) {
        col=c("dimgrey","darkblue")[is_top_top_ranked_umi],
        pch=16,
        ylim=c(1,100000))
-  abline(v=umi_points[3], h=umi_points[4])
-  text(umi_points[3], umi_points[4],
-       paste("(", umi_points[3], ", ", umi_points[4], ")", sep=""),
+  abline(v=umi_points[3], h=10^(umi_points[4]))
+  text(umi_points[3], 10^(umi_points[4]),
+       paste("(", umi_points[3], ", ", 10^(umi_points[4]), ")", sep=""),
        adj=c(-0.1,-0.5))
 }
 dev.off()
@@ -131,9 +131,9 @@ if (gene_plot1) {
        col=c("dimgrey","darkblue")[is_top_ranked_gene], 
        pch=16,
        ylim=c(1,10000))
-  abline(v=gene_points[1], h=gene_points[2])
-  text(gene_points[1], gene_points[2],
-       paste0("(", gene_points[1], ", ", gene_points[2], ")"),
+  abline(v=gene_points[1], h=10^(gene_points[2]))
+  text(gene_points[1], 10^(gene_points[2]),
+       paste0("(", gene_points[1], ", ", 10^(gene_points[2]), ")"),
        adj=c(-0.1,-0.5))
 }
 
@@ -148,9 +148,9 @@ if (gene_plot2) {
        col=c("dimgrey","darkblue")[is_top_top_ranked_gene],
        pch=16,
        ylim=c(1,10000))
-  abline(v=gene_points[3], h=gene_points[4])
-  text(gene_points[3], gene_points[4],
-       paste("(", gene_points[3], ", ", gene_points[4], ")", sep=""),
+  abline(v=gene_points[3], h=10^(gene_points[4]))
+  text(gene_points[3], 10^(gene_points[4]),
+       paste("(", gene_points[3], ", ", 10^(gene_points[4]), ")", sep=""),
        adj=c(-0.1,-0.5))
 }
 dev.off()
