@@ -14,8 +14,9 @@ task qc_rna {
         # This function takes in input the sorted bam file produced by STARsolo
         File bam
         File mtx_tar
-        Int? umi_min_cutoff = 100
-        Int? gene_min_cutoff = 100
+        Int? umi_min_cutoff = 1
+        Int? gene_min_cutoff = 1
+        Int? hist_min_umi = 100
         Int? hist_max_umi = 5000
         String genome_name
         String? barcode_tag = "CB"
@@ -80,7 +81,7 @@ task qc_rna {
         awk -v OFS="," 'NR>1{total+=$2; mito+=$4; unique+=$9} END {print "RNA_unique_reads_mapped_to_genes", unique; printf "RNA_FRIG,%.2f\n",unique/total; print "RNA_duplicate_reads", total-unique; printf "RNA_percent_duplicates,%.1f\n", (total-unique)/total*100; printf "RNA_percent_mitochondrial,%.1f\n", mito/total*100}' ~{barcode_metadata} > ~{duplicates_log}
 
         # Make QC plots
-        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_min_cutoff} ~{gene_min_cutoff} ~{hist_max_umi} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot} ~{umi_histogram_plot}
+        Rscript $(which rna_qc_plots.R) ~{barcode_metadata} ~{umi_min_cutoff} ~{gene_min_cutoff} ~{hist_min_umi} ~{hist_max_umi} ~{umi_barcode_rank_plot} ~{gene_barcode_rank_plot} ~{gene_umi_scatter_plot} ~{umi_histogram_plot}
     >>>
 
     output {
@@ -115,11 +116,16 @@ task qc_rna {
                 help: 'Cutoff for minimum number of genes required when making gene barcode rank plot.',
                 example: 10
             }
+        hist_min_umi: {
+                description: 'Histogram UMI minimum',
+                help: 'Minimum number of UMIs per barcode when making UMI count histogram (x-axis minimum).',
+                example: 100
+            }
         hist_max_umi: {
                 description: 'Histogram UMI maximum',
                 help: 'Maximum number of UMIs per barcode when making UMI count histogram (x-axis maximum).',
                 example: 5000
-           }
+            }
         subpool: {
                 description: 'Experiment subpool',
                 help: 'Id of the sample subpool. Can be used to distinguish the 10X lanes.',

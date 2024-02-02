@@ -90,10 +90,12 @@ if (fragment_plot2) {
 dev.off()
 
 # Make fragment count histogram
+hist_fragment_filtered <- fragment[fragment >= hist_min_fragment]
+
 png(fragment_histogram_plot_file, width=6, height=4, units='in', res=300)
 
-ggplot(mapping=aes(fragment[fragment >= hist_min_fragment])) + 
-  geom_histogram(binwidth=100) + 
+ggplot(mapping=aes(hist_fragment_filtered)) + 
+  geom_histogram(binwidth=50) + 
   xlim(0, hist_max_fragment) +
   xlab("Fragments per barcode")
 
