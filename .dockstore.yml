@@ -9,6 +9,7 @@ workflows:
              - dev
              - chromap-v2
              - dev-snapatac
+             - plot-fixes
          tags:
              - /.*/
 
