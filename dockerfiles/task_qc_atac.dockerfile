@@ -49,9 +49,9 @@ RUN wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/bedClip && 
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
 COPY --chown=$USER:$USER src/python/merge_atac_barcode_metadata.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/plot_insert_size_hist.py /usr/local/bin
-COPY --chown=$USER:$USER --chmod=755 src/python/snapatac2-tss-enrichment.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/snapatac2-tss-enrichment.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/compute_tss_enrichment.py /usr/local/bin
-COPY --chown=$USER:$USER --chmod=755 src/python/compute_tss_enrichment_bulk.py /usr/local/bin
+COPY --chown=$USER:$USER src/python/compute_tss_enrichment_bulk.py /usr/local/bin
 COPY --chown=$USER:$USER src/R/atac_qc_plots.R /usr/local/bin
 COPY --chown=$USER:$USER src/R/barcode_rank_functions.R /usr/local/bin
 
