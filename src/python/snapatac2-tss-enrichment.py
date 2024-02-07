@@ -1,3 +1,5 @@
+import numpy as np
+import scipy
 import snapatac2 as snap
 import sys
 
@@ -11,6 +13,7 @@ promoter_bed_file = sys.argv[5]
 min_frag_cutoff = int(sys.argv[6])
 metrics_output_file = sys.argv[7]
 tsse_output_file = sys.argv[8]
+fragments_per_chromosome_file = sys.argv[9]
 
 
 chrom_sizes_dict = defaultdict(int)
@@ -37,3 +40,7 @@ print('Fraction in promoter', file=sys.stderr)
 snap.metrics.frip(data, {"tss_frac": tss_bed_file, "promoter_frac": promoter_bed_file})
 print('save metrics', file=sys.stderr)
 data.obs.to_csv(metrics_output_file, index_label="barcode", sep="\t")
+
+snap.pp.filter_cells(data, min_counts=np.quantile(data.obs["n_fragment"], q=[.9])[0], min_tsse=0)
+cell_chr_mat = snap.pp.add_tile_matrix(data, bin_size=1000000000, inplace=False)
+scipy.sparse.save_npz(file=fragments_per_chromosome_file, cell_chr_mat.X)

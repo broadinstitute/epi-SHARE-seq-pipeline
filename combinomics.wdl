@@ -213,6 +213,7 @@ workflow combinomics {
         File? atac_track_bigwig_no_nucleosome = atac.atac_track_bigwig_no_nucleosome
         File? atac_track_bigwig_mono_nucleosome = atac.atac_track_bigwig_mono_nucleosome
         File? atac_track_bigwig_multi_nucleosome = atac.atac_track_bigwig_multi_nucleosome
+        File? atac_qc_counts_per_chromosome_matrix_npz = atac.atac_qc_counts_per_chromosome_matrix_npz
 
 
         # DORCS output

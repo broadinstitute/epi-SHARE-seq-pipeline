@@ -240,6 +240,7 @@ workflow wf_atac {
         File? atac_qc_insertion_size_histogram = qc_atac.atac_qc_final_hist_png
         File? atac_qc_tsse_fragments_plot = qc_atac.atac_qc_tsse_fragments_plot
         File? atac_qc_fragment_histogram = qc_atac.atac_qc_fragments_histogram
+        File? atac_qc_counts_per_chromosome_matrix_npz = qc_atac.atac_qc_counts_per_chromosome
         
         # Track
         File? atac_track_bigwig = track.atac_track_bigwig
