@@ -67,6 +67,7 @@ workflow wf_rna {
         # QC-specific inputs
         Int? umi_min_cutoff
         Int? gene_min_cutoff
+        Int? hist_min_umi
         Int? hist_max_umi
         # Runtime parameters
         Int? qc_cpus
@@ -150,6 +151,7 @@ workflow wf_rna {
                 mtx_tar = align.raw_tar,
                 umi_min_cutoff = umi_min_cutoff,
                 gene_min_cutoff = gene_min_cutoff,
+                hist_min_umi = hist_min_umi,
                 hist_max_umi = hist_max_umi,
                 subpool = subpool,
                 barcode_tag = barcode_tag,

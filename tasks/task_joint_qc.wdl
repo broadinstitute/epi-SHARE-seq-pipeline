@@ -17,7 +17,7 @@ task joint_qc_plotting {
         File? atac_barcode_metadata
         File? rna_barcode_metadata
         Int remove_low_yielding_cells = 10
-        Int min_umis = 100
+        Int min_umis = 200
         Int min_genes = 200
         Int min_tss = 4
         Int min_frags = 100

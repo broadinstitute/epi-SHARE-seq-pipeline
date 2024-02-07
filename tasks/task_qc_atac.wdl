@@ -24,7 +24,7 @@ task qc_atac {
 
         Int? fragment_min_cutoff = 1
         Int? hist_max_fragment = 5000
-        Int? hist_min_fragment = 10
+        Int? hist_min_fragment = 100
         Int? fragment_min_snapatac_cutoff = 100
         File? gtf
         String? genome_name
@@ -35,7 +35,7 @@ task qc_atac {
         Int? cpus = 60
         Float? disk_factor = 10.0
         Float? memory_factor = 0.3
-        String docker_image = "docker.io/polumechanos/qc-atac-atomic:igvf"
+        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
     }
 
     # Determine the size of the input

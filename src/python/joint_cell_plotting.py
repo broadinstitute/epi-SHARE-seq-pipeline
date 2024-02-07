@@ -76,9 +76,9 @@ def get_metrics(rna_metrics_file, atac_metrics_file, remove_low_yielding_cells):
     atac_barcodes = []
     # remove cells that have fewer than 10 fragments
     for line in atac_metrics_contents:
-        if int(line[reads_ind])/2 >= remove_low_yielding_cells:
+        if int(line[reads_ind]) >= remove_low_yielding_cells:
             tss.append(float(line[tss_ind]))
-            frags.append(int(line[reads_ind])/2)
+            frags.append(int(line[reads_ind]))
             atac_barcodes.append(line[atac_barcode_ind])
     atac_metrics = dict(zip(atac_barcodes, zip(tss, frags)))
 
