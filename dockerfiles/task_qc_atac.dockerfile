@@ -24,13 +24,12 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     r-base \
     tabix \
-    wget \
     zlib1g-dev &&\
     rm -rf /var/lib/apt/lists/*
 
 # Install packages for python3 scripts (pysam, SAMstats)
 RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam xopen snapatac2
+RUN python3 -m pip install --no-cache-dir --ignore-installed numpy matplotlib pandas plotnine pysam xopen
 
 # Install R packages
 RUN R --no-echo --no-restore --no-save -e "install.packages('ggplot2')"
@@ -43,15 +42,13 @@ RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
 
-RUN wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/bedClip && chmod a+x bedClip && mv bedClip /usr/local/bin
+# Add folder with software to the path
+ENV PATH="/software:${PATH}"
 
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
-COPY --chown=$USER:$USER src/python/merge_atac_barcode_metadata.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/plot_insert_size_hist.py /usr/local/bin
-COPY --chown=$USER:$USER src/python/snapatac2-tss-enrichment.py /usr/local/bin
 COPY --chown=$USER:$USER src/python/compute_tss_enrichment.py /usr/local/bin
-COPY --chown=$USER:$USER src/python/compute_tss_enrichment_bulk.py /usr/local/bin
 COPY --chown=$USER:$USER src/R/atac_qc_plots.R /usr/local/bin
 COPY --chown=$USER:$USER src/R/barcode_rank_functions.R /usr/local/bin
 
