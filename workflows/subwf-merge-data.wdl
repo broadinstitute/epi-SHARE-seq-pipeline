@@ -19,6 +19,7 @@ workflow merge {
     input {
         # Common inputs
         File genome_tsv
+        Array[String] dataset_names
         String? genome_name
         String? prefix = 'merged'
         
@@ -40,7 +41,8 @@ workflow merge {
         Boolean run_qc_merged_atac = true
         Array[File] atac_barcode_metadata
         File? tss_bed
-        Int? fragment_cutoff
+        Int? fragment_min_cutoff
+        Int? hist_max_fragment
         Float? qc_merged_atac_disk_factor
         Float? qc_merged_atac_memory_factor
         String? qc_merged_atac_docker_image
@@ -127,9 +129,11 @@ workflow merge {
                     fragments = merge_fragments.fragments,
                     fragments_index = merge_fragments.fragments_index,
                     tss = tss_bed_,
+                    dataset_names = dataset_names,
                     prefix = prefix,
                     genome_name = genome_name_,
-                    fragment_cutoff = fragment_cutoff,
+                    fragment_min_cutoff = fragment_min_cutoff,
+                    hist_max_fragment = hist_max_fragment,
                     disk_factor = qc_merged_atac_disk_factor,
                     memory_factor = qc_merged_atac_memory_factor,
                     docker_image = qc_merged_atac_docker_image
@@ -151,7 +155,7 @@ workflow merge {
         if (run_joint_qc && run_qc_merged_atac) {
             call share_task_joint_qc.joint_qc_plotting as joint_qc {
                 input:
-                    atac_barcode_metadata = qc_merged_atac.barcode_metadata,
+                    atac_barcode_metadata = qc_merged_atac.atac_barcode_metadata,
                     rna_barcode_metadata = merge_counts.barcode_metadata,
                     genome_name = genome_name_,
                     prefix = prefix,
@@ -175,7 +179,7 @@ workflow merge {
         call html_report.html_report as html_report {
             input:
                 prefix = prefix,
-                image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, seurat.seurat_raw_violin_plot, seurat.seurat_raw_qc_scatter_plot, seurat.seurat_filtered_violin_plot, seurat.seurat_filtered_qc_scatter_plot, seurat.seurat_variable_genes_plot, seurat.seurat_PCA_dim_loadings_plot, seurat.seurat_PCA_plot, seurat.seurat_heatmap_plot, seurat.seurat_jackstraw_plot, seurat.seurat_elbow_plot, seurat.seurat_umap_cluster_plot, seurat.seurat_umap_rna_count_plot, seurat.seurat_umap_gene_count_plot, seurat.seurat_umap_mito_plot, qc_merged_atac.barcode_rank_plot, qc_merged_atac.insert_size_hist, qc_merged_atac.tss_enrichment_plot, archr.archr_raw_tss_by_uniq_frags_plot, archr.archr_filtered_tss_by_uniq_frags_plot, archr.archr_raw_frag_size_dist_plot, archr.archr_filtered_frag_size_dist_plot, archr.archr_umap_doublets, archr.archr_umap_cluster_plot, archr.archr_umap_doublets, archr.archr_umap_num_frags_plot, archr.archr_umap_tss_score_plot, archr.archr_umap_frip_plot, archr.archr_heatmap_plot, dorcs.j_plot],
+                image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot, seurat.seurat_raw_violin_plot, seurat.seurat_raw_qc_scatter_plot, seurat.seurat_filtered_violin_plot, seurat.seurat_filtered_qc_scatter_plot, seurat.seurat_variable_genes_plot, seurat.seurat_PCA_dim_loadings_plot, seurat.seurat_PCA_plot, seurat.seurat_heatmap_plot, seurat.seurat_jackstraw_plot, seurat.seurat_elbow_plot, seurat.seurat_umap_cluster_plot, seurat.seurat_umap_rna_count_plot, seurat.seurat_umap_gene_count_plot, seurat.seurat_umap_mito_plot, qc_merged_atac.fragment_barcode_rank_plot, qc_merged_atac.fragment_histogram, qc_merged_atac.insert_size_hist, archr.archr_raw_tss_by_uniq_frags_plot, archr.archr_filtered_tss_by_uniq_frags_plot, archr.archr_raw_frag_size_dist_plot, archr.archr_filtered_frag_size_dist_plot, archr.archr_umap_doublets, archr.archr_umap_cluster_plot, archr.archr_umap_doublets, archr.archr_umap_num_frags_plot, archr.archr_umap_tss_score_plot, archr.archr_umap_frip_plot, archr.archr_heatmap_plot, dorcs.j_plot],
                 log_files = []
         }
     }
@@ -186,8 +190,7 @@ workflow merge {
  
         File? merged_fragments = merge_fragments.fragments
 
-        File? merged_fragments_filtered = qc_merged_atac.filtered_fragments
-        File? merged_atac_barcode_metadata = qc_merged_atac.barcode_metadata
+        File? merged_atac_barcode_metadata = qc_merged_atac.atac_barcode_metadata
 
         File? seurat_notebook_output = seurat.notebook_output
         File? seurat_obj = seurat.seurat_filtered_obj

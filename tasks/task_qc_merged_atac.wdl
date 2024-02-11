@@ -15,14 +15,16 @@ task qc_merged_atac {
         File fragments
         File fragments_index
         File tss
+        Array[String] dataset_names
         String? prefix
         String? genome_name
-        Int? fragment_cutoff = 10
+
+        Int? fragment_min_cutoff = 10
+        Int? hist_max_fragment = 5000
 
         # Runtime
-        Int? cpus = 8
         Float? disk_factor = 10.0
-        Float? memory_factor = 20
+        Float? memory_factor = 2.0
         String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
     }
 
@@ -30,47 +32,36 @@ task qc_merged_atac {
     Float input_file_size_gb = size(barcode_metadata, "G") + size(fragments, "G")
 
     # Determining memory size base on the size of the input files.
-    Float mem_gb = 32.0 + memory_factor * input_file_size_gb
+    Float mem_gb = 4.0 + memory_factor * input_file_size_gb
 
     # Determining disk size base on the size of the input files.
-    Int disk_gb = round(100.0 + disk_factor * input_file_size_gb)
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String filtered_fragments = '${default='merged' prefix}.atac.qc.${genome_name}.filtered.fragments.bed.gz'
-    String final_barcode_metadata = '${default='merged' prefix}.atac.qc.${genome_name}.metadata.tsv'
-    String insert_size_hist = '${default='merged' prefix}.atac.qc.hist.${genome_name}.png'
-    String fragment_barcode_rank_plot = '${default='merged' prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png'
+    String barcode_metadata = '${prefix}.atac.qc.${genome_name}.metadata.tsv'
+    String dataset_barcodes = '${prefix}.atac.qc.${genome_name}.dataset.barcodes.tsv'
+    String insert_size_hist = '${prefix}.atac.qc.hist.${genome_name}.png'
+    String fragment_barcode_rank_plot = '${prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png'
+    String fragment_histogram = '${prefix}.atac.qc.${genome_name}.fragment.histogram.png'
 
     command <<<
         set -e
 
         bash $(which monitor_script.sh) 1>&2 &
 
-        # Merge barcode metadata
-        echo '------ START: Merge barcode metadata files ------' 1>&2
-        time python3 $(which merge_atac_barcode_metadata.py) merged_barcode_metadata ~{sep=' ' barcode_metadata}
+        # Concatenate barcode metadata files
+        echo '------ START: Concatenate barcode metadata files ------' 1>&2
+        head -n 1 ~{barcode_metadata[0]} > ~{barcode_metadata}
+        tail -n +2 ~{sep=' ' barcode_metadata} >> ~{barcode_metadata}
 
-        # Filter fragments
-        echo '------ Filtering fragments ------' 1>&2
-        time awk -v threshold=~{fragment_cutoff} -v FS='[,|\t]' 'NR==FNR && ($7/2)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' merged_barcode_metadata <( zcat ~{fragments} ) > no-singleton.bed
-
-        bgzip -l 5 -@ ~{cpus} -c no-singleton.bed > ~{filtered_fragments}
-
-        tabix --zero-based --preset bed ~{filtered_fragments}
-
-        # TSS enrichment stats
-        echo '------ START: Compute TSS enrichment ------' 1>&2
-        time python3 $(which compute_tss_enrichment.py) \
-            -e 2000 \
-            -p 8 \
-            --regions ~{tss} \
-            --prefix "~{prefix}.atac.qc.~{genome_name}" \
-            no-singleton.bed.gz
-
-        # Add TSS enrichment to barcode metadata
-        join -j 1 -t $'\t' <(cat ~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv | (sed -u 1q; sort -k1,1)) <(cut -f 1,6-15 merged_barcode_metadata | (sed -u 1q; sort -k1,1)) > ~{final_barcode_metadata}
+        # Make TSV containing dataset names for each barcode
+        echo '------ START: Making dataset barcodes tsv ------' 1>&2
+        for i in range(length(~{barcode_metadata}));
+        do
+            cut -f1 ${barcode_metadata[$i]} | awk -v dataset="${dataset_names[$i]}" -v OFS="\t" 'NR>1{print $0, dataset}' > ~{dataset_barcodes}
+        done
 
         # Insert size plot bulk
         gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
@@ -79,21 +70,18 @@ task qc_merged_atac {
 
         # Barcode rank plot
         echo '------ START: Generate barcode rank plot ------' 1>&2
-        time Rscript $(which atac_qc_plots.R) ~{final_barcode_metadata} ~{fragment_cutoff} ~{fragment_barcode_rank_plot}
+        time Rscript $(which atac_qc_plots.R) ~{barcode_metadata} ~{fragment_min_cutoff} ~{hist_max_fragment} ~{fragment_barcode_rank_plot} ~{fragment_histogram}
     >>>
 
     output {
-        File filtered_fragments = filtered_fragments 
-        File tss_enrichment_barcode_stats = "${prefix}.atac.qc.${genome_name}.tss_enrichment_barcode_stats.tsv"
-        File tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
-        File enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
-        File barcode_metadata = final_barcode_metadata
+        File atac_barcode_metadata = barcode_metadata
+        File atac_dataset_barcodes = dataset_barcodes
         File insert_size_hist = insert_size_hist
-        File? barcode_rank_plot = fragment_barcode_rank_plot
+        File? fragment_barcode_rank_plot = fragment_barcode_rank_plot
+        File? fragment_histogram = fragment_histogram
     }
 
     runtime {
-        cpu: cpus
         disks: "local-disk ${disk_gb} ${disk_type}"
         docker: "${docker_image}"
         memory: "${mem_gb} GB"
@@ -129,11 +117,6 @@ task qc_merged_atac {
                 description: 'Reference name',
                 help: 'The name of the reference genome used by the aligner.',
                 examples: ['hg38', 'mm10', 'both']
-            }
-        fragment_cutoff: {
-                description: 'Fragment cutoff',
-                help: 'Cutoff for number of fragments required when making fragment barcode rank plot.',
-                example: 10
             }
     }    
 }
