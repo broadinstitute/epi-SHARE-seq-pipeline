@@ -113,7 +113,8 @@ task rna_align {
             --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \
-
+            --soloBarcodeMate 2 \
+            --clip5pNbases 0 34 \
             feature_type='GeneFull'
 
         # 10X v2
