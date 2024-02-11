@@ -9,6 +9,7 @@ workflows:
              - dev
              - chromap-v2
              - dev-snapatac
+             - paired-rna
          tags:
              - /.*/
 

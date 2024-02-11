@@ -62,19 +62,7 @@ task rna_align {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        # Check which fastq contains CB + UMI
-        r1_length=$(zcat ~{fastq_R1[0]} | head -2 | tail -1 | awk '{print length($1)}')
-        r2_length=$(zcat ~{fastq_R2[0]} | head -2 | tail -1 | awk '{print length($1)}')
-        if [ $r1_length -gt $r2_length ]; then
-            read_files='~{sep=',' fastq_R1} ~{sep=',' fastq_R2}'
-            cb_umi_length=$r2_length
-        else
-            read_files='~{sep=',' fastq_R2} ~{sep=',' fastq_R1}'
-            cb_umi_length=$r1_length
-        fi
-        echo $r1_length
-        echo $r2_length
-        echo $read_files
+        read_files='~{sep=',' fastq_R1} ~{sep=',' fastq_R2}'
 
         # Untar the genome
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
