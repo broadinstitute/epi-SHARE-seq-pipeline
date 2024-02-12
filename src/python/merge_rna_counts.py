@@ -183,6 +183,7 @@ def write_barcode_metadata(prefix, count_matrix, barcode_list):
 
 def write_dataset_barcodes(prefix, dataset_barcodes):
     with open(prefix + "_rna_dataset_barcodes.tsv", "w") as f:
+        f.write("barcode\tdataset\n")
         for barcode, dataset in dataset_barcodes.items():
             f.write(barcode + "\t" + dataset + "\n")	 
 

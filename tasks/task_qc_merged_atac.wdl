@@ -58,9 +58,10 @@ task qc_merged_atac {
 
         # Make TSV containing dataset names for each barcode
         echo '------ START: Making dataset barcodes tsv ------' 1>&2
+        echo "barcode\tdataset\n" > ~{dataset_barcodes}
         for i in range(length(~{barcode_metadata}));
         do
-            cut -f1 ${barcode_metadata[$i]} | awk -v dataset="${dataset_names[$i]}" -v OFS="\t" 'NR>1{print $0, dataset}' > ~{dataset_barcodes}
+            cut -f1 ${barcode_metadata[$i]} | awk -v dataset="${dataset_names[$i]}" -v OFS="\t" 'NR>1{print $0, dataset}' >> ~{dataset_barcodes}
         done
 
         # Insert size plot bulk
