@@ -114,7 +114,7 @@ task rna_align {
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \
             --soloBarcodeMate 2 \
-            --clip5pNbases 0 34
+            --clip5pNbases 0 49
 
             feature_type='GeneFull'
 
