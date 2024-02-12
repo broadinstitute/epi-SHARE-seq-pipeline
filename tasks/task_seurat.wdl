@@ -10,6 +10,7 @@ task seurat {
     input {
         #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
         File rna_matrix
+        File dataset_barcodes
         String genome_name
 
         Int? min_features = 200
@@ -77,6 +78,7 @@ task seurat {
     String jackstraw_plot = '${plots_filepath}/${prefix}.rna.seurat.jackstraw.${genome_name}.png'
     String elbow_plot = '${plots_filepath}/${prefix}.rna.seurat.elbow.${genome_name}.png'
     String umap_cluster_plot = '${plots_filepath}/${prefix}.rna.seurat.umap.${genome_name}.png'
+    String umap_dataset_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_dataset.${genome_name}.png'
     String umap_rna_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_rna_count.${genome_name}.png'
     String umap_gene_count_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_gene_count.${genome_name}.png'
     String umap_mito_plot = '${plots_filepath}/${prefix}.rna.seurat.umap_mito.${genome_name}.png'
@@ -104,6 +106,7 @@ task seurat {
         
         papermill $(which seurat_notebook.ipynb) ${output_filename} \
         -p rna_matrix ${rna_matrix} \
+        -p dataset_barcodes ${dataset_barcodes} \
         -p genome ${genome_name} \
         -p min_features ${min_features} \
         -p percent_MT ${percent_mt} \
@@ -143,6 +146,7 @@ task seurat {
         File? seurat_jackstraw_plot = jackstraw_plot
         File? seurat_elbow_plot = elbow_plot
         File? seurat_umap_cluster_plot = umap_cluster_plot
+        File? seurat_umap_dataset_plot = umap_dataset_plot
         File? seurat_umap_rna_count_plot = umap_rna_count_plot
         File? seurat_umap_gene_count_plot = umap_gene_count_plot
         File? seurat_umap_mito_plot = umap_mito_plot
