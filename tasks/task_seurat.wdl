@@ -10,7 +10,7 @@ task seurat {
     input {
         #This tasks takes in an RNA matrix file, processes using Seurat and creates plots
         File rna_matrix
-        File dataset_barcodes
+        File? dataset_barcodes
         String genome_name
 
         Int? min_features = 200
