@@ -12,6 +12,7 @@ task merge_counts {
 
     input {
         Array[File] tars
+        Array[String] dataset_names
         Array[String]? subpool_names = []
         String? gene_naming
         String? prefix
@@ -33,7 +34,6 @@ task merge_counts {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
-    String ensembl_option = if '~{gene_naming}'=='ensembl' then '--ensembl' else ''
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -45,8 +45,9 @@ task merge_counts {
         python3 $(which merge_rna_counts.py) \
             ~{prefix} \
             ~{sep=' ' tars} \
-            --subpools ~{sep=' ' subpool_names} \
-            ~{ensembl_option} \
+            --datasets ~{sep=' ' dataset_names} \
+            ~{if defined(subpool_names) then "--subpools ~{sep=' ' subpool_names}" else ""} \
+            ~{if "~{gene_naming}"=="ensembl" then "--ensembl" else ""} \
 
         tar -cvf ~{prefix}.tar ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
@@ -54,7 +55,8 @@ task merge_counts {
     output {
         File h5_matrix = '${prefix}.h5'
         File merged_tar = '${prefix}.tar'
-        File barcode_metadata = '${prefix}_rna_barcode_metadata.tsv'
+        File rna_barcode_metadata = '${prefix}_rna_barcode_metadata.tsv'
+        File rna_dataset_barcodes = '${prefix}_rna_dataset_barcodes.tsv'
         File monitor_log = '${monitor_log}'
     }
 

@@ -3,9 +3,9 @@ version 1.0
 import "../tasks/task_merge_rna_counts.wdl" as task_merge_rna_counts
 import "../tasks/task_merge_atac_fragments.wdl" as task_merge_atac_fragments
 import "../tasks/task_qc_merged_atac.wdl" as task_qc_merged_atac
-import "../tasks/task_seurat.wdl" as share_task_seurat 
-import "../tasks/task_archr.wdl" as share_task_archr
-import "../tasks/task_joint_qc.wdl" as share_task_joint_qc
+import "../tasks/task_seurat.wdl" as task_seurat 
+import "../tasks/task_archr.wdl" as task_archr
+import "../tasks/task_joint_qc.wdl" as task_joint_qc
 import "./subwf-find-dorcs.wdl" as find_dorcs
 import "../tasks/task_html_report.wdl" as html_report
 
@@ -95,7 +95,7 @@ workflow merge {
         }
 
         if (run_seurat) {
-            call share_task_seurat.seurat as seurat {
+            call task_seurat.seurat as seurat {
                 input:
                     rna_matrix = merge_counts.h5_matrix,
                     genome_name = genome_name_,
@@ -141,7 +141,7 @@ workflow merge {
         }
 
         if (run_archr) {
-            call share_task_archr.archr as archr {
+            call task_archr.archr as archr {
                 input:
                     atac_frag = merge_fragments.fragments,
                     genome = genome_name_,
@@ -153,10 +153,10 @@ workflow merge {
 
     if (aggregate_atac && aggregate_rna) {
         if (run_joint_qc && run_qc_merged_atac) {
-            call share_task_joint_qc.joint_qc_plotting as joint_qc {
+            call task_joint_qc.joint_qc_plotting as joint_qc {
                 input:
                     atac_barcode_metadata = qc_merged_atac.atac_barcode_metadata,
-                    rna_barcode_metadata = merge_counts.barcode_metadata,
+                    rna_barcode_metadata = merge_counts.rna_barcode_metadata,
                     genome_name = genome_name_,
                     prefix = prefix,
                     docker_image = joint_qc_docker_image
@@ -186,7 +186,7 @@ workflow merge {
 
     output {
         File? merged_h5 = merge_counts.h5_matrix
-        File? merged_rna_barcode_metadata = merge_counts.barcode_metadata
+        File? merged_rna_barcode_metadata = merge_counts.rna_barcode_metadata
  
         File? merged_fragments = merge_fragments.fragments
 

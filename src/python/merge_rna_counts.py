@@ -18,8 +18,10 @@ def parse_arguments():
     parser.add_argument("prefix", help="Prefix for naming output files")
     parser.add_argument("tar_files", nargs="*", help="File names for tar archives, one per matrix to be merged. Each must contain matrix.mtx, features.tsv, and barcodes.tsv files")
     parser.add_argument("--subpools", nargs="*", help="Cellular sub-pool names, one per matrix to be merged")
+    parser.add_argument("--datasets", nargs="*", help="Dataset names, one per matrix to be merged")
     parser.add_argument("--ensembl", help="Flag for outputting gene names in ENSEMBL form, rather than gene id", action="store_true")
     return parser.parse_args()
+
 
 def get_split_lines(file_name, delimiter, skip=0):
     """
@@ -32,6 +34,7 @@ def get_split_lines(file_name, delimiter, skip=0):
         for line in f:
             yield line.rstrip().split(sep=delimiter)
 
+
 def rename_duplicates(duplicate_list):
     """Rename duplicate entries as entry, entry.1, entry.2, etc."""
     seen = defaultdict(int)
@@ -42,8 +45,9 @@ def rename_duplicates(duplicate_list):
         seen[entry] += 1
         
     return renamed_list
+
             
-def get_merged_data(tar_files, subpools, ensembl):
+def get_merged_data(tar_files, subpools, datasets, ensembl):
     """
     Takes in paths to tar files (one per count matrix to be merged)
     containing barcodes.tsv, features.tsv, and matrix.mtx output files from STARsolo. 
@@ -56,6 +60,7 @@ def get_merged_data(tar_files, subpools, ensembl):
     barcode_mappings = []
     gene_mappings = []
     ensembl_to_gene = {}
+    dataset_barcodes = {}
     
     # get barcode mappings and gene mappings
     for i in range(len(tar_files)):
@@ -72,7 +77,10 @@ def get_merged_data(tar_files, subpools, ensembl):
         else:
             basename = os.path.basename(tar_files[i])
             barcode_mapping = {line[0] + "_" + basename:idx for idx, line in enumerate(barcodes)}
-            
+        
+        for barcode in barcode_mapping.keys():
+            dataset_barcodes[barcode] = dataset[i]
+   
         barcode_mappings.append(barcode_mapping)
         
         # read features file
@@ -124,7 +132,8 @@ def get_merged_data(tar_files, subpools, ensembl):
     if not ensembl:
         gene_list = rename_duplicates([ensembl_to_gene[ensembl_id] for ensembl_id in gene_list])
     
-    return(merged_matrix, barcode_list, gene_list, ensembl_to_gene)
+    return(merged_matrix, barcode_list, gene_list, ensembl_to_gene, dataset_barcodes)
+
         
 def write_h5(prefix, count_matrix, barcode_list, gene_list):
     h5_file = h5py.File(prefix + ".h5", "w")
@@ -139,6 +148,7 @@ def write_h5(prefix, count_matrix, barcode_list, gene_list):
     g.create_dataset("shape", data=count_matrix.shape)
 
     h5_file.close()   
+
     
 def write_starsolo_outputs(prefix, count_matrix, barcode_list, ensembl_to_gene):
     with gzip.open(prefix + ".features.tsv.gz", "wt") as f:
@@ -156,6 +166,7 @@ def write_starsolo_outputs(prefix, count_matrix, barcode_list, ensembl_to_gene):
         f.write("%s %s %s\n" % (count_matrix.shape[0], count_matrix.shape[1], count_matrix.nnz))
         for triple in zip(row, col, count_matrix.data):
             f.write("%s %s %s\n" % triple)
+
     
 def write_barcode_metadata(prefix, count_matrix, barcode_list):
     umis = count_matrix.sum(axis=0, dtype="int32").tolist()[0]
@@ -168,6 +179,13 @@ def write_barcode_metadata(prefix, count_matrix, barcode_list):
         # write rows
         for triple in zip(barcode_list, umis, genes):
             f.write("%s\t%s\t%s\n" % triple)
+
+
+def write_dataset_barcodes(prefix, dataset_barcodes):
+    with open(prefix + "_rna_dataset_barcodes.tsv", "w") as f:
+        for barcode, dataset in dataset_barcodes.items():
+            f.write(barcode + "\t" + dataset + "\n")	 
+
             
 def main():
     # get arguments
@@ -175,10 +193,11 @@ def main():
     prefix = getattr(args, "prefix")
     tar_files = getattr(args, "tar_files")
     subpools = getattr(args, "subpools")
+    datasets = getattr(args, "datasets")
     ensembl = getattr(args, "ensembl")
     
     # get merged count matrix, barcode list, and gene list from input tars
-    count_matrix, barcode_list, gene_list, ensembl_to_gene = get_merged_data(tar_files, subpools, ensembl)
+    count_matrix, barcode_list, gene_list, ensembl_to_gene, dataset_barcodes = get_merged_data(tar_files, subpools, datasets, ensembl)
     
     # write merged data to h5 file
     write_h5(prefix, count_matrix, barcode_list, gene_list)
@@ -188,6 +207,9 @@ def main():
     
     # write barcode metadata file
     write_barcode_metadata(prefix, count_matrix, barcode_list)
+
+    # write dataset barcode tsv
+    write_dataset_barcodes(prefix, dataset_barcodes)
 
 if __name__ == "__main__":
     main()
