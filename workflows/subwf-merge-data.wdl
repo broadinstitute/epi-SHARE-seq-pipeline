@@ -88,6 +88,7 @@ workflow merge {
                 tars = tars,
                 subpool_names = subpool_names,
                 prefix = prefix,
+                dataset_names = dataset_names,
                 gene_naming = gene_naming,
                 disk_factor = merge_counts_disk_factor,
                 memory_factor = merge_counts_memory_factor,
