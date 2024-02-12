@@ -34,6 +34,7 @@ task merge_counts {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
+    String ensembl_option = if '~{gene_naming}'=='ensembl' then '--ensembl' else ''
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -47,7 +48,7 @@ task merge_counts {
             ~{sep=' ' tars} \
             --datasets ~{sep=' ' dataset_names} \
             ~{if defined(subpool_names) then "--subpools ~{sep=' ' subpool_names}" else ""} \
-            ~{if "~{gene_naming}"=="ensembl" then "--ensembl" else ""} \
+            ~{ensembl_option} \
 
         tar -cvf ~{prefix}.tar ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
