@@ -40,7 +40,7 @@ task qc_merged_atac {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String barcode_metadata = '${prefix}.atac.qc.${genome_name}.metadata.tsv'
+    String merged_barcode_metadata = '${prefix}.atac.qc.${genome_name}.merged.metadata.tsv'
     String dataset_barcodes = '${prefix}.atac.qc.${genome_name}.dataset.barcodes.tsv'
     String insert_size_hist = '${prefix}.atac.qc.hist.${genome_name}.png'
     String fragment_barcode_rank_plot = '${prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png'
@@ -53,8 +53,8 @@ task qc_merged_atac {
 
         # Concatenate barcode metadata files
         echo '------ START: Concatenate barcode metadata files ------' 1>&2
-        head -n 1 ~{barcode_metadata[0]} > ~{barcode_metadata}
-        tail -n +2 ~{sep=' ' barcode_metadata} >> ~{barcode_metadata}
+        head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
+        tail -n +2 ~{sep=' ' barcode_metadata} >> ~{merged_barcode_metadata}
 
         # Make TSV containing dataset names for each barcode
         echo '------ START: Making dataset barcodes tsv ------' 1>&2
@@ -75,7 +75,7 @@ task qc_merged_atac {
     >>>
 
     output {
-        File atac_barcode_metadata = barcode_metadata
+        File atac_barcode_metadata = merged_barcode_metadata
         File atac_dataset_barcodes = dataset_barcodes
         File insert_size_hist = insert_size_hist
         File? fragment_barcode_rank_plot = fragment_barcode_rank_plot
