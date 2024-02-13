@@ -14,6 +14,7 @@ task merge_counts {
         Array[File] tars
         Array[String] dataset_names
         Array[String]? subpool_names = []
+        String? genome_name
         String? gene_naming
         String? prefix
 
@@ -34,7 +35,13 @@ task merge_counts {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
+    String merged_barcode_metadata = '${prefix}.rna.qc.merged.metadata.tsv'
+    String merged_h5 = '${prefix}.rna.qc.merged.h5'
+    String merged_tar = '${prefix}.rna.qc.merged.tar'
+    String dataset_barcodes = '${prefix}.rna.qc.dataset.barcodes.tsv'
+
     String ensembl_option = if '~{gene_naming}'=='ensembl' then '--ensembl' else ''
+    String subpool_option = if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -42,23 +49,25 @@ task merge_counts {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        # Create merged h5 matrix, mtx, barcode metadata
+        # Create merged h5 matrix, mtx
         python3 $(which merge_rna_counts.py) \
             ~{prefix} \
-            ~{sep=' ' tars} \
+            ~{merged_h5} \
+            ~{dataset_barcodes} \
+            --tar_files ~{sep=' ' tars} \
             --datasets ~{sep=' ' dataset_names} \
-            ~{if defined(subpool_names) then "--subpools ~{sep=' ' subpool_names}" else ""} \
+            ~{subpool_option} \
             ~{ensembl_option} \
 
-        tar -cvf ~{prefix}.tar ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
+        tar -cvf ~{merged_tar} ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
 
     output {
-        File h5_matrix = '${prefix}.h5'
-        File merged_tar = '${prefix}.tar'
-        File rna_barcode_metadata = '${prefix}_rna_barcode_metadata.tsv'
-        File rna_dataset_barcodes = '${prefix}_rna_dataset_barcodes.tsv'
-        File monitor_log = '${monitor_log}'
+        File merged_rna_barcode_metadata = merged_barcode_metadata
+        File merged_h5 = merged_h5
+        File merged_tar = merged_tar
+        File dataset_barcodes = dataset_barcodes
+        File monitor_log = monitor_log
     }
 
     runtime {
