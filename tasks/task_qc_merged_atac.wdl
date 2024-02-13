@@ -19,7 +19,8 @@ task qc_merged_atac {
         String? prefix
         String? genome_name
 
-        Int? fragment_min_cutoff = 10
+        Int? fragment_min_cutoff = 1
+        Int? hist_min_umi = 100
         Int? hist_max_fragment = 5000
 
         # Runtime
@@ -53,11 +54,11 @@ task qc_merged_atac {
 
         # Concatenate barcode metadata files
         echo '------ START: Concatenate barcode metadata files ------' 1>&2
-        #head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
-        #for i in range(length(~{barcode_metadata}));
-        #do
-        #    tail -n +2 ${barcode_metadata[$i]} >> ~{merged_barcode_metadata}
-        #done
+        head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
+        for i in range(length(~{barcode_metadata}));
+        do
+            tail -n +2 ${barcode_metadata[$i]} >> ~{merged_barcode_metadata}
+        done
 
         # Make TSV containing dataset names for each barcode
         echo '------ START: Making dataset barcodes tsv ------' 1>&2
@@ -72,9 +73,14 @@ task qc_merged_atac {
         echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
         time python3 $(which plot_insert_size_hist.py) insert_sizes ~{prefix} ~{insert_size_hist}
 
-        # Barcode rank plot
-        echo '------ START: Generate barcode rank plot ------' 1>&2
-        time Rscript $(which atac_qc_plots.R) ~{barcode_metadata} ~{fragment_min_cutoff} ~{hist_max_fragment} ~{fragment_barcode_rank_plot} ~{fragment_histogram}
+        # Make QC plots
+        echo '------ START: Generate QC plots ------' 1>&2
+        time Rscript $(which atac_qc_plots.R) \
+            ~{merged_barcode_metadata} \
+            ~{fragment_min_cutoff} \
+            ~{hist_max_fragment} \
+            ~{fragment_barcode_rank_plot} \
+            ~{fragment_histogram}
     >>>
 
     output {
