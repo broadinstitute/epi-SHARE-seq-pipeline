@@ -35,10 +35,10 @@ task merge_counts {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
-    String merged_barcode_metadata = '${prefix}.rna.qc.merged.metadata.tsv'
-    String merged_h5 = '${prefix}.rna.qc.merged.h5'
-    String merged_tar = '${prefix}.rna.qc.merged.tar'
-    String dataset_barcodes = '${prefix}.rna.qc.dataset.barcodes.tsv'
+    String merged_barcode_metadata = '~{prefix}.rna.~{genome_name}.merged.metadata.tsv'
+    String merged_h5 = '~{prefix}.rna.~{genome_name}.merged.h5'
+    String merged_tar = '~{prefix}.rna.~{genome_name}.merged.tar'
+    String dataset_barcodes = '~{prefix}.rna.~{genome_name}.dataset.barcodes.tsv'
 
     String ensembl_option = if '~{gene_naming}'=='ensembl' then '--ensembl' else ''
     String subpool_option = if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''
