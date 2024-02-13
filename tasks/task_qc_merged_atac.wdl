@@ -40,11 +40,11 @@ task qc_merged_atac {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String merged_barcode_metadata = '${prefix}.atac.qc.${genome_name}.merged.metadata.tsv'
-    String dataset_barcodes = '${prefix}.atac.qc.${genome_name}.dataset.barcodes.tsv'
-    String insert_size_hist = '${prefix}.atac.qc.hist.${genome_name}.png'
-    String fragment_barcode_rank_plot = '${prefix}.atac.qc.${genome_name}.fragment.barcode.rank.plot.png'
-    String fragment_histogram = '${prefix}.atac.qc.${genome_name}.fragment.histogram.png'
+    String merged_barcode_metadata = '${prefix}.atac.qc.merged.metadata.tsv'
+    String dataset_barcodes = '${prefix}.atac.qc.dataset.barcodes.tsv'
+    String insert_size_hist = '${prefix}.atac.qc.hist.png'
+    String fragment_barcode_rank_plot = '${prefix}.atac.qc.fragment.barcode.rank.plot.png'
+    String fragment_histogram = '${prefix}.atac.qc.fragment.histogram.png'
 
     command <<<
         set -e
@@ -53,11 +53,11 @@ task qc_merged_atac {
 
         # Concatenate barcode metadata files
         echo '------ START: Concatenate barcode metadata files ------' 1>&2
-        head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
-        for i in range(length(~{barcode_metadata}));
-        do
-            tail -n +2 ${barcode_metadata[$i]} >> ~{merged_barcode_metadata}
-        done
+        #head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
+        #for i in range(length(~{barcode_metadata}));
+        #do
+        #    tail -n +2 ${barcode_metadata[$i]} >> ~{merged_barcode_metadata}
+        #done
 
         # Make TSV containing dataset names for each barcode
         echo '------ START: Making dataset barcodes tsv ------' 1>&2
