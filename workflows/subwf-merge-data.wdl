@@ -98,8 +98,8 @@ workflow merge {
         if (run_seurat) {
             call task_seurat.seurat as seurat {
                 input:
-                    rna_matrix = merge_counts.h5_matrix,
-                    dataset_barcodes = merge_counts.rna_dataset_barcodes,
+                    rna_matrix = merge_counts.merged_h5,
+                    dataset_barcodes = merge_counts.dataset_barcodes,
                     genome_name = genome_name_,
                     min_features = seurat_min_features,
                     percent_mt = seurat_percent_mt,
@@ -133,7 +133,6 @@ workflow merge {
                     tss = tss_bed_,
                     dataset_names = dataset_names,
                     prefix = prefix,
-                    genome_name = genome_name_,
                     fragment_min_cutoff = fragment_min_cutoff,
                     hist_max_fragment = hist_max_fragment,
                     disk_factor = qc_merged_atac_disk_factor,
@@ -158,7 +157,7 @@ workflow merge {
             call task_joint_qc.joint_qc_plotting as joint_qc {
                 input:
                     atac_barcode_metadata = qc_merged_atac.atac_barcode_metadata,
-                    rna_barcode_metadata = merge_counts.rna_barcode_metadata,
+                    rna_barcode_metadata = merge_counts.merged_rna_barcode_metadata,
                     genome_name = genome_name_,
                     prefix = prefix,
                     docker_image = joint_qc_docker_image
@@ -168,7 +167,7 @@ workflow merge {
         if (run_dorcs) {
             call find_dorcs.wf_dorcs as dorcs {
                 input:
-                    rna_matrix = merge_counts.h5_matrix,
+                    rna_matrix = merge_counts.merged_h5,
                     atac_fragments = merge_fragments.fragments,
                     peak_file = peak_set_,
                     genome = genome_name_,
@@ -187,8 +186,8 @@ workflow merge {
     }
 
     output {
-        File? merged_h5 = merge_counts.h5_matrix
-        File? merged_rna_barcode_metadata = merge_counts.rna_barcode_metadata
+        File? merged_h5 = merge_counts.merged_h5
+        File? merged_rna_barcode_metadata = merge_counts.merged_rna_barcode_metadata
  
         File? merged_fragments = merge_fragments.fragments
 
