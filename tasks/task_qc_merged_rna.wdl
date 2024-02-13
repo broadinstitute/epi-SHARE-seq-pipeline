@@ -53,9 +53,9 @@ task qc_merged_rna {
         # Concatenate barcode metadata files
         echo '------ START: Concatenate barcode metadata files ------' 1>&2
         head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
-        for i in range(length(~{barcode_metadata}));
+        for metadata in ~{sep=' ' barcode_metadata};
         do
-            tail -n +2 ${barcode_metadata[$i]} >> ~{merged_barcode_metadata}
+            tail -n +2 $metadata >> ~{merged_barcode_metadata}
         done
 
         # Make QC plots
