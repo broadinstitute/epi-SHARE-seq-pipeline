@@ -73,7 +73,7 @@ task qc_merged_rna {
     >>>
 
     output {
-        File rna_barcode_metadata = merged_barcode_metadata
+        File rna_merged_barcode_metadata = merged_barcode_metadata
         File? umi_barcode_rank_plot = umi_barcode_rank_plot
         File? gene_barcode_rank_plot = gene_barcode_rank_plot
         File? gene_umi_scatter_plot = gene_umi_scatter_plot

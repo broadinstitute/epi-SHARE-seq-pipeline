@@ -1,14 +1,14 @@
 version 1.0
 
-import "../tasks/task_merge_rna_counts.wdl" as task_merge_rna_counts
-import "../tasks/task_qc_merged_rna.wdl" as task_qc_merged_rna
-import "../tasks/task_merge_atac_fragments.wdl" as task_merge_atac_fragments
-import "../tasks/task_qc_merged_atac.wdl" as task_qc_merged_atac
-import "../tasks/task_seurat.wdl" as task_seurat 
-import "../tasks/task_archr.wdl" as task_archr
-import "../tasks/task_joint_qc.wdl" as task_joint_qc
-import "./subwf-find-dorcs.wdl" as find_dorcs
-import "../tasks/task_html_report.wdl" as html_report
+import '../tasks/task_merge_rna_counts.wdl' as task_merge_rna_counts
+import '../tasks/task_qc_merged_rna.wdl' as task_qc_merged_rna
+import '../tasks/task_merge_atac_fragments.wdl' as task_merge_atac_fragments
+import '../tasks/task_qc_merged_atac.wdl' as task_qc_merged_atac
+import '../tasks/task_seurat.wdl' as task_seurat 
+import '../tasks/task_archr.wdl' as task_archr
+import '../tasks/task_joint_qc.wdl' as task_joint_qc
+import './subwf-find-dorcs.wdl' as find_dorcs
+import '../tasks/task_html_report.wdl' as html_report
 
 workflow merge {
     meta {
@@ -184,11 +184,11 @@ workflow merge {
     }
 
     if (aggregate_atac && aggregate_rna) {
-        if (run_joint_qc && run_qc_merged_atac) {
+        if (run_joint_qc && run_qc_merged_atac && run_qc_merged_rna) {
             call task_joint_qc.joint_qc_plotting as joint_qc {
                 input:
-                    atac_barcode_metadata = qc_merged_atac.atac_barcode_metadata,
-                    rna_barcode_metadata = merge_counts.merged_rna_barcode_metadata,
+                    atac_barcode_metadata = qc_merged_atac.atac_merged_barcode_metadata,
+                    rna_barcode_metadata = qc_merged_rna.rna_merged_barcode_metadata,
                     genome_name = genome_name_,
                     prefix = prefix,
                     docker_image = joint_qc_docker_image
@@ -218,11 +218,11 @@ workflow merge {
 
     output {
         File? merged_h5 = merge_counts.merged_h5
-        File? merged_rna_barcode_metadata = merge_counts.merged_rna_barcode_metadata
+        File? merged_rna_barcode_metadata = qc_merged_rna.rna_merged_barcode_metadata
  
         File? merged_fragments = merge_fragments.fragments
 
-        File? merged_atac_barcode_metadata = qc_merged_atac.atac_barcode_metadata
+        File? merged_atac_barcode_metadata = qc_merged_atac.atac_merged_barcode_metadata
 
         File? seurat_notebook_output = seurat.notebook_output
         File? seurat_obj = seurat.seurat_filtered_obj
