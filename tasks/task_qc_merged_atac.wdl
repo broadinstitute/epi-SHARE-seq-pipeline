@@ -30,7 +30,7 @@ task qc_merged_atac {
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = 10 #size(barcode_metadata, "G") + size(fragments, "G")
+    Float input_file_size_gb = size(barcode_metadata, "G") + size(fragments, "G")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 4.0 + memory_factor * input_file_size_gb
@@ -53,34 +53,34 @@ task qc_merged_atac {
         bash $(which monitor_script.sh) 1>&2 &
 
         # Concatenate barcode metadata files
-        echo "------ START: Concatenate barcode metadata files ------" 1>&2
-        head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
-        for i in range(length(~{barcode_metadata}));
-        do
-            tail -n +2 ${barcode_metadata[$i]} >> ~{merged_barcode_metadata}
-        done
+        # echo "------ START: Concatenate barcode metadata files ------" 1>&2
+        # head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
+        # for i in range(length(~{barcode_metadata}));
+        # do
+        #     tail -n +2 ${barcode_metadata[$i]} >> ~{merged_barcode_metadata}
+        # done
 
         # Make TSV containing dataset names for each barcode
-        echo "------ START: Making dataset barcodes tsv ------" 1>&2
-        echo "barcode\tdataset\n" > ~{dataset_barcodes}
-        for i in range(length(~{barcode_metadata}));
-        do
-            cut -f1 ${barcode_metadata[$i]} | awk -v dataset="${dataset_names[$i]}" -v OFS="\t" 'NR>1{print $0, dataset}' >> ~{dataset_barcodes}
-        done
+        # echo "------ START: Making dataset barcodes tsv ------" 1>&2
+        # echo "barcode\tdataset\n" > ~{dataset_barcodes}
+        # for i in range(length(~{barcode_metadata}));
+        # do
+        #     cut -f1 ${barcode_metadata[$i]} | awk -v dataset="${dataset_names[$i]}" -v OFS="\t" 'NR>1{print $0, dataset}' >> ~{dataset_barcodes}
+        # done
 
         # Insert size plot bulk
-        gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
-        echo "------ START: Generate TSS enrichment plot for bulk ------" 1>&2
-        time python3 $(which plot_insert_size_hist.py) insert_sizes ~{prefix} ~{insert_size_hist}
+        # gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
+        # echo "------ START: Generate TSS enrichment plot for bulk ------" 1>&2
+        # time python3 $(which plot_insert_size_hist.py) insert_sizes ~{prefix} ~{insert_size_hist}
 
         # Make QC plots
-        echo "------ START: Generate QC plots ------" 1>&2
-        time Rscript $(which atac_qc_plots.R) \
-            ~{merged_barcode_metadata} \
-            ~{fragment_min_cutoff} \
-            ~{hist_max_fragment} \
-            ~{fragment_barcode_rank_plot} \
-            ~{fragment_histogram}
+        # echo "------ START: Generate QC plots ------" 1>&2
+        # time Rscript $(which atac_qc_plots.R) \
+        #     ~{merged_barcode_metadata} \
+        #     ~{fragment_min_cutoff} \
+        #     ~{hist_max_fragment} \
+        #     ~{fragment_barcode_rank_plot} \
+        #     ~{fragment_histogram}
     >>>
 
     output {
