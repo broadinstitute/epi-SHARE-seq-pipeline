@@ -35,7 +35,6 @@ task merge_counts {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
-    String merged_barcode_metadata = '~{prefix}.rna.~{genome_name}.merged.metadata.tsv'
     String merged_h5 = '~{prefix}.rna.~{genome_name}.merged.h5'
     String merged_tar = '~{prefix}.rna.~{genome_name}.merged.tar'
     String dataset_barcodes = '~{prefix}.rna.~{genome_name}.dataset.barcodes.tsv'
@@ -63,7 +62,6 @@ task merge_counts {
     >>>
 
     output {
-        File merged_rna_barcode_metadata = merged_barcode_metadata
         File merged_h5 = merged_h5
         File merged_tar = merged_tar
         File dataset_barcodes = dataset_barcodes
