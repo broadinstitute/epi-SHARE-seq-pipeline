@@ -1,6 +1,6 @@
 version 1.0
  
-import '../tasks/task_qc_merged_rna.wdl' as task_qc_merged_rna
+import '/tasks/task_qc_merged_rna.wdl' as task_qc_merged_rna
 import '../tasks/task_merge_rna_counts.wdl' as task_merge_rna_counts
 import '../tasks/task_merge_atac_fragments.wdl' as task_merge_atac_fragments
 import '../tasks/task_qc_merged_atac.wdl' as task_qc_merged_atac
