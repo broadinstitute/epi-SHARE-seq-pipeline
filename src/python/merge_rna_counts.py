@@ -16,7 +16,9 @@ from scipy.sparse import csc_matrix
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Generate a merged h5 count matrix of genes x barcodes")
     parser.add_argument("prefix", help="Prefix for naming output files")
-    parser.add_argument("tar_files", nargs="*", help="File names for tar archives, one per matrix to be merged. Each must contain matrix.mtx, features.tsv, and barcodes.tsv files")
+    parser.add_argument("merged_h5_file", help="File name for output merged h5 file")
+    parser.add_argument("dataset_barcodes_file", help="File name for output dataset barcodes tsv file")
+    parser.add_argument("--tar_files", nargs="*", help="File names for tar archives, one per matrix to be merged. Each must contain matrix.mtx, features.tsv, and barcodes.tsv files")
     parser.add_argument("--subpools", nargs="*", help="Cellular sub-pool names, one per matrix to be merged")
     parser.add_argument("--datasets", nargs="*", help="Dataset names, one per matrix to be merged")
     parser.add_argument("--ensembl", help="Flag for outputting gene names in ENSEMBL form, rather than gene id", action="store_true")
@@ -79,7 +81,7 @@ def get_merged_data(tar_files, subpools, datasets, ensembl):
             barcode_mapping = {line[0] + "_" + basename:idx for idx, line in enumerate(barcodes)}
         
         for barcode in barcode_mapping.keys():
-            dataset_barcodes[barcode] = dataset[i]
+            dataset_barcodes[barcode] = datasets[i]
    
         barcode_mappings.append(barcode_mapping)
         
@@ -135,8 +137,8 @@ def get_merged_data(tar_files, subpools, datasets, ensembl):
     return(merged_matrix, barcode_list, gene_list, ensembl_to_gene, dataset_barcodes)
 
         
-def write_h5(prefix, count_matrix, barcode_list, gene_list):
-    h5_file = h5py.File(prefix + ".h5", "w")
+def write_h5(prefix, count_matrix, barcode_list, gene_list, merged_h5_file):
+    h5_file = h5py.File(merged_h5_file, "w")
 
     g = h5_file.create_group("group")
     g.create_dataset("barcodes", data=barcode_list)
@@ -167,22 +169,9 @@ def write_starsolo_outputs(prefix, count_matrix, barcode_list, ensembl_to_gene):
         for triple in zip(row, col, count_matrix.data):
             f.write("%s %s %s\n" % triple)
 
-    
-def write_barcode_metadata(prefix, count_matrix, barcode_list):
-    umis = count_matrix.sum(axis=0, dtype="int32").tolist()[0]
-    genes = np.diff(count_matrix.indptr)
-    fields = ["barcode", "unique_umi", "genes_final"]
-    
-    with open(prefix + "_rna_barcode_metadata.tsv", "w") as f:
-        # write header
-        f.write("\t".join(fields) + "\n")
-        # write rows
-        for triple in zip(barcode_list, umis, genes):
-            f.write("%s\t%s\t%s\n" % triple)
 
-
-def write_dataset_barcodes(prefix, dataset_barcodes):
-    with open(prefix + "_rna_dataset_barcodes.tsv", "w") as f:
+def write_dataset_barcodes(prefix, dataset_barcodes, dataset_barcodes_file):
+    with open(dataset_barcodes_file, "w") as f:
         f.write("barcode\tdataset\n")
         for barcode, dataset in dataset_barcodes.items():
             f.write(barcode + "\t" + dataset + "\n")	 
@@ -192,6 +181,8 @@ def main():
     # get arguments
     args = parse_arguments()
     prefix = getattr(args, "prefix")
+    merged_h5_file = getattr(args, "merged_h5_file")
+    dataset_barcodes_file = getattr(args, "dataset_barcodes_file")
     tar_files = getattr(args, "tar_files")
     subpools = getattr(args, "subpools")
     datasets = getattr(args, "datasets")
@@ -201,16 +192,13 @@ def main():
     count_matrix, barcode_list, gene_list, ensembl_to_gene, dataset_barcodes = get_merged_data(tar_files, subpools, datasets, ensembl)
     
     # write merged data to h5 file
-    write_h5(prefix, count_matrix, barcode_list, gene_list)
+    write_h5(prefix, count_matrix, barcode_list, gene_list, merged_h5_file)
     
     # write merged data to matrix.mtx, features.tsv, and barcodes.tsv files
     write_starsolo_outputs(prefix, count_matrix, barcode_list, ensembl_to_gene)
-    
-    # write barcode metadata file
-    write_barcode_metadata(prefix, count_matrix, barcode_list)
 
     # write dataset barcode tsv
-    write_dataset_barcodes(prefix, dataset_barcodes)
+    write_dataset_barcodes(prefix, dataset_barcodes, dataset_barcodes_file)
 
 if __name__ == "__main__":
     main()
