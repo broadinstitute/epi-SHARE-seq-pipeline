@@ -200,7 +200,7 @@ workflow merge {
             call find_dorcs.wf_dorcs as dorcs {
                 input:
                     rna_matrix = merge_counts.merged_h5,
-                    atac_fragments = merge_fragments.fragments,
+                    atac_fragments = merge_fragments.merged_fragments,
                     peak_file = peak_set_,
                     genome = genome_name_,
                     prefix = prefix
