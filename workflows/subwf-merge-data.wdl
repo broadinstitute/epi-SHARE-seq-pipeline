@@ -149,6 +149,7 @@ workflow merge {
             input:
                 fragments = fragments,
                 prefix = prefix,
+                genome_name = genome_name_,
                 disk_factor = merge_fragments_disk_factor,
                 docker_image = merge_fragments_docker_image,
                 cpus = merge_fragments_cpus
@@ -158,8 +159,8 @@ workflow merge {
             call task_qc_merged_atac.qc_merged_atac as qc_merged_atac {
                 input:
                     barcode_metadata = atac_barcode_metadata,
-                    fragments = merge_fragments.fragments,
-                    fragments_index = merge_fragments.fragments_index,
+                    fragments = merge_fragments.merged_fragments,
+                    fragments_index = merge_fragments.merged_fragments_index,
                     tss = tss_bed_,
                     dataset_names = dataset_names,
                     prefix = prefix,
@@ -175,7 +176,7 @@ workflow merge {
         if (run_archr) {
             call task_archr.archr as archr {
                 input:
-                    atac_frag = merge_fragments.fragments,
+                    atac_frag = merge_fragments.merged_fragments,
                     genome = genome_name_,
                     peak_set = peak_set_,
                     prefix = prefix
@@ -220,7 +221,8 @@ workflow merge {
         File? merged_h5 = merge_counts.merged_h5
         File? merged_rna_barcode_metadata = qc_merged_rna.rna_merged_barcode_metadata
  
-        File? merged_fragments = merge_fragments.fragments
+        File? merged_fragments = merge_fragments.merged_fragments
+        File? merged_fragments_index = merge_fragments.merged_fragments_index
 
         File? merged_atac_barcode_metadata = qc_merged_atac.atac_merged_barcode_metadata
 

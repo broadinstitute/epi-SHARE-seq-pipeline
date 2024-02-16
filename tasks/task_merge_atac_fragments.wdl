@@ -13,6 +13,7 @@ task merge_fragments {
     input {
         Array[File] fragments
         String? prefix
+        String? genome_name
 
         String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_merge_atac_fragments:dev'
         Float? disk_factor = 2
@@ -28,7 +29,8 @@ task merge_fragments {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
-    String output_file = '~{prefix}.fragments.tsv.gz'
+    String merged_fragments = '~{prefix}.~{genome_name}.fragments.tsv.gz'
+    String merged_fragments_index = '~{prefix}.~{genome_name}.fragments.tsv.gz.tbi'
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -44,9 +46,9 @@ task merge_fragments {
     >>>
 
     output {
-        File fragments = '${output_file}'
-        File fragments_index = '${output_file}.tbi'
-        File monitor_log = '${monitor_log}'
+        File merged_fragments = merged_fragments
+        File merged_fragments_index = merged_fragments_index
+        File monitor_log = monitor.log
     }
 
     runtime {
