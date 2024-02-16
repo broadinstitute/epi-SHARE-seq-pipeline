@@ -48,12 +48,12 @@ task qc_merged_atac {
     String fragment_histogram = '~{prefix}.atac.qc.~{genome_name}.fragment.histogram.png'
 
     command <<<
-        set -e
+        #set -e
 
-        bash $(which monitor_script.sh) 1>&2 &
+        #bash $(which monitor_script.sh) 1>&2 &
 
         # Concatenate barcode metadata files
-        echo '------ START: Concatenate barcode metadata files ------' 1>&2
+        #echo '------ START: Concatenate barcode metadata files ------' 1>&2
         #head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
         #for i in range(length(~{barcode_metadata}));
         #do
@@ -61,7 +61,7 @@ task qc_merged_atac {
         #done
 
         # Make TSV containing dataset names for each barcode
-        echo '------ START: Making dataset barcodes tsv ------' 1>&2
+        #echo '------ START: Making dataset barcodes tsv ------' 1>&2
         #echo 'barcode\tdataset\n' > ~{dataset_barcodes}
         #for i in range(length(~{barcode_metadata}));
         #do
@@ -70,11 +70,11 @@ task qc_merged_atac {
 
         # Insert size plot bulk
         #gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
-        echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
+        #echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
         #time python3 $(which plot_insert_size_hist.py) insert_sizes ~{prefix} ~{insert_size_hist}
 
         # Make QC plots
-        echo '------ START: Generate QC plots ------' 1>&2
+        #echo '------ START: Generate QC plots ------' 1>&2
         #time Rscript $(which atac_qc_plots.R) \
         #    ~{merged_barcode_metadata} \
         #    ~{fragment_min_cutoff} \
