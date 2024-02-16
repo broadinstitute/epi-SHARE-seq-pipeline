@@ -69,18 +69,18 @@ task qc_merged_atac {
         #done
 
         # Insert size plot bulk
-        gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
+        #gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
         echo '------ START: Generate TSS enrichment plot for bulk ------' 1>&2
-        time python3 $(which plot_insert_size_hist.py) insert_sizes ~{prefix} ~{insert_size_hist}
+        #time python3 $(which plot_insert_size_hist.py) insert_sizes ~{prefix} ~{insert_size_hist}
 
         # Make QC plots
         echo '------ START: Generate QC plots ------' 1>&2
-        time Rscript $(which atac_qc_plots.R) \
-            ~{merged_barcode_metadata} \
-            ~{fragment_min_cutoff} \
-            ~{hist_max_fragment} \
-            ~{fragment_barcode_rank_plot} \
-            ~{fragment_histogram}
+        #time Rscript $(which atac_qc_plots.R) \
+        #    ~{merged_barcode_metadata} \
+        #    ~{fragment_min_cutoff} \
+        #    ~{hist_max_fragment} \
+        #    ~{fragment_barcode_rank_plot} \
+        #    ~{fragment_histogram}
     >>>
 
     output {
