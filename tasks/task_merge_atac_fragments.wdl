@@ -39,16 +39,16 @@ task merge_fragments {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
         # decompress fragment files, merge sort, bgzip
-        pigz -p ~{cpus} -dc ~{sep=' ' fragments} | cat | sort -k1,1 -k2,2n --parallel=~{cpus} | bgzip -c -@ ~{cpus} > ~{output_file}
+        pigz -p ~{cpus} -dc ~{sep=' ' fragments} | cat | sort -k1,1 -k2,2n --parallel=~{cpus} | bgzip -c -@ ~{cpus} > ~{merged_fragments}
 
         # tabix index
-        tabix --zero-based -p bed ~{output_file} 
+        tabix --zero-based -p bed ~{merged_fragments} 
     >>>
 
     output {
         File merged_fragments = merged_fragments
         File merged_fragments_index = merged_fragments_index
-        File monitor_log = monitor.log
+        File monitor_log = monitor_log
     }
 
     runtime {
