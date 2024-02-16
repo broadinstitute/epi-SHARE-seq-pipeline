@@ -36,6 +36,7 @@ RUN apt-get update -qq && \
     libxml2-dev \
     libxt-dev \
     libgeos-dev \
+    libglpk-dev \
     meson \
     pkg-config \
     python3 \
@@ -56,7 +57,6 @@ RUN R --no-echo --no-restore --no-save -e "remotes::install_version('Seurat', ve
 RUN R --no-echo --no-restore --no-save -e "BiocManager::install(c('rhdf5'), update=F, ask=F)"
 
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
-
 
 RUN python3 -m pip install --break-system-packages jupyter papermill
 
