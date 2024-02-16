@@ -28,7 +28,7 @@ task merge_fragments {
     # Determining disk type based on the size of disk.
     String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
 
-    String output_file = '${default='aggregated' prefix}.fragments.tsv.gz'
+    String output_file = '~{prefix}.fragments.tsv.gz'
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -51,8 +51,8 @@ task merge_fragments {
 
     runtime {
         cpu: cpus
-        disks: "local-disk ${disk_gb} ${disk_type}"
-        docker : "${docker_image}"
+        disks: 'local-disk ~{disk_gb} ~{disk_type}'
+        docker: '~{docker_image}'
     }
 
     parameter_meta {
