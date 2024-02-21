@@ -127,7 +127,7 @@ task qc_atac {
         /usr/local/bin/bedClip -verbose=2 promoter.bed ~{chrom_sizes} promoter.clipped.bed 2> promoter.bedClip.log.txt
         echo '------ Sort fragments ------' 1>&2
         mkdir tmpsort
-        gzip -dc no-singleton.bed.gz | sort -k4,4 -k1,1 -k2,2n -S 2G --parallel=8 -T tmpsort | gzip -c > no-singleton.sorted.bed.gz
+        gzip -dc no-singleton.bed.gz | sort -k4,4 -S 2G --parallel=8 -T tmpsort | pigz -p 4 -c > no-singleton.sorted.bed.gz
         echo '------ Snapatac2 ------' 1>&2
         time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.sorted.bed.gz gtf.gz ~{chrom_sizes} tss.extended.clipped.bed promoter.clipped.bed ~{fragment_min_snapatac_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png" "~{prefix}.atac.qc.~{genome_name}.chromosome_counts_matrix.npz"         # Insert size plot bulk
         echo '------ START: Generate Insert size plot ------' 1>&2

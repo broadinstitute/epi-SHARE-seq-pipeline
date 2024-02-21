@@ -14,6 +14,8 @@ min_frag_cutoff = int(sys.argv[6])
 metrics_output_file = sys.argv[7]
 tsse_output_file = sys.argv[8]
 fragments_per_chromosome_file = sys.argv[9]
+snap_h5ad = sys.argv[10]
+prefix = sys.argv[11]
 
 
 chrom_sizes_dict = defaultdict(int)
@@ -27,6 +29,7 @@ print('Running import', file=sys.stderr)
 data = snap.pp.import_data(
     fragment_file=fragment_file,
     chrom_sizes=chrom_sizes_dict,
+    filename=snap_h5ad,
     sorted_by_barcode=True,
     min_num_fragments=min_frag_cutoff,
     shift_left=0,
@@ -41,6 +44,22 @@ snap.metrics.frip(data, {"tss_frac": tss_bed_file, "promoter_frac": promoter_bed
 print('save metrics', file=sys.stderr)
 data.obs.to_csv(metrics_output_file, index_label="barcode", sep="\t")
 
+data.obs["sample"] = prefix
+
 snap.pp.filter_cells(data, min_counts=np.quantile(data.obs["n_fragment"], q=[.9])[0], min_tsse=0)
 cell_chr_mat = snap.pp.add_tile_matrix(data, bin_size=1000000000, inplace=False)
-scipy.sparse.save_npz(file=fragments_per_chromosome_file, cell_chr_mat.X)
+cell_chr_mat.write(fragments_per_chromosome_file,  as_dense="X")
+
+snap.ex.export_coverage(data,
+                        groupby="sample",
+                        bin_size=25,
+                        blacklist=None,
+                        normalization='CPM',
+                        min_frag_length=None,
+                        max_frag_length=2000,
+                        out_dir='./', prefix=prefix,
+                        suffix='.bw',
+                        tempdir='./',
+                        n_jobs=8)
+
+data.close()
