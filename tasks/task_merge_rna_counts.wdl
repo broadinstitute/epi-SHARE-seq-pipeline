@@ -15,7 +15,7 @@ task merge_counts {
         Array[String] dataset_names
         Array[String]? subpool_names = []
         String? genome_name
-        String? gene_naming
+        String? gene_naming = 'gene_name'
         String? prefix
 
         String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_generate_h5:dev'
@@ -51,10 +51,10 @@ task merge_counts {
             ~{prefix} \
             ~{merged_h5} \
             ~{dataset_barcodes} \
+            ~{gene_naming} \
             --tar_files ~{sep=' ' tars} \
             --datasets ~{sep=' ' dataset_names} \
-            ~{if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''} \
-            ~{if ~{gene_naming}'=='ensembl' then '--ensembl' else ''} \
+            ~{if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''}
 
         tar -cvf ~{merged_tar} ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
