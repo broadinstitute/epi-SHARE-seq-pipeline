@@ -55,10 +55,7 @@ task qc_merged_atac {
         # Concatenate barcode metadata files
         echo "------ START: Concatenate barcode metadata files ------" 1>&2
         head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
-        for i in $(seq 0 ~{n_datasets});
-        do
-            tail -n +2 ${barcode_metadata[$i]} >> ~{merged_barcode_metadata}
-        done
+        awk 'FNR>1{print $0}' ~{sep=" " barcode_metadata} >> ~{merged_barcode_metadata}
 
         # Make TSV containing dataset names for each barcode
         echo "------ START: Making dataset barcodes tsv ------" 1>&2
