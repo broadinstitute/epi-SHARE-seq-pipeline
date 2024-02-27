@@ -54,7 +54,8 @@ task merge_counts {
             ~{gene_naming} \
             --tar_files ~{sep=' ' tars} \
             --datasets ~{sep=' ' dataset_names} \
-            ~{if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''}
+            --subpools ~{sep=' ' subpool_names}
+            # ~{if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''}
 
         tar -cvf ~{merged_tar} ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
