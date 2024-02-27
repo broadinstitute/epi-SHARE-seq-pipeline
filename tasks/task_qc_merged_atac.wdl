@@ -41,7 +41,6 @@ task qc_merged_atac {
     # Determining disk type base on the size of disk.
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    Int n_datasets = length(barcode_metadata)
     String merged_barcode_metadata = "~{prefix}.atac.qc.~{genome_name}.merged.metadata.tsv"
     String dataset_barcodes = "~{prefix}.atac.qc.~{genome_name}.dataset.barcodes.tsv"
     String insert_size_hist = "~{prefix}.atac.qc.~{genome_name}.hist.png"
@@ -63,11 +62,9 @@ task qc_merged_atac {
 
         # Make TSV containing dataset names for each barcode
         echo "------ START: Making dataset barcodes tsv ------" 1>&2
+        echo ~{sep=" " dataset_names} | sed 's/ /\n/g'  > dataset_names
         echo "barcode\tdataset\n" > ~{dataset_barcodes}
-        for i in $(seq 0 ~{n_datasets});
-        do
-            cut -f1 ${barcode_metadata[$i]} | awk -v dataset="${dataset_names[$i]}" -v OFS="\t" 'NR>1{print $0, dataset}' >> ~{dataset_barcodes}
-        done
+        awk 'BEGIN{FNUM=0} NR==FNR{name[NR+1]=$1} FNR==1{FNUM++} FNUM>1{print $1,name[FNUM]}' dataset_names ~{sep=" " barcode_metadata} >> ~{dataset_barcodes}
 
         # Insert size plot bulk
         gzip -dc ~{fragments} | awk '{print $3-$2}' > insert_sizes
