@@ -39,8 +39,6 @@ task merge_counts {
     String merged_tar = '~{prefix}.rna.~{genome_name}.merged.tar'
     String dataset_barcodes = '~{prefix}.rna.~{genome_name}.dataset.barcodes.tsv'
 
-    String ensembl_option = if '~{gene_naming}'=='ensembl' then '--ensembl' else ''
-    String subpool_option = if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''
     String monitor_log = 'monitor.log'
 
     command <<<
@@ -55,8 +53,8 @@ task merge_counts {
             ~{dataset_barcodes} \
             --tar_files ~{sep=' ' tars} \
             --datasets ~{sep=' ' dataset_names} \
-            ~{subpool_option} \
-            ~{ensembl_option} \
+            ~{if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''} \
+            ~{if ~{gene_naming}'=='ensembl' then '--ensembl' else ''} \
 
         tar -cvf ~{merged_tar} ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
