@@ -11,9 +11,7 @@ chrom_sizes = sys.argv[3]
 tss_bed_file = sys.argv[4]
 promoter_bed_file = sys.argv[5]
 min_frag_cutoff = int(sys.argv[6])
-metrics_output_file = sys.argv[7]
-tsse_output_file = sys.argv[8]
-fragments_per_chromosome_file = sys.argv[9]
+
 snap_h5ad = sys.argv[10]
 prefix = sys.argv[11]
 
@@ -29,26 +27,41 @@ print('Running import', file=sys.stderr)
 data = snap.pp.import_data(
     fragment_file=fragment_file,
     chrom_sizes=chrom_sizes_dict,
-    filename=snap_h5ad,
+    filename=f"{prefix}.snapatac.h5ad",
     sorted_by_barcode=True,
-    min_num_fragments=min_frag_cutoff,
+    min_num_fragments=100,
     shift_left=0,
     shift_right=1
 )
 print('TSSe', file=sys.stderr)
 snap.metrics.tsse(data, compressed_gtf_file)
+
 print('Plot TSSe', file=sys.stderr)
-snap.pl.tsse(data, min_fragment=min_frag_cutoff, width=800, height=1000, show=False, out_file=tsse_output_file)
+snap.pl.tsse(data, min_fragment=min_frag_cutoff, width=800, height=1000, show=False, out_file=f"{prefix}.cutoff{min_frag_cutoff}.tsse.png")
+
+print('Plot TSSe strict', file=sys.stderr)
+snap.pl.tsse(data, min_fragment=500, width=800, height=1000, show=False, out_file=f"{prefix}.cutoff500.tsse.png")
+
+print('Plot Insert size distribution', file=sys.stderr)
+snap.pl.frag_size_distr(data, width=800, height=1000, show=False, out_file=f"{prefix}.cutoff{min_frag_cutoff}.insertsize.distribution.png")
+
 print('Fraction in promoter', file=sys.stderr)
 snap.metrics.frip(data, {"tss_frac": tss_bed_file, "promoter_frac": promoter_bed_file})
+
+
+# Plot frac_mito vs frac_dup
+# create usable reads chromap
+# create mapped reads
+# Frac dup after 500 
+
 print('save metrics', file=sys.stderr)
-data.obs.to_csv(metrics_output_file, index_label="barcode", sep="\t")
+data.obs.to_csv(f"{prefix}.barcode_stats.tsv", index_label="barcode", sep="\t")
 
 data.obs["sample"] = prefix
 
-snap.pp.filter_cells(data, min_counts=np.quantile(data.obs["n_fragment"], q=[.9])[0], min_tsse=0)
+snap.pp.filter_cells(data, min_counts=500, min_tsse=0)
 cell_chr_mat = snap.pp.add_tile_matrix(data, bin_size=1000000000, inplace=False)
-cell_chr_mat.write(fragments_per_chromosome_file,  as_dense="X")
+cell_chr_mat.write(f"{prefix}.chromosome_counts_matrix.npz",  as_dense="X")
 
 snap.ex.export_coverage(data,
                         groupby="sample",

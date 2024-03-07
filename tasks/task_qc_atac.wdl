@@ -21,11 +21,11 @@ task qc_atac {
         File? chrom_sizes
         File? tss
         File? barcode_conversion_dict
-
-        Int? fragment_min_cutoff = 1
+        
         Int? hist_max_fragment = 5000
         Int? hist_min_fragment = 100
-        Int? fragment_min_snapatac_cutoff = 100
+        Int? fragment_min_snapatac_cutoff = 500
+        Int? tsse_snapatac_cutoff = 10
         File? gtf
         String? genome_name
         String? prefix
@@ -94,15 +94,7 @@ task qc_atac {
         fi
 
         echo '------ Number of barcodes BEFORE filtering------' 1>&2
-        wc -l temp_summary
-
-        echo '------ Filtering fragments ------' 1>&2
-        time awk -v threshold=~{fragment_min_cutoff} -v FS='[,|\t]' 'NR==FNR && ($2-$3-$4-$5)>threshold {Arr[$1]++;next} Arr[$4] {print $0}' temp_summary <( zcat in.fragments.tsv.gz )  | bgzip -l 5 -@ ~{cpus} -c > no-singleton.bed.gz
-        
-        echo '------ Number of barcodes AFTER filtering------' 1>&2
-        cat temp_summary | grep -v barcode | awk -v FS="," -v threshold=~{fragment_min_cutoff} '($2-$3-$4-$5)>threshold' | wc -l
-        
-        tabix --zero-based --preset bed no-singleton.bed.gz
+        wc -l temp_summary > number_raw_barcodes.txt
 
         cut -f1 ~{chrom_sizes} > list-names-chromosomes
         grep -wFf list-names-chromosomes ~{tss} > filtered.tss.bed
@@ -114,24 +106,29 @@ task qc_atac {
             -p ~{cpus} \
             --regions filtered.tss.bed \
             --prefix "~{prefix}.atac.qc.~{genome_name}" \
-            no-singleton.bed.gz
+            in.fragments.tsv.gz
 
         echo '------ START: Compute TSS enrichment snapatac2 ------' 1>&2
         echo '------ Extend TSS ------' 1>&2
         awk -v OFS="\t" '{if($2-150<0){$2=0}else{$2=$2-150};$3=$3+150; print $0}' filtered.tss.bed > tss.extended.bed
-        echo '------ BedClip Extend TSS ------' 1>&2
         /usr/local/bin/bedClip -verbose=2 tss.extended.bed ~{chrom_sizes} tss.extended.clipped.bed 2> tss.bedClip.log.txt
         echo '------ Promoter ------' 1>&2
         awk -v OFS="\t" '{if($2-2000<0){$2=0}else{$2=$2-2000};$3=$3+2000; print $0}' filtered.tss.bed > promoter.bed
-        echo '------ BedClip promoter ------' 1>&2
         /usr/local/bin/bedClip -verbose=2 promoter.bed ~{chrom_sizes} promoter.clipped.bed 2> promoter.bedClip.log.txt
-        echo '------ Sort fragments ------' 1>&2
-        mkdir tmpsort
-        gzip -dc no-singleton.bed.gz | sort -k4,4 -S 2G --parallel=8 -T tmpsort | pigz -p 4 -c > no-singleton.sorted.bed.gz
+        
         echo '------ Snapatac2 ------' 1>&2
-        time python3 /usr/local/bin/snapatac2-tss-enrichment.py no-singleton.sorted.bed.gz gtf.gz ~{chrom_sizes} tss.extended.clipped.bed promoter.clipped.bed ~{fragment_min_snapatac_cutoff} "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" "~{prefix}.atac.qc.~{genome_name}.tss_frags.png" "~{prefix}.atac.qc.~{genome_name}.chromosome_counts_matrix.npz"         # Insert size plot bulk
+        time python3 /usr/local/bin/snapatac2-tss-enrichment.py in.fragments.tsv.gz \
+                                                                gtf.gz \
+                                                                ~{chrom_sizes} \
+                                                                tss.extended.clipped.bed \
+                                                                promoter.clipped.bed \
+                                                                ~{fragment_min_snapatac_cutoff} \
+                                                                "~{prefix}.atac.qc.~{genome_name}.tss_enrichment_barcode_stats.tsv" \
+                                                                "~{prefix}.atac.qc.~{genome_name}.tss_frags.png" "~{prefix}.atac.qc.~{genome_name}.chromosome_counts_matrix.npz"
+                                                                         # Insert size plot bulk
+        
+        
         echo '------ START: Generate Insert size plot ------' 1>&2
-
         echo "insert_size" > ~{hist_log}
         time awk '{print $3-$2}' <(zcat in.fragments.tsv.gz ) | sort --parallel 4 -n | uniq -c | awk -v OFS="\t" '{print $2,$1}' >> ~{hist_log}
         time python3 $(which plot_insert_size_hist.py) ~{hist_log} ~{prefix} ~{hist_log_png}
@@ -153,14 +150,12 @@ task qc_atac {
         File atac_qc_final_hist_png = hist_log_png
         File atac_qc_final_hist = hist_log
 
-        File temp_frag = "no-singleton.bed.gz"
-        
-        File temp_summary = "temp_summary"
+        Int atac_qc_raw_barcode_number = read_int("number_raw_barcodes.txt")
+        Float atac_qc_bulk_tsse = read_float("${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt")
 
         File atac_qc_snapatac2_barcode_metadata = "~{final_snapatac2_barcode_metadata}"
         File atac_qc_chromap_barcode_metadata = "~{final_chromap_barcode_metadata}"
         File atac_qc_tss_enrichment_plot = "${prefix}.atac.qc.${genome_name}.tss_enrichment_bulk.png"
-        File atac_qc_tss_enrichment_score_bulk = "${prefix}.atac.qc.${genome_name}.tss_score_bulk.txt"
         File atac_qc_counts_per_chromosome = "~{prefix}.atac.qc.~{genome_name}.chromosome_counts_matrix.npz"
 
         File atac_qc_tsse_fragments_plot = "~{prefix}.atac.qc.~{genome_name}.tss_frags.png"
