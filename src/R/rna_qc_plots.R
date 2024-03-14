@@ -27,7 +27,8 @@ barcode_metadata <- read.table(barcode_metadata_file, header=T)
 ## Get plot inputs
 
 # Impose UMI cutoff, sort in decreasing order, assign rank
-umi_filtered <- barcode_metadata$unique_umi[barcode_metadata$unique_umi >= umi_min_cutoff]
+umi <- barcode_metadata$unique_umi
+umi_filtered <- umi[(umi >= umi_min_cutoff) & (umi > 0)]
 umi_filtered_sort <- sort(umi_filtered, decreasing=T)
 umi_rank <- 1:length(umi_filtered_sort)
 
@@ -50,7 +51,8 @@ if (length(umi_points) > 0) { # Elbow found in first plot
 }
 
 # Impose gene cutoff, sort in decreasing order, assign rank
-gene_filtered <- barcode_metadata$genes[barcode_metadata$genes >= gene_min_cutoff]
+genes <- barcode_metadata$genes
+gene_filtered <- genes[(genes >= gene_min_cutoff) & (genes > 0)]
 gene_filtered_sort <- sort(gene_filtered, decreasing=T)
 gene_rank <- 1:length(gene_filtered_sort)
 
