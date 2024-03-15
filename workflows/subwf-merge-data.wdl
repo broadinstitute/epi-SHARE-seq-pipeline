@@ -1,9 +1,10 @@
 version 1.0
  
-import "../tasks/task_qc_merged_rna.wdl" as task_qc_merged_rna
 import "../tasks/task_merge_rna_counts.wdl" as task_merge_rna_counts
 import "../tasks/task_merge_atac_fragments.wdl" as task_merge_atac_fragments
+import "../tasks/task_qc_merged_rna.wdl" as task_qc_merged_rna
 import "../tasks/task_qc_merged_atac.wdl" as task_qc_merged_atac
+import "../tasks/task_make_track.wdl" as task_make_track
 import "../tasks/task_seurat.wdl" as task_seurat 
 import "../tasks/task_archr.wdl" as task_archr
 import "../tasks/task_joint_qc.wdl" as task_joint_qc
@@ -60,6 +61,14 @@ workflow merge {
         Float? qc_merged_atac_memory_factor
         String? qc_merged_atac_docker_image
 
+        # ATAC make track inputs
+        Boolean run_make_track = true
+        File? chrom_sizes
+        Int? make_track_cpus = 8
+        Float? make_track_disk_factor = 4
+        Float? make_track_memory_factor = 0.3
+        String? make_track_docker_image
+
         # Seurat inputs
         Boolean run_seurat = true 
         Int? seurat_min_features
@@ -94,6 +103,7 @@ workflow merge {
     String genome_name_ =  select_first([genome_name, annotations["genome_name"]])
     File tss_bed_ = select_first([tss_bed, annotations["tss"]])
     File peak_set_ = select_first([peak_set, annotations["ccre"]])
+    File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
 
     if (aggregate_rna) {
         call task_merge_rna_counts.merge_counts as merge_counts {
@@ -173,6 +183,20 @@ workflow merge {
             }
         }
 
+        if (run_make_track) {
+            call task_make_track.make_track as track {
+                input:
+                    fragments = merge_fragments.merged_fragments,
+                    chrom_sizes = chrom_sizes_,
+                    genome_name = genome_name,
+                    prefix = prefix,
+                    cpus = make_track_cpus,
+                    disk_factor = make_track_disk_factor,
+                    docker_image = make_track_docker_image,
+                    memory_factor = make_track_memory_factor
+            }
+        }
+
         if (run_archr) {
             call task_archr.archr as archr {
                 input:
@@ -218,29 +242,32 @@ workflow merge {
     }
 
     output {
-        File? merged_h5 = merge_counts.merged_h5
-        File? merged_rna_barcode_metadata = qc_merged_rna.rna_merged_barcode_metadata
- 
-        File? merged_fragments = merge_fragments.merged_fragments
-        File? merged_fragments_index = merge_fragments.merged_fragments_index
+        # RNA outputs
+        File? rna_merged_h5 = merge_counts.merged_h5
+        File? rna_merged_barcode_metadata = qc_merged_rna.rna_merged_barcode_metadata
+        File? rna_seurat_notebook_output = seurat.notebook_output
+        File? rna_seurat_obj = seurat.seurat_filtered_obj
+        File? rna_seurat_plots_zip = seurat.plots_zip
 
-        File? merged_atac_barcode_metadata = qc_merged_atac.atac_merged_barcode_metadata
-
-        File? seurat_notebook_output = seurat.notebook_output
-        File? seurat_obj = seurat.seurat_filtered_obj
-        File? seurat_plots_zip = seurat.plots_zip
-
+        # ATAC outputs
+        File? atac_merged_fragments = merge_fragments.merged_fragments
+        File? atac_merged_fragments_index = merge_fragments.merged_fragments_index
+        File? atac_merged_barcode_metadata = qc_merged_atac.atac_merged_barcode_metadata
+        File? atac_track_bigwig = make_track.atac_track_bigwig
         File? archr_notebook_output = archr.notebook_output
         File? archr_arrow = archr.archr_arrow
         File? atac_archr_obj = archr.archr_raw_obj
         File? atac_archr_plots_zip = archr.plots_zip
 
-        File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
-
+        # DORCS outputs
         File? dorcs_notebook_output = dorcs.dorcs_notebook_output
         File? dorcs_genes_summary = dorcs.dorcs_genes_summary
         File? dorcs_regions_summary = dorcs.dorcs_regions_summary
 
+        # Joint outputs
+        File? joint_barcode_metadata = joint_qc.joint_barcode_metadata
+
+        # Report
         File? html_report = html_report.html_report_file
     }
 }   
