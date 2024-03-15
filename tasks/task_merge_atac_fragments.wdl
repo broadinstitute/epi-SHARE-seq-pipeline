@@ -15,23 +15,23 @@ task merge_fragments {
         String? prefix
         String? genome_name
 
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_merge_atac_fragments:dev'
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/task_merge_atac_fragments:dev"
         Float? disk_factor = 2
         Int? cpus = 8
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(fragments, 'G')
+    Float input_file_size_gb = size(fragments, "G")
 
     # Determining disk size based on the size of the input files.
     Int disk_gb = round(20 + disk_factor * input_file_size_gb)
 
     # Determining disk type based on the size of disk.
-    String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String merged_fragments = '~{prefix}.~{genome_name}.fragments.tsv.gz'
-    String merged_fragments_index = '~{prefix}.~{genome_name}.fragments.tsv.gz.tbi'
-    String monitor_log = 'monitor.log'
+    String merged_fragments = "~{prefix}.~{genome_name}.fragments.tsv.gz"
+    String merged_fragments_index = "~{prefix}.~{genome_name}.fragments.tsv.gz.tbi"
+    String monitor_log = "monitor.log"
 
     command <<<
         set -e
@@ -39,7 +39,7 @@ task merge_fragments {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
         
         # decompress fragment files, merge sort, bgzip
-        pigz -p ~{cpus} -dc ~{sep=' ' fragments} | cat | sort -k1,1 -k2,2n --parallel=~{cpus} | bgzip -c -@ ~{cpus} > ~{merged_fragments}
+        pigz -p ~{cpus} -dc ~{sep=" " fragments} | cat | sort -k1,1 -k2,2n --parallel=~{cpus} | bgzip -c -@ ~{cpus} > ~{merged_fragments}
 
         # tabix index
         tabix --zero-based -p bed ~{merged_fragments} 
@@ -53,20 +53,20 @@ task merge_fragments {
 
     runtime {
         cpu: cpus
-        disks: 'local-disk ~{disk_gb} ~{disk_type}'
-        docker: '~{docker_image}'
+        disks: "local-disk ~{disk_gb} ~{disk_type}"
+        docker: "~{docker_image}"
     }
 
     parameter_meta {
         fragments: {
-                description: 'Fragment files',
-                help: 'Array of fragment files, one per entity to be merged.',
-                example: ['first.fragment.file.tsv.gz', 'second.fragment.file.tsv.gz']
+                description: "Fragment files",
+                help: "Array of fragment files, one per entity to be merged.",
+                example: ["first.fragment.file.tsv.gz", "second.fragment.file.tsv.gz"]
             }
         prefix: {
-                description: 'Prefix for output files',
-                help: 'Prefix that will be used to name the output files',
-                example: 'MyExperiment'
+                description: "Prefix for output files",
+                help: "Prefix that will be used to name the output files",
+                example: "MyExperiment"
             }
     }
 }

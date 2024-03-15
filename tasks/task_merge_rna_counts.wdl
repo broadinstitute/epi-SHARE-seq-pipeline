@@ -15,16 +15,16 @@ task merge_counts {
         Array[String] dataset_names
         Array[String]? subpool_names = []
         String? genome_name
-        String? gene_naming = 'gene_name'
+        String? gene_naming = "gene_name"
         String? prefix
 
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_generate_h5:dev'
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/task_generate_h5:dev"
         Float? disk_factor = 2.0
         Float? memory_factor = 50.0
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(tars, 'G')
+    Float input_file_size_gb = size(tars, "G")
 
     # Determining memory size based on the size of the input files.
     Float mem_gb = 5.0 + memory_factor * input_file_size_gb
@@ -33,13 +33,13 @@ task merge_counts {
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
 
     # Determining disk type based on the size of disk.
-    String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String merged_h5 = '~{prefix}.rna.~{genome_name}.merged.h5'
-    String merged_tar = '~{prefix}.rna.~{genome_name}.merged.tar'
-    String dataset_barcodes = '~{prefix}.rna.~{genome_name}.dataset.barcodes.tsv'
+    String merged_h5 = "~{prefix}.rna.~{genome_name}.merged.h5"
+    String merged_tar = "~{prefix}.rna.~{genome_name}.merged.tar"
+    String dataset_barcodes = "~{prefix}.rna.~{genome_name}.dataset.barcodes.tsv"
 
-    String monitor_log = 'monitor.log'
+    String monitor_log = "monitor.log"
 
     command <<<
         set -e
@@ -52,10 +52,10 @@ task merge_counts {
             ~{merged_h5} \
             ~{dataset_barcodes} \
             ~{gene_naming} \
-            --tar_files ~{sep=' ' tars} \
-            --datasets ~{sep=' ' dataset_names} \
-            --subpools ~{sep=' ' subpool_names}
-            # ~{if defined(subpool_names) then '--subpools ~{sep=' ' subpool_names}' else ''}
+            --tar_files ~{sep=" " tars} \
+            --datasets ~{sep=" " dataset_names} \
+            --subpools ~{sep=" " subpool_names}
+            # ~{if defined(subpool_names) then "--subpools ~{sep=" " subpool_names}" else ""}
 
         tar -cvf ~{merged_tar} ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
@@ -75,24 +75,24 @@ task merge_counts {
 
     parameter_meta {
         tars: {
-                description: 'STARsolo output tar.gz files',
-                help: 'Array of tar.gz files containing raw matrix, features, and barcodes files from STARsolo, one per entity to be merged.',
-                example: ['first.raw.tar.gz', 'second.raw.tar.gz']
+                description: "STARsolo output tar.gz files",
+                help: "Array of tar.gz files containing raw matrix, features, and barcodes files from STARsolo, one per entity to be merged.",
+                example: ["first.raw.tar.gz", "second.raw.tar.gz"]
             }
         subpool_names: {
-                description: 'Cellular sub-pool names',
-                help: 'Array of cellular sub-pool names, one per entity to be merged. Sub-pool names will be appended to barcodes.',
-                example: ['SS-PKR-1', 'SS-PKR-2']
+                description: "Cellular sub-pool names",
+                help: "Array of cellular sub-pool names, one per entity to be merged. Sub-pool names will be appended to barcodes.",
+                example: ["SS-PKR-1", "SS-PKR-2"]
             }
         gene_naming: {
-                description: 'Gene naming convention',
-                help: 'Convention for gene naming in h5 matrix; either "gene_name" (default) or "ensembl".',
-                example: ['gene_name', 'ensembl']
+                description: "Gene naming convention",
+                help: "Convention for gene naming in h5 matrix; either 'gene_name' (default) or 'ensembl'.",
+                example: ["gene_name", "ensembl"]
             }
         prefix: {
-                description: 'Prefix for output files',
-                help: 'Prefix that will be used to name the output files',
-                example: 'MyExperiment'
+                description: "Prefix for output files",
+                help: "Prefix that will be used to name the output files",
+                example: "MyExperiment"
             }
     }
 }
