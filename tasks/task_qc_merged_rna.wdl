@@ -23,11 +23,11 @@ task qc_merged_rna {
         # Runtime
         Float? disk_factor = 10.0
         Float? memory_factor = 1.0
-        String? docker_image = 'us.gcr.io/buenrostro-share-seq/task_qc_rna:dev'
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_rna:dev"
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(barcode_metadata, 'G')
+    Float input_file_size_gb = size(barcode_metadata, "G")
 
     # Determining memory size based on the size of the input files.
     Float mem_gb = 4.0 + memory_factor * input_file_size_gb
@@ -36,14 +36,14 @@ task qc_merged_rna {
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     # Determining disk type based on the size of disk.
-    String disk_type = if disk_gb > 375 then 'SSD' else 'LOCAL'
+    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
-    String merged_barcode_metadata = '~{prefix}.qc.rna.~{genome_name}.barcode.metadata.tsv'
-    String umi_barcode_rank_plot = '~{prefix}.rna.qc.~{genome_name}.umi.barcode.rank.plot.png'
-    String gene_barcode_rank_plot = '~{prefix}.rna.qc.~{genome_name}.gene.barcode.rank.plot.png'
-    String gene_umi_scatter_plot = '~{prefix}.rna.qc.~{genome_name}.gene.umi.scatter.plot.png'
-    String umi_histogram_plot = '~{prefix}.rna.qc~{genome_name}.umi.histogram.png'
-    String monitor_log = 'monitor.log'
+    String merged_barcode_metadata = "~{prefix}.qc.rna.~{genome_name}.barcode.metadata.tsv"
+    String umi_barcode_rank_plot = "~{prefix}.rna.qc.~{genome_name}.umi.barcode.rank.plot.png"
+    String gene_barcode_rank_plot = "~{prefix}.rna.qc.~{genome_name}.gene.barcode.rank.plot.png"
+    String gene_umi_scatter_plot = "~{prefix}.rna.qc.~{genome_name}.gene.umi.scatter.plot.png"
+    String umi_histogram_plot = "~{prefix}.rna.qc~{genome_name}.umi.histogram.png"
+    String monitor_log = "monitor.log"
 
     command <<<
         set -e
@@ -51,15 +51,15 @@ task qc_merged_rna {
         bash $(which monitor_script.sh) 1>&2 &
 
         # Concatenate barcode metadata files
-        echo '------ START: Concatenate barcode metadata files ------' 1>&2
+        echo "------ START: Concatenate barcode metadata files ------" 1>&2
         head -n 1 ~{barcode_metadata[0]} > ~{merged_barcode_metadata}
-        for metadata in ~{sep=' ' barcode_metadata};
+        for metadata in ~{sep=" " barcode_metadata};
         do
             tail -n +2 $metadata >> ~{merged_barcode_metadata}
         done
 
         # Make QC plots
-        echo '------ START: Generate QC plots ------' 1>&2
+        echo "------ START: Generate QC plots ------" 1>&2
         Rscript $(which rna_qc_plots.R) \
             ~{merged_barcode_metadata} \
             ~{umi_min_cutoff} \
@@ -81,8 +81,8 @@ task qc_merged_rna {
     }
 
     runtime {
-        disks: 'local-disk ${disk_gb} ${disk_type}'
-        docker: '${docker_image}'
-        memory: '${mem_gb} GB'
+        disks: "local-disk ${disk_gb} ${disk_type}"
+        docker: "${docker_image}"
+        memory: "${mem_gb} GB"
     }
 }

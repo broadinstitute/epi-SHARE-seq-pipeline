@@ -22,12 +22,12 @@ workflow merge {
         File genome_tsv
         Array[String] dataset_names
         String? genome_name
-        String? prefix = 'merged'
+        String? prefix = "merged"
         
         # RNA merge counts inputs
         Array[File] tars
         Array[String]? subpool_names
-        String? gene_naming = 'gene_name'
+        String? gene_naming = "gene_name"
         Float? merge_counts_disk_factor
         Float? merge_counts_memory_factor
         String? merge_counts_docker_image

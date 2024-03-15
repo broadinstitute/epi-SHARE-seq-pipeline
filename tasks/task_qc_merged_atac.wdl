@@ -5,9 +5,9 @@ version 1.0
 
 task qc_merged_atac {
     meta {
-        version: "v0.1"
-        author: "Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard"
-        description: "Broad Institute of MIT and Harvard SHARE-seq pipeline: merged ATAC QC task"
+        version: 'v0.1'
+        author: 'Mei Knudson (mknudson@broadinstitute.org) at Broad Institute of MIT and Harvard'
+        description: 'Broad Institute of MIT and Harvard SHARE-seq pipeline: merged ATAC QC task'
     }
 
     input {
