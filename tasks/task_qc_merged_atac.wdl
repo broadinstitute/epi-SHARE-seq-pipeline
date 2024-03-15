@@ -79,11 +79,11 @@ task qc_merged_atac {
     >>>
 
     output {
-        File atac_merged_barcode_metadata = merged_barcode_metadata
-        File atac_dataset_barcodes = dataset_barcodes
-        File insert_size_hist = insert_size_hist
-        File? fragment_barcode_rank_plot = fragment_barcode_rank_plot
-        File? fragment_histogram = fragment_histogram
+        File atac_merged_barcode_metadata = ~{merged_barcode_metadata}
+        File atac_dataset_barcodes = ~{dataset_barcodes}
+        File insert_size_hist = ~{insert_size_hist}
+        File? fragment_barcode_rank_plot = ~{fragment_barcode_rank_plot}
+        File? fragment_histogram = ~{fragment_histogram}
     }
 
     runtime {
