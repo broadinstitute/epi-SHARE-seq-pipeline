@@ -253,7 +253,7 @@ workflow merge {
         File? atac_merged_fragments = merge_fragments.merged_fragments
         File? atac_merged_fragments_index = merge_fragments.merged_fragments_index
         File? atac_merged_barcode_metadata = qc_merged_atac.atac_merged_barcode_metadata
-        File? atac_track_bigwig = make_track.atac_track_bigwig
+        File? atac_track_bigwig = track.atac_track_bigwig
         File? archr_notebook_output = archr.notebook_output
         File? archr_arrow = archr.archr_arrow
         File? atac_archr_obj = archr.archr_raw_obj

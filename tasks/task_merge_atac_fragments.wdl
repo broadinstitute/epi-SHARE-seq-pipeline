@@ -46,9 +46,9 @@ task merge_fragments {
     >>>
 
     output {
-        File merged_fragments = ~{merged_fragments}
-        File merged_fragments_index = ~{merged_fragments_index}
-        File monitor_log = ~{monitor_log}
+        File merged_fragments = "~{merged_fragments}"
+        File merged_fragments_index = "~{merged_fragments_index}"
+        File monitor_log = "~{monitor_log}"
     }
 
     runtime {

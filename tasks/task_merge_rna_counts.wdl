@@ -38,6 +38,7 @@ task merge_counts {
     String merged_h5 = "~{prefix}.rna.~{genome_name}.merged.h5"
     String merged_tar = "~{prefix}.rna.~{genome_name}.merged.tar"
     String dataset_barcodes = "~{prefix}.rna.~{genome_name}.dataset.barcodes.tsv"
+    String ensembl_option = if "${gene_naming}"=="ensembl" then "--ensembl" else ""
 
     String monitor_log = "monitor.log"
 
@@ -53,18 +54,18 @@ task merge_counts {
             ~{dataset_barcodes} \
             ~{gene_naming} \
             --tar_files ~{sep=" " tars} \
+            --subpools ~{sep=" " subpool_names} \
             --datasets ~{sep=" " dataset_names} \
-            --subpools ~{sep=" " subpool_names}
-            # ~{if defined(subpool_names) then "--subpools ~{sep=" " subpool_names}" else ""}
+            ~{ensembl_option}
 
         tar -cvf ~{merged_tar} ~{prefix}.barcodes.tsv.gz ~{prefix}.features.tsv.gz ~{prefix}.matrix.mtx.gz
     >>>
 
     output {
-        File merged_h5 = ~{merged_h5}
-        File merged_tar = ~{merged_tar}
-        File dataset_barcodes = ~{dataset_barcodes}
-        File monitor_log = ~{monitor_log}
+        File merged_h5 = "~{merged_h5}"
+        File merged_tar = "~{merged_tar}"
+        File dataset_barcodes = "~{dataset_barcodes}"
+        File monitor_log = "~{monitor_log}"
     }
 
     runtime {
