@@ -61,10 +61,10 @@ task merge_counts {
     >>>
 
     output {
-        File merged_h5 = merged_h5
-        File merged_tar = merged_tar
-        File dataset_barcodes = dataset_barcodes
-        File monitor_log = monitor_log
+        File merged_h5 = ~{merged_h5}
+        File merged_tar = ~{merged_tar}
+        File dataset_barcodes = ~{dataset_barcodes}
+        File monitor_log = ~{monitor_log}
     }
 
     runtime {
