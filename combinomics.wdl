@@ -190,6 +190,7 @@ workflow combinomics {
         # Fastq after correction/trimming
         Array[File]? atac_read1_processed = atac.atac_read1_processed
         Array[File]? atac_read2_processed = atac.atac_read2_processed
+        Array[File]? atac_barcode_processed = atac.atac_barcode_processed
 
         Array[File]? rna_read1_processed = rna.rna_read1_processed
         Array[File]? rna_read2_processed = rna.rna_read2_processed

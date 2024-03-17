@@ -223,8 +223,10 @@ workflow wf_atac {
 
     output {
         # Correction/trimming
-        Array[File]? atac_read1_processed = if defined(trim.fastq_R1_trimmed) then trim.fastq_R1_trimmed else correct.corrected_fastq_R1
-        Array[File]? atac_read2_processed = if defined(trim.fastq_R1_trimmed) then trim.fastq_R2_trimmed else correct.corrected_fastq_R2
+        Array[File]? atac_read1_processed = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1])
+        Array[File]? atac_read2_processed = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2])
+        Array[File]? atac_barcode_processed = select_first([correct.corrected_fastq_barcode, fastq_barcode])
+
 
         # Align
         File? atac_alignment_log = align.atac_alignment_log
