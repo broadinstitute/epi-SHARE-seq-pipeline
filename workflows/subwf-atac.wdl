@@ -150,7 +150,7 @@ workflow wf_atac {
             subpool = subpool,
             multimappers = align_multimappers,
             #barcode_inclusion_list = whitelist,
-            barcode_inclusion_list = barcode_inclusion_list,
+            r1_barcode_inclusion_list = r1_barcode_inclusion_list,
             barcode_conversion_dict = barcode_conversion_dict,
             prefix = prefix,
             disk_factor = align_disk_factor,
