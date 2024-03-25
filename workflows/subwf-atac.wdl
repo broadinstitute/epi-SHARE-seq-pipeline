@@ -50,6 +50,9 @@ workflow wf_atac {
         Array[File] fastq_barcode
         Int? align_multimappers
         File reference_fasta
+        File? r1_barcode_inclusion_list
+        File? r2_barcode_inclusion_list
+        File? r3_barcode_inclusion_list
         Boolean? remove_pcr_duplicates = true
         Boolean? remove_pcr_duplicates_at_cell_level = true
         Boolean? Tn5_shift = true
@@ -149,6 +152,9 @@ workflow wf_atac {
             subpool = subpool,
             multimappers = align_multimappers,
             #barcode_inclusion_list = whitelist,
+            r1_barcode_inclusion_list = r1_barcode_inclusion_list,
+            r2_barcode_inclusion_list = r2_barcode_inclusion_list,
+            r3_barcode_inclusion_list = r3_barcode_inclusion_list,
             barcode_conversion_dict = barcode_conversion_dict,
             prefix = prefix,
             disk_factor = align_disk_factor,
