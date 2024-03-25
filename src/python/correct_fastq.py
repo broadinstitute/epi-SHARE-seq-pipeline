@@ -43,27 +43,24 @@ def get_barcodes(whitelist_file):
 def make_correction_counts_dict(sample_type):
     """
     Initialize a dictionary for counting cell barcode correction combinations.
-    Accepted combinations are those which contain no shifts, and those in which
-    a shift in one round is followed by the same shift in every subseqent round.
-    (ex. ELL ok, but ELE not ok)
-    Add key for counting nonmatches, and for polyG UMIs if RNA.
+
+    This function initializes a dictionary to count the different combinations of cell barcode corrections.
+    Accepted combinations are those which do not contain shifts.
+    The dictionary also contains a key for counting non-matches and, if sample_type is "RNA", a key for counting polyG UMIs.
+
+    Args:
+        sample_type (str): The type of sample. If "RNA", an additional key for counting polyG UMIs will be added.
+
+    Returns:
+        dict: A dictionary with keys representing different correction combinations and their counts.
+            The dictionary also contains a key for counting non-matches and, if sample_type is "RNA", a key for counting polyG UMIs.
     """
     cellbarcode_correction_counts = {}
-    correction_types = ["E", "M", "R", "L"]  # exact, mismatch, right shift, left shift
+    correction_types = ["E", "M"]  # exact, mismatch, right shift, left shift
     correction_combos = [c1+c2+c3 for c1 in correction_types for c2 in correction_types for c3 in correction_types]
 
     for combo in correction_combos:
-        valid = True
-        r_index = combo.find("R")
-        l_index = combo.find("L")
-        if r_index != -1:  # if R in combo, rest of combo must also be R
-            if set(combo[r_index:]) != {"R"}:
-                valid = False
-        if l_index != -1:  # if L in combo, rest of combo must also be L
-            if set(combo[l_index:]) != {"L"}:
-                valid = False
-        if valid:
-            cellbarcode_correction_counts[combo] = 0
+        cellbarcode_correction_counts[combo] = 0
 
     cellbarcode_correction_counts["nonmatch"] = 0
     if sample_type == "RNA":
@@ -186,7 +183,7 @@ def process_fastqs(input_read1_fastq_file,
                     buffer_counter += 1
 
                 # add to correction counts dictionary
-                #cellbarcode_correction_counts[c1+c2+c3] += 1
+                cellbarcode_correction_counts[c1+c2+c3] += 1
 
                 # write to corrected FASTQ files
                 if buffer_counter == 10000000:
@@ -197,9 +194,8 @@ def process_fastqs(input_read1_fastq_file,
                     barcode_out_writer.write("".join(buffer3))
                     buffer3.clear()
                     buffer_counter = 0
-
-            #else:
-                #cellbarcode_correction_counts["nonmatch"] += 1
+            else:
+                cellbarcode_correction_counts["nonmatch"] += 1
 
     if buffer_counter > 0:
         read1_out_writer.write("".join(buffer1))
@@ -211,10 +207,10 @@ def process_fastqs(input_read1_fastq_file,
         buffer_counter = 0
 
     # write QC stats
-    # with open(f"{prefix}_barcode_qc.txt", "w") as f:
-    #     f.write(f"\t{prefix}\n")
-    #     for k, v in cellbarcode_correction_counts.items():
-    #         f.write(f"{k}\t{v}\n")
+    with open(f"{prefix}_barcode_qc.txt", "w") as f:
+        f.write(f"\t{prefix}\n")
+        for k, v in cellbarcode_correction_counts.items():
+            f.write(f"{k}\t{v}\n")
 
 
 def main():
