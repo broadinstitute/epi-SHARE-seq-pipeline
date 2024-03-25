@@ -134,17 +134,17 @@ def process_fastqs(input_read1_fastq_file,
             read_2_barcode_quality = quality2[-99:]
             # extract 10bp sequence containing R1 barcode, 10bp sequence containing R2 barcode,
             # 9bp sequence containing R3 barcode, and corresponding quality strings
-            r1_str, r2_str, r3_str = read_2_barcode_sequence[14:24], read_2_barcode_sequence[52:62], read_2_barcode_sequence[90:99]
-            q1_str, q2_str, q3_str = read_2_barcode_quality[14:24], read_2_barcode_quality[52:62], read_2_barcode_quality[90:99]
+            r1_str, r2_str, r3_str = read_2_barcode_sequence[15:23], read_2_barcode_sequence[53:61], read_2_barcode_sequence[91:99]
+            q1_str, q2_str, q3_str = read_2_barcode_quality[15:23], read_2_barcode_quality[53:61], read_2_barcode_quality[91:99]
             # get corrected barcodes
             r1 = r2 = r3 = None
-            r1, q1, c1 = check_putative_barcode(r1_str, q1_str, r1_barcode_exact_dict, r1_barcode_mismatch_dict)
-            r2, q2, c2 = check_putative_barcode(r2_str, q2_str, r2_barcode_exact_dict, r2_barcode_mismatch_dict)
-            r3, q3, c3 = check_putative_barcode(r3_str, q3_str, r3_barcode_exact_dict, r3_barcode_mismatch_dict)
+            r1, c1 = check_putative_barcode(r1_str, r1_barcode_exact_dict, r1_barcode_mismatch_dict)
+            r2, c2 = check_putative_barcode(r2_str, r2_barcode_exact_dict, r2_barcode_mismatch_dict)
+            r3, c3 = check_putative_barcode(r3_str, r3_barcode_exact_dict, r3_barcode_mismatch_dict)
 
             # if corrected barcodes found and correction type is valid,
             # write to both read 1 and read 2 FASTQ files
-            if r1 and r2 and r3 and c1+c2+c3 in cellbarcode_correction_counts.keys():
+            if r1 and r2 and r3:
                 # correct FASTQ reads
                 if sample_type == "RNA":
                     # add corrected barcodes, PKR, and UMI to header; remove any information after a space
@@ -157,10 +157,10 @@ def process_fastqs(input_read1_fastq_file,
                     # or R1R2R3UMIread2 if paired-end RNA
                     if paired_rna:
                         corrected_sequence2 = r1 + r2 + r3 + sequence2[:-99]
-                        corrected_quality2 = q1 + q2 + q3 + quality2[:-99]
+                        corrected_quality2 = q1_str + q2_str + q3_str + quality2[:-99]
                     else:
                         corrected_sequence2 = r1 + r2 + r3 + sequence2[:10]
-                        corrected_quality2 = q1 + q2 + q3 + quality2[:10]
+                        corrected_quality2 = q1_str + q2_str + q3_str + quality2[:10]
                     corrected_read2 = f"{corrected_header}\n{corrected_sequence2}\n+\n{corrected_quality2}\n"
                     buffer2.append(corrected_read2)
                     buffer_counter += 1
@@ -180,13 +180,13 @@ def process_fastqs(input_read1_fastq_file,
                     buffer2.append(corrected_read2)
                     # add corrected barcode to buffer3 AKA fastq barcode
                     corrected_sequence3 = r1 + r2 + r3
-                    corrected_quality3 = q1 + q2 + q3
+                    corrected_quality3 = q1_str + q2_str + q3_str
                     corrected_read3 = f"{corrected_header}\n{corrected_sequence3}\n+\n{corrected_quality3}\n"
                     buffer3.append(corrected_read3)
                     buffer_counter += 1
 
                 # add to correction counts dictionary
-                cellbarcode_correction_counts[c1+c2+c3] += 1
+                #cellbarcode_correction_counts[c1+c2+c3] += 1
 
                 # write to corrected FASTQ files
                 if buffer_counter == 10000000:
@@ -198,8 +198,8 @@ def process_fastqs(input_read1_fastq_file,
                     buffer3.clear()
                     buffer_counter = 0
 
-            else:
-                cellbarcode_correction_counts["nonmatch"] += 1
+            #else:
+                #cellbarcode_correction_counts["nonmatch"] += 1
 
     if buffer_counter > 0:
         read1_out_writer.write("".join(buffer1))
@@ -211,10 +211,10 @@ def process_fastqs(input_read1_fastq_file,
         buffer_counter = 0
 
     # write QC stats
-    with open(f"{prefix}_barcode_qc.txt", "w") as f:
-        f.write(f"\t{prefix}\n")
-        for k, v in cellbarcode_correction_counts.items():
-            f.write(f"{k}\t{v}\n")
+    # with open(f"{prefix}_barcode_qc.txt", "w") as f:
+    #     f.write(f"\t{prefix}\n")
+    #     for k, v in cellbarcode_correction_counts.items():
+    #         f.write(f"{k}\t{v}\n")
 
 
 def main():
