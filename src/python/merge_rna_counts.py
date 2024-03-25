@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
 """
-Merge RNA count matrices
+Take multiple STARsolo mtx tar files and combine to create a merged h5 count matrix.
+Also produces a merged version of the STARsolo mtx tar files, as well as a TSV
+mapping barcodes to their dataset of origin.
 """
 
 import argparse
@@ -29,7 +31,7 @@ def get_split_lines(file_name, delimiter, skip=0):
     """
     Read file contents and yield generator with line entries
     """
-    opener = gzip.open if file_name.endswith('.gz') else open
+    opener = gzip.open if file_name.endswith(".gz") else open
     with opener(file_name, "rt") as f:
         for i in range(skip):
             next(f)
@@ -38,7 +40,9 @@ def get_split_lines(file_name, delimiter, skip=0):
 
 
 def rename_duplicates(duplicate_list):
-    """Rename duplicate entries as entry, entry.1, entry.2, etc."""
+    """
+    Rename duplicate entries as entry, entry.1, entry.2, etc.
+    """
     seen = defaultdict(int)
     renamed_list = []
     
@@ -54,90 +58,89 @@ def get_merged_data(tar_files, subpools, datasets, ensembl):
     Takes in paths to tar files (one per count matrix to be merged)
     containing barcodes.tsv, features.tsv, and matrix.mtx output files from STARsolo. 
     Merges matrices by translating individual mtx file indices to a master set of indices. 
-    Outputs merged CSC matrix, barcode list, and gene list. 
-    If the same barcode(+subpool) is present in multiple tar files, its counts will be summed by default.
-    However, if concat==True, each occurrence will be preserved in its own column.
+    Outputs merged CSC matrix, barcode list, gene list, and barcode-dataset corerspondences. 
     Genes will be outputted as ENSEMBL IDs if ensembl==True, and as gene symbols otherwise.
     """
-    barcode_mappings = []
-    gene_mappings = []
+    mtxs = []
+    barcode_mapping_dicts = []
+    gene_mapping_dicts = []
     ensembl_to_gene = {}
-    dataset_barcodes = {}
+    barcode_to_dataset = {}
     
-    # get barcode mappings and gene mappings
+    # for each input, read in mtx file, map column indices to barcodes, map row indices to genes
     for i in range(len(tar_files)):
         tar = tarfile.open(tar_files[i], mode="r")
+        tar.extract("matrix.mtx.gz")
         tar.extract("barcodes.tsv.gz")
         tar.extract("features.tsv.gz")
         
+        # read mtx file
+        mtxs.append(get_split_lines("matrix.mtx.gz", delimiter=" ", skip=3))
+
         # read barcodes file
         barcodes = get_split_lines("barcodes.tsv.gz", delimiter="\t")
-        # get mapping of barcode to column index; {barcode:col_idx}
+
+        # get mapping of column index to barcode; {col_idx: barcode}
         # append subpool name with underscore if supplied
         if subpools:
-            barcode_mapping = {line[0] + "_" + subpools[i]:idx for idx, line in enumerate(barcodes)}
+            col_to_barcode = {idx: line[0] + "_" + subpools[i] for idx, line in enumerate(barcodes)}
         else:
             basename = os.path.basename(tar_files[i])
-            barcode_mapping = {line[0] + "_" + basename:idx for idx, line in enumerate(barcodes)}
-        
-        for barcode in barcode_mapping.keys():
-            dataset_barcodes[barcode] = datasets[i]
-   
-        barcode_mappings.append(barcode_mapping)
+            col_to_barcode = {idx: line[0] + "_" + basename for idx, line in enumerate(barcodes)}
+
+        barcode_mapping_dicts.append(col_to_barcode)
+
+        # get mapping of barcodes to dataset name
+        for barcode in col_to_barcode.values():
+            barcode_to_dataset[barcode] = datasets[i]
         
         # read features file
-        features = get_split_lines("features.tsv.gz", delimiter="\t")              
-        # get mapping of gene to row index; {gene:row_idx}
-        ensembl_dict = {line[0]:line[1] for line in features}
-        ensembl_to_gene.update(ensembl_dict)
-        gene_mapping = {key:idx for idx, key in enumerate(ensembl_dict.keys())}
-        gene_mappings.append(gene_mapping)
+        features = get_split_lines("features.tsv.gz", delimiter="\t")      
+
+        # make dictionary of {ENSEMBL: gene_id}
+        gene_dict = {line[0]: line[1] for line in features}
+        ensembl_to_gene.update(gene_dict)
+
+        # get mapping of row index to ENSEMBL id; {row_idx: ENSEMBL}
+        row_to_gene = {idx: key for idx, key in enumerate(gene_dict.keys())}
+        gene_mapping_dicts.append(row_to_gene)
         
         tar.close()
     
-    # get list of unique barcodes and genes
-    barcode_list = list({k for d in barcode_mappings for k in d.keys()})
-    gene_list = list({k for d in gene_mappings for k in d.keys()})   
+    # get list of all barcodes and all genes
+    barcode_list = [k for d in barcode_mapping_dicts for k in d.values()]
+    gene_list = [k for d in gene_mapping_dicts for k in d.values()]
     
-    # assign column indices for master list of barcodes and row indices for master list of genes
-    merged_barcode_mapping = {barcode:idx for idx, barcode in enumerate(barcode_list)}
-    merged_gene_mapping = {gene:idx for idx, gene in enumerate(gene_list)}
+    # assign column indices to merged barcode list and row indices to merged gene list
+    barcode_to_merged_col = {barcode: idx for idx, barcode in enumerate(barcode_list)}
+    gene_to_merged_row = {gene: idx for idx, gene in enumerate(gene_list)}
     
-    n_row = len(gene_list)
-    n_col = len(barcode_list) 
-    merged_matrix = csc_matrix((n_row,n_col))
-    
-    # get concordances between indices in individual gene/barcode mappings and indices in merged mappings;
-    # create csc matrix using counts from mtx file and add to merged matrix
-    for i in range(len(tar_files)):
-        barcode_mappings[i] = {idx:merged_barcode_mapping[barcode] for barcode, idx in barcode_mappings[i].items()}
-        gene_mappings[i] = {idx:merged_gene_mapping[gene] for gene, idx in gene_mappings[i].items()}
-        
-        count_mapping = {}
-        
-        tar = tarfile.open(tar_files[i], mode="r")
-        tar.extract("matrix.mtx.gz")
-        matrix = get_split_lines("matrix.mtx.gz", delimiter=" ", skip=3)
-        
-        for entry in matrix:
-            # subtract 1 from indices to convert to zero-based indexing
-            row_ind = gene_mappings[i][int(entry[0])-1]
-            col_ind = barcode_mappings[i][int(entry[1])-1]
+    # get mappings of counts to their merged indices
+    count_mapping = {}
+    for mtx, col_to_barcode, row_to_gene in zip(mtxs, barcode_mapping_dicts, gene_mapping_dicts):
+        for entry in mtx:
+            row_ind = int(entry[0]) - 1  # indices have 1-based indexing in mtx
+            col_ind = int(entry[1]) - 1
             count = int(entry[2])
-            count_mapping[(row_ind,col_ind)] = count
-                    
-        merged_matrix += csc_matrix((list(count_mapping.values()), zip(*count_mapping.keys())), shape=(n_row,n_col))
-        
-        tar.close()
-    
+
+            merged_row_ind = gene_to_merged_row[row_to_gene[row_ind]]
+            merged_col_ind = barcode_to_merged_col[col_to_barcode[col_ind]]
+
+            count_mapping[(merged_row_ind, merged_col_ind)] = count
+
+    # make sparse matrix
+    n_row = len(gene_list)
+    n_col = len(barcode_list)
+    merged_matrix = csc_matrix((list(count_mapping.values()), zip(*count_mapping.keys())), shape=(n_row, n_col))
+
     # if gene names to be outputted, convert and rename duplicate genes
     if not ensembl:
         gene_list = rename_duplicates([ensembl_to_gene[ensembl_id] for ensembl_id in gene_list])
     
-    return(merged_matrix, barcode_list, gene_list, ensembl_to_gene, dataset_barcodes)
+    return(merged_matrix, barcode_list, gene_list, ensembl_to_gene, barcode_to_dataset)
 
         
-def write_h5(prefix, count_matrix, barcode_list, gene_list, merged_h5_file):
+def write_h5(count_matrix, barcode_list, gene_list, merged_h5_file):
     h5_file = h5py.File(merged_h5_file, "w")
 
     g = h5_file.create_group("group")
@@ -170,10 +173,10 @@ def write_starsolo_outputs(prefix, count_matrix, barcode_list, ensembl_to_gene):
             f.write("%s %s %s\n" % triple)
 
 
-def write_dataset_barcodes(prefix, dataset_barcodes, dataset_barcodes_file):
+def write_dataset_barcodes(barcode_to_dataset, dataset_barcodes_file):
     with open(dataset_barcodes_file, "w") as f:
         f.write("barcode\tdataset\n")
-        for barcode, dataset in dataset_barcodes.items():
+        for barcode, dataset in barcode_to_dataset.items():
             f.write(barcode + "\t" + dataset + "\n")	 
 
             
@@ -188,17 +191,17 @@ def main():
     datasets = getattr(args, "datasets")
     ensembl = getattr(args, "ensembl")
     
-    # get merged count matrix, barcode list, and gene list from input tars
-    count_matrix, barcode_list, gene_list, ensembl_to_gene, dataset_barcodes = get_merged_data(tar_files, subpools, datasets, ensembl)
+    # get merged data from input tars
+    count_matrix, barcode_list, gene_list, ensembl_to_gene, barcode_to_dataset = get_merged_data(tar_files, subpools, datasets, ensembl)
     
     # write merged data to h5 file
-    write_h5(prefix, count_matrix, barcode_list, gene_list, merged_h5_file)
+    write_h5(count_matrix, barcode_list, gene_list, merged_h5_file)
     
     # write merged data to matrix.mtx, features.tsv, and barcodes.tsv files
     write_starsolo_outputs(prefix, count_matrix, barcode_list, ensembl_to_gene)
 
     # write dataset barcode tsv
-    write_dataset_barcodes(prefix, dataset_barcodes, dataset_barcodes_file)
+    write_dataset_barcodes(barcode_to_dataset, dataset_barcodes_file)
 
 if __name__ == "__main__":
     main()
