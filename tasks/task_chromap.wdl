@@ -17,9 +17,7 @@ task atac_align_chromap {
         Array[File] fastq_barcode
         File reference_fasta
         File chrom_sizes
-        File? r1_barcode_inclusion_list
-        File? r2_barcode_inclusion_list
-        File? r3_barcode_inclusion_list
+        File? barcode_inclusion_list
         File? barcode_conversion_dict
 
         Boolean? trim_adapters = true
@@ -102,7 +100,7 @@ task atac_align_chromap {
                 -1 ~{sep="," fastq_R1} \
                 -2 ~{sep="," fastq_R2} \
                 -b ~{sep="," fastq_barcode} \
-                --barcode-whitelist ~{r1_barcode_inclusion_list},~{r2_barcode_inclusion_list},~{r3_barcode_inclusion_list} \
+                --barcode-whitelist ~{barcode_inclusion_list} \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o out.fragments.tmp.tsv \
                 --summary ~{barcode_log} > ~{alignment_log} 2>&1
