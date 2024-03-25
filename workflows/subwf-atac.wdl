@@ -148,7 +148,7 @@ workflow wf_atac {
             genome_name = genome_name,
             subpool = subpool,
             multimappers = align_multimappers,
-            barcode_inclusion_list = whitelist,
+            #barcode_inclusion_list = whitelist,
             barcode_conversion_dict = barcode_conversion_dict,
             prefix = prefix,
             disk_factor = align_disk_factor,

@@ -17,7 +17,9 @@ task atac_align_chromap {
         Array[File] fastq_barcode
         File reference_fasta
         File chrom_sizes
-        File? barcode_inclusion_list
+        File? r1_barcode_inclusion_list
+        File? r2_barcode_inclusion_list
+        File? r3_barcode_inclusion_list
         File? barcode_conversion_dict
 
         Boolean? trim_adapters = true
@@ -77,14 +79,6 @@ task atac_align_chromap {
         echo '------ indexing ------' 1>&2
         time chromap -i -r <(zcat ~{reference_fasta}) -o chromap_index/index
 
-        if [[ '~{barcode_inclusion_list}' == *.gz ]]; then
-            echo '------ Decompressing the barcode inclusion list ------' 1>&2
-            gunzip -c ~{barcode_inclusion_list} > barcode_inclusion_list.txt
-        else
-            echo '------ No decompression needed for the barcode inclusion list ------' 1>&2
-            cat ~{barcode_inclusion_list} > barcode_inclusion_list.txt
-        fi
-
         # [r1|r2|bc]:start:end:strand
         # --read-format bc:0:15,r1:16:-1
         # The start and end are inclusive and -1 means the end of the read. User may use multiple fields to specify non-consecutive segments, e.g. bc:0:15,bc:32:-1.
@@ -108,7 +102,7 @@ task atac_align_chromap {
                 -1 ~{sep="," fastq_R1} \
                 -2 ~{sep="," fastq_R2} \
                 -b ~{sep="," fastq_barcode} \
-                --barcode-whitelist barcode_inclusion_list.txt \
+                --barcode-whitelist ~{r1_barcode_inclusion_list},~{r2_barcode_inclusion_list},~{r3_barcode_inclusion_list} \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o out.fragments.tmp.tsv \
                 --summary ~{barcode_log} > ~{alignment_log} 2>&1
