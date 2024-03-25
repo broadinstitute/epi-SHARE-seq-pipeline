@@ -50,7 +50,7 @@ workflow wf_atac {
         Array[File] fastq_barcode
         Int? align_multimappers
         File reference_fasta
-        File? barcode_inclusion_list
+        File? r1_barcode_inclusion_list
         Boolean? remove_pcr_duplicates = true
         Boolean? remove_pcr_duplicates_at_cell_level = true
         Boolean? Tn5_shift = true
