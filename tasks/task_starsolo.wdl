@@ -81,6 +81,7 @@ task rna_align {
             else
                 read_files='~{sep=',' fastq_R2} ~{sep=',' fastq_R1}'
                 cb_umi_length=$r1_length
+            fi
         fi
 
         echo $r1_length
