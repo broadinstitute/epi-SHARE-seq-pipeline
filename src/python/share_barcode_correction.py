@@ -78,15 +78,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process compressed files in parallel.')
     parser.add_argument('--input-files', required=True, help='Paths to input compressed files separated by commas')
     parser.add_argument('--output-files', required=True, help='Paths to output compressed files separated by commas')
-    parser.add_argument('--whitelist', required=True, help='Number of lines to process as a chunk')
+    parser.add_argument('--exclusion-list', required=True, help='Path to the inclusion list file.')
     parser.add_argument('--chunk-size', type=int, default=10000, help='Number of lines to process as a chunk')
+    parser.add_argument('-p', type=int, default=1, help='Number of cpus to use for processing the files')
 
     args = parser.parse_args()
 
     input_files = parse_file_paths(args.input_files)
     output_files = parse_file_paths(args.output_files)
-    whitelist = args.whitelist
+    exclusion_list = args.exclusion_list
     chunk_size = args.chunk_size
+    cpus = args.p
 
-    barcode_dict_per_round = create_barcode_dicts_from_file(whitelist)
+    barcode_dict_per_round = create_barcode_dicts_from_file(exclusion_list)
     process_compressed_files(input_files, output_files, barcode_dict_per_round, chunk_size)

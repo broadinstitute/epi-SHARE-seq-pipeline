@@ -1,5 +1,4 @@
-from typing import List
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -8,12 +7,12 @@ Utility functions
 """
 
 
-def _read_barcodes_from_file(whitelist_file: str) -> List[List[str], List[str], List[str]]:
+def _read_barcodes_from_file(exclusion_list_file: str) -> List[List[str], List[str], List[str]]:
     """
-    Read barcode sequences from a whitelist file and return them as lists.
+    Read barcode sequences from an exclusion list file and return them as lists.
 
     Args:
-        whitelist_file (str): The path to the whitelist file.
+        exclusion_list_file (str): The path to the exclusion_list file.
 
     Returns:
         list: A list containing three sublists, each containing the barcode sequences for a specific round.
@@ -21,7 +20,7 @@ def _read_barcodes_from_file(whitelist_file: str) -> List[List[str], List[str], 
     r1_barcodes = set()
     r2_barcodes = set()
     r3_barcodes = set()
-    with open(whitelist_file) as f:
+    with open(exclusion_list_file) as f:
         for line in f:
             r1_barcodes.add(line[:8])
             r2_barcodes.add(line[8:16])
