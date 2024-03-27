@@ -63,7 +63,7 @@ task rna_align {
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
         if [[ '~{whitelist}' == *.gz ]]; then
-            gunzip -c ~{whitelist} > whitelist.txt
+            gzip -dc ~{whitelist} > whitelist.txt
         else
             cat ~{whitelist} > whitelist.txt
         fi
@@ -91,7 +91,7 @@ task rna_align {
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
         # SHARE-seq
-        if [ '~{chemistry}' == 'shareseq' ]; then=
+        if [ '~{chemistry}' == 'shareseq' ]; then
             $(which STAR) \
             --readFilesIn $read_files \
             --readFilesCommand zcat \
