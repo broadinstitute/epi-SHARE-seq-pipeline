@@ -30,7 +30,7 @@ task rna_align {
         Float outFilterMatchNminOverLread = 0.3
         Float? outFilterMismatchNoverReadLmax
         String? soloBarcodeMate
-        String? clip5pNbases  # 39 0
+        String? clip5pNbases
 
         Int? outFilterScoreMin
         Int? winAnchorMultimapNmax
@@ -62,16 +62,27 @@ task rna_align {
 
         bash $(which monitor_script.sh) | tee ~{monitor_log} 1>&2 &
 
-        # Check which fastq contains CB + UMI
+        if [[ '~{whitelist}' == *.gz ]]; then
+            gunzip -c ~{whitelist} > whitelist.txt
+        else
+            cat ~{whitelist} > whitelist.txt
+        fi
+
+        # Reorder FASTQ files if necessary so that cDNA passed in first, barcode passed in second
         r1_length=$(zcat ~{fastq_R1[0]} | head -2 | tail -1 | awk '{print length($1)}')
         r2_length=$(zcat ~{fastq_R2[0]} | head -2 | tail -1 | awk '{print length($1)}')
-        if [ $r1_length -gt $r2_length ]; then
+
+        if [[ '~{chemistry}' == 'shareseq' ]]; then
             read_files='~{sep=',' fastq_R1} ~{sep=',' fastq_R2}'
-            cb_umi_length=$r2_length
         else
-            read_files='~{sep=',' fastq_R2} ~{sep=',' fastq_R1}'
-            cb_umi_length=$r1_length
+            if [ $r1_length -gt $r2_length ]; then
+                read_files='~{sep=',' fastq_R1} ~{sep=',' fastq_R2}'
+                cb_umi_length=$r2_length
+            else
+                read_files='~{sep=',' fastq_R2} ~{sep=',' fastq_R1}'
+                cb_umi_length=$r1_length
         fi
+
         echo $r1_length
         echo $r2_length
         echo $read_files
@@ -80,34 +91,19 @@ task rna_align {
         tar xvzf ~{genome_index_tar} --no-same-owner -C ./
 
         # SHARE-seq
-        if [ '~{chemistry}' == 'shareseq' ]; then
-            # Need to think of a way of doing this. For now off.
-            # Check that CB + UMI length is correct
-            #if [ $cb_umi_length -ne 34 ]; then
-            #    echo 'CB + UMI length is $cb_umi_length; expected 34'
-            #    exit 1
-            #fi
-
-            # Generate whitelist
-            for fq in ~{sep=' ' fastq_R2}
-              do
-              gunzip -c "${fq}" | awk 'NR%4==2{dict[substr($1,1,24)]}END{for (i in dict){print i}}' >> shareseq_whitelist.txt
-            done
-
+        if [ '~{chemistry}' == 'shareseq' ]; then=
             $(which STAR) \
-            --readFilesIn $read_files  \
+            --readFilesIn $read_files \
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
             --genomeDir ./ \
-            --soloType CB_UMI_Simple \
+            --soloType CB_UMI_Complex \
             --soloFeatures GeneFull  \
             --soloStrand Forward \
-            --soloCBwhitelist shareseq_whitelist.txt \
-            --soloCBmatchWLtype Exact \
-            --soloCBstart 1 \
-            --soloCBlen 24 \
-            --soloUMIstart 25 \
-            --soloUMIlen 10 \
+            --soloCBwhitelist whitelist.txt whitelist.txt whitelist.txt \
+            --soloCBmatchWLtype 1MM \
+            --soloCBposition 1_-83_1_-76 1_-45_1_-38 1_-7_1_0 \
+            --soloUMIposition 0_0_0_9 \
             ~{"--soloBarcodeMate "+ soloBarcodeMate} \
             ~{"--clip5pNbases "+ clip5pNbases} \
             ~{"--soloMultiMappers "+ soloMultiMappers} \
@@ -136,12 +132,6 @@ task rna_align {
                 exit 1
             fi
 
-            if [[ '~{whitelist}' == *.gz ]]; then
-                gunzip -c ~{whitelist} > 10x_v2_whitelist.txt
-            else
-                cat ~{whitelist} > 10x_v2_whitelist.txt
-            fi
-
             $(which STAR) \
             --readFilesIn $read_files \
             --readFilesCommand zcat \
@@ -156,7 +146,7 @@ task rna_align {
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
             --soloMultiMappers Unique EM \
-            --soloCBwhitelist 10x_v2_whitelist.txt \
+            --soloCBwhitelist whitelist.txt \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 10 \
@@ -192,12 +182,6 @@ task rna_align {
                 exit 1
             fi
 
-            if [[ '~{whitelist}' == *.gz ]]; then
-                gunzip -c ~{whitelist} > 10x_multiome_whitelist.txt
-            else
-                cat ~{whitelist} > 10x_multiome_whitelist.txt
-            fi
-
             $(which STAR) \
             --readFilesIn $read_files \
             --readFilesCommand zcat \
@@ -210,7 +194,7 @@ task rna_align {
             --soloCellFilter EmptyDrops_CR \
             --soloBarcodeReadLength 0 \
             --soloMultiMappers Unique EM \
-            --soloCBwhitelist 10x_multiome_whitelist.txt \
+            --soloCBwhitelist whitelist.txt \
             --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts \
             --soloCBlen 16 \
             --soloUMIlen 12 \
