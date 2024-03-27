@@ -8,7 +8,7 @@ Utility functions
 """
 
 
-def get_barcodes(whitelist_file: str) -> List[List[str], List[str], List[str]]:
+def _read_barcodes_from_file(whitelist_file: str) -> List[List[str], List[str], List[str]]:
     """
     Read barcode sequences from a whitelist file and return them as lists.
 
@@ -64,18 +64,18 @@ def _generate_barcode_variants(input_barcode: str) -> List[str]:
     return result
 
 
-def create_barcode_dicts(barcode_list: List[str]) -> Tuple[Dict[str, str], Dict[str, str]]:
+
+def create_barcode_dicts(barcode_list: List[str]) -> Dict[str, Tuple[str, str]]:
     """
-    Creates dictionaries containing exact match and 1-mismatch sequences
+    Create a dictionary of barcode corrections based on a list of barcodes.
 
     Args:
-        barcode_list (list): A list of barcode sequences.
+        barcode_list (List[str]): A list of barcodes.
 
     Returns:
-        tuple: A tuple containing two dictionaries. The first dictionary contains exact match sequences,
-               where the barcode sequence is the key and the value is the same barcode sequence. The second
-               dictionary contains 1-mismatch sequences, where the mismatch sequence is the key and the value
-               is the corresponding barcode sequence from the barcode_list.
+        Dict[str, Tuple[str, str]]: A dictionary where the keys are barcodes and the values are tuples
+        containing the original barcode and a correction type ('E' for exact match or 'M' for 1 mismatch).
+
     """
     barcode_correction_dict = dict()
     for barcode in barcode_list:
@@ -96,5 +96,5 @@ def create_barcode_dicts_from_file(barcode_file: str) -> List[Dict[str, str]]:
     Returns:
         list: A list of dictionaries. Each dictionary contains the barcode correction information for a specific round.
     """
-    barcode_lists_per_round = get_barcodes(barcode_file)
+    barcode_lists_per_round = _read_barcodes_from_file(barcode_file)
     return list(map(create_barcode_dicts, barcode_lists_per_round))
