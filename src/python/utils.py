@@ -14,14 +14,15 @@ def check_putative_barcode(barcode_str, barcode_exact_dict, barcode_mismatch_dic
     corrected = barcode_exact_dict.get(barcode_str)  # check exact location first
 
     if corrected:
-        return corrected, True
-    
+        return corrected, "E"
+
     corrected = barcode_mismatch_dict.get(barcode_str)  # check mismatch
 
     if corrected:
-        return corrected, False
-    
+        return corrected, "M"
+
     return None, False
+
 
 def create_barcode_dicts(barcode_list):
     """
