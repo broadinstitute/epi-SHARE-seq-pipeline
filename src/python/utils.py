@@ -33,7 +33,7 @@ def create_barcode_dicts(barcode_list):
     for barcode in barcode_list:
         barcode_exact_dict[barcode] = barcode  # exact match
         for i, base in enumerate(barcode):
-            for x in 'ACGT':
+            for x in 'ACGTN':
                 if base != x:
                     # add mismatch possibilities at pos i
                     mismatch = barcode[:i] + x + barcode[i + 1:]
