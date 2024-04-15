@@ -1,6 +1,5 @@
 version 1.0
 
-import "../tasks/share_task_correct_fastq.wdl" as share_task_correct_fastq
 import "../tasks/task_starsolo.wdl" as task_starsolo
 import "../tasks/task_generate_h5.wdl" as task_generate_h5
 import "../tasks/task_qc_rna.wdl" as task_qc_rna
@@ -28,15 +27,6 @@ workflow wf_rna {
 
         # Do we want to use the multimappers assigned with EM method
         Boolean multimappers = false
-
-        # Correct-specific inputs
-        Boolean correct_barcodes = true
-        Boolean? paired_rna = false
-        # Runtime parameters
-        Int? correct_cpus
-        Float? correct_disk_factor
-        Float? correct_memory_factor
-        String? correct_docker_image
 
         # Align-specific inputs
         File idx_tar
@@ -87,31 +77,12 @@ workflow wf_rna {
         String? seurat_docker_image
     }
 
-    if ( chemistry == "shareseq" && correct_barcodes ) {
-        scatter (read_pair in zip(read1, read2)) {
-            call share_task_correct_fastq.share_correct_fastq as correct {
-                input:
-                    fastq_R1 = read_pair.left,
-                    fastq_R2 = read_pair.right,
-                    whitelist = whitelist,
-                    sample_type = "RNA",
-                    pkr = subpool,
-                    prefix = prefix,
-                    paired_rna = paired_rna,
-                    cpus = correct_cpus,
-                    disk_factor = correct_disk_factor,
-                    memory_factor = correct_memory_factor,
-                    docker_image = correct_docker_image
-            }
-        }
-    }
-
     if (  "~{pipeline_modality}" != "no_align" ) {
         call task_starsolo.rna_align as align {
             input:
                 chemistry = chemistry,
-                fastq_R1 = select_first([correct.corrected_fastq_R1, read1]),
-                fastq_R2 = select_first([correct.corrected_fastq_R2, read2]),
+                fastq_R1 = read1,
+                fastq_R2 = read2,
                 whitelist = whitelist,
                 soloMultiMappers = soloMultiMappers,
                 soloUMIdedup = soloUMIdedup,
@@ -166,7 +137,9 @@ workflow wf_rna {
         call task_log_rna.log_rna as log_rna {
         input:
             alignment_log = align.log_final_out,
-            dups_log = qc_rna.rna_duplicates_log,
+            qc_rna_statistics = qc_rna.rna_qc_statistics,
+            barcode_statistics = align.barcodes_stats,
+            summary_csv = align.summary_csv,
             prefix = prefix
         }
 
@@ -189,10 +162,6 @@ workflow wf_rna {
     }
 
     output {
-        # Correction/trimming
-        Array[File]? rna_read1_processed = correct.corrected_fastq_R1
-        Array[File]? rna_read2_processed = correct.corrected_fastq_R2
-        
         File? task_starsolo_output_bam = align.output_bam
         File? rna_alignment_log = align.log_final_out
         File? task_starsolo_log_out = align.log_out
@@ -207,7 +176,7 @@ workflow wf_rna {
         File? rna_h5 = generate_h5.h5_matrix
 
         File? rna_barcode_metadata  = qc_rna.rna_barcode_metadata
-        File? rna_duplicates_log = qc_rna.rna_duplicates_log
+        File? rna_duplicates_log = qc_rna.rna_qc_statistics
         File? rna_umi_barcode_rank_plot = qc_rna.rna_umi_barcode_rank_plot
         File? rna_gene_barcode_rank_plot = qc_rna.rna_gene_barcode_rank_plot
         File? rna_gene_umi_scatter_plot = qc_rna.rna_gene_umi_scatter_plot
