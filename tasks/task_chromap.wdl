@@ -31,7 +31,7 @@ task atac_align_chromap {
         
 
         Int? multimappers = 4 # As per ENCODE pipeline
-        Int? bc_error_threshold = 2
+        Int? bc_error_threshold = 1
         Float? bc_probability_threshold = 0.9
         #TODO: This should come from a previous task parsing the seqspec.
         String? read_format 
