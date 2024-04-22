@@ -16,7 +16,7 @@ LABEL software.task="generate_h5"
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install python packages
-RUN python3 -m pip install --no-cache-dir h5py scipy
+RUN python3 -m pip install --no-cache-dir h5py scipy==1.10.0
 
 # Create and setup new user
 ENV USER=shareseq

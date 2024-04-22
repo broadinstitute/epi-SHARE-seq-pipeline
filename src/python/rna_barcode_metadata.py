@@ -6,7 +6,6 @@ total reads, duplicate reads, UMIs, genes, and percent mitochondrial reads for e
 """
 
 import argparse
-import logging
 import numpy as np
 import pysam
 from collections import defaultdict
@@ -45,6 +44,9 @@ def get_metrics(bam, barcode_tag="CB", subpool=None):
         barcode = read.get_tag(barcode_tag)
         if barcode == "-":
             continue
+
+        # remove underscores from barcode
+        barcode = barcode.replace("_", "")
             
         # get UMI; skip read if not present
         umi = read.get_tag("UB")

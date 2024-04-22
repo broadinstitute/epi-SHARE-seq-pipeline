@@ -129,11 +129,10 @@ def process_fastqs(input_read1_fastq_file,
             # last 99bp of read 2 contains barcode sequences
             read_2_barcode_sequence = sequence2[-99:]
             read_2_barcode_quality = quality2[-99:]
-            # extract 10bp sequence containing R1 barcode, 10bp sequence containing R2 barcode,
-            # 9bp sequence containing R3 barcode, and corresponding quality strings
+            # extract barcode rounds and corresponding quality strings
             r1_str, r2_str, r3_str = read_2_barcode_sequence[15:23], read_2_barcode_sequence[53:61], read_2_barcode_sequence[91:99]
-            q1_str, q2_str, q3_str = read_2_barcode_quality[15:23], read_2_barcode_quality[53:61], read_2_barcode_quality[91:99]
-            # get corrected barcodes
+            q1, q2, q3 = read_2_barcode_quality[15:23], read_2_barcode_quality[53:61], read_2_barcode_quality[91:99]
+            # get corrected barcodes and correction type
             r1 = r2 = r3 = None
             r1, c1 = check_putative_barcode(r1_str, r1_barcode_exact_dict, r1_barcode_mismatch_dict)
             r2, c2 = check_putative_barcode(r2_str, r2_barcode_exact_dict, r2_barcode_mismatch_dict)
@@ -154,10 +153,10 @@ def process_fastqs(input_read1_fastq_file,
                     # or R1R2R3UMIread2 if paired-end RNA
                     if paired_rna:
                         corrected_sequence2 = r1 + r2 + r3 + sequence2[:-99]
-                        corrected_quality2 = q1_str + q2_str + q3_str + quality2[:-99]
+                        corrected_quality2 = q1 + q2 + q3 + quality2[:-99]
                     else:
                         corrected_sequence2 = r1 + r2 + r3 + sequence2[:10]
-                        corrected_quality2 = q1_str + q2_str + q3_str + quality2[:10]
+                        corrected_quality2 = q1 + q2 + q3 + quality2[:10]
                     corrected_read2 = f"{corrected_header}\n{corrected_sequence2}\n+\n{corrected_quality2}\n"
                     buffer2.append(corrected_read2)
                     buffer_counter += 1
@@ -177,7 +176,7 @@ def process_fastqs(input_read1_fastq_file,
                     buffer2.append(corrected_read2)
                     # add corrected barcode to buffer3 AKA fastq barcode
                     corrected_sequence3 = r1 + r2 + r3
-                    corrected_quality3 = q1_str + q2_str + q3_str
+                    corrected_quality3 = q1 + q2 + q3
                     corrected_read3 = f"{corrected_header}\n{corrected_sequence3}\n+\n{corrected_quality3}\n"
                     buffer3.append(corrected_read3)
                     buffer_counter += 1

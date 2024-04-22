@@ -112,16 +112,16 @@ def write_fastqs(bam_file,
                 # get R1 barcode sequence
                 r1_barcode_raw = barcode_tag[15:23]
                 # get error-corrected R1 barcode
-                r1_barcode_corrected, is_exact = check_putative_barcode(r1_barcode_raw,
-                                                                        r1_barcode_exact_dict,
-                                                                        r1_barcode_mismatch_dict)
+                r1_barcode_corrected, correction_type = check_putative_barcode(r1_barcode_raw,
+                                                                               r1_barcode_exact_dict,
+                                                                               r1_barcode_mismatch_dict)
 
                 if r1_barcode_corrected:
                     # write reads to appropriate FASTQ files by checking which R1 barcode subset the corrected R1 barcode belongs to
                     write_read(read_1_pointers[r1_barcode_subset_dict[r1_barcode_corrected]], read_1)
                     write_read(read_2_pointers[r1_barcode_subset_dict[r1_barcode_corrected]], read_2)
 
-                    if is_exact:
+                    if correction_type == "E":
                         exact_match += 1
                     else:
                         mismatch += 1

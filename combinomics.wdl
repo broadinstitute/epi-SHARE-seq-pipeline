@@ -76,9 +76,9 @@ workflow combinomics {
     Boolean process_rna = if length(read1_rna)>0 then true else false
 
     Map[String, File] whitelists = read_map(whitelists_tsv)
-    File? whitelist_ = if chemistry=='10x_multiome' then whitelist else select_first([whitelist, whitelists[chemistry]])
-    File? whitelist_rna_ = if chemistry=="10x_multiome" then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
-    File? whitelist_atac_ = if chemistry=="10x_multiome" then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
+    File? whitelist_ = if (chemistry=="10x_multiome" || chemistry=="shareseq") then whitelist else select_first([whitelist, whitelists[chemistry]])
+    File? whitelist_rna_ = if (chemistry=="10x_multiome" || chemistry=="shareseq") then select_first([whitelist_rna, whitelists["${chemistry}_rna"]]) else whitelist_rna
+    File? whitelist_atac_ = if (chemistry=="10x_multiome" || chemistry=="shareseq") then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
 
     if ( chemistry != "shareseq" && process_atac) {
         scatter (idx in range(length(read1_atac))) {
@@ -191,9 +191,6 @@ workflow combinomics {
         Array[File]? atac_read1_processed = atac.atac_read1_processed
         Array[File]? atac_read2_processed = atac.atac_read2_processed
         Array[File]? atac_barcode_processed = atac.atac_barcode_processed
-
-        Array[File]? rna_read1_processed = rna.rna_read1_processed
-        Array[File]? rna_read2_processed = rna.rna_read2_processed
 
         # RNA outputs
         File? rna_final_bam = rna.task_starsolo_output_bam
