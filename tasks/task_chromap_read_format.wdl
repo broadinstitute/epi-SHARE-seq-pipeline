@@ -19,10 +19,9 @@ task get_read_format {
         # 8bp round 2 barcode, 30bp linker, 8bp round 3 barcode
         # Chromap indexing is 0-based and inclusive
 
-        r2_length=$(gzip -dc ~{fastq_R2} | awk 'NR==2 {print length($0)-100}')
+        r2_end=$(gzip -dc ~{fastq_R2} | awk 'NR==2 {print length($0)-100}')
         
-
-        bc1_start=$(( $r2_length + 16 ))
+        bc1_start=$(( $r2_end + 16 ))
         bc1_end=$(( $bc1_start + 7 ))
 
         bc2_start=$(( $bc1_end + 31 ))
@@ -31,7 +30,7 @@ task get_read_format {
         bc3_start=$(( $bc2_end + 31 ))
         bc3_end=$(( $bc3_start + 7 ))
 
-        echo "r1:0:-1,r2:0:${r2_length},bc:${bc1_start}:${bc1_end},bc:${bc2_start}:${bc2_end},bc:${bc3_start}:${bc3_end}" > read_format.txt
+        echo "r1:0:-1,r2:0:${r2_end},bc:${bc1_start}:${bc1_end},bc:${bc2_start}:${bc2_end},bc:${bc3_start}:${bc3_end}" > read_format.txt
 
         cat read_format.txt
     >>>
