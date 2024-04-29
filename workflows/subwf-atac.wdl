@@ -2,7 +2,6 @@ version 1.0
 
 # Import the tasks called by the pipeline
 import "../tasks/task_chromap_read_format.wdl" as task_chromap_read_format
-import "../tasks/task_trim_fastqs_atac.wdl" as task_trim
 import "../tasks/task_chromap.wdl" as task_align_chromap
 import "../tasks/task_qc_atac.wdl" as task_qc_atac
 import "../tasks/task_make_track.wdl" as task_make_track
@@ -31,7 +30,6 @@ workflow wf_atac {
         String genome_name
         Int? cutoff
         String pipeline_modality = "full"
-        Boolean trim_fastqs = true
         File? barcode_conversion_dict # For 10X multiome
 
         # Align-specific inputs
