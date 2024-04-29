@@ -17,10 +17,11 @@ task get_read_format {
     command <<<
         # SHARE R2 FASTQ format is read 2, 15bp linker, 8bp round 1 barcode, 30bp linker,
         # 8bp round 2 barcode, 30bp linker, 8bp round 3 barcode
-
-        r2_length=$(gzip -dc ~{fastq_R2} | awk 'NR==2 {print length($0)-99}')
-        
         # Chromap indexing is 0-based and inclusive
+
+        r2_length=$(gzip -dc ~{fastq_R2} | awk 'NR==2 {print length($0)-100}')
+        
+
         bc1_start=$(( $r2_length + 16 ))
         bc1_end=$(( $bc1_start + 7 ))
 
