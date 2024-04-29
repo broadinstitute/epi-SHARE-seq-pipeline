@@ -9,7 +9,7 @@ workflows:
              - dev
              - chromap-v2
              - dev-snapatac
-             - update-correction-v2
+             - chromap-read-format
          tags:
              - /.*/
 

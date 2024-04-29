@@ -1,7 +1,7 @@
 version 1.0
 
 # Import the tasks called by the pipeline
-import "../tasks/share_task_correct_fastq.wdl" as task_correct_fastq
+import "../tasks/task_chromap_read_format.wdl" as task_chromap_read_format
 import "../tasks/task_trim_fastqs_atac.wdl" as task_trim
 import "../tasks/task_chromap.wdl" as task_align_chromap
 import "../tasks/task_qc_atac.wdl" as task_qc_atac
@@ -33,16 +33,6 @@ workflow wf_atac {
         String pipeline_modality = "full"
         Boolean trim_fastqs = true
         File? barcode_conversion_dict # For 10X multiome
-        
-
-        # Correct-specific inputs
-        Boolean correct_barcodes = true
-        File whitelist
-        # Runtime parameters
-        Int? correct_cpus = 16
-        Float? correct_disk_factor = 8.0
-        Float? correct_memory_factor = 0.08
-        String? correct_docker_image
 
         # Align-specific inputs
         Array[File] read1
@@ -50,6 +40,7 @@ workflow wf_atac {
         Array[File] fastq_barcode
         Int? align_multimappers
         File reference_fasta
+        File whitelist
         Boolean? remove_pcr_duplicates = true
         Boolean? remove_pcr_duplicates_at_cell_level = true
         Boolean? Tn5_shift = true
@@ -101,70 +92,43 @@ workflow wf_atac {
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
 
-    # Perform barcode error correction on FASTQs.
-    if ( chemistry == "shareseq" && correct_barcodes ) {
-        scatter (read_pair in zip(read1, read2)) {
-            call task_correct_fastq.share_correct_fastq as correct {
-                input:
-                    fastq_R1 = read_pair.left,
-                    fastq_R2 = read_pair.right,
-                    whitelist = whitelist,
-                    sample_type = "ATAC",
-                    pkr = subpool,
-                    prefix = prefix,
-                    cpus = correct_cpus,
-                    disk_factor = correct_disk_factor,
-                    memory_factor = correct_memory_factor,
-                    docker_image = correct_docker_image
-            }
-        }
-    }
-
-    if ( trim_fastqs ){
-        # Remove dovetail in the ATAC reads.
-        scatter (read_pair in zip(select_first([correct.corrected_fastq_R1, read1]), select_first([correct.corrected_fastq_R2, read2]))) {
-            call task_trim.trim_fastqs_atac as trim {
-                input:
-                    fastq_R1 = read_pair.left,
-                    fastq_R2 = read_pair.right,
-                    chemistry = chemistry,
-                    cpus = trim_cpus,
-                    disk_factor = trim_disk_factor,
-                    memory_factor = trim_memory_factor,
-                    docker_image = trim_docker_image
-            }
-        }
-    }
-
     if (  "~{pipeline_modality}" != "no_align" ) {
+
+        if ( "~{chemistry}" == "shareseq" ) {
+            call task_chromap_read_format.get_read_format as get_read_format {
+                input:
+                    fastq_R2 = read2[0]
+            }
+        }
+
         call task_align_chromap.atac_align_chromap as align {
-        input:
-            fastq_R1 = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1]),
-            fastq_R2 = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2]),
-            fastq_barcode = select_first([correct.corrected_fastq_barcode, fastq_barcode]),
-            reference_fasta = reference_fasta,
-            chrom_sizes = chrom_sizes,
-            trim_adapters = trim_adapters,
-            genome_name = genome_name,
-            subpool = subpool,
-            multimappers = align_multimappers,
-            barcode_inclusion_list = whitelist,
-            barcode_conversion_dict = barcode_conversion_dict,
-            prefix = prefix,
-            disk_factor = align_disk_factor,
-            memory_factor = align_memory_factor,
-            cpus = align_cpus,
-            docker_image = align_docker_image,
-            remove_pcr_duplicates = remove_pcr_duplicates,
-            remove_pcr_duplicates_at_cell_level = remove_pcr_duplicates_at_cell_level,
-            Tn5_shift = Tn5_shift,
-            low_mem = low_mem,
-            bed_output = bed_output,
-            max_insert_size = max_insert_size,
-            quality_filter = quality_filter,
-            bc_error_threshold = bc_error_threshold,
-            bc_probability_threshold = bc_probability_threshold,
-            read_format = read_format
+            input:
+                fastq_R1 = read1,
+                fastq_R2 = read2,
+                fastq_barcode = fastq_barcode,
+                reference_fasta = reference_fasta,
+                chrom_sizes = chrom_sizes,
+                trim_adapters = trim_adapters,
+                genome_name = genome_name,
+                subpool = subpool,
+                multimappers = align_multimappers,
+                barcode_inclusion_list = whitelist,
+                barcode_conversion_dict = barcode_conversion_dict,
+                prefix = prefix,
+                disk_factor = align_disk_factor,
+                memory_factor = align_memory_factor,
+                cpus = align_cpus,
+                docker_image = align_docker_image,
+                remove_pcr_duplicates = remove_pcr_duplicates,
+                remove_pcr_duplicates_at_cell_level = remove_pcr_duplicates_at_cell_level,
+                Tn5_shift = Tn5_shift,
+                low_mem = low_mem,
+                bed_output = bed_output,
+                max_insert_size = max_insert_size,
+                quality_filter = quality_filter,
+                bc_error_threshold = bc_error_threshold,
+                bc_probability_threshold = bc_probability_threshold,
+                read_format = select_first([get_read_format.read_format, read_format])
         }
 
         call task_qc_atac.qc_atac as qc_atac{
@@ -222,12 +186,6 @@ workflow wf_atac {
     }
 
     output {
-        # Correction/trimming
-        Array[File]? atac_read1_processed = select_first([trim.fastq_R1_trimmed, correct.corrected_fastq_R1, read1])
-        Array[File]? atac_read2_processed = select_first([trim.fastq_R2_trimmed, correct.corrected_fastq_R2, read2])
-        Array[File]? atac_barcode_processed = select_first([correct.corrected_fastq_barcode, fastq_barcode])
-
-
         # Align
         File? atac_alignment_log = align.atac_alignment_log
         File? atac_fragments = align.atac_fragments

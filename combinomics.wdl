@@ -187,11 +187,6 @@ workflow combinomics {
     }
 
     output{
-        # Fastq after correction/trimming
-        Array[File]? atac_read1_processed = atac.atac_read1_processed
-        Array[File]? atac_read2_processed = atac.atac_read2_processed
-        Array[File]? atac_barcode_processed = atac.atac_barcode_processed
-
         # RNA outputs
         File? rna_final_bam = rna.task_starsolo_output_bam
         File? rna_starsolo_raw_tar = rna.task_starsolo_raw_tar
