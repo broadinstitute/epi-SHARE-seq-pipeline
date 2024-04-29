@@ -22,7 +22,7 @@ workflow combinomics {
         String chemistry
         String prefix = "shareseq-project"
         String? subpool
-        String pipeline_modality = "full" # "full": run everything; "count_only": stops after producing fragment file and count matrix; "no_align": correct and trim raw fastqs.
+        String pipeline_modality = "full" # "full": run everything; "count_only": stops after producing fragment file and count matrix
 
         File whitelists_tsv = 'gs://broad-buenrostro-pipeline-genome-annotations/whitelists/whitelists.tsv'
         File? whitelist
@@ -157,33 +157,29 @@ workflow combinomics {
                 }
             }
             
-            if ( pipeline_modality != "no_align" ) {
-                call joint_qc.joint_qc_plotting as joint_qc {
-                    input:
-                        atac_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata,
-                        rna_barcode_metadata = rna.rna_barcode_metadata,
-                        prefix = prefix,
-                        genome_name = genome_name_
-                }
+            call joint_qc.joint_qc_plotting as joint_qc {
+                input:
+                    atac_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata,
+                    rna_barcode_metadata = rna.rna_barcode_metadata,
+                    prefix = prefix,
+                    genome_name = genome_name_
             }
         }
     }
 
-    if ( pipeline_modality != "no_align" ) {
-        call html_report.html_report as html_report {
-            input:
-                prefix = prefix,
-                atac_metrics = atac.atac_qc_metrics_csv,
-                rna_metrics = rna.rna_qc_metrics,
-                ## JPEG files to be encoded and appended to html
-                # RNA plots
-                image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot,
-                               rna.rna_umi_barcode_rank_plot, rna.rna_gene_barcode_rank_plot, rna.rna_gene_umi_scatter_plot, rna.rna_umi_histogram, rna.rna_seurat_raw_violin_plot, rna.rna_seurat_raw_qc_scatter_plot, rna.rna_seurat_filtered_violin_plot, rna.rna_seurat_filtered_qc_scatter_plot, rna.rna_seurat_variable_genes_plot, rna.rna_seurat_PCA_dim_loadings_plot, rna.rna_seurat_PCA_plot, rna.rna_seurat_heatmap_plot, rna.rna_seurat_jackstraw_plot, rna.rna_seurat_elbow_plot, rna.rna_seurat_umap_cluster_plot, rna.rna_seurat_umap_rna_count_plot, rna.rna_seurat_umap_gene_count_plot, rna.rna_seurat_umap_mito_plot,
-                               atac.atac_qc_barcode_rank_plot, atac.atac_qc_tsse_fragments_plot, atac.atac_qc_insertion_size_histogram, atac.atac_qc_fragment_histogram,  atac.atac_qc_tss_enrichment, atac.atac_archr_raw_tss_enrichment, atac.atac_archr_filtered_tss_enrichment, atac.atac_archr_raw_fragment_size_plot, atac.atac_archr_filtered_fragment_size_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_cluster_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_num_frags_plot, atac.atac_archr_umap_tss_score_plot, atac.atac_archr_umap_frip_plot, atac.atac_archr_gene_heatmap_plot,
-                               dorcs.j_plot],
-                ## Links to files and logs to append to end of html
-                log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_alignment_log, atac.atac_archr_notebook_log, dorcs.dorcs_notebook_log]
-        }
+    call html_report.html_report as html_report {
+        input:
+            prefix = prefix,
+            atac_metrics = atac.atac_qc_metrics_csv,
+            rna_metrics = rna.rna_qc_metrics,
+            ## JPEG files to be encoded and appended to html
+            # RNA plots
+            image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot,
+                            rna.rna_umi_barcode_rank_plot, rna.rna_gene_barcode_rank_plot, rna.rna_gene_umi_scatter_plot, rna.rna_umi_histogram, rna.rna_seurat_raw_violin_plot, rna.rna_seurat_raw_qc_scatter_plot, rna.rna_seurat_filtered_violin_plot, rna.rna_seurat_filtered_qc_scatter_plot, rna.rna_seurat_variable_genes_plot, rna.rna_seurat_PCA_dim_loadings_plot, rna.rna_seurat_PCA_plot, rna.rna_seurat_heatmap_plot, rna.rna_seurat_jackstraw_plot, rna.rna_seurat_elbow_plot, rna.rna_seurat_umap_cluster_plot, rna.rna_seurat_umap_rna_count_plot, rna.rna_seurat_umap_gene_count_plot, rna.rna_seurat_umap_mito_plot,
+                            atac.atac_qc_barcode_rank_plot, atac.atac_qc_tsse_fragments_plot, atac.atac_qc_insertion_size_histogram, atac.atac_qc_fragment_histogram,  atac.atac_qc_tss_enrichment, atac.atac_archr_raw_tss_enrichment, atac.atac_archr_filtered_tss_enrichment, atac.atac_archr_raw_fragment_size_plot, atac.atac_archr_filtered_fragment_size_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_cluster_plot, atac.atac_archr_umap_doublets, atac.atac_archr_umap_num_frags_plot, atac.atac_archr_umap_tss_score_plot, atac.atac_archr_umap_frip_plot, atac.atac_archr_gene_heatmap_plot,
+                            dorcs.j_plot],
+            ## Links to files and logs to append to end of html
+            log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_alignment_log, atac.atac_archr_notebook_log, dorcs.dorcs_notebook_log]
     }
 
     output{

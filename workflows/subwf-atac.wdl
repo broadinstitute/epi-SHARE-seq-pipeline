@@ -92,96 +92,93 @@ workflow wf_atac {
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
 
-    if (  "~{pipeline_modality}" != "no_align" ) {
+    if ( "~{chemistry}" == "shareseq" ) {
+        call task_chromap_read_format.get_read_format as get_read_format {
+            input:
+                fastq_R2 = read2[0]
+        }
+    }
 
-        if ( "~{chemistry}" == "shareseq" ) {
-            call task_chromap_read_format.get_read_format as get_read_format {
-                input:
-                    fastq_R2 = read2[0]
-            }
+    call task_align_chromap.atac_align_chromap as align {
+        input:
+            fastq_R1 = read1,
+            fastq_R2 = read2,
+            fastq_barcode = fastq_barcode,
+            reference_fasta = reference_fasta,
+            chrom_sizes = chrom_sizes,
+            trim_adapters = trim_adapters,
+            genome_name = genome_name,
+            subpool = subpool,
+            multimappers = align_multimappers,
+            barcode_inclusion_list = whitelist,
+            barcode_conversion_dict = barcode_conversion_dict,
+            prefix = prefix,
+            disk_factor = align_disk_factor,
+            memory_factor = align_memory_factor,
+            cpus = align_cpus,
+            docker_image = align_docker_image,
+            remove_pcr_duplicates = remove_pcr_duplicates,
+            remove_pcr_duplicates_at_cell_level = remove_pcr_duplicates_at_cell_level,
+            Tn5_shift = Tn5_shift,
+            low_mem = low_mem,
+            bed_output = bed_output,
+            max_insert_size = max_insert_size,
+            quality_filter = quality_filter,
+            bc_error_threshold = bc_error_threshold,
+            bc_probability_threshold = bc_probability_threshold,
+            read_format = select_first([get_read_format.read_format, read_format])
+    }
+
+    call task_qc_atac.qc_atac as qc_atac{
+        input:
+            fragments = align.atac_fragments,
+            fragments_index = align.atac_fragments_index,
+            barcode_summary = align.atac_align_barcode_statistics,
+            tss = tss_bed,
+            gtf = gtf,
+            subpool = subpool,
+            barcode_conversion_dict = barcode_conversion_dict,
+            fragment_min_cutoff = qc_fragment_min_cutoff,
+            chrom_sizes = chrom_sizes,
+            hist_max_fragment = qc_hist_max_fragment,
+            hist_min_fragment = qc_hist_min_fragment,
+            genome_name = genome_name,
+            prefix = prefix,
+            cpus = qc_cpus,
+            disk_factor = qc_disk_factor,
+            docker_image = qc_docker_image,
+            memory_factor = qc_memory_factor
         }
 
-        call task_align_chromap.atac_align_chromap as align {
+    call task_make_track.make_track as track {
+        input:
+            fragments = align.atac_fragments,
+            chrom_sizes = chrom_sizes,
+            genome_name = genome_name,
+            prefix = prefix,
+            cpus = make_track_cpus,
+            disk_factor = make_track_disk_factor,
+            docker_image = make_track_docker_image,
+            memory_factor = make_track_memory_factor
+    }
+
+    call task_log_atac.log_atac as log_atac {
+        input:
+            alignment_log = align.atac_alignment_log,
+            barcode_log = align.atac_align_barcode_statistics,
+            prefix = prefix
+    }
+
+    if (  "~{pipeline_modality}" == "full" ) {
+        call task_archr.archr as archr{
             input:
-                fastq_R1 = read1,
-                fastq_R2 = read2,
-                fastq_barcode = fastq_barcode,
-                reference_fasta = reference_fasta,
-                chrom_sizes = chrom_sizes,
-                trim_adapters = trim_adapters,
-                genome_name = genome_name,
-                subpool = subpool,
-                multimappers = align_multimappers,
-                barcode_inclusion_list = whitelist,
-                barcode_conversion_dict = barcode_conversion_dict,
+                atac_frag = align.atac_fragments,
+                genome = genome_name,
+                peak_set = peak_set,
                 prefix = prefix,
-                disk_factor = align_disk_factor,
-                memory_factor = align_memory_factor,
-                cpus = align_cpus,
-                docker_image = align_docker_image,
-                remove_pcr_duplicates = remove_pcr_duplicates,
-                remove_pcr_duplicates_at_cell_level = remove_pcr_duplicates_at_cell_level,
-                Tn5_shift = Tn5_shift,
-                low_mem = low_mem,
-                bed_output = bed_output,
-                max_insert_size = max_insert_size,
-                quality_filter = quality_filter,
-                bc_error_threshold = bc_error_threshold,
-                bc_probability_threshold = bc_probability_threshold,
-                read_format = select_first([get_read_format.read_format, read_format])
-        }
-
-        call task_qc_atac.qc_atac as qc_atac{
-            input:
-                fragments = align.atac_fragments,
-                fragments_index = align.atac_fragments_index,
-                barcode_summary = align.atac_align_barcode_statistics,
-                tss = tss_bed,
-                gtf = gtf,
-                subpool = subpool,
-                barcode_conversion_dict = barcode_conversion_dict,
-                fragment_min_cutoff = qc_fragment_min_cutoff,
-                chrom_sizes = chrom_sizes,
-                hist_max_fragment = qc_hist_max_fragment,
-                hist_min_fragment = qc_hist_min_fragment,
-                genome_name = genome_name,
-                prefix = prefix,
-                cpus = qc_cpus,
-                disk_factor = qc_disk_factor,
-                docker_image = qc_docker_image,
-                memory_factor = qc_memory_factor
-         }
-
-        call task_make_track.make_track as track {
-            input:
-                fragments = align.atac_fragments,
-                chrom_sizes = chrom_sizes,
-                genome_name = genome_name,
-                prefix = prefix,
-                cpus = make_track_cpus,
-                disk_factor = make_track_disk_factor,
-                docker_image = make_track_docker_image,
-                memory_factor = make_track_memory_factor
-        }
-
-        call task_log_atac.log_atac as log_atac {
-            input:
-                alignment_log = align.atac_alignment_log,
-                barcode_log = align.atac_align_barcode_statistics,
-                prefix = prefix
-        }
-
-        if (  "~{pipeline_modality}" == "full" ) {
-            call task_archr.archr as archr{
-                input:
-                    atac_frag = align.atac_fragments,
-                    genome = genome_name,
-                    peak_set = peak_set,
-                    prefix = prefix,
-                    memory_factor = archr_memory_factor,
-                    disk_factor = archr_disk_factor,
-                    docker_image = archr_docker_image
-            }
+                memory_factor = archr_memory_factor,
+                disk_factor = archr_disk_factor,
+                docker_image = archr_docker_image
         }
     }
 
