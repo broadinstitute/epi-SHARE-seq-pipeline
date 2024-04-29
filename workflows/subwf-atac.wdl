@@ -65,13 +65,6 @@ workflow wf_atac {
         Float? qc_memory_factor = 0.15
         String? qc_docker_image
 
-        # Trim-specific inputs
-        # Runtime parameters
-        Int? trim_cpus = 16
-        Float? trim_disk_factor = 8.0
-        Float? trim_memory_factor = 0.15
-        String? trim_docker_image
-
         # Make track inputs
         # Runtime parameters
         Int make_track_cpus = 8

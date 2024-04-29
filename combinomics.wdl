@@ -17,7 +17,6 @@ workflow combinomics {
     input {
         # Common inputs
 
-        Boolean trim_fastqs = true
         Boolean dorcs_flag = true
         String chemistry
         String prefix = "shareseq-project"
@@ -129,7 +128,6 @@ workflow combinomics {
                     subpool = subpool,
                     gtf = gtf_,
                     whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
-                    trim_fastqs = trim_fastqs,
                     chrom_sizes = chrom_sizes_,
                     genome_index_tar = idx_tar_atac_,
                     tss_bed = tss_bed_,
