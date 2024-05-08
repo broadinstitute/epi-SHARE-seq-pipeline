@@ -40,6 +40,7 @@ workflow wf_rna {
         Float? outFilterMismatchNoverReadLmax
         Int? outFilterScoreMin
         String? soloBarcodeMate # 2 for SHARE
+        String? soloCBposition # 1_-83_1_-76 1_-45_1_-38 1_-7_1_0 for SHARE
         String? clip5pNbases  # 0 34 for SHARE
         # Runtime parameters
         Int? align_cpus
@@ -92,6 +93,7 @@ workflow wf_rna {
             outFilterMismatchNoverReadLmax = outFilterMismatchNoverReadLmax,
             outFilterScoreMin = outFilterScoreMin,
             soloBarcodeMate = soloBarcodeMate,
+            soloCBposition = soloCBposition,
             clip5pNbases = clip5pNbases,
             genome_name = genome_name,
             genome_index_tar = idx_tar,
