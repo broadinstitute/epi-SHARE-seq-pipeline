@@ -49,7 +49,7 @@ workflow wf_atac {
         Int? quality_filter = 0
         Int? bc_error_threshold = 2
         Float? bc_probability_threshold = 0.9
-        String? read_format = "bc:0:-1,r1:0:-1,r2:0:-1"
+        String? read_format
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor = 8.0
@@ -83,10 +83,10 @@ workflow wf_atac {
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
 
-    if ( "~{chemistry}" == "shareseq" ) {
-        call task_chromap_read_format.get_read_format as get_read_format {
+    if ( "~{chemistry}" == "shareseq" && !defined(read_format)) {
+        call task_chromap_read_format.get_chromap_read_format as get_chromap_read_format {
             input:
-                fastq_R2 = read2[0]
+                fastq = fastq_barcode[0]
         }
     }
 
@@ -117,7 +117,7 @@ workflow wf_atac {
             quality_filter = quality_filter,
             bc_error_threshold = bc_error_threshold,
             bc_probability_threshold = bc_probability_threshold,
-            read_format = select_first([get_read_format.read_format, read_format])
+            read_format = select_first([get_chromap_read_format.read_format, read_format])
     }
 
     call task_qc_atac.qc_atac as qc_atac{
