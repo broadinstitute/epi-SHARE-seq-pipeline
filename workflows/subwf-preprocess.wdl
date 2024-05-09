@@ -22,6 +22,8 @@ workflow wf_preprocess {
 		String terra_project # set to none or make optional
 		String workspace_name
 		String dockerImage = "us.gcr.io/buenrostro-share-seq/task_preprocess:dev"
+		Float? basecalls_to_bams_memory_factor = 1.4
+		Float? extract_barcodes_memory_factor = 0.8
 	}
 
 	String barcodeStructure = "99M8B"
@@ -50,8 +52,8 @@ workflow wf_preprocess {
 	Int lengthLanes = length(select_first([lanes, GetLanes.lanes]))
 	# memory estimate for BasecallsToBam depends on estimated size of one lane of data
 	Float bclSize = size(bcl, 'G')
-	Float memory = ceil(1.4 * bclSize + 147) / lengthLanes
-	Float memory2 = (ceil(0.8 * bclSize) * 1.25) / lengthLanes # an unusual increase from 0.25 x for black swan
+	Float basecalls_to_bams_memory = ceil(basecalls_to_bams_memory_factor * bclSize + 147) / lengthLanes
+	Float extract_barcodes_memory = (ceil(extract_barcodes_memory_factor * bclSize) * 1.25) / lengthLanes # an unusual increase from 0.25 x for black swan
 	
 	scatter (lane in select_first([lanes, GetLanes.lanes])) {
 		call BarcodeMap {
@@ -69,7 +71,7 @@ workflow wf_preprocess {
 				barcodeStructure = barcodeStructure,
 				lane = lane,
 				dockerImage = dockerImage,
-				memory = memory2
+				memory = extract_barcodes_memory
 		}
 
 		call BasecallsToBams {
@@ -82,7 +84,7 @@ workflow wf_preprocess {
 				lane = lane,
 				sequencingCenter = sequencingCenter,
 				dockerImage = dockerImage,
-				memory = memory
+				memory = basecalls_to_bams_memory
 		}
 
 		scatter(bam in BasecallsToBams.bams){
@@ -227,6 +229,7 @@ task ExtractBarcodes {
 		Int lane 
 		String dockerImage
 		Float memory
+		Float? picard_java_heap_factor = 0.9
 	}
 	
 	parameter_meta {
@@ -246,7 +249,7 @@ task ExtractBarcodes {
 	Int diskSize = ceil(2.1 * bclSize)
 	String diskType = if diskSize > 375 then "SSD" else "LOCAL"
 
-	Int javaMemory = ceil((memory - 0.5) * 1500)
+	Int picard_java_memory = round(picard_java_heap_factor * memory)
 
         String laneUntarBcl = untarBcl + ' RunInfo.xml RTAComplete.txt RunParameters.xml Data/Intensities/s.locs Data/Intensities/BaseCalls/L00~{lane}  && rm "~{basename(bcl)}"'
 	
@@ -275,7 +278,7 @@ task ExtractBarcodes {
 		done < "~{barcodesMap}"
 
 		# Extract barcodes, write to metrics file
-		java -Xmx~{javaMemory}m -jar /software/picard.jar ExtractIlluminaBarcodes \
+		java -Xmx~{picard_java_memory}G -jar /software/picard.jar ExtractIlluminaBarcodes \
 			-BASECALLS_DIR "Data/Intensities/BaseCalls" \
 			-TMP_DIR . \
 			-OUTPUT_DIR . \
