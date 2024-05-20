@@ -34,7 +34,7 @@ task atac_align_chromap {
         Int? bc_error_threshold = 1
         Float? bc_probability_threshold = 0.9
         #TODO: This should come from a previous task parsing the seqspec.
-        String? read_format 
+        String? read_format = "bc:0:-1,r1:0:-1,r2:0:-1"
 
         String? subpool = "none"
         String genome_name # GRCh38, mm10

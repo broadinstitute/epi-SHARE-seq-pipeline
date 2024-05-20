@@ -22,7 +22,7 @@ task rna_align {
         String prefix
         String chemistry
 
-        # Extra parameteres for STARsolo SHARE.
+        # Extra parameters for STARsolo SHARE.
         String soloUMIdedup = "1MM_All"
         String soloMultiMappers = "Unique EM"
         Int outFilterMultimapNmax = 20
@@ -31,6 +31,7 @@ task rna_align {
         Float? outFilterMismatchNoverReadLmax
         String? soloBarcodeMate
         String? clip5pNbases  # 39 0
+        String? soloCBposition = "1_-83_1_-76 1_-45_1_-38 1_-7_1_0"
 
         Int? outFilterScoreMin
         Int? winAnchorMultimapNmax
@@ -103,7 +104,7 @@ task rna_align {
             --soloStrand Forward \
             --soloCBwhitelist whitelist.txt whitelist.txt whitelist.txt \
             --soloCBmatchWLtype 1MM \
-            --soloCBposition 1_-83_1_-76 1_-45_1_-38 1_-7_1_0 \
+            --soloCBposition ~{soloCBposition} \
             --soloUMIposition 0_0_0_9 \
             ~{"--soloBarcodeMate "+ soloBarcodeMate} \
             ~{"--clip5pNbases "+ clip5pNbases} \

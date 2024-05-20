@@ -40,6 +40,7 @@ workflow wf_rna {
         Float? outFilterMismatchNoverReadLmax
         Int? outFilterScoreMin
         String? soloBarcodeMate # 2 for SHARE
+        String? soloCBposition # 1_-83_1_-76 1_-45_1_-38 1_-7_1_0 for SHARE
         String? clip5pNbases  # 0 34 for SHARE
         # Runtime parameters
         Int? align_cpus
@@ -77,87 +78,86 @@ workflow wf_rna {
         String? seurat_docker_image
     }
 
-    if (  "~{pipeline_modality}" != "no_align" ) {
-        call task_starsolo.rna_align as align {
-            input:
-                chemistry = chemistry,
-                fastq_R1 = read1,
-                fastq_R2 = read2,
-                whitelist = whitelist,
-                soloMultiMappers = soloMultiMappers,
-                soloUMIdedup = soloUMIdedup,
-                outFilterMultimapNmax = outFilterMultimapNmax,
-                outFilterScoreMinOverLread = outFilterScoreMinOverLread,
-                outFilterMatchNminOverLread = outFilterMatchNminOverLread,
-                winAnchorMultimapNmax = winAnchorMultimapNmax,
-                outFilterMismatchNoverReadLmax = outFilterMismatchNoverReadLmax,
-                outFilterScoreMin = outFilterScoreMin,
-                soloBarcodeMate = soloBarcodeMate,
-                clip5pNbases = clip5pNbases,
-                genome_name = genome_name,
-                genome_index_tar = idx_tar,
-                prefix = prefix,
-                cpus = align_cpus,
-                disk_factor = align_disk_factor,
-                memory_factor = align_memory_factor,
-                docker_image = align_docker_image
-        }
-
-        call task_generate_h5.generate_h5 as generate_h5 {
-            input:
-                tar = align.raw_tar,
-                genome_name = genome_name,
-                prefix = prefix,
-                pkr = subpool,
-                multimappers = multimappers,
-                gene_naming = gene_naming,
-                disk_factor = generate_h5_disk_factor,
-                memory_factor = generate_h5_memory_factor,
-                docker_image = generate_h5_docker_image
-        }
-
-        call task_qc_rna.qc_rna as qc_rna {
-            input:
-                bam = align.output_bam,
-                mtx_tar = align.raw_tar,
-                umi_min_cutoff = umi_min_cutoff,
-                gene_min_cutoff = gene_min_cutoff,
-                hist_min_umi = hist_min_umi,
-                hist_max_umi = hist_max_umi,
-                subpool = subpool,
-                barcode_tag = barcode_tag,
-                genome_name = genome_name,
-                prefix = prefix,
-                cpus = qc_cpus,
-                disk_factor = qc_disk_factor,
-                memory_factor = qc_memory_factor,
-                docker_image = qc_docker_image
-        }
-
-        call task_log_rna.log_rna as log_rna {
+    call task_starsolo.rna_align as align {
         input:
-            alignment_log = align.log_final_out,
-            qc_rna_statistics = qc_rna.rna_qc_statistics,
-            barcode_statistics = align.barcodes_stats,
-            summary_csv = align.summary_csv,
-            prefix = prefix
-        }
+            chemistry = chemistry,
+            fastq_R1 = read1,
+            fastq_R2 = read2,
+            whitelist = whitelist,
+            soloMultiMappers = soloMultiMappers,
+            soloUMIdedup = soloUMIdedup,
+            outFilterMultimapNmax = outFilterMultimapNmax,
+            outFilterScoreMinOverLread = outFilterScoreMinOverLread,
+            outFilterMatchNminOverLread = outFilterMatchNminOverLread,
+            winAnchorMultimapNmax = winAnchorMultimapNmax,
+            outFilterMismatchNoverReadLmax = outFilterMismatchNoverReadLmax,
+            outFilterScoreMin = outFilterScoreMin,
+            soloBarcodeMate = soloBarcodeMate,
+            soloCBposition = soloCBposition,
+            clip5pNbases = clip5pNbases,
+            genome_name = genome_name,
+            genome_index_tar = idx_tar,
+            prefix = prefix,
+            cpus = align_cpus,
+            disk_factor = align_disk_factor,
+            memory_factor = align_memory_factor,
+            docker_image = align_docker_image
+    }
 
-        if ( "~{pipeline_modality}" == "full") {
-            call task_seurat.seurat as seurat {
-                input:
-                    rna_matrix = generate_h5.h5_matrix,
-                    genome_name = genome_name,
-                    min_features = seurat_min_features,
-                    percent_mt = seurat_percent_mt,
-                    min_cells = seurat_min_cells,
-                    umap_dim = seurat_umap_dim,
-                    umap_resolution = seurat_umap_resolution,
-                    prefix = prefix,
-                    disk_factor = seurat_disk_factor,
-                    memory_factor = seurat_memory_factor,
-                    docker_image = seurat_docker_image
-            }
+    call task_generate_h5.generate_h5 as generate_h5 {
+        input:
+            tar = align.raw_tar,
+            genome_name = genome_name,
+            prefix = prefix,
+            pkr = subpool,
+            multimappers = multimappers,
+            gene_naming = gene_naming,
+            disk_factor = generate_h5_disk_factor,
+            memory_factor = generate_h5_memory_factor,
+            docker_image = generate_h5_docker_image
+    }
+
+    call task_qc_rna.qc_rna as qc_rna {
+        input:
+            bam = align.output_bam,
+            mtx_tar = align.raw_tar,
+            umi_min_cutoff = umi_min_cutoff,
+            gene_min_cutoff = gene_min_cutoff,
+            hist_min_umi = hist_min_umi,
+            hist_max_umi = hist_max_umi,
+            subpool = subpool,
+            barcode_tag = barcode_tag,
+            genome_name = genome_name,
+            prefix = prefix,
+            cpus = qc_cpus,
+            disk_factor = qc_disk_factor,
+            memory_factor = qc_memory_factor,
+            docker_image = qc_docker_image
+    }
+
+    call task_log_rna.log_rna as log_rna {
+    input:
+        alignment_log = align.log_final_out,
+        qc_rna_statistics = qc_rna.rna_qc_statistics,
+        barcode_statistics = align.barcodes_stats,
+        summary_csv = align.summary_csv,
+        prefix = prefix
+    }
+
+    if ( "~{pipeline_modality}" == "full") {
+        call task_seurat.seurat as seurat {
+            input:
+                rna_matrix = generate_h5.h5_matrix,
+                genome_name = genome_name,
+                min_features = seurat_min_features,
+                percent_mt = seurat_percent_mt,
+                min_cells = seurat_min_cells,
+                umap_dim = seurat_umap_dim,
+                umap_resolution = seurat_umap_resolution,
+                prefix = prefix,
+                disk_factor = seurat_disk_factor,
+                memory_factor = seurat_memory_factor,
+                docker_image = seurat_docker_image
         }
     }
 
