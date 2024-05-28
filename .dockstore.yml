@@ -62,10 +62,10 @@ workflows:
          tags:
              - /.*/
 
-    - name: "correct-fastqs"
-      subclass: WDL
-      primaryDescriptorPath: /workflows/subwf-correct.wdl
-      filters:  # Only develop or master branches and localAligner/** tags
+   - name: "correct-fastqs"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-correct.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
              - dev
