@@ -10,10 +10,11 @@ workflow correct_fastq {
     }
 
     input {
-        Array[File] read1
-        Array[File] read2
+        Array[File] atac_fastq_R1
+        Array[File] atac_fastq_R2
+        Array[File] rna_fastq_R1
+        Array[File] rna_fastq_R2
         File whitelist
-        String sample_type
         String? pkr
         String? prefix
         
@@ -24,13 +25,29 @@ workflow correct_fastq {
         String? docker_image
     }
 
-    scatter (read_pair in zip(read1, read2)) {
-        call correct_fastq.share_correct_fastq as correct {
+    scatter (read_pair in zip(atac_fastq_R1, atac_fastq_R2)) {
+        call correct_fastq.share_correct_fastq as correct_atac {
             input:
                 fastq_R1 = read_pair.left,
                 fastq_R2 = read_pair.right,
                 whitelist = whitelist,
-                sample_type = sample_type,
+                sample_type = "ATAC",
+                pkr = pkr,
+                prefix = prefix,
+                cpus = cpus,
+                disk_factor = disk_factor,
+                memory_factor = memory_factor,
+                docker_image = docker_image
+        }
+    }
+
+    scatter (read_pair in zip(rna_fastq_R1, rna_fastq_R2)) {
+        call correct_fastq.share_correct_fastq as correct_rna {
+            input:
+                fastq_R1 = read_pair.left,
+                fastq_R2 = read_pair.right,
+                whitelist = whitelist,
+                sample_type = "RNA",
                 pkr = pkr,
                 prefix = prefix,
                 cpus = cpus,
@@ -41,8 +58,11 @@ workflow correct_fastq {
     }
 
     output {
-        Array[File] corrected_fastq_R1 = correct.corrected_fastq_R1
-        Array[File] corrected_fastq_R2 = correct.corrected_fastq_R2
-        Array[File] corrected_fastq_barcode = correct.corrected_fastq_barcode
+        Array[File]? atac_corrected_fastq_R1 = correct_atac.corrected_fastq_R1
+        Array[File]? atac_corrected_fastq_R2 = correct_atac.corrected_fastq_R2
+        Array[File]? atac_corrected_fastq_barcode = correct_atac.corrected_fastq_barcode
+
+        Array[File]? rna_corrected_fastq_R1 = correct_rna.corrected_fastq_R1
+        Array[File]? rna_corrected_fastq_R2 = correct_rna.corrected_fastq_R2
     }
 }
