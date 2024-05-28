@@ -16,7 +16,7 @@ workflow correct_fastq {
         String sample_type
         String? pkr
         String? prefix
-
+        # Runtime attributes
         Int? cpus
         Float? disk_factor
         Float? memory_factor
