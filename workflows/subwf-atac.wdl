@@ -32,6 +32,10 @@ workflow wf_atac {
         String pipeline_modality = "full"
         File? barcode_conversion_dict # For 10X multiome
 
+        # Chromap read format-specific inputs
+        Float? read_format_disk_factor = 1.0
+        Float? read_format_memory_factor = 0.15
+
         # Align-specific inputs
         Array[File] read1
         Array[File] read2
@@ -86,7 +90,9 @@ workflow wf_atac {
     if ( "~{chemistry}" == "shareseq" && !defined(read_format)) {
         call task_chromap_read_format.get_chromap_read_format as get_chromap_read_format {
             input:
-                fastq = fastq_barcode[0]
+                fastq = fastq_barcode[0],
+                disk_factor = read_format_disk_factor,
+                memory_factor = read_format_memory_factor
         }
     }
 
