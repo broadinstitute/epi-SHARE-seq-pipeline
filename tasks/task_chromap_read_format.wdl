@@ -43,7 +43,7 @@ task get_chromap_read_format {
     }
 
     runtime {
-        docker: 'ubuntu:latest'
+        docker: 'google/cloud-sdk:latest'
     }
 
     parameter_meta {
