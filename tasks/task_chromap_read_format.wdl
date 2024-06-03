@@ -19,11 +19,8 @@ task get_chromap_read_format {
         # 8bp round 2 barcode, 30bp linker, 8bp round 3 barcode
         # Chromap indexing is 0-based and inclusive
 
-        # Get R2 FASTQ sequence length (read2 + cell barcode)
-        sequence_length=$(gsutil cp ~{fastq_path} - | gzip -dc | head -n 2 | tail -n 1 | wc -m)
-
         # Get read2 end position
-        r2_end=$(( sequence_length - 100 ))
+        r2_end=$(gsutil cp ~{fastq_path} - | gzip -dc | head -n 2 | tail -n 1 | awk '{print length($0) - 100}')
         
         # Calculate barcode positions
         bc1_start=$(( $r2_end + 16 ))
