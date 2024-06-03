@@ -11,31 +11,21 @@ task get_chromap_read_format {
     }
 
     input {
-        File fastq
-        
-        Float? disk_factor = 1
-        Float? memory_factor = 0.15
+        String fastq_path
     }
-
-    # Determine the size of the input
-    Float input_file_size_gb = size(fastq, "G")
-
-    # Determining memory size base on the size of the input files.
-    Float mem_gb = 1.0 + memory_factor * input_file_size_gb
-
-    # Determining disk size base on the size of the input files.
-    Int disk_gb = round(1.0 + disk_factor * input_file_size_gb)
-
-    # Determining disk type base on the size of disk.
-    String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     command <<<
         # SHARE R2 FASTQ format is read 2, 15bp linker, 8bp round 1 barcode, 30bp linker,
         # 8bp round 2 barcode, 30bp linker, 8bp round 3 barcode
         # Chromap indexing is 0-based and inclusive
 
-        r2_end=$(gzip -dc ~{fastq} | awk 'NR==2 {print length($0)-100}')
+        # Get R2 FASTQ sequence length (read2 + cell barcode)
+        sequence_length=$(gsutil cp ~{fastq_path} - | gzip -dc | head -n 2 | tail -n 1 | wc -m)
+
+        # Get read2 end position
+        r2_end=$(( sequence_length - 100 ))
         
+        # Calculate barcode positions
         bc1_start=$(( $r2_end + 16 ))
         bc1_end=$(( $bc1_start + 7 ))
 
@@ -53,15 +43,13 @@ task get_chromap_read_format {
     }
 
     runtime {
-        disks: "local-disk ${disk_gb} ${disk_type}"
-        memory: "${mem_gb} GB"
         docker: 'ubuntu:latest'
     }
 
     parameter_meta {
-        fastq: {
-            description: 'FASTQ file containing cell barcode sequence',
-	        help: 'FASTQ file containing cell barcode sequence',
+        fastq_path: {
+            description: 'Path to FASTQ file containing cell barcode sequence',
+	        help: 'Path to FASTQ file containing cell barcode sequence',
             example: 'SS-PKR-100_R2.fastq.gz'
         }
     }
