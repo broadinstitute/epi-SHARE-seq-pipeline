@@ -13,7 +13,7 @@ task atac_align_chromap {
     input {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Array[File] fastq_R1
-        Array[File]? fastq_R2
+        Array[File] fastq_R2
         Array[File] fastq_barcode
         File reference_fasta
         File chrom_sizes
@@ -106,7 +106,7 @@ task atac_align_chromap {
                 ~{"-q " + quality_filter} \
                 -t ~{cpus} \
                 -1 ~{sep="," fastq_R1} \
-                -2 ~{sep="," fastq_R2} \
+                ~{if length(fastq_R2) > 0 then "-2 " + "~{sep=',' fastq_R2}" else "" } \
                 -b ~{sep="," fastq_barcode} \
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
