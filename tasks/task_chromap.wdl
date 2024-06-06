@@ -13,7 +13,7 @@ task atac_align_chromap {
     input {
         # This task takes in input the preprocessed ATAC fastqs and align them to the genome.
         Array[File] fastq_R1
-        Array[File] fastq_R2
+        Array[File]? fastq_R2
         Array[File] fastq_barcode
         File reference_fasta
         File chrom_sizes
