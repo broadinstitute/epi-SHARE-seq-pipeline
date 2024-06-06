@@ -106,7 +106,7 @@ task atac_align_chromap {
                 ~{"-q " + quality_filter} \
                 -t ~{cpus} \
                 -1 ~{sep="," fastq_R1} \
-                -2 ~{sep="," fastq_R2} \
+                ~{"-2 " + sep(",", fastq_R2)} \
                 -b ~{sep="," fastq_barcode} \
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
