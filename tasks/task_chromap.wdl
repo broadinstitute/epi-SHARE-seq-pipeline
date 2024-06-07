@@ -108,7 +108,6 @@ task atac_align_chromap {
                 -1 ~{sep="," fastq_R1} \
                 ~{if length(fastq_R2) > 0 then "-2 " + "~{sep=',' fastq_R2}" else "" } \
                 -b ~{sep="," fastq_barcode} \
-                -b ~{sep="," fastq_barcode} \
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o out.fragments.tmp.tsv \
