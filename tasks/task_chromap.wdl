@@ -67,7 +67,7 @@ task atac_align_chromap {
 
     String monitor_log = "atac_align_monitor.log"
 
-    String tmp = "~{sep="," fastq_R2}"
+    String tmp = "~{sep=',' fastq_R2}"
     String mate2 = "-2 ~{tmp}"
 
     command <<<
