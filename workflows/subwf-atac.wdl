@@ -204,7 +204,6 @@ workflow wf_atac {
         # Float? atac_percent_duplicates = log_atac.atac_pct_dup
         File? atac_qc_metrics_csv = log_atac.atac_statistics_csv
 
-
         # ArchR
         File? atac_archr_notebook_output = archr.notebook_output
         File? atac_archr_notebook_log = archr.notebook_log
