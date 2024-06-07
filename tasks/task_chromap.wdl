@@ -67,9 +67,6 @@ task atac_align_chromap {
 
     String monitor_log = "atac_align_monitor.log"
 
-    String tmp = "~{sep=',' fastq_R2}"
-    String mate2 = "-2 ~{tmp}"
-
     command <<<
         set -e
 
@@ -109,7 +106,7 @@ task atac_align_chromap {
                 ~{"-q " + quality_filter} \
                 -t ~{cpus} \
                 -1 ~{sep="," fastq_R1} \
-                ~{if length(fastq_R2) > 0 then mate2 else "" } \
+                -2 ~{sep="," fastq_R2} \
                 -b ~{sep="," fastq_barcode} \
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
