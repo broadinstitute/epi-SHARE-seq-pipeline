@@ -67,7 +67,7 @@ task atac_align_chromap {
 
     String monitor_log = "atac_align_monitor.log"
 
-    String temp = "${sep=',' fastq_R2}"
+    String temp = '${sep="," fastq_R2}'
 
     command <<<
         set -e
