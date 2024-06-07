@@ -65,13 +65,13 @@ task atac_align_chromap {
     String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.summary.csv"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
 
-    String mate2 = if length(fastq_R2) > 0 then "${sep=',' fastq_R2}" else ""
+    String mate2 =  "~{sep=',' fastq_R2}"
 
     String monitor_log = "atac_align_monitor.log"
 
     command <<<
         set -e
-        
+
         bash $(which monitor_script.sh) 1>&2 &
 
         # Create index
