@@ -84,7 +84,7 @@ task atac_align_chromap {
             echo '------ No decompression needed for the barcode inclusion list ------' 1>&2
             cat ~{barcode_inclusion_list} > barcode_inclusion_list.txt
         fi
-        mate2="~{sep=',' fastq_R2}"
+
         # [r1|r2|bc]:start:end:strand
         # --read-format bc:0:15,r1:16:-1
         # The start and end are inclusive and -1 means the end of the read. User may use multiple fields to specify non-consecutive segments, e.g. bc:0:15,bc:32:-1.
@@ -106,7 +106,7 @@ task atac_align_chromap {
                 ~{"-q " + quality_filter} \
                 -t ~{cpus} \
                 -1 ~{sep="," fastq_R1} \
-                -2 "${mate2}" \
+                ~{if length(fastq_R2) > 0 then "-2" else ""} ~{sep="," fastq_R2} \
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o out.fragments.tmp.tsv \
