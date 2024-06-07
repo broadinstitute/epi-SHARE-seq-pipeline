@@ -86,7 +86,7 @@ workflow wf_atac {
     if ( "~{chemistry}" == "shareseq" && !defined(read_format)) {
         call task_chromap_read_format.get_chromap_read_format as get_chromap_read_format {
             input:
-                fastq = fastq_barcode[0]
+                fastq_path = fastq_barcode[0]
         }
     }
 
@@ -203,7 +203,6 @@ workflow wf_atac {
         # Int? atac_duplicate_reads = log_atac.atac_duplicate_reads
         # Float? atac_percent_duplicates = log_atac.atac_pct_dup
         File? atac_qc_metrics_csv = log_atac.atac_statistics_csv
-
 
         # ArchR
         File? atac_archr_notebook_output = archr.notebook_output

@@ -84,7 +84,7 @@ task atac_align_chromap {
             echo '------ No decompression needed for the barcode inclusion list ------' 1>&2
             cat ~{barcode_inclusion_list} > barcode_inclusion_list.txt
         fi
-
+        
         # [r1|r2|bc]:start:end:strand
         # --read-format bc:0:15,r1:16:-1
         # The start and end are inclusive and -1 means the end of the read. User may use multiple fields to specify non-consecutive segments, e.g. bc:0:15,bc:32:-1.
@@ -97,7 +97,7 @@ task atac_align_chromap {
                 ~{true='--Tn5-shift ' false='' Tn5_shift} \
                 ~{true='--low-mem ' false='' low_mem} \
                 ~{true='--BED ' false='' bed_output} \
-                ~{"-l " + max_insert_size} \
+                ~{if max_insert_size > 0 then "-l " + "~{max_insert_size}" else "" } \
                 ~{"--bc-error-threshold " + bc_error_threshold} \
                 ~{"--bc-probability-threshold " + bc_probability_threshold} \
                 ~{"--read-format " + read_format} \

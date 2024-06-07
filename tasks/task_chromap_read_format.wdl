@@ -11,7 +11,7 @@ task get_chromap_read_format {
     }
 
     input {
-        File fastq 
+        String fastq_path
     }
 
     command <<<
@@ -19,8 +19,10 @@ task get_chromap_read_format {
         # 8bp round 2 barcode, 30bp linker, 8bp round 3 barcode
         # Chromap indexing is 0-based and inclusive
 
-        r2_end=$(gzip -dc ~{fastq} | awk 'NR==2 {print length($0)-100}')
+        # Get read2 end position
+        r2_end=$(gsutil cp ~{fastq_path} - | gzip -dc | head -n 2 | tail -n 1 | awk '{print length($0) - 100}')
         
+        # Calculate barcode positions
         bc1_start=$(( $r2_end + 16 ))
         bc1_end=$(( $bc1_start + 7 ))
 
@@ -38,13 +40,13 @@ task get_chromap_read_format {
     }
 
     runtime {
-        docker: 'ubuntu:latest'
+        docker: 'google/cloud-sdk:latest'
     }
 
     parameter_meta {
-        fastq: {
-            description: 'FASTQ file containing cell barcode sequence',
-	        help: 'FASTQ file containing cell barcode sequence',
+        fastq_path: {
+            description: 'Path to FASTQ file containing cell barcode sequence',
+	        help: 'Path to FASTQ file containing cell barcode sequence',
             example: 'SS-PKR-100_R2.fastq.gz'
         }
     }
