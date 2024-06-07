@@ -65,8 +65,6 @@ task atac_align_chromap {
     String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.summary.csv"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
 
-    String mate2 =  "~{sep=',' fastq_R2}"
-
     String monitor_log = "atac_align_monitor.log"
 
     command <<<
@@ -86,6 +84,8 @@ task atac_align_chromap {
             echo '------ No decompression needed for the barcode inclusion list ------' 1>&2
             cat ~{barcode_inclusion_list} > barcode_inclusion_list.txt
         fi
+
+        mate2=~{sep=',' fastq_R2}
 
         # [r1|r2|bc]:start:end:strand
         # --read-format bc:0:15,r1:16:-1
@@ -108,7 +108,7 @@ task atac_align_chromap {
                 ~{"-q " + quality_filter} \
                 -t ~{cpus} \
                 -1 ~{sep="," fastq_R1} \
-                ~{if length(fastq_R2) > 0 then "-2 " + mate2 else "" } \
+                ~{if length(fastq_R2) > 0 then "-2 " + " ~{sep=',' fastq_R2}" else "" } \
                 -b ~{sep="," fastq_barcode} \
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
