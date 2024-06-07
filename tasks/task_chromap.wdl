@@ -66,7 +66,7 @@ task atac_align_chromap {
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
 
     String monitor_log = "atac_align_monitor.log"
-    
+
     command <<<
         set -e
 
@@ -106,7 +106,7 @@ task atac_align_chromap {
                 ~{"-q " + quality_filter} \
                 -t ~{cpus} \
                 -1 ~{sep="," fastq_R1} \
-                -2 $mate2 \
+                -2 ${mate2} \
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o out.fragments.tmp.tsv \
