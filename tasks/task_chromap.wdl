@@ -129,6 +129,7 @@ task atac_align_chromap {
         # Writing non corrected fragments
         awk -v OFS="\t" -v maxinsert=~{max_insert_size} '$3-$2<=maxinsert' out.fragments.clipped.tsv | bgzip -c > ~{fragments}.gz
         #tabix --zero-based --preset bed ~{fragments}.gz
+        touch ~{fragments}.gz.tbi
 
     >>>
 
