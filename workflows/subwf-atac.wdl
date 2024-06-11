@@ -47,7 +47,7 @@ workflow wf_atac {
         Boolean? trim_adapters = true
         Int? max_insert_size = 2000
         Int? quality_filter = 0
-        Int? bc_error_threshold = 2
+        Int? bc_error_threshold = 1
         Float? bc_probability_threshold = 0.9
         String? read_format
         # Runtime parameters
