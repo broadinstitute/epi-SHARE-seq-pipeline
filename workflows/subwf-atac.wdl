@@ -31,6 +31,7 @@ workflow wf_atac {
         Int? cutoff
         String pipeline_modality = "full"
         File? barcode_conversion_dict # For 10X multiome
+        String generate_track = "yes"
 
         # Align-specific inputs
         Array[File] read1
@@ -141,16 +142,18 @@ workflow wf_atac {
             memory_factor = qc_memory_factor
         }
 
-    call task_make_track.make_track as track {
-        input:
-            fragments = align.atac_fragments,
-            chrom_sizes = chrom_sizes,
-            genome_name = genome_name,
-            prefix = prefix,
-            cpus = make_track_cpus,
-            disk_factor = make_track_disk_factor,
-            docker_image = make_track_docker_image,
-            memory_factor = make_track_memory_factor
+    if (  "~{generate_track}" == "yes" ) {
+        call task_make_track.make_track as track {
+            input:
+                fragments = align.atac_fragments,
+                chrom_sizes = chrom_sizes,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = make_track_cpus,
+                disk_factor = make_track_disk_factor,
+                docker_image = make_track_docker_image,
+                memory_factor = make_track_memory_factor
+        }
     }
 
     call task_log_atac.log_atac as log_atac {
