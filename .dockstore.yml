@@ -62,3 +62,12 @@ workflows:
              - rc-v2.0.0
          tags:
              - /.*/
+
+   - name: "bowtie2"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-bowtie2.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - bowtie2
+         tags:
+             - /.*/
