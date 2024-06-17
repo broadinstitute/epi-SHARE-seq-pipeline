@@ -19,12 +19,7 @@ workflow bowtie2 {
     }
 }
 
-version 1.0
-
-# TASK
-# SHARE-atac-bowtie2
-
-task share_atac_align {
+task atac_align_bowtie2 {
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei (emattei@broadinstitute.org) at Broad Institute of MIT and Harvard'
