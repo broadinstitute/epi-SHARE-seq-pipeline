@@ -74,7 +74,7 @@ workflow wf_atac {
                 
         # ArchR-specific inputs
         File peak_set
-        Boolean? archr_flag = True
+        Boolean? archr_flag = true
         # Runtime parameters
         Float? archr_disk_factor
         Float? archr_memory_factor 
