@@ -10,6 +10,7 @@ workflows:
              - chromap-v2
              - dev-snapatac
              - chromap-read-format-memory
+             - archr-flag
          tags:
              - /.*/
 

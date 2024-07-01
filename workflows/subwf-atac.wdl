@@ -74,6 +74,7 @@ workflow wf_atac {
                 
         # ArchR-specific inputs
         File peak_set
+        Boolean? archr_flag = True
         # Runtime parameters
         Float? archr_disk_factor
         Float? archr_memory_factor 
@@ -160,8 +161,8 @@ workflow wf_atac {
             prefix = prefix
     }
 
-    if (  "~{pipeline_modality}" == "full" ) {
-        call task_archr.archr as archr{
+    if ( "~{pipeline_modality}" == "full" && archr_flag ) {
+        call task_archr.archr as archr {
             input:
                 atac_frag = align.atac_fragments,
                 genome = genome_name,
