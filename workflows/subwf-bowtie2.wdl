@@ -11,21 +11,24 @@ workflow bowtie2 {
         String genome_name
         String genome_index_tar
         Int? align_multimappers
+        Boolean correct_fastqs
     }
 
-    scatter (read_pair in zip(read1, read2)) {
-        call correct_fastq {
-            input:
-                fastq_R1 = read_pair.left,
-                fastq_R2 = read_pair.right,
-                whitelist = whitelist,
-                sample_type = "ATAC",
-                pkr = pkr,
-                prefix = prefix
+    if ( correct_fastqs ) {
+        scatter (read_pair in zip(read1, read2)) {
+            call correct_fastq {
+                input:
+                    fastq_R1 = read_pair.left,
+                    fastq_R2 = read_pair.right,
+                    whitelist = whitelist,
+                    sample_type = "ATAC",
+                    pkr = pkr,
+                    prefix = prefix
+            }
         }
     }
 
-    scatter (read_pair in zip(correct_fastq.corrected_fastq_R1, correct_fastq.corrected_fastq_R2)) {
+    scatter (read_pair in zip(select_first([correct_fastq.corrected_fastq_R1, read1]), select_first([correct_fastq.corrected_fastq_R2, read2]))) {
         call trim {
             input:
                 fastq_R1 = read_pair.left,
