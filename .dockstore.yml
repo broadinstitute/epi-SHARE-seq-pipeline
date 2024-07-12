@@ -69,7 +69,6 @@ workflows:
          branches:
              - main
              - dev
-             - correction-workflow
          tags:
              - /.*/
 
