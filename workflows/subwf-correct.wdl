@@ -25,35 +25,39 @@ workflow correct_fastq {
         String? docker_image
     }
 
-    scatter (read_pair in zip(atac_fastq_R1, atac_fastq_R2)) {
-        call correct_fastq.share_correct_fastq as correct_atac {
-            input:
-                fastq_R1 = read_pair.left,
-                fastq_R2 = read_pair.right,
-                whitelist = whitelist,
-                sample_type = "ATAC",
-                pkr = pkr,
-                prefix = prefix,
-                cpus = cpus,
-                disk_factor = disk_factor,
-                memory_factor = memory_factor,
-                docker_image = docker_image
+    if ( length(atac_fastq_R1) > 0 ) {
+        scatter (read_pair in zip(atac_fastq_R1, atac_fastq_R2)) {
+            call correct_fastq.share_correct_fastq as correct_atac {
+                input:
+                    fastq_R1 = read_pair.left,
+                    fastq_R2 = read_pair.right,
+                    whitelist = whitelist,
+                    sample_type = "ATAC",
+                    pkr = pkr,
+                    prefix = prefix,
+                    cpus = cpus,
+                    disk_factor = disk_factor,
+                    memory_factor = memory_factor,
+                    docker_image = docker_image
+            }
         }
     }
 
-    scatter (read_pair in zip(rna_fastq_R1, rna_fastq_R2)) {
-        call correct_fastq.share_correct_fastq as correct_rna {
-            input:
-                fastq_R1 = read_pair.left,
-                fastq_R2 = read_pair.right,
-                whitelist = whitelist,
-                sample_type = "RNA",
-                pkr = pkr,
-                prefix = prefix,
-                cpus = cpus,
-                disk_factor = disk_factor,
-                memory_factor = memory_factor,
-                docker_image = docker_image
+    if ( length(rna_fastq_R1) > 0 ) {
+        scatter (read_pair in zip(rna_fastq_R1, rna_fastq_R2)) {
+            call correct_fastq.share_correct_fastq as correct_rna {
+                input:
+                    fastq_R1 = read_pair.left,
+                    fastq_R2 = read_pair.right,
+                    whitelist = whitelist,
+                    sample_type = "RNA",
+                    pkr = pkr,
+                    prefix = prefix,
+                    cpus = cpus,
+                    disk_factor = disk_factor,
+                    memory_factor = memory_factor,
+                    docker_image = docker_image
+            }
         }
     }
 
