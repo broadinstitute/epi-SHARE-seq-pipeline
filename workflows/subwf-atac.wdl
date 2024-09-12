@@ -18,6 +18,7 @@ workflow wf_atac {
 
     input {
         File chrom_sizes
+        File? genome_index_tar
         File tss_bed
         Int? mapq_threshold = 30
         String? barcode_tag = "CB"
