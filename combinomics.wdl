@@ -64,7 +64,7 @@ workflow combinomics {
     Map[String, File] annotations = read_map(genome_tsv)
     String genome_name_ =  select_first([genome_name, annotations["genome_name"]])
     File peak_set_ = select_first([peak_set, annotations["ccre"]])
-    File idx_tar_atac_ = select_first([atac_genome_index_tar, annotations["bowtie2_idx_tar"]])
+    #File idx_tar_atac_ = select_first([atac_genome_index_tar, annotations["bowtie2_idx_tar"]])
     File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
     File tss_bed_ = select_first([tss_bed, annotations["tss"]])
 
