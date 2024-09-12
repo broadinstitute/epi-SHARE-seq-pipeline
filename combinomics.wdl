@@ -129,7 +129,6 @@ workflow combinomics {
                     gtf = gtf_,
                     whitelist = select_first([whitelist_atac, whitelist_atac_, whitelist, whitelist_]),
                     chrom_sizes = chrom_sizes_,
-                    genome_index_tar = idx_tar_atac_,
                     tss_bed = tss_bed_,
                     peak_set = peak_set_,
                     prefix = prefix,
