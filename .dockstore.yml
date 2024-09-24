@@ -6,6 +6,7 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - main
+             - IGVF-variant-jamboree
          tags:
              - /.*/
 
