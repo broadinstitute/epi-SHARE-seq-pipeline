@@ -193,13 +193,6 @@ workflow combinomics {
         File? atac_fragments_index = atac.atac_fragments_index
         File? atac_chromap_barcode_metadata = atac.atac_qc_chromap_barcode_metadata
         File? atac_snapatac2_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata
-        File? atac_archr_notebook_output = atac.atac_archr_notebook_output
-        File? atac_archr_arrow = atac.atac_archr_arrow
-        File? atac_track_bigwig = atac.atac_track_bigwig
-        File? atac_track_bigwig_no_nucleosome = atac.atac_track_bigwig_no_nucleosome
-        File? atac_track_bigwig_mono_nucleosome = atac.atac_track_bigwig_mono_nucleosome
-        File? atac_track_bigwig_multi_nucleosome = atac.atac_track_bigwig_multi_nucleosome
-
 
         # DORCS output
         File? dorcs_notebook_output = dorcs.dorcs_notebook_output

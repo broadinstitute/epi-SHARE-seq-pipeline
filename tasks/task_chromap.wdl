@@ -22,8 +22,9 @@ task atac_align_chromap {
 
         Boolean? trim_adapters = true
         Boolean? remove_pcr_duplicates = true
-        Boolean? remove_pcr_duplicates_at_cell_level = true
-        Boolean? Tn5_shift = true
+        Boolean? remove_pcr_duplicates_at_cell_level = false
+        Boolean? remove_pcr_duplicates_at_bulk_level = true
+        Boolean? Tn5_shift = false
         Boolean? low_mem = true
         Boolean? bed_output = true
         Int? max_insert_size = 2000
@@ -34,7 +35,7 @@ task atac_align_chromap {
         Int? bc_error_threshold = 1
         Float? bc_probability_threshold = 0.9
         #TODO: This should come from a previous task parsing the seqspec.
-        String? read_format = "bc:0:-1,r1:0:-1,r2:0:-1"
+        String? read_format
 
         String? subpool = "none"
         String genome_name # GRCh38, mm10
@@ -65,7 +66,7 @@ task atac_align_chromap {
     String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.summary.csv"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
 
-    String monitor_log = "atac_align_monitor.log"
+    String monitor_log = "atac_align_monitor.log.txt"
 
     command <<<
         set -e
@@ -94,6 +95,7 @@ task atac_align_chromap {
                 ~{true='--trim-adapters ' false='' trim_adapters} \
                 ~{true='--remove-pcr-duplicates ' false='' remove_pcr_duplicates} \
                 ~{true='--remove-pcr-duplicates-at-cell-level ' false='' remove_pcr_duplicates_at_cell_level} \
+                ~{true='--remove-pcr-duplicates-at-bulk-level ' false='' remove_pcr_duplicates_at_bulk_level} \
                 ~{true='--Tn5-shift ' false='' Tn5_shift} \
                 ~{true='--low-mem ' false='' low_mem} \
                 ~{true='--BED ' false='' bed_output} \
@@ -121,19 +123,13 @@ task atac_align_chromap {
             mv temp ~{barcode_log}
         fi
 
-        bedClip -verbose=2 out.fragments.tmp.tsv ~{chrom_sizes} out.fragments.clipped.tsv 2> ~{prefix}.bedClip.log.txt 
-
-
-        # Asking chromap to not correct and fixing +4/-4 shift here.
-        # awk -v OFS="\t" '{print $1,$2+4,$3-4,$4,$5}' 
         # Writing non corrected fragments
-        awk -v OFS="\t" -v maxinsert=~{max_insert_size} '$3-$2<=maxinsert' out.fragments.clipped.tsv | bgzip -c > ~{fragments}.gz
+        awk -v OFS="\t" -v maxinsert=~{max_insert_size} '$3-$2 <= maxinsert' out.fragments.tmp.tsv | bgzip -c > ~{fragments}.gz
         tabix --zero-based --preset bed ~{fragments}.gz
 
     >>>
 
     output {
-        File atac_clipping_log = "~{prefix}.bedClip.log.txt"
         File atac_fragments = "~{fragments}.gz"
         File atac_fragments_index = "~{fragments}.gz.tbi"
         File atac_align_barcode_statistics = barcode_log
@@ -158,42 +154,132 @@ task atac_align_chromap {
         fastq_R2: {
                 description: 'Read2 fastq.',
                 help: 'Processed fastq for read2.',
-                example: 'input.atac.R2.fq.gz'
+                example: 'input.atac.R2.fq.gz',
+            }
+        fastq_barcode: {
+                description: 'Barcode fastq.',
+                help: 'Processed fastq for barcode.',
+                example: 'input.atac.barcode.fq.gz',
+            }
+        reference_fasta: {
+                description: 'Reference fasta.',
+                help: 'Reference fasta file.',
+                example: 'reference.fasta',
+            }
+        chrom_sizes: {
+                description: 'Chrom sizes.',
+                help: 'Chrom sizes file.',
+                example: 'chrom.sizes',
+            }
+        barcode_inclusion_list: {
+                description: 'Barcode inclusion list.',
+                help: 'Barcode inclusion list.',
+                example: 'barcode_inclusion_list.txt',
+            }
+        barcode_conversion_dict: {
+                description: 'Barcode conversion dict.',
+                help: 'Barcode conversion dict.',
+                example: 'barcode_conversion_dict.txt',
+            }
+        trim_adapters: {
+                description: 'Trim adapters.',
+                help: 'Trim adapters.',
+                example: 'true',
+            }
+        remove_pcr_duplicates: {
+                description: 'Remove PCR duplicates.',
+                help: 'Remove PCR duplicates.',
+                example: 'true',
+            }
+        remove_pcr_duplicates_at_cell_level: {
+                description: 'Remove PCR duplicates at cell level.',
+                help: 'Remove PCR duplicates at cell level.',
+                example: 'false',
+            }
+        remove_pcr_duplicates_at_bulk_level: {
+                description: 'Remove PCR duplicates at bulk level.',
+                help: 'Remove PCR duplicates at bulk level.',
+                example: 'true',
+            }
+        Tn5_shift: {
+                description: 'Tn5 shift.',
+                help: 'Tn5 shift.',
+                example: 'false',
+            }
+        low_mem: {
+                description: 'Low mem.',
+                help: 'Low mem.',
+                example: 'true',
+            }
+        bed_output: {
+                description: 'Bed output.',
+                help: 'Bed output.',
+                example: 'true',
+            }
+        max_insert_size: {
+                description: 'Max insert size.',
+                help: 'Max insert size.',
+                example: '2000',
+            }
+        quality_filter: {
+                description: 'Quality filter.',
+                help: 'Quality filter.',
+                example: '0',
             }
         multimappers: {
-                    description: 'Specifiy the numbers of multimappers allowed.',
-                    help: 'This is the integer that will be passed to the -k parameter of bowtie2',
-                    example: [5]
+                description: 'Multimappers.',
+                help: 'Multimappers.',
+                example: '4',
             }
-        cpus: {
-                description: 'Number of cpus.',
-                help: 'Set the number of cpus used by bowtie2',
-                default: 16
+        bc_error_threshold: {
+                description: 'BC error threshold.',
+                help: 'BC error threshold.',
+                example: '1',
             }
-        disk_factor: {
-                description: 'Multiplication factor to determine disk required for task align.',
-                help: 'This factor will be multiplied to the size of FASTQs to determine required disk of instance (GCP/AWS) or job (HPCs).',
-                default: 8.0
+        bc_probability_threshold: {
+                description: 'BC probability threshold.',
+                help: 'BC probability threshold.',
+                example: '0.9',
             }
-        memory_factor: {
-                description: 'Multiplication factor to determine memory required for task align.',
-                help: 'This factor will be multiplied to the size of FASTQs to determine required memory of instance (GCP/AWS) or job (HPCs).',
-                default: 0.15
+        read_format: {
+                description: 'Read format.',
+                help: 'Read format.',
+                example: 'bc:0:15,r1:16:-1',
+            }
+        subpool: {
+                description: 'Subpool.',
+                help: 'Subpool.',
+                example: 'none',
             }
         genome_name: {
-                description: 'Reference name.',
-                help: 'The name of the reference genome used by the aligner. This is appended to the output file name.',
-                examples: ['GRCh38', 'mm10']
+                description: 'Genome name.',
+                help: 'Genome name.',
+                example: 'GRCh38',
             }
         prefix: {
-                description: 'Prefix for output files.',
-                help: 'Prefix that will be used to name the output files',
-                examples: 'my-experiment'
+                description: 'Prefix.',
+                help: 'Prefix.',
+                example: 'test-sample',
+            }
+        cpus: {
+                description: 'CPUs.',
+                help: 'CPUs.',
+                example: '8',
+            }
+        disk_factor: {
+                description: 'Disk factor.',
+                help: 'Disk factor.',
+                example: '1',
+            }
+        memory_factor: {
+                description: 'Memory factor.',
+                help: 'Memory factor.',
+                example: '0.15',
             }
         docker_image: {
                 description: 'Docker image.',
-                help: 'Docker image for the alignment step.',
-                example: ["us.gcr.io/buenrostro-share-seq/share_task_bowtie2"]
+                help: 'Docker image.',
+                example: 'us.gcr.io/buenrostro-share-seq/task_chromap:dev',
             }
-    }
+        
 }
