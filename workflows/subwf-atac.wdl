@@ -71,6 +71,8 @@ workflow wf_atac {
         Float? make_track_disk_factor = 4
         Float? make_track_memory_factor = 0.3
         String? make_track_docker_image
+
+        Boolean? generate_tracks = false
                 
         # ArchR-specific inputs
         File peak_set
@@ -118,7 +120,7 @@ workflow wf_atac {
             quality_filter = quality_filter,
             bc_error_threshold = bc_error_threshold,
             bc_probability_threshold = bc_probability_threshold,
-            read_format = select_first([get_chromap_read_format.read_format, read_format])
+            read_format = select_first([read_format, get_chromap_read_format.read_format])
     }
 
     call task_qc_atac.qc_atac as qc_atac{
@@ -142,16 +144,18 @@ workflow wf_atac {
             memory_factor = qc_memory_factor
         }
 
-    call task_make_track.make_track as track {
-        input:
-            fragments = align.atac_fragments,
-            chrom_sizes = chrom_sizes,
-            genome_name = genome_name,
-            prefix = prefix,
-            cpus = make_track_cpus,
-            disk_factor = make_track_disk_factor,
-            docker_image = make_track_docker_image,
-            memory_factor = make_track_memory_factor
+    if ( generate_tracks ) {
+        call task_make_track.make_track as track {
+            input:
+                fragments = align.atac_fragments,
+                chrom_sizes = chrom_sizes,
+                genome_name = genome_name,
+                prefix = prefix,
+                cpus = make_track_cpus,
+                disk_factor = make_track_disk_factor,
+                docker_image = make_track_docker_image,
+                memory_factor = make_track_memory_factor
+        }
     }
 
     call task_log_atac.log_atac as log_atac {
@@ -204,25 +208,5 @@ workflow wf_atac {
         # Int? atac_duplicate_reads = log_atac.atac_duplicate_reads
         # Float? atac_percent_duplicates = log_atac.atac_pct_dup
         File? atac_qc_metrics_csv = log_atac.atac_statistics_csv
-
-        # ArchR
-        File? atac_archr_notebook_output = archr.notebook_output
-        File? atac_archr_notebook_log = archr.notebook_log
-        File? atac_archr_barcode_metadata = archr.archr_barcode_metadata
-        File? atac_archr_raw_tss_enrichment = archr.archr_raw_tss_by_uniq_frags_plot
-        File? atac_archr_filtered_tss_enrichment = archr.archr_filtered_tss_by_uniq_frags_plot
-        File? atac_archr_raw_fragment_size_plot = archr.archr_raw_frag_size_dist_plot
-        File? atac_archr_filtered_fragment_size_plot = archr.archr_filtered_frag_size_dist_plot
-
-        File? atac_archr_umap_doublets = archr.archr_umap_doublets
-        File? atac_archr_umap_cluster_plot = archr.archr_umap_cluster_plot
-        File? atac_archr_umap_num_frags_plot = archr.archr_umap_num_frags_plot
-        File? atac_archr_umap_tss_score_plot = archr.archr_umap_tss_score_plot
-        File? atac_archr_umap_frip_plot = archr.archr_umap_frip_plot
-
-        File? atac_archr_gene_heatmap_plot = archr.archr_heatmap_plot
-        File? atac_archr_arrow = archr.archr_arrow
-        File? atac_archr_obj = archr.archr_raw_obj
-        File? atac_archr_plots_zip = archr.plots_zip
     }
 }
