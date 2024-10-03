@@ -25,15 +25,30 @@ task rna_align {
         # Extra parameters for STARsolo SHARE.
         String soloUMIdedup = "1MM_All"
         String soloMultiMappers = "Unique EM"
-        Int outFilterMultimapNmax = 20
-        Float outFilterScoreMinOverLread = 0.3
-        Float outFilterMatchNminOverLread = 0.3
-        Float? outFilterMismatchNoverReadLmax
+        String? outSAMunmapped = "Within"
+        String? outSAMheaderHD = "@HD VN:1.4 SO:coordinate"
+        String? outFilterType = "BySJout"
+        String? outSAMstrandField = "intronMotif"
+        String? outSAMtype = "BAM SortedByCoordinate"
+        String? soloUMIfiltering = "MultiGeneUMI_CR"
+        String? soloCellFilter
+        String? soloCBmatchWLtype = "1MM"
+        Int? alignIntronMin
+        Int? alignIntronMax
+        Int? alignMatesGapMax
+        Int? outFilterMultimapNmax = 20
+        Int? alignSJoverhangMin
+        Int? alignSJDBoverhangMin
+        Int? outFilterMismatchNmax
+        Float? outFilterScoreMinOverLread = 0.3
+        Float? outFilterMatchNminOverLread = 0.3
+        Float? outFilterMismatchNoverReadLmax = 0.04
+        Int? outFilterScoreMin = 30
         String? soloBarcodeMate
+        String? gene_model = "GeneFull" # parse GeneFull_Ex50pAS
         String? clip5pNbases  # 39 0
         String? soloCBposition = "1_-83_1_-76 1_-45_1_-38 1_-7_1_0"
 
-        Int? outFilterScoreMin
         Int? winAnchorMultimapNmax
 
         # Runtime parameters
@@ -98,33 +113,46 @@ task rna_align {
             --readFilesIn $read_files \
             --readFilesCommand zcat \
             --runThreadN ~{cpus} \
+            --genomeLoad NoSharedMemory \
             --genomeDir ./ \
             --soloType CB_UMI_Complex \
-            --soloFeatures GeneFull  \
+            --soloFeatures ~{gene_model}  \
             --soloStrand Forward \
             --soloCBwhitelist whitelist.txt whitelist.txt whitelist.txt \
-            --soloCBmatchWLtype 1MM \
             --soloCBposition ~{soloCBposition} \
             --soloUMIposition 0_0_0_9 \
             ~{"--soloBarcodeMate "+ soloBarcodeMate} \
             ~{"--clip5pNbases "+ clip5pNbases} \
             ~{"--soloMultiMappers "+ soloMultiMappers} \
-            --soloUMIdedup 1MM_All \
+            --soloUMIdedup ~{soloUMIdedup} \
             --chimOutType WithinBAM \
             --limitOutSJcollapsed 2000000 \
-            --outFilterMultimapNmax ~{outFilterMultimapNmax} \
-            --outFilterScoreMinOverLread ~{outFilterScoreMinOverLread} \
-            --outFilterMatchNminOverLread ~{outFilterMatchNminOverLread} \
+            ~{"--outSAMunmapped "+ outSAMunmapped} \
+            ~{"--outSAMheaderHD "+ outSAMheaderHD} \
+            ~{"--outFilterType "+ outFilterType} \
+            ~{"--outSAMstrandField "+ outSAMstrandField} \
+            ~{"--soloUMIfiltering "+ soloUMIfiltering} \
+            ~{"--soloCellFilter "+ soloCellFilter} \
+            ~{"--soloCBmatchWLtype "+ soloCBmatchWLtype} \
+            ~{"--alignIntronMin "+ alignIntronMin} \
+            ~{"--alignIntronMax "+ alignIntronMax} \
+            ~{"--alignMatesGapMax "+ alignMatesGapMax} \
+            ~{"--outFilterMultimapNmax "+ outFilterMultimapNmax} \
+            ~{"--alignSJoverhangMin "+ alignSJoverhangMin} \
+            ~{"--alignSJDBoverhangMin "+ alignSJDBoverhangMin} \
+            ~{"--outFilterScoreMinOverLread "+ outFilterScoreMinOverLread} \
+            ~{"--outFilterMatchNminOverLread "+ outFilterMatchNminOverLread} \
             ~{"--outFilterMismatchNoverReadLmax "+ outFilterMismatchNoverReadLmax} \
+            ~{"--outFilterMismatchNmax " + outFilterMismatchNmax} \
             ~{"--winAnchorMultimapNmax " + winAnchorMultimapNmax} \
             ~{"--outFilterScoreMin " + outFilterScoreMin} \
-            --outSAMtype BAM SortedByCoordinate \
+            --outSAMtype ~{outSAMtype} \
             --limitBAMsortRAM 31232551044 \
-            --outSAMattributes CR UR CY UY CB UB NH HI AS nM MD GX GN gx gn \
+            --outSAMattributes CR UR CY UY CB UB NH HI AS NM MD GX GN gx gn \
             --outReadsUnmapped Fastx \
             --outFileNamePrefix result/ \
 
-            feature_type='GeneFull'
+            feature_type='~{gene_model}'
 
         # 10X v2
         elif [ '~{chemistry}' == '10x_v2' ]; then
