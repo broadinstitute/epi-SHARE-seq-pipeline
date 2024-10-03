@@ -7,9 +7,7 @@ workflows:
          branches:
              - rc-v2.0.0
              - dev
-             - chromap-v2
-             - dev-snapatac
-             - chromap-read-format-memory
+             - snapatac-chromap-new-parameters
              - IGVF-variant-jamboree
          tags:
              - /.*/
