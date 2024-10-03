@@ -15,6 +15,7 @@ task atac_align_chromap {
         Array[File] fastq_R1
         Array[File] fastq_R2
         Array[File] fastq_barcode
+        File reference_index_tar_gz
         File reference_fasta
         File chrom_sizes
         File? barcode_inclusion_list
@@ -75,8 +76,9 @@ task atac_align_chromap {
 
         # Create index
         mkdir chromap_index
-        echo '------ indexing ------' 1>&2
-        time chromap -i -r <(zcat ~{reference_fasta}) -o chromap_index/index
+        # Extracting index
+        echo '------ Extracting indexing ------' 1>&2
+        time tar -xzf ~{reference_index_tar_gz}
 
         if [[ '~{barcode_inclusion_list}' == *.gz ]]; then
             echo '------ Decompressing the barcode inclusion list ------' 1>&2
@@ -281,5 +283,5 @@ task atac_align_chromap {
                 help: 'Docker image.',
                 example: 'us.gcr.io/buenrostro-share-seq/task_chromap:dev',
             }
-        
+    }
 }

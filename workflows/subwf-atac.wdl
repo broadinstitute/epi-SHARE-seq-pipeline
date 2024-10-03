@@ -3,6 +3,7 @@ version 1.0
 # Import the tasks called by the pipeline
 import "../tasks/task_chromap_read_format.wdl" as task_chromap_read_format
 import "../tasks/task_chromap.wdl" as task_align_chromap
+import "../tasks/task_chromap_bam.wdl" as task_align_chromap_bam
 import "../tasks/task_qc_atac.wdl" as task_qc_atac
 import "../tasks/task_make_track.wdl" as task_make_track
 import "../tasks/task_log_atac.wdl" as task_log_atac
@@ -18,7 +19,7 @@ workflow wf_atac {
 
     input {
         File chrom_sizes
-        File? genome_index_tar
+        File reference_index_tar_gz
         File tss_bed
         Int? mapq_threshold = 30
         String? barcode_tag = "CB"
@@ -40,8 +41,9 @@ workflow wf_atac {
         File reference_fasta
         File whitelist
         Boolean? remove_pcr_duplicates = true
-        Boolean? remove_pcr_duplicates_at_cell_level = true
-        Boolean? Tn5_shift = true
+        Boolean? remove_pcr_duplicates_at_cell_level = false
+        Boolean? remove_pcr_duplicates_at_bulk_level = true
+        Boolean? Tn5_shift = false
         Boolean? low_mem = true
         Boolean? bed_output = true
         Boolean? trim_adapters = true
@@ -51,6 +53,10 @@ workflow wf_atac {
         Float? bc_probability_threshold = 0.9
         String? read_format
         # Runtime parameters
+        Int? align_bam_cpus
+        Float? align_bam_disk_factor = 8.0
+        Float? align_bam_memory_factor = 0.15
+
         Int? align_cpus
         Float? align_disk_factor = 8.0
         Float? align_memory_factor = 0.15
@@ -72,7 +78,8 @@ workflow wf_atac {
         Float? make_track_memory_factor = 0.3
         String? make_track_docker_image
 
-        Boolean? generate_tracks = false
+        Boolean generate_tracks = false
+        Boolean generate_bam_alignment = false
                 
         # ArchR-specific inputs
         File peak_set
@@ -99,6 +106,7 @@ workflow wf_atac {
             fastq_R2 = read2,
             fastq_barcode = fastq_barcode,
             reference_fasta = reference_fasta,
+            reference_index_tar_gz = reference_index_tar_gz,
             chrom_sizes = chrom_sizes,
             trim_adapters = trim_adapters,
             genome_name = genome_name,
@@ -113,6 +121,7 @@ workflow wf_atac {
             docker_image = align_docker_image,
             remove_pcr_duplicates = remove_pcr_duplicates,
             remove_pcr_duplicates_at_cell_level = remove_pcr_duplicates_at_cell_level,
+            remove_pcr_duplicates_at_bulk_level = remove_pcr_duplicates_at_bulk_level,
             Tn5_shift = Tn5_shift,
             low_mem = low_mem,
             bed_output = bed_output,
@@ -121,6 +130,39 @@ workflow wf_atac {
             bc_error_threshold = bc_error_threshold,
             bc_probability_threshold = bc_probability_threshold,
             read_format = select_first([read_format, get_chromap_read_format.read_format])
+    }
+
+    if ( generate_bam_alignment ) {
+        call task_align_chromap_bam.atac_align_chromap as generate_bam {
+                input:
+                    fastq_R1 = read1,
+                    fastq_R2 = read2,
+                    fastq_barcode = fastq_barcode,
+                    reference_fasta = reference_fasta,
+                    reference_index_tar_gz = reference_index_tar_gz,
+                    trim_adapters = trim_adapters,
+                    genome_name = genome_name,
+                    subpool = subpool,
+                    multimappers = align_multimappers,
+                    barcode_inclusion_list = whitelist,
+                    barcode_conversion_dict = barcode_conversion_dict,
+                    prefix = prefix,
+                    disk_factor = align_bam_disk_factor,
+                    memory_factor = align_bam_memory_factor,
+                    cpus = align_bam_cpus,
+                    docker_image = align_docker_image,
+                    remove_pcr_duplicates = remove_pcr_duplicates,
+                    remove_pcr_duplicates_at_cell_level = remove_pcr_duplicates_at_cell_level,
+                    remove_pcr_duplicates_at_bulk_level = remove_pcr_duplicates_at_bulk_level,
+                    Tn5_shift = Tn5_shift,
+                    low_mem = low_mem,
+                    bed_output = bed_output,
+                    max_insert_size = max_insert_size,
+                    mapq_threshold = mapq_threshold,
+                    bc_error_threshold = bc_error_threshold,
+                    bc_probability_threshold = bc_probability_threshold,
+                    read_format = select_first([read_format, get_chromap_read_format.read_format])
+        }
     }
 
     call task_qc_atac.qc_atac as qc_atac{
@@ -183,6 +225,10 @@ workflow wf_atac {
         File? atac_alignment_log = align.atac_alignment_log
         File? atac_fragments = align.atac_fragments
         File? atac_fragments_index = align.atac_fragments_index
+
+        File? atac_chromap_bam = generate_bam.atac_bam
+        File? atac_chromap_bam_index = generate_bam.atac_bam_index
+        File? atac_chromap_bam_alignment_stats = generate_bam.atac_alignment_log
 
         # QC
         File? atac_qc_chromap_barcode_metadata = qc_atac.atac_qc_chromap_barcode_metadata
