@@ -63,3 +63,14 @@ workflows:
              - rc-v2.0.0
          tags:
              - /.*/
+
+   - name: "correct-fastqs"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/subwf-correct.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+             - dev
+         tags:
+             - /.*/
+
