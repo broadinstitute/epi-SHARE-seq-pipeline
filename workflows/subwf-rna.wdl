@@ -33,15 +33,30 @@ workflow wf_rna {
         String? barcode_tag
         String soloUMIdedup = "1MM_All"
         String soloMultiMappers = "Unique EM"
-        Int outFilterMultimapNmax = 20
-        Float outFilterScoreMinOverLread = 0.3
-        Float outFilterMatchNminOverLread = 0.3
+        String? outSAMunmapped = "Within"
+        String? outSAMheaderHD = "@HD VN:1.4 SO:coordinate"
+        String? outFilterType = "BySJout"
+        String? outSAMstrandField = "intronMotif"
+        String? outSAMtype = "BAM SortedByCoordinate"
+        String? soloUMIfiltering = "MultiGeneUMI_CR"
+        String? soloCellFilter
+        String? soloCBmatchWLtype = "1MM"
+        Int? alignIntronMin
+        Int? alignIntronMax
+        Int? alignMatesGapMax
+        Int? outFilterMultimapNmax = 20
+        Int? alignSJoverhangMin
+        Int? alignSJDBoverhangMin
+        Int? outFilterMismatchNmax
+        Float? outFilterScoreMinOverLread = 0.3
+        Float? outFilterMatchNminOverLread = 0.3
+        Float? outFilterMismatchNoverReadLmax = 0.04
+        Int? outFilterScoreMin = 30
+        String? soloBarcodeMate
+        String? gene_model = "GeneFull" # parse GeneFull_Ex50pAS
+        String? clip5pNbases  # 39 0
+        String? soloCBposition = "1_-83_1_-76 1_-45_1_-38 1_-7_1_0" # SHARE
         Int? winAnchorMultimapNmax
-        Float? outFilterMismatchNoverReadLmax
-        Int? outFilterScoreMin
-        String? soloBarcodeMate # 2 for SHARE
-        String? soloCBposition # 1_-83_1_-76 1_-45_1_-38 1_-7_1_0 for SHARE
-        String? clip5pNbases  # 0 34 for SHARE
         # Runtime parameters
         Int? align_cpus
         Float? align_disk_factor
@@ -86,16 +101,29 @@ workflow wf_rna {
             whitelist = whitelist,
             soloMultiMappers = soloMultiMappers,
             soloUMIdedup = soloUMIdedup,
+            outSAMunmapped = outSAMunmapped,
+            outSAMheaderHD = outSAMheaderHD,
+            outFilterType = outFilterType,
+            outSAMstrandField = outSAMstrandField,
+            outSAMtype = outSAMtype,
+            soloUMIfiltering = soloUMIfiltering,
+            soloCellFilter = soloCellFilter,
+            soloCBmatchWLtype = soloCBmatchWLtype,
+            alignIntronMin = alignIntronMin,
+            alignIntronMax = alignIntronMax,
+            alignMatesGapMax = alignMatesGapMax,
+            alignSJoverhangMin = alignSJoverhangMin,
+            alignSJDBoverhangMin = alignSJDBoverhangMin,
             outFilterMultimapNmax = outFilterMultimapNmax,
             outFilterScoreMinOverLread = outFilterScoreMinOverLread,
             outFilterMatchNminOverLread = outFilterMatchNminOverLread,
             winAnchorMultimapNmax = winAnchorMultimapNmax,
             outFilterMismatchNoverReadLmax = outFilterMismatchNoverReadLmax,
-            outFilterScoreMin = outFilterScoreMin,
             soloBarcodeMate = soloBarcodeMate,
             soloCBposition = soloCBposition,
             clip5pNbases = clip5pNbases,
             genome_name = genome_name,
+            gene_model = gene_model,
             genome_index_tar = idx_tar,
             prefix = prefix,
             cpus = align_cpus,
@@ -136,12 +164,12 @@ workflow wf_rna {
     }
 
     call task_log_rna.log_rna as log_rna {
-    input:
-        alignment_log = align.log_final_out,
-        qc_rna_statistics = qc_rna.rna_qc_statistics,
-        barcode_statistics = align.barcodes_stats,
-        summary_csv = align.summary_csv,
-        prefix = prefix
+        input:
+            alignment_log = align.log_final_out,
+            qc_rna_statistics = qc_rna.rna_qc_statistics,
+            barcode_statistics = align.barcodes_stats,
+            summary_csv = align.summary_csv,
+            prefix = prefix
     }
 
     if ( "~{pipeline_modality}" == "full") {
