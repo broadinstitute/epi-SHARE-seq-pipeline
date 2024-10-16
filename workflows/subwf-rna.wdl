@@ -191,6 +191,7 @@ workflow wf_rna {
 
     output {
         File? task_starsolo_output_bam = align.output_bam
+        File? task_starsolo_output_bam_index = align.output_bam_index
         File? rna_alignment_log = align.log_final_out
         File? task_starsolo_log_out = align.log_out
         File? task_starsolo_log_progress_out = align.log_progress_out

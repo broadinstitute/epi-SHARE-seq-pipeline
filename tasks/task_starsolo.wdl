@@ -272,10 +272,13 @@ task rna_align {
             mv $file ~{prefix}.$file
         done
 
+        samtools index result/~{prefix}.Aligned.sortedByCoord.out.bam
+
     >>>
 
     output {
         File output_bam = "result/~{prefix}.Aligned.sortedByCoord.out.bam"
+        File output_bam_index = "result/~{prefix}.Aligned.sortedByCoord.out.bam.bai"
         File log_final_out = "result/~{prefix}.Log.final.out"
         File log_out = "result/~{prefix}.Log.out"
         File log_progress_out = "result/~{prefix}.Log.progress.out"

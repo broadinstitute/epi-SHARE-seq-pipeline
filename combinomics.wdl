@@ -186,6 +186,7 @@ workflow combinomics {
     output{
         # RNA outputs
         File? rna_final_bam = rna.task_starsolo_output_bam
+        File? rna_bam_index = rna.task_starsolo_output_bam_index
         File? rna_starsolo_raw_tar = rna.task_starsolo_raw_tar
         File? rna_h5 = rna.rna_h5
         File? rna_barcode_metadata  = rna.rna_barcode_metadata
