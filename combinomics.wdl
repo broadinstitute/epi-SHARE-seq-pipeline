@@ -113,8 +113,8 @@ workflow combinomics {
         if ( read1_atac[0] != "" ) {
             call atac.wf_atac as atac{
                 input:
-                    read1 = select_first([preprocess_tenx.fastq_R1_preprocessed ,read1_atac]),
-                    read2 = select_first([preprocess_tenx.fastq_R2_preprocessed ,read2_atac]),
+                    read1 = read1_atac,
+                    read2 = read2_atac,
                     fastq_barcode = fastq_barcode,
                     chemistry = chemistry,
                     subpool = subpool,
