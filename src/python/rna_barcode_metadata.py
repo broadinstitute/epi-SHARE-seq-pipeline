@@ -21,6 +21,7 @@ def parse_arguments():
 
     return parser.parse_args()
 
+
 def get_metrics(bam, barcode_tag="CB", subpool=None):
     """
     Get barcode metrics from bam file; all counts are only for reads overlapping genes.
@@ -33,7 +34,6 @@ def get_metrics(bam, barcode_tag="CB", subpool=None):
     reads_per_barcode = defaultdict(partial(np.zeros, 2, dtype=int))
     genes_per_barcode = defaultdict(set)
     mito_genes_per_barcode = defaultdict(set)
-
 
     for read in bam:
         # skip read if not primary alignment (multimapper)
@@ -59,8 +59,11 @@ def get_metrics(bam, barcode_tag="CB", subpool=None):
             reads_per_barcode[barcode][1] += 1
 
         # get gene id; skip read if not present
-        gene_id = read.get_tag("GX")
-        if gene_id == "-":
+        try:
+            gene_id = read.get_tag("GX")
+            if gene_id == "-":
+                continue
+        except KeyError:
             continue
 
         if read.reference_name == "chrM":

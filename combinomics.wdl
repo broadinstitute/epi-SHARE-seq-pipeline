@@ -82,17 +82,6 @@ workflow combinomics {
     File? whitelist_atac_ = if (chemistry=="10x_multiome" || chemistry=="shareseq") then select_first([whitelist_atac, whitelists["${chemistry}_atac"]]) else whitelist_atac
 
     if ( chemistry != "shareseq" && process_atac) {
-        scatter (idx in range(length(read1_atac))) {
-            call preprocess_tenx.preprocess_tenx as preprocess_tenx{
-                    input:
-                        fastq_R1 = read1_atac[idx],
-                        fastq_R3 = read2_atac[idx],
-                        fastq_R2 = fastq_barcode[idx],
-                        whitelist = select_first([whitelist_atac, whitelist_atac_]),
-                        chemistry = chemistry,
-                        prefix = prefix
-            }
-        }
         if ( chemistry == "10x_multiome" ){
             call tenx_barcode_map.mapping_tenx_barcodes as barcode_mapping{
                 input:
