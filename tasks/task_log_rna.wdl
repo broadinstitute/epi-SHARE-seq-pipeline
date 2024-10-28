@@ -47,7 +47,7 @@ task log_rna {
         awk -F "," '$1~/Sequencing Saturation/{printf "%.2f\n", $2}' ~{summary_csv} > sequencing_saturation.txt
         awk -F "," '$1~/Q30 Bases in CB\+UMI/{printf "%.2f\n", $2}' ~{summary_csv} > frac_q30_bases_in_cb_umi.txt
         awk -F "," '$1~/Q30 Bases in RNA read/{printf "%.2f\n", $2}' ~{summary_csv} > frac_q30_bases_in_read.txt
-        awk -F "," '$1~/Reads Mapped to Ge/{printf "%.2f\n", $2}' ~{summary_csv} > starsolo_frig.txt
+        #awk -F "," '$1~/Reads Mapped to Ge/{printf "%.2f\n", $2}' ~{summary_csv} > starsolo_frig.txt
         awk -F "," '$1~/Estimated Number of Cells/{print $2}' ~{summary_csv} > estimated_cells.txt
         awk -F "," '$1~/Fraction of Unique Reads in Cells/{printf "%.2f\n", $2}' ~{summary_csv} > frac_unique_reads_in_cells.txt
         awk -F "," '$1~/Median Reads per Cell/{print $2}' ~{summary_csv} > median_reads_per_cell.txt
@@ -93,7 +93,8 @@ task log_rna {
         Float rna_sequencing_saturation = read_float("sequencing_saturation.txt")
         Float rna_frac_q30_bases_in_cb_umi = read_float("frac_q30_bases_in_cb_umi.txt")
         Float rna_frac_q30_bases_in_read = read_float("frac_q30_bases_in_read.txt")
-        Float rna_starsolo_frig = read_float("starsolo_frig.txt")
+        #Float rna_starsolo_frig = read_float("starsolo_frig.txt")
+        Float rna_starsolo_frig = -1.0
         Int rna_estimated_cells = read_int("estimated_cells.txt")
         Float rna_frac_unique_reads_in_cells = read_float("frac_unique_reads_in_cells.txt")
         Int rna_median_reads_per_cell = read_int("median_reads_per_cell.txt")
