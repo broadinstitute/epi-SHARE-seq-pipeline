@@ -1,7 +1,6 @@
 version 1.0
 
 # Import the sub-workflow for preprocessing the fastqs.
-import "tasks/10x_task_preprocess.wdl" as preprocess_tenx
 import "tasks/10x_create_barcode_mapping.wdl" as tenx_barcode_map
 import "workflows/subwf-atac.wdl" as atac
 import "workflows/subwf-rna.wdl" as rna
@@ -17,9 +16,8 @@ workflow combinomics {
     input {
         # Common inputs
 
-        Boolean dorcs_flag = true
         String chemistry
-        String prefix = "shareseq-project"
+        String prefix = "combinomics"
         String? subpool
         String pipeline_modality = "full" # "full": run everything; "count_only": stops after producing fragment file and count matrix
 
@@ -32,15 +30,11 @@ workflow combinomics {
         Array[File] read1_atac
         Array[File] read2_atac
         Array[File] fastq_barcode = []
-        Boolean count_only = false
         File? chrom_sizes
-        File? atac_genome_index_tar
         File? tss_bed
-        String? barcode_tag = "CB"
 
         # ATAC - Filter
         ## Biological
-        Int? atac_filter_minimum_fragments_cutoff = 1
 
         # RNA-specific inputs
         Array[File] read1_rna
@@ -52,11 +46,8 @@ workflow combinomics {
 
         String? gene_naming = "gene_name"
 
-        # DORCs specific inputs
-        File? peak_set
-
-        # Joint qc
-        Int remove_low_yielding_cells = 10
+        # Peaks for QC?
+        # File? peak_set
 
         File genome_tsv
         String? genome_name
@@ -64,7 +55,7 @@ workflow combinomics {
 
     Map[String, File] annotations = read_map(genome_tsv)
     String genome_name_ =  select_first([genome_name, annotations["genome_name"]])
-    File peak_set_ = select_first([peak_set, annotations["ccre"]])
+    # File peak_set_ = select_first([peak_set, annotations["ccre"]])
     #File idx_tar_atac_ = select_first([atac_genome_index_tar, annotations["bowtie2_idx_tar"]])
     File chrom_sizes_ = select_first([chrom_sizes, annotations["chrsz"]])
     File tss_bed_ = select_first([tss_bed, annotations["tss"]])
@@ -123,33 +114,18 @@ workflow combinomics {
                     chrom_sizes = chrom_sizes_,
                     reference_index_tar_gz = idx_tar_atac_,
                     tss_bed = tss_bed_,
-                    peak_set = peak_set_,
                     prefix = prefix,
                     genome_name = genome_name_,
-                    barcode_conversion_dict = barcode_mapping.tenx_barcode_conversion_dict,
-                    pipeline_modality = pipeline_modality
+                    barcode_conversion_dict = barcode_mapping.tenx_barcode_conversion_dict
             }
         }
     }
 
     if ( process_atac && process_rna ) {
         if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
-            if ( pipeline_modality == "full" ) {
-                if ( dorcs_flag ){
-                    call find_dorcs.wf_dorcs as dorcs{
-                        input:
-                            rna_matrix = rna.rna_h5,
-                            atac_fragments = atac.atac_fragments,
-                            peak_file = peak_set_,
-                            genome = genome_name_,
-                            prefix = prefix
-                    }
-                }
-            }
-            
             call joint_qc.joint_qc_plotting as joint_qc {
                 input:
-                    atac_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata,
+                    atac_barcode_metadata = atac.atac_align_barcode_statistics,
                     rna_barcode_metadata = rna.rna_barcode_metadata,
                     prefix = prefix,
                     genome_name = genome_name_
@@ -160,16 +136,16 @@ workflow combinomics {
     call html_report.html_report as html_report {
         input:
             prefix = prefix,
-            atac_metrics = atac.atac_qc_metrics_csv,
+            atac_metrics = atac.atac_qc_barcode_metrics,
             rna_metrics = rna.rna_qc_metrics,
             ## JPEG files to be encoded and appended to html
             # RNA plots
             image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot,
                             rna.rna_umi_barcode_rank_plot, rna.rna_gene_barcode_rank_plot, rna.rna_gene_umi_scatter_plot, rna.rna_umi_histogram, rna.rna_seurat_raw_violin_plot, rna.rna_seurat_raw_qc_scatter_plot, rna.rna_seurat_filtered_violin_plot, rna.rna_seurat_filtered_qc_scatter_plot, rna.rna_seurat_variable_genes_plot, rna.rna_seurat_PCA_dim_loadings_plot, rna.rna_seurat_PCA_plot, rna.rna_seurat_heatmap_plot, rna.rna_seurat_jackstraw_plot, rna.rna_seurat_elbow_plot, rna.rna_seurat_umap_cluster_plot, rna.rna_seurat_umap_rna_count_plot, rna.rna_seurat_umap_gene_count_plot, rna.rna_seurat_umap_mito_plot,
-                            atac.atac_qc_barcode_rank_plot, atac.atac_qc_tsse_fragments_plot, atac.atac_qc_insertion_size_histogram, atac.atac_qc_fragment_histogram,  atac.atac_qc_tss_enrichment,
-                            dorcs.j_plot],
+                            atac.atac_qc_atac_knee_plot, atac.atac_qc_atac_n_fragment_vs_tss_enrichment_filtered_plot, atac.atac_qc_fraction_of_duplicates_distribution_plot, atac.atac_qc_tss_enrichment_library_plot, atac.atac_qc_fragment_size_distribution_plot, atac.atac_qc_n_fragment_vs_tss_enrichment_plot, atac.atac_qc_atac_n_fragment_vs_tss_enrichment_filtered_plot, atac.atac_qc_umap_leiden_plot
+                        ],
             ## Links to files and logs to append to end of html
-            log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_alignment_log, dorcs.dorcs_notebook_log]
+            log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_align_log]
     }
 
     output{
@@ -183,18 +159,14 @@ workflow combinomics {
         File? rna_seurat_obj = rna.rna_seurat_obj
 
         # ATAC ouputs
-        File? atac_final_bam = atac.atac_chromap_bam
-        File? atac_bam_index = atac.atac_chromap_bam_index
-        File? atac_bam_log = atac.atac_chromap_bam_alignment_stats
-        File? atac_fragments = atac.atac_fragments
-        File? atac_fragments_index = atac.atac_fragments_index
-        File? atac_chromap_barcode_metadata = atac.atac_qc_chromap_barcode_metadata
-        File? atac_snapatac2_barcode_metadata = atac.atac_qc_snapatac2_barcode_metadata
-
-        # DORCS output
-        File? dorcs_notebook_output = dorcs.dorcs_notebook_output
-        File? dorcs_genes_summary = dorcs.dorcs_genes_summary
-        File? dorcs_regions_summary = dorcs.dorcs_regions_summary
+        File? atac_final_bam = atac.atac_bam
+        File? atac_bam_index = atac.atac_bam_index
+        File? atac_bam_log = atac.atac_bam_alignment_stats
+        File? atac_fragments = atac.atac_fragment_file
+        File? atac_fragments_index = atac.atac_fragment_file_index
+        File? atac_barcode_alignment_stats = atac.atac_align_barcode_statistics
+        File? atac_barcode_metrics = atac.atac_qc_barcode_metrics
+        File? atac_h5ad = atac.atac_qc_snapatac2_h5ad
 
         # Joint outputs
         File? joint_barcode_metadata = joint_qc.joint_barcode_metadata

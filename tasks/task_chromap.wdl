@@ -17,14 +17,13 @@ task atac_align_chromap {
         Array[File] fastq_barcode
         File reference_index_tar_gz
         File reference_fasta
-        File chrom_sizes
         File? barcode_inclusion_list
         File? barcode_conversion_dict
 
         Boolean? trim_adapters = true
         Boolean? remove_pcr_duplicates = true
-        Boolean? remove_pcr_duplicates_at_cell_level = false
-        Boolean? remove_pcr_duplicates_at_bulk_level = true
+        Boolean? remove_pcr_duplicates_at_cell_level = true
+        Boolean? remove_pcr_duplicates_at_bulk_level = false
         Boolean? Tn5_shift = false
         Boolean? low_mem = true
         Boolean? bed_output = true
@@ -33,7 +32,7 @@ task atac_align_chromap {
         
 
         Int? multimappers = 4 # As per ENCODE pipeline
-        Int? bc_error_threshold = 1
+        Int? bc_error_threshold = 0
         Float? bc_probability_threshold = 0.9
         #TODO: This should come from a previous task parsing the seqspec.
         String? read_format
@@ -63,11 +62,10 @@ task atac_align_chromap {
     String disk_type = if disk_gb > 375 then "SSD" else "LOCAL"
 
     # Define the output names
-    String fragments = '${prefix}.atac.fragments.${genome_name}.tsv'
+    String fragment_file = '${prefix}.atac.fragments.${genome_name}.tsv'
+    String fragment_file_sorted_by_barcode = '${prefix}.atac.fragments.${genome_name}.sorted.by.barcode.tsv'
     String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.summary.csv"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
-
-    String monitor_log = "atac_align_monitor.log.txt"
 
     command <<<
         set -e
@@ -87,6 +85,8 @@ task atac_align_chromap {
             echo '------ No decompression needed for the barcode inclusion list ------' 1>&2
             cat ~{barcode_inclusion_list} > barcode_inclusion_list.txt
         fi
+
+        chromap --version > chromap_version.txt
         
         # [r1|r2|bc]:start:end:strand
         # --read-format bc:0:15,r1:16:-1
@@ -125,17 +125,48 @@ task atac_align_chromap {
             mv temp ~{barcode_log}
         fi
 
-        # Writing non corrected fragments
-        awk -v OFS="\t" -v maxinsert=~{max_insert_size} '$3-$2 <= maxinsert' out.fragments.tmp.tsv | bgzip -c > ~{fragments}.gz
-        tabix --zero-based --preset bed ~{fragments}.gz
+        # Compute percentage of duplicates
+        awk '{total+=$5}END{printf "%.1f\n", (total-NR)/NR*100}' out.fragments.tmp.tsv > duplicates_percentage.txt
+        cut -f4 out.fragments.tmp.tsv | sort -u | wc -l > unique_barcodes_unfiltered.txt
+
+        # Sort fragments by name
+        sort --parallel=~{cpus} -k4,4 out.fragments.tmp.tsv > ~{fragment_file_sorted_by_barcode}
+
+        # Filter fragments by max insert size
+        #awk -v OFS="\t" -v maxinsert=~{max_insert_size} '$3-$2 <= maxinsert' out.fragments.tmp.tsv | bgzip -c > ~{fragment_file}.gz
+        bgzip -c out.fragments.tmp.tsv > ~{fragment_file}.gz
+        tabix --zero-based --preset bed ~{fragment_file}.gz
+
+        grep "Number of reads:" ~{alignment_log} | tr -d '.' | awk '{print $NF}' > reads_count.txt
+        grep "Number of mapped reads" ~{alignment_log} | tr -d '.' |awk '{print $NF}' > mapped_reads.txt
+        grep "Number of uniquely mapped reads" ~{alignment_log} | tr -d '.' | awk '{print $NF}' > unique_reads.txt
+        grep "Number of reads have multi-mappings:" ~{alignment_log} | tr -d '.' | awk '{print $NF}' > multi_mapping_reads.txt
+        grep "Number of corrected barcodes" ~{alignment_log} | tr -d '.' | awk '{print $NF}' > corrected_barcodes.txt
+        grep "uni-mappings" ~{alignment_log} | tr -d '.' | awk '{print $3}' > uni_mappings_fragments.txt
+        grep "multi-mappings" ~{alignment_log} | tr -d '.' | awk '{print $9}' > multi_mappings_fragments.txt
+        grep "Number of output mappings" ~{alignment_log} | tr -d '.' | awk '{print $8}' > final_number_of fragments.txt
+  
 
     >>>
 
     output {
-        File atac_fragments = "~{fragments}.gz"
-        File atac_fragments_index = "~{fragments}.gz.tbi"
+        File atac_fragment_file = "~{fragment_file}.gz"
+        File atac_fragment_file_index = "~{fragment_file}.gz.tbi"
+        File atac_fragment_file_sorted_by_barcode = fragment_file_sorted_by_barcode
         File atac_align_barcode_statistics = barcode_log
         File atac_alignment_log = alignment_log
+        Float atac_pcr_duplicates_percentage = read_float("duplicates_percentage.txt")
+        Int atac_reads_count = read_int("reads_count.txt")
+        Int atac_mapped_reads = read_int("mapped_reads.txt")
+        Int atac_unique_reads = read_int("unique_reads.txt")
+        Int atac_multi_mapping_reads = read_int("multi_mapping_reads.txt")
+        Int atac_corrected_barcodes = read_int("corrected_barcodes.txt")
+        Int atac_unique_mappings_fragments = read_int("uni_mappings_fragments.txt")
+        Int atac_multi_mappings_fragments = read_int("multi_mappings_fragments.txt")
+        Int atac_final_number_of_fragments = read_int("final_number_of fragments.txt")
+        Int atac_unique_barcodes_unfiltered = read_int("unique_barcodes_unfiltered.txt")
+        String atac_chromap_verion = read_string("chromap_version.txt")
+
     }
 
 
@@ -167,11 +198,6 @@ task atac_align_chromap {
                 description: 'Reference fasta.',
                 help: 'Reference fasta file.',
                 example: 'reference.fasta',
-            }
-        chrom_sizes: {
-                description: 'Chrom sizes.',
-                help: 'Chrom sizes file.',
-                example: 'chrom.sizes',
             }
         barcode_inclusion_list: {
                 description: 'Barcode inclusion list.',

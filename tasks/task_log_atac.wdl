@@ -17,7 +17,7 @@ task log_atac {
         # the quality metrics
         File? alignment_log
         File? barcode_log
-        String? prefix = "sample"
+        String prefix = "sample"
     }
 
     command <<<

@@ -20,24 +20,23 @@ task atac_align_chromap {
         File? barcode_inclusion_list
         File? barcode_conversion_dict
 
-        Boolean? trim_adapters
-        Boolean? remove_pcr_duplicates
-        Boolean? remove_pcr_duplicates_at_cell_level
-        Boolean? remove_pcr_duplicates_at_bulk_level
-        Boolean? Tn5_shift
+        Boolean? trim_adapters = true
+        Boolean? remove_pcr_duplicates = true
+        Boolean? remove_pcr_duplicates_at_cell_level = true
+        Boolean? remove_pcr_duplicates_at_bulk_level = false
+        Boolean? Tn5_shift = false
         Boolean? low_mem
-        Boolean? bed_output
-        Int? max_insert_size
-        Int? mapq_threshold
+
+        Int? max_insert_size = 2000
+        Int? mapq_threshold = 0
         
 
-        Int? multimappers # As per ENCODE pipeline
+        Int? multimappers = 4 # As per ENCODE pipeline
         Int? bc_error_threshold
         Float? bc_probability_threshold
         #TODO: This should come from a previous task parsing the seqspec.
         String? read_format 
 
-        String? subpool = "none"
         String genome_name # GRCh38, mm10
         String prefix = "test-sample"
 
@@ -66,8 +65,6 @@ task atac_align_chromap {
     String bam = '${prefix}.atac.align.k${multimappers}.${genome_name}.bam'
     String barcode_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.barcode.summary.csv"
     String alignment_log = "${prefix}.atac.align.k${multimappers}.${genome_name}.log.txt"
-
-    String monitor_log = "atac_align_monitor.log.txt"
 
     command <<<
         set -e

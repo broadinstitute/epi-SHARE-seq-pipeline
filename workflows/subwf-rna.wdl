@@ -17,7 +17,7 @@ workflow wf_rna {
     input {
         # RNA sub-workflow inputs
         String? subpool
-        String prefix
+        String prefix = "combinomics"
         String genome_name
         String chemistry
         String pipeline_modality = "full"
