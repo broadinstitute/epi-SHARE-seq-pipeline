@@ -6,6 +6,7 @@ import "../tasks/task_chromap.wdl" as task_align_chromap
 import "../tasks/task_chromap_bam.wdl" as task_align_chromap_bam
 import "../tasks/task_qc_atac.wdl" as task_qc_atac
 import "../tasks/task_make_track.wdl" as task_make_track
+import "../structs/atac_output_struct.wdl"
 
 workflow wf_atac {
     meta {
@@ -24,6 +25,7 @@ workflow wf_atac {
         String prefix = "combinomics"
         String? subpool
         String genome_name
+        String? atac_metadata
         File? barcode_conversion_dict # For 10X multiome
 
         # Align-specific inputs
@@ -60,14 +62,14 @@ workflow wf_atac {
         Int qc_cpus = 16
         Float qc_disk_factor = 8.0
         Float qc_memory_factor = 0.15
-        String qc_docker_image
+        String? qc_docker_image
 
         # Make track inputs
         # Runtime parameters
         Int make_track_cpus = 8
         Float make_track_disk_factor = 4
         Float make_track_memory_factor = 0.3
-        String make_track_docker_image
+        String? make_track_docker_image
 
         Boolean generate_tracks = false
         Boolean generate_bam_alignment = false
@@ -170,6 +172,46 @@ workflow wf_atac {
         }
     }
 
+    Atac_outputs atac_output = object {
+        bam: generate_bam.atac_bam,
+        bai: generate_bam.atac_bam_index,
+        atac_bam_alignment_stats: generate_bam.atac_alignment_log,
+        alignment_tool_version: align.atac_chromap_version,
+        fragment_file: align.atac_fragment_file,
+        fragment_file_index: align.atac_fragment_file_index,
+        fragment_file_sorted_by_barcode: align.atac_fragment_file_sorted_by_barcode,
+        barcode_alignment_statistics: align.atac_align_barcode_statistics,
+        alignment_log: align.atac_alignment_log,
+        pcr_duplicates_percentage: align.atac_pcr_duplicates_percentage,
+        reads_count: align.atac_reads_count,
+        mapped_reads: align.atac_mapped_reads,
+        unique_reads: align.atac_unique_reads,
+        multi_mapping_reads: align.atac_multi_mapping_reads,
+        corrected_barcodes: align.atac_corrected_barcodes,
+        unique_mappings_fragments: align.atac_unique_mappings_fragments,
+        multi_mappings_fragments: align.atac_multi_mappings_fragments,
+        final_number_of_fragments: align.atac_final_number_of_fragments,
+        barcode_count_raw: align.atac_unique_barcodes_unfiltered,
+        fragment_size_distribution_plot: qc_atac.atac_fragment_size_distribution_plot,
+        tss_enrichment_library_plot: qc_atac.atac_tss_enrichment_library_plot,
+        fraction_of_duplicates_distribution_plot: qc_atac.atac_fraction_of_duplicates_distribution_plot,
+        fraction_of_mito_distribution_plot: qc_atac.atac_fraction_of_mito_distribution_plot,
+        knee_plot: qc_atac.atac_knee_plot,
+        n_fragment_vs_tss_enrichment_plot: qc_atac.atac_n_fragment_vs_tss_enrichment_plot,
+        n_fragment_vs_tss_enrichment_filtered_plot: qc_atac.atac_n_fragment_vs_tss_enrichment_filtered_plot,
+        umap_leiden_plot: qc_atac.atac_umap_leiden_plot,
+        h5ad: qc_atac.atac_snapatac2_h5ad,
+        barcode_metrics: qc_atac.atac_barcode_metrics,
+        library_tss_overlap: qc_atac.atac_library_tss_overlap,
+        library_tsse: qc_atac.atac_library_tsse,
+        barcode_count_lenient_filter: qc_atac.atac_barcode_count,
+        barcode_count_strict_filter: qc_atac.atac_barcode_count_filtered,
+        bigwig: track.atac_track_bigwig,
+        bigwig_no_nucleosome: track.atac_track_bigwig_no_nucleosome,
+        bigwig_mono_nucleosome: track.atac_track_bigwig_mono_nucleosome,
+        bigwig_multi_nucleosome: track.atac_track_bigwig_multi_nucleosome
+    }
+
     output {
         # Bam
         File? atac_bam = generate_bam.atac_bam
@@ -192,7 +234,7 @@ workflow wf_atac {
         Int atac_multi_mappings_fragments = align.atac_multi_mappings_fragments
         Int atac_final_number_of_fragments = align.atac_final_number_of_fragments
         Int atac_unique_barcodes_unfiltered = align.atac_unique_barcodes_unfiltered
-        String atac_alingment_tool_verion = align.atac_chromap_verion
+        String atac_alignment_tool_version = align.atac_chromap_version
 
         # QC
         File atac_qc_fragment_size_distribution_plot = qc_atac.atac_fragment_size_distribution_plot
@@ -207,11 +249,16 @@ workflow wf_atac {
         File atac_qc_barcode_metrics = qc_atac.atac_barcode_metrics
         Float atac_qc_library_tss_overlap = qc_atac.atac_library_tss_overlap
         Float atac_qc_library_tsse = qc_atac.atac_library_tsse
+        Int atac_qc_barcode_count = qc_atac.atac_barcode_count
+        Int atac_qc_barcode_count_filtered = qc_atac.atac_barcode_count_filtered
         
         # Track
         File? atac_track_bigwig = track.atac_track_bigwig
         File? atac_track_bigwig_no_nucleosome = track.atac_track_bigwig_no_nucleosome
         File? atac_track_bigwig_mono_nucleosome = track.atac_track_bigwig_mono_nucleosome
         File? atac_track_bigwig_multi_nucleosome = track.atac_track_bigwig_multi_nucleosome
+
+        # Struct
+        Atac_outputs atac_struct_output = atac_output
     }
 }

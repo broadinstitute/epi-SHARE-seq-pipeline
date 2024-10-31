@@ -26,7 +26,7 @@ task qc_atac {
         Int cpus = 10
         Float disk_factor = 10.0
         Float memory_factor = 0.3
-        String docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
+        String? docker_image = "us.gcr.io/buenrostro-share-seq/task_qc_atac:dev"
     }
 
     # Determine the size of the input
@@ -53,7 +53,8 @@ task qc_atac {
     String n_fragment_vs_tss_enrichment_filtered_plot = "~{prefix}_n_fragment_vs_TSS_enrichment_filtered.png"
     String umap_leiden_plot = "~{prefix}_umap_leiden.png"
     String snapatac2_h5ad = "~{prefix}_snap.h5ad"
-
+    String number_barcodes = "~{prefix}_number_of_barcodes.txt"
+    String number_barcodes_filtered = "~{prefix}_number_of_barcodes_after_filter.txt"
 
     command <<<
         qc_atac \
@@ -77,6 +78,9 @@ task qc_atac {
         File atac_barcode_metrics = "~{prefix}_barcode_metrics.csv"
         Float atac_library_tss_overlap = read_float(library_tss_overlap)
         Float atac_library_tsse = read_float(library_tsse)
+        Int atac_barcode_count = read_int(number_barcodes)
+        Int atac_barcode_count_filtered = read_int(number_barcodes_filtered)
+
     }
 
     runtime {

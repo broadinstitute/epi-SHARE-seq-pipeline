@@ -188,6 +188,14 @@ def main(fragment_file, compressed_gtf_file, chrom_sizes, min_frag_cutoff, prefi
     snap.tl.leiden(data)
     snap.pl.umap(data, color='leiden', interactive=False, height=500, show=False, out_file=f"{prefix}_umap_leiden.png")
 
+    logging.info('Number of cells')
+    with open(f"{prefix}_number_of_barcodes.txt","w") as fh:
+        fh.write(f"{num_cells:.2f}")
+    
+    logging.info('Number of cells post filter')
+    with open(f"{prefix}_number_of_barcodes_after_filter.txt","w") as fh:
+        fh.write(f"{num_cells_filtered:.2f}")
+
     # Save the content of data.obs to a file
     data.obs.to_csv(f"{prefix}_barcode_metrics.csv")
     logging.info('Done')

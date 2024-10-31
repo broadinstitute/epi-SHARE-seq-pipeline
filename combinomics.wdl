@@ -7,6 +7,8 @@ import "workflows/subwf-rna.wdl" as rna
 import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/task_joint_qc.wdl" as joint_qc
 import "tasks/task_html_report.wdl" as html_report
+import "structs/atac_output_struct.wdl"
+
 
 
 # WDL workflow for SHARE-seq
@@ -174,6 +176,8 @@ workflow combinomics {
         # Report
         File? html_summary = html_report.html_report_file
         File? csv_summary_file = html_report.csv_summary_file
+
+        Atac_outputs? atac_struct_output = atac.atac_struct_output
     }
 
 }

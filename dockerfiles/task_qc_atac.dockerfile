@@ -15,7 +15,6 @@ LABEL software.description="Quality control for ATAC-seq data"
 
 # Install the required packages
 RUN pip install --upgrade pip
-# RUN pip install click matplotlib numpy pandas snapatac2[recommend]
 
 RUN mkdir /software
 COPY src/python/qc_atac /software
@@ -31,9 +30,6 @@ RUN groupadd -r $USER &&\
 
 # Copy the compiled software from the builder
 COPY --chown=$USER:$USER src/bash/monitor_script.sh /usr/local/bin
-#COPY --chown=$USER:$USER src/python/snapatac2_qc_generation.py /usr/local/bin
-
-#RUN chmod +x /usr/local/bin/snapatac2_qc_generation.py
 
 USER ${USER}
 

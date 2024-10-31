@@ -1,0 +1,41 @@
+version 1.0
+
+struct Atac_outputs {
+    File? bam
+    File? bai
+    File? atac_bam_alignment_stats
+    String alignment_tool_version
+    File? fragment_file
+    File? fragment_file_index
+    File? fragment_file_sorted_by_barcode
+    File? barcode_alignment_statistics
+    File? alignment_log
+    Float pcr_duplicates_percentage
+    Int reads_count
+    Int mapped_reads
+    Int unique_reads
+    Int multi_mapping_reads
+    Int corrected_barcodes
+    Int unique_mappings_fragments
+    Int multi_mappings_fragments
+    Int final_number_of_fragments
+    Int barcode_count_raw
+    File fragment_size_distribution_plot
+    File tss_enrichment_library_plot
+    File fraction_of_duplicates_distribution_plot
+    File fraction_of_mito_distribution_plot
+    File knee_plot
+    File n_fragment_vs_tss_enrichment_plot
+    File n_fragment_vs_tss_enrichment_filtered_plot
+    File umap_leiden_plot
+    File h5ad
+    File barcode_metrics
+    Float library_tss_overlap
+    Float library_tsse
+    Int barcode_count_lenient_filter
+    Int barcode_count_strict_filter
+    File? bigwig
+    File? bigwig_no_nucleosome
+    File? bigwig_mono_nucleosome
+    File? bigwig_multi_nucleosome
+}
