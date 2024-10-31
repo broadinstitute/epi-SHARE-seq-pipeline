@@ -29,7 +29,7 @@ workflow combinomics {
         # ATAC-specific inputs
         Array[File] read1_atac
         Array[File] read2_atac
-        Array[File] fastq_barcode = []
+        Array[File] fastq_barcode
         File? chrom_sizes
         File? tss_bed
 

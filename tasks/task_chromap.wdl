@@ -124,16 +124,16 @@ task atac_align_chromap {
             awk -v FS="," -v OFS="," -v subpool=~{subpool} 'NR==1{print $0;next}{$1=$1"_"subpool; print $0}' ~{barcode_log} > temp
             mv temp ~{barcode_log}
         fi
-
+        echo '------ Compute percentage of duplicates ------' 1>&2
         # Compute percentage of duplicates
-        awk '{total+=$5}END{printf "%.1f\n", (total-NR)/NR*100}' out.fragments.tmp.tsv > duplicates_percentage.txt
+        awk '{total+=$5}END{printf "%.1f\n", (total-NR)/total*100}' out.fragments.tmp.tsv > duplicates_percentage.txt
         cut -f4 out.fragments.tmp.tsv | sort -u | wc -l > unique_barcodes_unfiltered.txt
 
+        echo '------ Sort fragment file by barcode ------' 1>&2
         # Sort fragments by name
         sort --parallel=~{cpus} -k4,4 out.fragments.tmp.tsv > ~{fragment_file_sorted_by_barcode}
 
-        # Filter fragments by max insert size
-        #awk -v OFS="\t" -v maxinsert=~{max_insert_size} '$3-$2 <= maxinsert' out.fragments.tmp.tsv | bgzip -c > ~{fragment_file}.gz
+        echo '------ Compress and index fragment file ------' 1>&2
         bgzip -c out.fragments.tmp.tsv > ~{fragment_file}.gz
         tabix --zero-based --preset bed ~{fragment_file}.gz
 
