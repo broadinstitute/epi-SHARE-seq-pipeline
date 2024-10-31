@@ -262,12 +262,26 @@ task rna_align {
         gzip *
         tar -cvzf raw.mtx.tar.gz *.gz
 
+
         # Move files and rename
         # TODO: double check this because might be reporting the wrong files
         cd ../../../../
-        ls result/Solo.out/*
         # Find all the files undere result/Solo.out and move them to result
-        find result/Solo.out -type f -exec mv {} result/~{prefix}.{} \;
+        mv result/Solo.out/$feature_type/raw/* result/
+        mv result/Solo.out/SJ/* result/
+        mv result/Solo.out/* result/
+
+        mv result/Aligned.sortedByCoord.out.bam result/~{prefix}.Aligned.sortedByCoord.out.bam
+        mv result/Log.final.out result/~{prefix}.Log.final.out
+        mv result/Log.out result/~{prefix}.Log.out
+        mv result/Log.progress.out result/~{prefix}.Log.progress.out
+        mv result/SJ.out.tab result/~{prefix}.SJ.out.tab
+        mv result/Barcodes.stats result/~{prefix}.Barcodes.stats
+        mv result/Features.stats result/~{prefix}.Features.stats
+        mv result/Summary.csv result/~{prefix}.Summary.csv
+        mv result/UMIperCellSorted.txt result/~{prefix}.UMIperCellSorted.txt
+        mv result/raw.mtx.tar.gz result/~{prefix}.raw.mtx.tar.gz
+
 
         samtools index result/~{prefix}.Aligned.sortedByCoord.out.bam
 
