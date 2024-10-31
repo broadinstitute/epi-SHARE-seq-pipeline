@@ -38,4 +38,5 @@ struct Atac_outputs {
     File? bigwig_no_nucleosome
     File? bigwig_mono_nucleosome
     File? bigwig_multi_nucleosome
+    String? extra_metadata
 }

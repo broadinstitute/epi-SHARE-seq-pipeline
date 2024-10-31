@@ -36,8 +36,8 @@ workflow wf_atac {
         File reference_fasta
         File whitelist
         Boolean? remove_pcr_duplicates = true
-        Boolean? remove_pcr_duplicates_at_cell_level = false
-        Boolean? remove_pcr_duplicates_at_bulk_level = true
+        Boolean? remove_pcr_duplicates_at_cell_level = true
+        Boolean? remove_pcr_duplicates_at_bulk_level = false
         Boolean? Tn5_shift = false
         Boolean? low_mem = true
         Boolean? bed_output = true
@@ -209,7 +209,8 @@ workflow wf_atac {
         bigwig: track.atac_track_bigwig,
         bigwig_no_nucleosome: track.atac_track_bigwig_no_nucleosome,
         bigwig_mono_nucleosome: track.atac_track_bigwig_mono_nucleosome,
-        bigwig_multi_nucleosome: track.atac_track_bigwig_multi_nucleosome
+        bigwig_multi_nucleosome: track.atac_track_bigwig_multi_nucleosome,
+        extra_metadata: atac_metadata
     }
 
     output {
