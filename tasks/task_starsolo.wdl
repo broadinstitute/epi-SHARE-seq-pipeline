@@ -265,6 +265,7 @@ task rna_align {
         # Move files and rename
         # TODO: double check this because might be reporting the wrong files
         cd ../../../../
+        ls result/Solo.out/*
         # Find all the files undere result/Solo.out and move them to result
         find result/Solo.out -type f -exec mv {} result/~{prefix}.{} \;
 
