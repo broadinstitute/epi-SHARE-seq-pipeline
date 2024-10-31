@@ -86,7 +86,7 @@ task atac_align_chromap {
             cat ~{barcode_inclusion_list} > barcode_inclusion_list.txt
         fi
 
-        chromap --version > chromap_version.txt
+        chromap --version > chromap_version.txt 2>&1
         
         # [r1|r2|bc]:start:end:strand
         # --read-format bc:0:15,r1:16:-1
