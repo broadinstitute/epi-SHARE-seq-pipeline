@@ -87,6 +87,7 @@ task atac_align_chromap {
         fi
 
         chromap --version > chromap_version.txt 2>&1
+        touch ~{alignment_log}
         
         # [r1|r2|bc]:start:end:strand
         # --read-format bc:0:15,r1:16:-1
@@ -115,7 +116,7 @@ task atac_align_chromap {
                 --barcode-whitelist barcode_inclusion_list.txt \
                 ~{"--barcode-translate " + barcode_conversion_dict} \
                 -o out.fragments.tmp.tsv \
-                --summary ~{barcode_log} > ~{alignment_log} 2>&1
+                --summary ~{barcode_log} 2>&1
         
         if [[ '~{subpool}' != "none" ]]; then
             echo '------  Add subpool to barcode name ------' 1>&2
