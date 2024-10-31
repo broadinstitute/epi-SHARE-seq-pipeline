@@ -279,7 +279,7 @@ task rna_align {
         mv result/Barcodes.stats result/~{prefix}.Barcodes.stats
         mv result/Features.stats result/~{prefix}.Features.stats
         mv result/Summary.csv result/~{prefix}.Summary.csv
-        mv result/Solo.out/$feature_type/raw/UMIperCellSorted.txt result/~{prefix}.UMIperCellSorted.txt
+        mv result/Solo.out/$feature_type/UMIperCellSorted.txt result/~{prefix}.UMIperCellSorted.txt
         mv result/raw.mtx.tar.gz result/~{prefix}.raw.mtx.tar.gz
 
 
