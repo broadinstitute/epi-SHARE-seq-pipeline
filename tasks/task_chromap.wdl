@@ -105,7 +105,7 @@ task atac_align_chromap {
                 ~{"--bc-error-threshold " + bc_error_threshold} \
                 ~{"--bc-probability-threshold " + bc_probability_threshold} \
                 ~{"--read-format " + read_format} \
-                ~{"--drop-repetitive-reads " + multimappers} \
+                ~{"--allocate-multi-mappings " + multimappers} \
                 -r ~{reference_fasta} \
                 ~{"-q " + quality_filter} \
                 -t ~{cpus} \
