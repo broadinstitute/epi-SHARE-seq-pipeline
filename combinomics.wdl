@@ -9,8 +9,6 @@ import "tasks/task_joint_qc.wdl" as joint_qc
 import "tasks/task_html_report.wdl" as html_report
 import "structs/atac_output_struct.wdl"
 
-
-
 # WDL workflow for SHARE-seq
 
 workflow combinomics {
