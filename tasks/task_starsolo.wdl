@@ -265,12 +265,8 @@ task rna_align {
         # Move files and rename
         # TODO: double check this because might be reporting the wrong files
         cd ../../../../
-        find result -type f -exec mv {} result \;
-        cd result
-        for file in $(ls)
-        do
-            mv $file ~{prefix}.$file
-        done
+        # Find all the files undere result/Solo.out and move them to result
+        find result/Solo.out -type f -exec sh -c 'mv "$1" "result/~{prefix}.$(basename "$1")"' _ {} \;
 
         samtools index result/~{prefix}.Aligned.sortedByCoord.out.bam
 
