@@ -1,0 +1,16 @@
+# snapatac2_qc_generation.py
+
+## Overview
+`qc_atac` is a Python script designed to perform quality control (QC) on ATAC-seq data using the SnapATAC2 toolkit.
+
+## Usage
+$ pip install --editable .
+$ qc_atac [OPTIONS]
+
+Options:
+  --fragment_file PATH        Path to the fragment file.  [required]
+  --compressed_gtf_file PATH  Path to the compressed GTF file.  [required]
+  --chrom_sizes PATH          Path to the chromosome sizes file.  [required]
+  --min_frag_cutoff INTEGER   Minimum fragment cutoff. Default is 10.
+  --prefix TEXT               Prefix for output files. Default is snap.
+  --help                      Show this message and exit.

@@ -1,0 +1,23 @@
+[project]
+name = "atac-quality-metrics-generation"
+version = "1.0.0"
+description = "QC scATAC library from fragment file"
+requires-python = "==3.10.15"
+dependencies = [
+    "click>=8.1.7",
+    "matplotlib==3.9.2",
+    "numpy==1.26.4",
+    "numba==0.60.0",
+    "snapatac2==2.7.0",
+    "umap-learn==0.5.7",
+]
+
+[project.scripts]
+qc_atac = "qc_atac:main"
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "qc_atac"

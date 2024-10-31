@@ -56,7 +56,7 @@ task qc_atac {
 
 
     command <<<
-        python snapatac2_qc_generation.py \
+        qc_atac \
             --fragment_file ~{fragment_file} \
             --chrom_sizes ~{chrom_sizes} \
             --compressed_gtf_file ~{gtf} \
