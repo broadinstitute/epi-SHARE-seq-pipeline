@@ -266,7 +266,7 @@ task rna_align {
         # TODO: double check this because might be reporting the wrong files
         cd ../../../../
         # Find all the files undere result/Solo.out and move them to result
-        find result/Solo.out -type f -exec sh -c 'mv "$1" "result/~{prefix}.$(basename "$1")"' _ {} \;
+        find result/Solo.out -type f -exec mv {} result/~{prefix}.{} \;
 
         samtools index result/~{prefix}.Aligned.sortedByCoord.out.bam
 
