@@ -256,6 +256,14 @@ task rna_align {
             # TODO: add the final case in which none of the above is passed.
         fi
 
+        find ./result -print | awk '{
+            depth = split($0, path, "/");
+            for (i = 1; i < depth; i++) {
+                printf "  ";
+            }
+            print path[depth];
+        }'
+
         # tar and gzip barcodes, features, and matrix files
         cd result/Solo.out/$feature_type/raw/
         sed -i 's/_//g' barcodes.tsv  # remove underscores separating barcodes (SHARE) 
