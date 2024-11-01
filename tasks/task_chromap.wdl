@@ -161,7 +161,7 @@ task atac_align_chromap {
         Int atac_corrected_barcodes = read_int("corrected_barcodes.txt")
         Int atac_unique_mappings_fragments = read_int("uni_mappings_fragments.txt")
         Int atac_multi_mappings_fragments = read_int("multi_mappings_fragments.txt")
-        Int atac_final_number_of_fragments = read_int("final_number_of fragments.txt")
+        Int atac_final_number_of_fragments = read_int("final_number_of_fragments.txt")
         Int atac_unique_barcodes_unfiltered = read_int("unique_barcodes_unfiltered.txt")
         String atac_chromap_version = read_string("chromap_version.txt")
 
