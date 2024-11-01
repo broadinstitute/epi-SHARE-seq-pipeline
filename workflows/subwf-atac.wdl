@@ -43,7 +43,7 @@ workflow wf_atac {
         Boolean? bed_output = true
         Boolean? trim_adapters = true
         Int? max_insert_size = 2000
-        Int? quality_filter = 0
+        Int? align_quality_filter = 0
         Int? bc_error_threshold = 1
         Float? bc_probability_threshold = 0.9
         String? read_format
@@ -107,7 +107,7 @@ workflow wf_atac {
             low_mem = low_mem,
             bed_output = bed_output,
             max_insert_size = max_insert_size,
-            quality_filter = quality_filter,
+            quality_filter = align_quality_filter,
             bc_error_threshold = bc_error_threshold,
             bc_probability_threshold = bc_probability_threshold,
             read_format = select_first([read_format, get_chromap_read_format.read_format])
