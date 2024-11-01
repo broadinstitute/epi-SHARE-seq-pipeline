@@ -142,7 +142,7 @@ task atac_align_chromap {
         grep "Number of corrected barcodes" ~{alignment_log} | tr -d '.' | awk '{print $NF}' > corrected_barcodes.txt
         grep "uni-mappings" ~{alignment_log} | tr -d '.' | awk '{print $3}' > uni_mappings_fragments.txt
         grep "multi-mappings" ~{alignment_log} | tr -d '.' | awk '{print $9}' > multi_mappings_fragments.txt
-        grep "Number of output mappings" ~{alignment_log} | tr -d '.' | awk '{print $8}' > final_number_of fragments.txt
+        grep "Number of output mappings" ~{alignment_log} | tr -d '.' | awk '{print $8}' > final_number_of_fragments.txt
   
 
     >>>
