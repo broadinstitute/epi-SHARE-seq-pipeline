@@ -15,7 +15,7 @@ task mapping_tenx_barcodes {
         File whitelist_atac # Barcode whitelist (chemistry specific)
         File whitelist_rna # Barcode whitelist (chemistry specific)
 
-        Int? cpus = 16
+        Int? cpus = 1
         Float? disk_factor = 0.5
         Float? memory_factor = 0.15
         String? docker_image = "debian:bullseye-slim"
