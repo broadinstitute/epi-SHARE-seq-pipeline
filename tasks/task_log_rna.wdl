@@ -52,7 +52,7 @@ task log_rna {
         awk -F "," '$1~/Fraction of Unique Reads in Cells/{printf "%.2f\n", $2}' ~{summary_csv} > frac_unique_reads_in_cells.txt
         awk -F "," '$1~/Median Reads per Cell/{print $2}' ~{summary_csv} > median_reads_per_cell.txt
         awk -F "," '$1~/Median UMI per Cell/{print $2}' ~{summary_csv} > median_umis_per_cell.txt
-        awk -F "," '$1~/Median GeneFull per Cell/{print $2}' ~{summary_csv} > median_genes_per_cell.txt
+        #awk -F "," '$1~/Median GeneFull per Cell/{print $2}' ~{summary_csv} > median_genes_per_cell.txt
         awk -F "," '$1~/Total GeneFull Detected/{print $2}' ~{summary_csv} > genes.txt
 
         # get qc_rna statistics
@@ -99,7 +99,7 @@ task log_rna {
         Float rna_frac_unique_reads_in_cells = read_float("frac_unique_reads_in_cells.txt")
         Int rna_median_reads_per_cell = read_int("median_reads_per_cell.txt")
         Int rna_median_umis_per_cell = read_int("median_umis_per_cell.txt")
-        Int rna_median_genes_per_cell = read_int("median_genes_per_cell.txt")
+        #Int rna_median_genes_per_cell = read_int("median_genes_per_cell.txt")
         Int rna_genes = read_int("genes.txt")
 
         # qc_rna statistics
