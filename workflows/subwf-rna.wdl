@@ -199,7 +199,7 @@ workflow wf_rna {
         File? task_starsolo_barcodes_stats = align.barcodes_stats
         File? task_starsolo_features_stats = align.features_stats
         File? task_starsolo_summary_csv = align.summary_csv
-        File? task_starsolo_umi_per_cell = align.umi_per_cell
+        #File? task_starsolo_umi_per_cell = align.umi_per_cell
         File? task_starsolo_raw_tar = align.raw_tar
 
         File? rna_h5 = generate_h5.h5_matrix

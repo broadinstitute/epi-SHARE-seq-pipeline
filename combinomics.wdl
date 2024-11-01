@@ -145,7 +145,8 @@ workflow combinomics {
                             atac.atac_qc_atac_knee_plot, atac.atac_qc_atac_n_fragment_vs_tss_enrichment_filtered_plot, atac.atac_qc_fraction_of_duplicates_distribution_plot, atac.atac_qc_tss_enrichment_library_plot, atac.atac_qc_fragment_size_distribution_plot, atac.atac_qc_n_fragment_vs_tss_enrichment_plot, atac.atac_qc_atac_n_fragment_vs_tss_enrichment_filtered_plot, atac.atac_qc_umap_leiden_plot
                         ],
             ## Links to files and logs to append to end of html
-            log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv, rna.task_starsolo_umi_per_cell, rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_align_log]
+            #rna.task_starsolo_umi_per_cell,
+            log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv,  rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_align_log]
     }
 
     output{
