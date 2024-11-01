@@ -271,6 +271,9 @@ task rna_align {
         mv result/Solo.out/SJ/* result/
         mv result/Solo.out/* result/
 
+        # Find the complete path inside result of the file UMIperCellSorted.txt
+        umi_per_cell_path=$(find result/Solo.out/$feature_type/ -name UMIperCellSorted.txt)
+
         mv result/Aligned.sortedByCoord.out.bam result/~{prefix}.Aligned.sortedByCoord.out.bam
         mv result/Log.final.out result/~{prefix}.Log.final.out
         mv result/Log.out result/~{prefix}.Log.out
@@ -279,7 +282,7 @@ task rna_align {
         mv result/Barcodes.stats result/~{prefix}.Barcodes.stats
         mv result/Features.stats result/~{prefix}.Features.stats
         mv result/Summary.csv result/~{prefix}.Summary.csv
-        mv result/Solo.out/$feature_type/UMIperCellSorted.txt result/~{prefix}.UMIperCellSorted.txt
+        mv $umi_per_cell_path result/~{prefix}.UMIperCellSorted.txt
         mv result/raw.mtx.tar.gz result/~{prefix}.raw.mtx.tar.gz
 
 
