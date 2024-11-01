@@ -30,7 +30,7 @@ task rna_align {
         String? outFilterType = "BySJout"
         String? outSAMstrandField = "intronMotif"
         String? outSAMtype = "BAM SortedByCoordinate"
-        String? soloUMIfiltering = "MultiGeneUMI_CR"
+        String? soloUMIfiltering = "MultiGeneUMI"
         String? soloCellFilter
         String? soloCBmatchWLtype = "1MM"
         Int? alignIntronMin
