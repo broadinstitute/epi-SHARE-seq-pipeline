@@ -256,14 +256,6 @@ task rna_align {
             # TODO: add the final case in which none of the above is passed.
         fi
 
-        find ./result -print | awk '{
-            depth = split($0, path, "/");
-            for (i = 1; i < depth; i++) {
-                printf "  ";
-            }
-            print path[depth];
-        }'
-
         # tar and gzip barcodes, features, and matrix files
         cd result/Solo.out/$feature_type/raw/
         sed -i 's/_//g' barcodes.tsv  # remove underscores separating barcodes (SHARE) 
@@ -276,7 +268,6 @@ task rna_align {
         cd ../../../../
         # Find all the files undere result/Solo.out and move them to result
         mv result/Solo.out/$feature_type/raw/* result/
-        mv result/Solo.out/SJ/* result/
         mv result/Solo.out/* result/
 
         # Find the complete path inside result of the file UMIperCellSorted.txt
