@@ -146,8 +146,7 @@ workflow wf_atac {
 
     call task_qc_atac.qc_atac as qc_atac{
         input:
-            fragment_file = align.atac_fragment_file,
-            fragment_file_index = align.atac_fragment_file_index,
+            fragment_file_sorted_by_barcode = align.atac_fragment_file_sorted_by_barcode,
             chrom_sizes = chrom_sizes,
             gtf = gtf,
             fragment_min_cutoff = qc_fragment_min_cutoff,

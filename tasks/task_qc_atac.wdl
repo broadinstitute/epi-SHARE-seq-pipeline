@@ -14,8 +14,7 @@ task qc_atac {
         # This function takes in input the raw and filtered bams
         # and compute some alignment metrics along with the TSS
         # enrichment plot.
-        File fragment_file
-        File? fragment_file_index
+        File fragment_file_sorted_by_barcode
         File chrom_sizes
         File gtf
         # File? tss_bed
@@ -30,7 +29,7 @@ task qc_atac {
     }
 
     # Determine the size of the input
-    Float input_file_size_gb = size(fragment_file, "G")
+    Float input_file_size_gb = size(fragment_file_sorted_by_barcode, "G")
 
     # Determining memory size base on the size of the input files.
     Float mem_gb = 32.0 + memory_factor * input_file_size_gb
@@ -58,7 +57,7 @@ task qc_atac {
 
     command <<<
         qc_atac \
-            --fragment_file ~{fragment_file} \
+            --fragment_file ~{fragment_file_sorted_by_barcode} \
             --chrom_sizes ~{chrom_sizes} \
             --compressed_gtf_file ~{gtf} \
             --min_frag_cutoff ~{fragment_min_cutoff} \
@@ -101,15 +100,10 @@ task qc_atac {
                 help: 'Docker image for preprocessing step. Dependencies: python3 -m pip install Levenshtein pyyaml Bio; apt install pigz',
                 example: ['put link to gcr or dockerhub']
             }
-        fragment_file: {
-            description: "Fragment file",
-            help: "The input fragment file containing the raw sequencing reads.",
+        fragment_file_sorted_by_barcode: {
+            description: "Fragment file sorted by barcode",
+            help: "The input fragment file containing fragments sorted by barcode.",
             example: "sample.fragments.tsv.gz"
-        }
-        fragment_file_index: {
-            description: "Fragment file index",
-            help: "Optional index file for the fragment file.",
-            example: "sample.fragments.tsv.gz.tbi"
         }
         chrom_sizes: {
             description: "Chromosome sizes file",
