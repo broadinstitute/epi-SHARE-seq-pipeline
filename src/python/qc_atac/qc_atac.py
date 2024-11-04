@@ -40,8 +40,7 @@ def main(fragment_file, compressed_gtf_file, chrom_sizes, min_frag_cutoff, prefi
         sorted_by_barcode=True,
         min_num_fragments=min_frag_cutoff,
         shift_left=4,
-        shift_right=-4,
-        file=f"{prefix}_snap.h5ad"
+        shift_right=-4
     )
 
     logging.info('Running metrics')
@@ -198,6 +197,7 @@ def main(fragment_file, compressed_gtf_file, chrom_sizes, min_frag_cutoff, prefi
 
     # Save the content of data.obs to a file
     data.obs.to_csv(f"{prefix}_barcode_metrics.csv")
+    data.write(f"{prefix}_snap.h5ad")
     logging.info('Done')
     data.close()
 
