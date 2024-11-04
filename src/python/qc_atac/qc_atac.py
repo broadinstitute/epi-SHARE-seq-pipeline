@@ -145,7 +145,7 @@ def main(fragment_file, compressed_gtf_file, chrom_sizes, min_frag_cutoff, prefi
 
     logging.info('Plot number of fragments vs TSS enrichment (filtered)')
     # Filter the data to keep only barcodes with 500 or more fragments
-    filtered_data = data[data.obs['n_fragment'] >= 500]
+    filtered_data = data[data.obs['n_fragment'] >= 500, :]
 
     # Update the plots to use the filtered data
     fig = plt.figure(figsize=(10, 10))

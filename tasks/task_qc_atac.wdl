@@ -56,8 +56,11 @@ task qc_atac {
     String number_barcodes_filtered = "~{prefix}_number_of_barcodes_after_filter.txt"
 
     command <<<
+        # Chromap bug reporting fragments mapping outside of the chromosome.
+        awk -v OFS='\t' 'NR==FNR{a[$1]=$2;next} $1 in a && $3 <= a[$1]' ~{chrom_sizes} ~{fragment_file_sorted_by_barcode} > temp.fragments.tsv
+        
         qc_atac \
-            --fragment_file ~{fragment_file_sorted_by_barcode} \
+            --fragment_file temp.fragments.tsv \
             --chrom_sizes ~{chrom_sizes} \
             --compressed_gtf_file ~{gtf} \
             --min_frag_cutoff ~{fragment_min_cutoff} \
