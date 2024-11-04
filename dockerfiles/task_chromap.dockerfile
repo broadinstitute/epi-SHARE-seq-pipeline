@@ -3,7 +3,7 @@
 # Based on Debian slim
 ############################################################
 
-FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f as builder
+FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f AS builder
 
 # To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -33,8 +33,8 @@ RUN wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/bedClip && 
 
 FROM debian@sha256:3ecce669b6be99312305bc3acc90f91232880c68b566f257ae66647e9414174f
 
-LABEL maintainer = "Eugenio Mattei"
-LABEL software = "combinomics Single Cell pipeline"
+LABEL maintainer="Eugenio Mattei"
+LABEL software="combinomics Single Cell pipeline"
 LABEL software.version="2.0.0"
 LABEL software.organization="Broad Institute of MIT and Harvard"
 LABEL software.version.is-production="Yes"

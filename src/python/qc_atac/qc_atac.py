@@ -199,7 +199,6 @@ def main(fragment_file, compressed_gtf_file, chrom_sizes, min_frag_cutoff, prefi
     data.obs.to_csv(f"{prefix}_barcode_metrics.csv")
     data.write(f"{prefix}_snap.h5ad")
     logging.info('Done')
-    data.close()
 
 
 if __name__ == '__main__':
