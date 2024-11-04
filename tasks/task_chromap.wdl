@@ -91,29 +91,29 @@ task atac_align_chromap {
         # The start and end are inclusive and -1 means the end of the read. User may use multiple fields to specify non-consecutive segments, e.g. bc:0:15,bc:32:-1.
         # The strand is presented by '+' and '-' symbol, if '-' the barcode will be reverse-complemented after extraction
         echo '------ align chromap ------' 1>&2
-        time chromap -x chromap_index/index \
-                ~{true='--trim-adapters ' false='' trim_adapters} \
-                ~{true='--remove-pcr-duplicates ' false='' remove_pcr_duplicates} \
-                ~{true='--remove-pcr-duplicates-at-cell-level ' false='' remove_pcr_duplicates_at_cell_level} \
-                ~{true='--remove-pcr-duplicates-at-bulk-level ' false='' remove_pcr_duplicates_at_bulk_level} \
-                ~{true='--Tn5-shift ' false='' Tn5_shift} \
-                ~{true='--low-mem ' false='' low_mem} \
-                ~{true='--BED ' false='' bed_output} \
-                ~{if max_insert_size > 0 then "-l " + "~{max_insert_size}" else "" } \
-                ~{"--bc-error-threshold " + bc_error_threshold} \
-                ~{"--bc-probability-threshold " + bc_probability_threshold} \
-                ~{"--read-format " + read_format} \
-                ~{"--allocate-multi-mappings " + multimappers} \
-                -r ~{reference_fasta} \
-                ~{"-q " + quality_filter} \
-                -t ~{cpus} \
-                -1 ~{sep="," fastq_R1} \
-                -2 ~{sep="," fastq_R2} \
-                -b ~{sep="," fastq_barcode} \
-                --barcode-whitelist barcode_inclusion_list.txt \
-                ~{"--barcode-translate " + barcode_conversion_dict} \
-                -o out.fragments.tmp.tsv \
-                --summary ~{barcode_log} > ~{alignment_log} 2>&1
+        chromap -x chromap_index/index \
+            ~{true='--trim-adapters ' false='' trim_adapters} \
+            ~{true='--remove-pcr-duplicates ' false='' remove_pcr_duplicates} \
+            ~{true='--remove-pcr-duplicates-at-cell-level ' false='' remove_pcr_duplicates_at_cell_level} \
+            ~{true='--remove-pcr-duplicates-at-bulk-level ' false='' remove_pcr_duplicates_at_bulk_level} \
+            ~{true='--Tn5-shift ' false='' Tn5_shift} \
+            ~{true='--low-mem ' false='' low_mem} \
+            ~{true='--BED ' false='' bed_output} \
+            ~{if max_insert_size > 0 then "-l " + "~{max_insert_size}" else "" } \
+            ~{"--bc-error-threshold " + bc_error_threshold} \
+            ~{"--bc-probability-threshold " + bc_probability_threshold} \
+            ~{"--read-format " + read_format} \
+            ~{"--allocate-multi-mappings " + multimappers} \
+            -r ~{reference_fasta} \
+            ~{"-q " + quality_filter} \
+            -t ~{cpus} \
+            -1 ~{sep="," fastq_R1} \
+            -2 ~{sep="," fastq_R2} \
+            -b ~{sep="," fastq_barcode} \
+            --barcode-whitelist barcode_inclusion_list.txt \
+            ~{"--barcode-translate " + barcode_conversion_dict} \
+            -o out.fragments.tmp.tsv \
+            --summary ~{barcode_log} > ~{alignment_log} 2>&1
         
         if [[ '~{subpool}' != "none" ]]; then
             echo '------  Add subpool to barcode name ------' 1>&2
