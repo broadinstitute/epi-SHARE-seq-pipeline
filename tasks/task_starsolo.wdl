@@ -262,10 +262,13 @@ task rna_align {
         gzip *
         tar -cvzf raw.mtx.tar.gz *.gz
 
+        # Tar the entire STARsolo results folder
+        cd ../../../../
+        tar -cvzf result.tar.gz result/
+
 
         # Move files and rename
         # TODO: double check this because might be reporting the wrong files
-        cd ../../../../
         # Find all the files undere result/Solo.out and move them to result
         mv result/Solo.out/$feature_type/raw/* result/
         mv result/Solo.out/* result/
@@ -290,15 +293,15 @@ task rna_align {
     >>>
 
     output {
-        File output_bam = "result/~{prefix}.Aligned.sortedByCoord.out.bam"
-        File output_bam_index = "result/~{prefix}.Aligned.sortedByCoord.out.bam.bai"
-        File log_final_out = "result/~{prefix}.Log.final.out"
-        File log_out = "result/~{prefix}.Log.out"
-        File log_progress_out = "result/~{prefix}.Log.progress.out"
-        File output_sj = "result/~{prefix}.SJ.out.tab"
-        File barcodes_stats = "result/~{prefix}.Barcodes.stats"
-        File features_stats = "result/~{prefix}.Features.stats"
-        File summary_csv = "result/~{prefix}.Summary.csv"
+        File? output_bam = "result/~{prefix}.Aligned.sortedByCoord.out.bam"
+        File? output_bam_index = "result/~{prefix}.Aligned.sortedByCoord.out.bam.bai"
+        File? log_final_out = "result/~{prefix}.Log.final.out"
+        File? log_out = "result/~{prefix}.Log.out"
+        File? log_progress_out = "result/~{prefix}.Log.progress.out"
+        File? output_sj = "result/~{prefix}.SJ.out.tab"
+        File? barcodes_stats = "result/~{prefix}.Barcodes.stats"
+        File? features_stats = "result/~{prefix}.Features.stats"
+        File? summary_csv = "result/~{prefix}.Summary.csv"
         #File umi_per_cell = "result/~{prefix}.UMIperCellSorted.txt"
         File raw_tar = "result/~{prefix}.raw.mtx.tar.gz"
     }

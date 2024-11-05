@@ -15,10 +15,10 @@ task log_rna {
     input {
         # This function takes as input the necessary log files and extracts
         # the quality metrics
-        File alignment_log
-        File barcode_statistics
-        File summary_csv
-        File qc_rna_statistics
+        File? alignment_log
+        File? barcode_statistics
+        File? summary_csv
+        File? qc_rna_statistics
         String? prefix = "sample"
     }
 
