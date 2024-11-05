@@ -47,13 +47,13 @@ task log_rna {
         awk -F "," '$1~/Sequencing Saturation/{printf "%.2f\n", $2}' ~{summary_csv} > sequencing_saturation.txt
         awk -F "," '$1~/Q30 Bases in CB\+UMI/{printf "%.2f\n", $2}' ~{summary_csv} > frac_q30_bases_in_cb_umi.txt
         awk -F "," '$1~/Q30 Bases in RNA read/{printf "%.2f\n", $2}' ~{summary_csv} > frac_q30_bases_in_read.txt
-        #awk -F "," '$1~/Reads Mapped to Ge/{printf "%.2f\n", $2}' ~{summary_csv} > starsolo_frig.txt
+        awk -F "," '$1~/Reads Mapped to /{printf "%.2f\n", $2}' ~{summary_csv} > starsolo_frig.txt
         awk -F "," '$1~/Estimated Number of Cells/{print $2}' ~{summary_csv} > estimated_cells.txt
         awk -F "," '$1~/Fraction of Unique Reads in Cells/{printf "%.2f\n", $2}' ~{summary_csv} > frac_unique_reads_in_cells.txt
         awk -F "," '$1~/Median Reads per Cell/{print $2}' ~{summary_csv} > median_reads_per_cell.txt
         awk -F "," '$1~/Median UMI per Cell/{print $2}' ~{summary_csv} > median_umis_per_cell.txt
-        #awk -F "," '$1~/Median GeneFull per Cell/{print $2}' ~{summary_csv} > median_genes_per_cell.txt
-        awk -F "," '$1~/Total GeneFull Detected/{print $2}' ~{summary_csv} > genes.txt
+        awk -F "," '$1~/Median Gene* per Cell/{print $2}' ~{summary_csv} > median_genes_per_cell.txt
+        awk -F "," '$1~/Total Gene* Detected/{print $2}' ~{summary_csv} > genes.txt
 
         # get qc_rna statistics
         awk -F "," '$1~/RNA_unique_reads_mapped_to_genes/{print $2}' ~{qc_rna_statistics} > unique_reads_mapped_to_genes.txt
