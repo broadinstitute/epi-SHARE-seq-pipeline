@@ -68,14 +68,14 @@ def main(fragment_file, compressed_gtf_file, chrom_sizes, min_frag_cutoff, prefi
     plt.hist(data.obs['frac_dup'], bins=100)
     plt.xlabel("Fraction of duplicates")
     plt.ylabel("Barcode count")
-    plt.savefig(f"{prefix}_fraction_of_duplicates.png")
+    plt.savefig(f"{prefix}_fraction_of_duplicates_distribution.png")
     plt.close()
 
     logging.info('Plot fraction of mitochondrial fragments')
     plt.hist(data.obs['frac_mito'], bins=100)
     plt.xlabel("Fraction of mitochondrial fragments")
     plt.ylabel("Barcode count")
-    plt.savefig(f"{prefix}_fraction_of_mitochondrial_fragments.png")
+    plt.savefig(f"{prefix}_fraction_of_mitochondrial_fragments_distribution.png")
     plt.close()
 
     logging.info('Plot fraction of fragments overlapping TSS')
@@ -189,11 +189,11 @@ def main(fragment_file, compressed_gtf_file, chrom_sizes, min_frag_cutoff, prefi
 
     logging.info('Number of cells')
     with open(f"{prefix}_number_of_barcodes.txt","w") as fh:
-        fh.write(f"{num_cells:.2f}")
+        fh.write(f"{num_cells}")
     
     logging.info('Number of cells post filter')
     with open(f"{prefix}_number_of_barcodes_after_filter.txt","w") as fh:
-        fh.write(f"{num_cells_filtered:.2f}")
+        fh.write(f"{num_cells_filtered}")
 
     # Save the content of data.obs to a file
     data.obs.to_csv(f"{prefix}_barcode_metrics.csv")

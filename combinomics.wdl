@@ -142,7 +142,7 @@ workflow combinomics {
             # RNA plots
             image_files = [joint_qc.joint_qc_plot, joint_qc.joint_density_plot,
                             rna.rna_umi_barcode_rank_plot, rna.rna_gene_barcode_rank_plot, rna.rna_gene_umi_scatter_plot, rna.rna_umi_histogram, rna.rna_seurat_raw_violin_plot, rna.rna_seurat_raw_qc_scatter_plot, rna.rna_seurat_filtered_violin_plot, rna.rna_seurat_filtered_qc_scatter_plot, rna.rna_seurat_variable_genes_plot, rna.rna_seurat_PCA_dim_loadings_plot, rna.rna_seurat_PCA_plot, rna.rna_seurat_heatmap_plot, rna.rna_seurat_jackstraw_plot, rna.rna_seurat_elbow_plot, rna.rna_seurat_umap_cluster_plot, rna.rna_seurat_umap_rna_count_plot, rna.rna_seurat_umap_gene_count_plot, rna.rna_seurat_umap_mito_plot,
-                            atac.atac_qc_atac_knee_plot, atac.atac_qc_atac_n_fragment_vs_tss_enrichment_filtered_plot, atac.atac_qc_fraction_of_duplicates_distribution_plot, atac.atac_qc_tss_enrichment_library_plot, atac.atac_qc_fragment_size_distribution_plot, atac.atac_qc_n_fragment_vs_tss_enrichment_plot, atac.atac_qc_atac_n_fragment_vs_tss_enrichment_filtered_plot, atac.atac_qc_umap_leiden_plot
+                            atac.atac_qc_tss_enrichment_library_plot, atac.atac_qc_fragment_size_distribution_plot, atac.atac_qc_atac_knee_plot, atac.atac_qc_fraction_of_duplicates_distribution_plot, atac.atac_qc_n_fragment_vs_tss_enrichment_plot, atac.atac_qc_atac_n_fragment_vs_tss_enrichment_filtered_plot, atac.atac_qc_umap_leiden_plot
                         ],
             ## Links to files and logs to append to end of html
             #rna.task_starsolo_umi_per_cell,
