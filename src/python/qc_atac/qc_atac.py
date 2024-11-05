@@ -196,7 +196,7 @@ def main(fragment_file, compressed_gtf_file, chrom_sizes, min_frag_cutoff, prefi
         fh.write(f"{num_cells_filtered}")
 
     # Save the content of data.obs to a file
-    data.obs.to_csv(f"{prefix}_barcode_metrics.csv")
+    data.obs.to_csv(f"{prefix}_barcode_metrics.tsv", sep="\t", index_label="barcode")
     data.write(f"{prefix}_snap.h5ad")
     logging.info('Done')
 
