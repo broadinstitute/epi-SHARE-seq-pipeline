@@ -258,9 +258,10 @@ task rna_align {
 
         # tar and gzip barcodes, features, and matrix files
         cd result/Solo.out/$feature_type/raw/
-        sed -i 's/_//g' barcodes.tsv  # remove underscores separating barcodes (SHARE) 
+        sed -i 's/_//g' barcodes.tsv  # remove underscores separating barcodes (SHARE)
+        gzip matrix.mtx barcodes.tsv features.tsv
         tar -cvzf raw.complete.mtx.tar.gz *
-        tar -cvzf raw.unique.mtx.tar.gz barcodes.tsv matrix.mtx features.tsv
+        tar -cvzf raw.unique.mtx.tar.gz barcodes.tsv.gz matrix.mtx.gz features.tsv.gz
 
         # Tar the entire STARsolo results folder
         cd ../../../../
