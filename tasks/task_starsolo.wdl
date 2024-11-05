@@ -259,51 +259,48 @@ task rna_align {
         # tar and gzip barcodes, features, and matrix files
         cd result/Solo.out/$feature_type/raw/
         sed -i 's/_//g' barcodes.tsv  # remove underscores separating barcodes (SHARE) 
-        gzip *
-        tar -cvzf raw.mtx.tar.gz *.gz
+        tar -cvzf raw.complete.mtx.tar.gz *
+        tar -cvzf raw.unique.mtx.tar.gz barcodes.tsv matrix.mtx features.tsv
 
         # Tar the entire STARsolo results folder
         cd ../../../../
-        tar -cvzf result.tar.gz result/
+        tar -cvzf ~{prefix}.align.out.folder.tar.gz result/
 
 
         # Move files and rename
         # TODO: double check this because might be reporting the wrong files
         # Find all the files undere result/Solo.out and move them to result
-        mv result/Solo.out/$feature_type/raw/* result/
-        mv result/Solo.out/* result/
-
-        # Find the complete path inside result of the file UMIperCellSorted.txt
-        #umi_per_cell_path=$(find result/Solo.out/$feature_type/ -name UMIperCellSorted.txt)
 
         mv result/Aligned.sortedByCoord.out.bam result/~{prefix}.Aligned.sortedByCoord.out.bam
         mv result/Log.final.out result/~{prefix}.Log.final.out
         mv result/Log.out result/~{prefix}.Log.out
         mv result/Log.progress.out result/~{prefix}.Log.progress.out
         mv result/SJ.out.tab result/~{prefix}.SJ.out.tab
-        mv result/Barcodes.stats result/~{prefix}.Barcodes.stats
-        mv result/Features.stats result/~{prefix}.Features.stats
-        mv result/Summary.csv result/~{prefix}.Summary.csv
-        #mv $umi_per_cell_path result/~{prefix}.UMIperCellSorted.txt
-        mv result/raw.mtx.tar.gz result/~{prefix}.raw.mtx.tar.gz
-
-
+        mv result/Solo.out/Barcodes.stats result/~{prefix}.Barcodes.stats
+        mv result/Solo.out/$feature_type/Features.stats result/~{prefix}.Features.stats
+        mv result/Solo.out/$feature_type/Summary.csv result/~{prefix}.Summary.csv
+        mv result/Solo.out/$feature_type/UMIperCellSorted.txt result/~{prefix}.UMIperCellSorted.txt
+        mv result/Solo.out/$feature_type/raw/raw.unique.mtx.tar.gz result/~{prefix}.unique.raw.mtx.tar.gz
+        mv result/Solo.out/$feature_type/raw/raw.complete.mtx.tar.gz result/~{prefix}.complete.raw.mtx.tar.gz
+    
         samtools index result/~{prefix}.Aligned.sortedByCoord.out.bam
 
     >>>
 
     output {
-        File? output_bam = "result/~{prefix}.Aligned.sortedByCoord.out.bam"
-        File? output_bam_index = "result/~{prefix}.Aligned.sortedByCoord.out.bam.bai"
-        File? log_final_out = "result/~{prefix}.Log.final.out"
-        File? log_out = "result/~{prefix}.Log.out"
-        File? log_progress_out = "result/~{prefix}.Log.progress.out"
-        File? output_sj = "result/~{prefix}.SJ.out.tab"
-        File? barcodes_stats = "result/~{prefix}.Barcodes.stats"
-        File? features_stats = "result/~{prefix}.Features.stats"
-        File? summary_csv = "result/~{prefix}.Summary.csv"
-        #File umi_per_cell = "result/~{prefix}.UMIperCellSorted.txt"
-        File raw_tar = "result/~{prefix}.raw.mtx.tar.gz"
+        File output_bam = "result/~{prefix}.Aligned.sortedByCoord.out.bam"
+        File output_bam_index = "result/~{prefix}.Aligned.sortedByCoord.out.bam.bai"
+        File log_final_out = "result/~{prefix}.Log.final.out"
+        File log_out = "result/~{prefix}.Log.out"
+        File log_progress_out = "result/~{prefix}.Log.progress.out"
+        File output_sj = "result/~{prefix}.SJ.out.tab"
+        File barcodes_stats = "result/~{prefix}.Barcodes.stats"
+        File features_stats = "result/~{prefix}.Features.stats"
+        File summary_csv = "result/~{prefix}.Summary.csv"
+        File umi_per_cell = "result/~{prefix}.UMIperCellSorted.txt"
+        File raw_mtx_unique_tar = "result/~{prefix}.unique.raw.mtx.tar.gz"
+        File raw_mtx_complete_tar = "result/~{prefix}.complete.raw.mtx.tar.gz"
+        File align_complete_output_tar = "~{prefix}.align.out.folder.tar.gz"
     }
 
     runtime {

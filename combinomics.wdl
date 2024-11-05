@@ -146,14 +146,16 @@ workflow combinomics {
                         ],
             ## Links to files and logs to append to end of html
             #rna.task_starsolo_umi_per_cell,
-            log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv,  rna.task_starsolo_raw_tar,rna.rna_seurat_notebook_log, atac.atac_align_log]
+            log_files = [rna.rna_alignment_log,  rna.task_starsolo_barcodes_stats, rna.task_starsolo_features_stats, rna.task_starsolo_summary_csv,  rna.task_starsolo_mtx_unique_tar, rna.rna_seurat_notebook_log, atac.atac_align_log]
     }
 
     output{
         # RNA outputs
         File? rna_final_bam = rna.task_starsolo_output_bam
         File? rna_bam_index = rna.task_starsolo_output_bam_index
-        File? rna_starsolo_raw_tar = rna.task_starsolo_raw_tar
+        File? rna_starsolo_raw_tar = rna.task_starsolo_mtx_unique_tar
+        File? rna_align_output_folder_tar = rna.task_starsolo_output_folder_tar
+
         File? rna_h5 = rna.rna_h5
         File? rna_barcode_metadata  = rna.rna_barcode_metadata
         File? rna_seurat_notebook_output = rna.rna_seurat_notebook_output

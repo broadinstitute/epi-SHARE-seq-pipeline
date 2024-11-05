@@ -12,7 +12,7 @@ task qc_rna {
 
     input {
         # This function takes in input the sorted bam file produced by STARsolo
-        File? bam
+        File bam
         File mtx_tar
         Int? umi_min_cutoff = 1
         Int? gene_min_cutoff = 1

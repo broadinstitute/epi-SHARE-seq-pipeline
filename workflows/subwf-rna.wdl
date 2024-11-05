@@ -134,7 +134,7 @@ workflow wf_rna {
 
     call task_generate_h5.generate_h5 as generate_h5 {
         input:
-            tar = align.raw_tar,
+            tar = align.raw_mtx_unique_tar,
             genome_name = genome_name,
             prefix = prefix,
             pkr = subpool,
@@ -148,7 +148,7 @@ workflow wf_rna {
     call task_qc_rna.qc_rna as qc_rna {
         input:
             bam = align.output_bam,
-            mtx_tar = align.raw_tar,
+            mtx_tar = align.raw_mtx_unique_tar,
             umi_min_cutoff = umi_min_cutoff,
             gene_min_cutoff = gene_min_cutoff,
             hist_min_umi = hist_min_umi,
@@ -190,17 +190,19 @@ workflow wf_rna {
     }
 
     output {
-        File? task_starsolo_output_bam = align.output_bam
-        File? task_starsolo_output_bam_index = align.output_bam_index
-        File? rna_alignment_log = align.log_final_out
-        File? task_starsolo_log_out = align.log_out
-        File? task_starsolo_log_progress_out = align.log_progress_out
-        File? task_starsolo_output_sj = align.output_sj
-        File? task_starsolo_barcodes_stats = align.barcodes_stats
-        File? task_starsolo_features_stats = align.features_stats
-        File? task_starsolo_summary_csv = align.summary_csv
-        #File? task_starsolo_umi_per_cell = align.umi_per_cell
-        File? task_starsolo_raw_tar = align.raw_tar
+        File task_starsolo_output_bam = align.output_bam
+        File task_starsolo_output_bam_index = align.output_bam_index
+        File rna_alignment_log = align.log_final_out
+        File task_starsolo_log_out = align.log_out
+        File task_starsolo_log_progress_out = align.log_progress_out
+        File task_starsolo_output_sj = align.output_sj
+        File task_starsolo_barcodes_stats = align.barcodes_stats
+        File task_starsolo_features_stats = align.features_stats
+        File task_starsolo_summary_csv = align.summary_csv
+        File task_starsolo_umi_per_cell = align.umi_per_cell
+        File task_starsolo_mtx_unique_tar = align.raw_mtx_unique_tar
+        File task_starsolo_mtx_complete_tar = align.raw_mtx_complete_tar
+        File task_starsolo_output_folder_tar = align.align_complete_output_tar
 
         File? rna_h5 = generate_h5.h5_matrix
 
