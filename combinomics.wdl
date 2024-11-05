@@ -125,7 +125,7 @@ workflow combinomics {
         if ( read1_atac[0] != "" && read1_rna[0] != "" ) {
             call joint_qc.joint_qc_plotting as joint_qc {
                 input:
-                    atac_barcode_metadata = atac.atac_align_barcode_statistics,
+                    atac_barcode_metadata = atac.atac_qc_barcode_metrics,
                     rna_barcode_metadata = rna.rna_barcode_metadata,
                     prefix = prefix,
                     genome_name = genome_name_

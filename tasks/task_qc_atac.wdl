@@ -77,7 +77,7 @@ task qc_atac {
         File atac_n_fragment_vs_tss_enrichment_filtered_plot = n_fragment_vs_tss_enrichment_filtered_plot
         File atac_umap_leiden_plot = umap_leiden_plot
         File atac_snapatac2_h5ad = snapatac2_h5ad
-        File atac_barcode_metrics = "~{prefix}_barcode_metrics.csv"
+        File atac_barcode_metrics = "~{prefix}_barcode_metrics.tsv"
         Float atac_library_tss_overlap = read_float(library_tss_overlap)
         Float atac_library_tsse = read_float(library_tsse)
         Int atac_barcode_count = read_int(number_barcodes)
