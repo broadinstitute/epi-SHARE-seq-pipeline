@@ -302,7 +302,6 @@ task rna_align {
         File raw_mtx_unique_tar = "result/~{prefix}.unique.raw.mtx.tar.gz"
         File raw_mtx_complete_tar = "result/~{prefix}.complete.raw.mtx.tar.gz"
         File align_complete_output_tar = "~{prefix}.align.out.folder.tar.gz"
-        String feature_type = feature_type
     }
 
     runtime {
