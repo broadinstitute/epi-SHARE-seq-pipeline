@@ -52,8 +52,8 @@ task log_rna {
         awk -F "," '$1~/Fraction of Unique Reads in Cells/{printf "%.2f\n", $2}' ~{summary_csv} > frac_unique_reads_in_cells.txt
         awk -F "," '$1~/Median Reads per Cell/{print $2}' ~{summary_csv} > median_reads_per_cell.txt
         awk -F "," '$1~/Median UMI per Cell/{print $2}' ~{summary_csv} > median_umis_per_cell.txt
-        awk -F "," '$1~/Median Gene* per Cell/{print $2}' ~{summary_csv} > median_genes_per_cell.txt
-        awk -F "," '$1~/Total Gene* Detected/{print $2}' ~{summary_csv} > genes.txt
+        awk -F "," '$1~/Median Gene.* per Cell/{print $2}' ~{summary_csv} > median_genes_per_cell.txt
+        awk -F "," '$1~/Total Gene.* Detected/{print $2}' ~{summary_csv} > genes.txt
 
         # get qc_rna statistics
         awk -F "," '$1~/RNA_unique_reads_mapped_to_genes/{print $2}' ~{qc_rna_statistics} > unique_reads_mapped_to_genes.txt
