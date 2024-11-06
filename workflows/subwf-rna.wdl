@@ -92,6 +92,7 @@ workflow wf_rna {
         Float? seurat_disk_factor
         Float? seurat_memory_factor
         String? seurat_docker_image
+        String? rna_metadata
     }
 
     call task_starsolo.rna_align as align {
@@ -215,7 +216,8 @@ workflow wf_rna {
         rna_qc_rna_frig: log_rna.rna_qc_rna_frig,
         rna_duplicate_reads: log_rna.rna_duplicate_reads,
         rna_percent_duplicates: log_rna.rna_percent_duplicates,
-        rna_percent_mitochondrial: log_rna.rna_percent_mitochondrial
+        rna_percent_mitochondrial: log_rna.rna_percent_mitochondrial,
+        rna_extra_metadata: rna_metadata
     }
 
     output {

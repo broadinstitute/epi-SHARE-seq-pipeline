@@ -209,7 +209,7 @@ workflow wf_atac {
         bigwig_no_nucleosome: track.atac_track_bigwig_no_nucleosome,
         bigwig_mono_nucleosome: track.atac_track_bigwig_mono_nucleosome,
         bigwig_multi_nucleosome: track.atac_track_bigwig_multi_nucleosome,
-        extra_metadata: atac_metadata
+        atac_extra_metadata: atac_metadata
     }
 
     output {

@@ -26,4 +26,5 @@ struct RNA_outputs {
     Int rna_duplicate_reads
     Float rna_percent_duplicates
     Float rna_percent_mitochondrial
+    String? rna_extra_metadata
 }
