@@ -8,8 +8,15 @@ import "workflows/subwf-find-dorcs.wdl" as find_dorcs
 import "tasks/task_joint_qc.wdl" as joint_qc
 import "tasks/task_html_report.wdl" as html_report
 import "structs/atac_output_struct.wdl"
+import "structs/rna_output_struct.wdl"
+import "structs/joint_output_struct.wdl"
 
 # WDL workflow for SHARE-seq
+struct Combinomics_output{
+    Atac_outputs atac_struct_output
+    RNA_outputs rna_struct_output
+    Joint_outputs joint_struct_output
+}
 
 workflow combinomics {
 
@@ -178,7 +185,16 @@ workflow combinomics {
         File? html_summary = html_report.html_report_file
         File? csv_summary_file = html_report.csv_summary_file
 
-        Atac_outputs? atac_struct_output = atac.atac_struct_output
+        # Combined outputs
+        Combinomics_output combinomics_structu_output = object{
+            atac_struct_output: atac.atac_struct_output,
+            rna_struct_output: rna.rna_struct_output,
+            joint_struct_output: object{
+                joint_qc_plot: atac.atac_qc_barcode_metrics,
+                joint_density_plot: joint_qc.joint_density_plot,
+                joint_barcode_metadata: joint_qc.joint_barcode_metadata
+            }
+        }
     }
 
 }

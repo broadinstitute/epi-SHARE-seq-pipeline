@@ -5,6 +5,7 @@ import "../tasks/task_generate_h5.wdl" as task_generate_h5
 import "../tasks/task_qc_rna.wdl" as task_qc_rna
 import "../tasks/task_log_rna.wdl" as task_log_rna
 import "../tasks/task_seurat.wdl" as task_seurat
+import "../structs/rna_output_struct.wdl"
 
 # Import the tasks called by the pipeline
 workflow wf_rna {
@@ -189,6 +190,34 @@ workflow wf_rna {
         }
     }
 
+    RNA_outputs rna_outputs = object {
+        rna_qc_metrics: log_rna.rna_qc_metrics,
+        rna_input_reads: log_rna.rna_input_reads,
+        rna_aligned_reads: log_rna.rna_aligned_reads,
+        rna_aligned_uniquely: log_rna.rna_aligned_uniquely,
+        rna_aligned_multimap: log_rna.rna_aligned_multimap,
+        rna_unaligned_reads: log_rna.rna_unaligned_reads,
+        rna_homopolymer_umis: log_rna.rna_homopolymer_umis,
+        rna_nonmatch_barcodes: log_rna.rna_nonmatch_barcodes,
+        rna_exact_match_barcodes: log_rna.rna_exact_match_barcodes,
+        rna_mismatch_barcodes: log_rna.rna_mismatch_barcodes,
+        rna_frac_valid_barcodes: log_rna.rna_frac_valid_barcodes,
+        rna_sequencing_saturation: log_rna.rna_sequencing_saturation,
+        rna_frac_q30_bases_in_cb_umi: log_rna.rna_frac_q30_bases_in_cb_umi,
+        rna_frac_q30_bases_in_read: log_rna.rna_frac_q30_bases_in_read,
+        rna_starsolo_frig: log_rna.rna_starsolo_frig,
+        rna_estimated_cells: log_rna.rna_estimated_cells,
+        rna_frac_unique_reads_in_cells: log_rna.rna_frac_unique_reads_in_cells,
+        rna_median_reads_per_cell: log_rna.rna_median_reads_per_cell,
+        rna_median_umis_per_cell: log_rna.rna_median_umis_per_cell,
+        rna_genes: log_rna.rna_genes,
+        rna_unique_reads_mapped_to_genes: log_rna.rna_unique_reads_mapped_to_genes,
+        rna_qc_rna_frig: log_rna.rna_qc_rna_frig,
+        rna_duplicate_reads: log_rna.rna_duplicate_reads,
+        rna_percent_duplicates: log_rna.rna_percent_duplicates,
+        rna_percent_mitochondrial: log_rna.rna_percent_mitochondrial
+    }
+
     output {
         File task_starsolo_output_bam = align.output_bam
         File task_starsolo_output_bam_index = align.output_bam_index
@@ -233,5 +262,6 @@ workflow wf_rna {
         File? rna_plots_zip = seurat.plots_zip
 
         File? rna_qc_metrics = log_rna.rna_qc_metrics
+        RNA_outputs rna_struct_output = rna_outputs
     }
 }
