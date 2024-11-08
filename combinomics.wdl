@@ -186,7 +186,7 @@ workflow combinomics {
         File? csv_summary_file = html_report.csv_summary_file
 
         # Combined outputs
-        Combinomics_output combinomics_structu_output = object{
+        Combinomics_output combinomics_struct_output = object{
             atac_struct_output: atac.atac_struct_output,
             rna_struct_output: rna.rna_struct_output,
             joint_struct_output: object{
