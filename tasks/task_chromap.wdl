@@ -154,7 +154,7 @@ task atac_align_chromap {
         File atac_align_barcode_statistics = barcode_log
         File atac_alignment_log = alignment_log
         Float atac_pcr_duplicates_percentage = read_float("duplicates_percentage.txt")
-        Int atac_reads_count = read_int("reads_count.txt")
+        Float atac_reads_count = read_float("reads_count.txt")
         Int atac_mapped_reads = read_int("mapped_reads.txt")
         Int atac_unique_reads = read_int("unique_reads.txt")
         Int atac_multi_mapping_reads = read_int("multi_mapping_reads.txt")

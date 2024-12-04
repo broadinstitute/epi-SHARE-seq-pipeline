@@ -19,7 +19,7 @@ struct Atac_outputs {
     Float library_tss_overlap
     Float library_tsse
     Float pcr_duplicates_percentage
-    Int reads_count
+    Float reads_count
     Int mapped_reads
     Int unique_reads
     Int multi_mapping_reads

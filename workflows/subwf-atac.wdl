@@ -225,7 +225,7 @@ workflow wf_atac {
         File atac_align_barcode_statistics = align.atac_align_barcode_statistics
         File atac_align_log = align.atac_alignment_log
         Float atac_pcr_duplicates_percentage = align.atac_pcr_duplicates_percentage
-        Int atac_reads_count = align.atac_reads_count
+        Float atac_reads_count = align.atac_reads_count
         Int atac_mapped_reads = align.atac_mapped_reads
         Int atac_unique_reads = align.atac_unique_reads
         Int atac_multi_mapping_reads = align.atac_multi_mapping_reads
