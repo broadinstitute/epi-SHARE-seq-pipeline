@@ -225,15 +225,15 @@ workflow wf_atac {
         File atac_align_barcode_statistics = align.atac_align_barcode_statistics
         File atac_align_log = align.atac_alignment_log
         Float atac_pcr_duplicates_percentage = align.atac_pcr_duplicates_percentage
-        Float atac_reads_count = align.atac_reads_count
-        Int atac_mapped_reads = align.atac_mapped_reads
-        Int atac_unique_reads = align.atac_unique_reads
-        Int atac_multi_mapping_reads = align.atac_multi_mapping_reads
-        Int atac_corrected_barcodes = align.atac_corrected_barcodes
-        Int atac_unique_mappings_fragments = align.atac_unique_mappings_fragments
-        Int atac_multi_mappings_fragments = align.atac_multi_mappings_fragments
+        String atac_reads_count = align.atac_reads_count
+        String atac_mapped_reads = align.atac_mapped_reads
+        String atac_unique_reads = align.atac_unique_reads
+        String atac_multi_mapping_reads = align.atac_multi_mapping_reads
+        String atac_corrected_barcodes = align.atac_corrected_barcodes
+        String atac_unique_mappings_fragments = align.atac_unique_mappings_fragments
+        String atac_multi_mappings_fragments = align.atac_multi_mappings_fragments
         Int atac_final_number_of_fragments = align.atac_final_number_of_fragments
-        Int atac_unique_barcodes_unfiltered = align.atac_unique_barcodes_unfiltered
+        String atac_unique_barcodes_unfiltered = align.atac_unique_barcodes_unfiltered
         String atac_alignment_tool_version = align.atac_chromap_version
 
         # QC

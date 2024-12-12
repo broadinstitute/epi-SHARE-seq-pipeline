@@ -154,15 +154,15 @@ task atac_align_chromap {
         File atac_align_barcode_statistics = barcode_log
         File atac_alignment_log = alignment_log
         Float atac_pcr_duplicates_percentage = read_float("duplicates_percentage.txt")
-        Float atac_reads_count = read_float("reads_count.txt")
-        Int atac_mapped_reads = read_int("mapped_reads.txt")
-        Int atac_unique_reads = read_int("unique_reads.txt")
-        Int atac_multi_mapping_reads = read_int("multi_mapping_reads.txt")
-        Int atac_corrected_barcodes = read_int("corrected_barcodes.txt")
-        Int atac_unique_mappings_fragments = read_int("uni_mappings_fragments.txt")
-        Int atac_multi_mappings_fragments = read_int("multi_mappings_fragments.txt")
+        String atac_reads_count = read_float("reads_count.txt")
+        String atac_mapped_reads = read_int("mapped_reads.txt")
+        String atac_unique_reads = read_int("unique_reads.txt")
+        String atac_multi_mapping_reads = read_int("multi_mapping_reads.txt")
+        String atac_corrected_barcodes = read_int("corrected_barcodes.txt")
+        String atac_unique_mappings_fragments = read_int("uni_mappings_fragments.txt")
+        String atac_multi_mappings_fragments = read_int("multi_mappings_fragments.txt")
         Int atac_final_number_of_fragments = read_int("final_number_of_fragments.txt")
-        Int atac_unique_barcodes_unfiltered = read_int("unique_barcodes_unfiltered.txt")
+        String atac_unique_barcodes_unfiltered = read_int("unique_barcodes_unfiltered.txt")
         String atac_chromap_version = read_string("chromap_version.txt")
 
     }

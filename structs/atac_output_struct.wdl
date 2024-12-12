@@ -19,17 +19,17 @@ struct Atac_outputs {
     Float library_tss_overlap
     Float library_tsse
     Float pcr_duplicates_percentage
-    Float reads_count
-    Int mapped_reads
-    Int unique_reads
-    Int multi_mapping_reads
-    Int corrected_barcodes
-    Int unique_mappings_fragments
-    Int multi_mappings_fragments
+    String reads_count
+    String mapped_reads
+    String unique_reads
+    String multi_mapping_reads
+    String corrected_barcodes
+    String unique_mappings_fragments
+    String multi_mappings_fragments
     Int final_number_of_fragments
-    Int barcode_count_raw
-    Int barcode_count_lenient_filter
-    Int barcode_count_strict_filter
+    String barcode_count_raw
+    String barcode_count_lenient_filter
+    String barcode_count_strict_filter
     String alignment_tool_version
     File? bam
     File? bai
