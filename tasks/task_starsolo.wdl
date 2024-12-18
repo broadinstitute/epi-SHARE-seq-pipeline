@@ -205,7 +205,7 @@ task rna_align {
             feature_type='Gene'
 
         # 10X v3 (multiome)
-        elif [ '~{chemistry}' == '10x_multiome' ]; then
+         elif [ '~{chemistry}' == '10x_multiome' ] || [ '~{chemistry}' == '10x_v3' ]; then
             # Check that CB + UMI length is correct
             if [ $cb_umi_length -ne 28 ]; then
                 echo 'CB + UMI length is $cb_umi_length; expected 28'
