@@ -13,9 +13,9 @@ import "structs/joint_output_struct.wdl"
 
 # WDL workflow for SHARE-seq
 struct Combinomics_output{
-    Atac_outputs atac_struct_output
-    RNA_outputs rna_struct_output
-    Joint_outputs joint_struct_output
+    Atac_outputs? atac_struct_output
+    RNA_outputs? rna_struct_output
+    Joint_outputs? joint_struct_output
 }
 
 workflow combinomics {
