@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${FASTQC_VER}.zip && \
     unzip fastqc_v${FASTQC_VER}.zip && \
     rm fastqc_v${FASTQC_VER}.zip && \
-    chmod +x FastQC/fastqc
+    chmod +x FastQC/fastqc && \
+    mkdir /common
 
 
 # Install MultiQC
@@ -34,7 +35,7 @@ RUN groupadd -r $USER &&\
 ENV PATH="${PATH}:/FastQC/"
 
 # Copy SHARE-seq specific contaminants TSV file.
-COPY --chown=$USER:$USER common/share_contaminants.tsv .
+COPY --chown=$USER:$USER common/share_contaminants.tsv /common/share_contaminants.tsv
 
 # Default command
 CMD ["bash"]

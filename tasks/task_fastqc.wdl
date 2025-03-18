@@ -16,7 +16,7 @@ task run_fastqc{
         do
             name=${fq##*/}
             prefix=${name%%.*}
-            gzip -dc ${fq} | fastqc stdin:$prefix --contaminants share_contaminants.tsv --adapters share_contaminants.tsv --noextract --threads ~{num_threads} --outdir qc_output
+            gzip -dc ${fq} | fastqc stdin:$prefix --contaminants /common/share_contaminants.tsv --adapters /common/share_contaminants.tsv --noextract --threads ~{num_threads} --outdir qc_output
         done
 
         multiqc qc_output --force -o ~{sample_prefix}
@@ -34,7 +34,7 @@ task run_fastqc{
   }
 
   runtime {
-    docker: "ctzouana/cutadapt7:latest"
+    docker: "polumechanos/multiqc"
     memory: "${memory}GB"
     disks: "local-disk ${disk_space} HDD"
     cpu: "${num_threads}"
