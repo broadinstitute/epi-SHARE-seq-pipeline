@@ -1,0 +1,37 @@
+# RT_primer: 5'-/5Phos/ GTCTCGTGGGCTCGGAGATGTGTATAAGAGACAG[10-bp UMI]/iBiodT/TTTTTTTTTTTTTTVN -3'
+
+# Round1 barcodes: 5'-/5Phos/ CGCGCTGCATACTTG[8-bp Barcode1]CCCATGATCGTCCGA -3'
+
+# Round1 linker: 5'- CCGAGCCCACGAGACTCGGACGATCATGGG -3'
+
+# Round2 barcodes: 5'-/5Phos/CATCGGCGTACGACT[8-bp Barcode2]ATCCACGTGCTTGAG -3'
+
+# Round2 linker: 5'- CAAGTATGCAGCGCGCTCAAGCACGTGGAT -3'
+
+# Round3 barcodes: 5'- CAAGCAGAAGACGGCATACGAGAT[8-bp Barcode3]GTGGCCGATGTTTCG -3'
+
+# Round3 linker: 5'- AGTCGTACGCCGATGCGAAACATCGGCCAC -3'
+
+# Round1 blocking (reverse complementary to Round1 linker): 5'- CCCATGATCGTCCGAGTCTCGTGGGCTCGG -3'
+
+# Round2 blocking (reverse complementary to Round2 linker): 5'- ATCCACGTGCTTGAGCGCGCTGCATACTTG -3'
+
+# Round3 blocking (reverse complementary to Round3 linker): 5'- GTGGCCGATGTTTCGCATCGGCGTACGACT -3'
+
+# Template Switching Oligos (TSO): 5'- AAGCAGTGGTATCAACGCAGAGTGAATrGrG+G -3'
+
+# RNA_PCR_primer: 5'- AAGCAGTGGTATCAACGCAGAGT -3'
+
+# v2_Ad1.01: 5'- AATGATACGGCGACCACCGAGATCTACAC[8-bp i5]TCGTCGGCAGCGTCAGATGTGTAT -3'
+
+# Read 1 sequencing primer: 5'- TCGTCGGCAGCGTCAGATGTGTATAAGAGACAG -3'
+
+# Index 1 sequencing primer (i7): 5'- CTGTCTCTTATACACATCTCCGAGCCCACGAGAC -3'
+
+# Index 2 sequencing primer (i5): 5'- CTGTCTCTTATACACATCTGACGCTGCCGACGA -3'
+
+# Read 2 sequencing primer: 5'- GTCTCGTGGGCTCGGAGATGTGTATAAGAGACAG -3'
+
+# Illumina P5 adapter: 5'- AATGATACGGCGACCACCGAGATCTACAC -3'
+
+# Illumina P7 adapter: 5'- CAAGCAGAAGACGGCATACGAGAT -3'
