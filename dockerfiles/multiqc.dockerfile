@@ -1,4 +1,3 @@
-# Use an official Python runtime as a parent image
 FROM ubuntu:jammy
 
 ARG FASTQC_VER="0.12.1"
@@ -15,7 +14,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get autoclean && rm -rf /var/lib/apt/lists/*
 
 # Install FastQC
-# install fastqc. Make /data for use as a working dir
 RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${FASTQC_VER}.zip && \
     unzip fastqc_v${FASTQC_VER}.zip && \
     rm fastqc_v${FASTQC_VER}.zip && \
@@ -32,7 +30,7 @@ WORKDIR /home/$USER
 RUN groupadd -r $USER &&\
     useradd -r -g $USER --home /home/$USER -s /sbin/nologin -c "Docker image user" $USER &&\
     chown $USER:$USER /home/$USER
-    
+
 ENV PATH="${PATH}:/FastQC/"
 
 # Default command
