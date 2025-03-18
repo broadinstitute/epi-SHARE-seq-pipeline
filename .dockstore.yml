@@ -5,7 +5,7 @@ workflows:
      primaryDescriptorPath: /combinomics.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
-             - rc-v2.0.0
+             - v2.0.0
              - dev
              - snapatac-chromap-new-parameters
              - IGVF-variant-jamboree
@@ -18,55 +18,16 @@ workflows:
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
              - dev
-             - rc-v2.0.0
+             - v2.0.0
          tags:
              - /.*/
 
-   - name: "Combinomics-archr"
+   - name: "Combinomics-fastqc"
      subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-atac-archr.wdl
+     primaryDescriptorPath: /workflows/subwf-fastqc.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
-             - dev
-             - rc-v2.0.0
-         tags:
-             - /.*/
-
-   - name: "Combinomics-seurat"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-rna-seurat.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
-             - dev
-             - rc-v2.0.0
-         tags:
-             - /.*/
-
-   - name: "Combinomics-sample-demultiplexing"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-preprocess.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
-             - dev
-             - rc-v2.0.0
-         tags:
-             - /.*/
-
-   - name: "Combinomics-merge-data"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-merge-data.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
-             - dev
-             - rc-v2.0.0
-         tags:
-             - /.*/
-
-   - name: "correct-fastqs"
-     subclass: WDL
-     primaryDescriptorPath: /workflows/subwf-correct.wdl
-     filters:  # Only develop or master branches and localAligner/** tags
-         branches:
+             - v2.0.0
              - main
              - dev
          tags:
