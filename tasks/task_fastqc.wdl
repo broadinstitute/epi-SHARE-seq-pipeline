@@ -3,32 +3,29 @@ version 1.0
 task run_fastqc{
     input{
       Array[File] fastq
-      String? sample_prefix = "report"
+      String? sample_prefix = "multiqc_output"
       Int memory = 8
       Int disk_space = 300
       Int? num_threads = 4
     }
 
     command<<<
-        mkdir qc_output
 
         for fq in ~{sep=" " fastq}
         do
             name=${fq##*/}
             prefix=${name%%.*}
-            gzip -dc ${fq} | fastqc stdin:$prefix --contaminants /common/share_contaminants.tsv --adapters /common/share_contaminants.tsv --noextract --threads ~{num_threads} --outdir qc_output
+            gzip -dc ${fq} | fastqc stdin:$prefix --contaminants /common/share_contaminants.tsv --adapters /common/share_contaminants.tsv --noextract --threads ~{num_threads} --outdir '.'
         done
 
-        multiqc qc_output --force -o ~{sample_prefix}
+        multiqc '.' --force -o ~{sample_prefix}
         
-        cp qc_output/~{sample_prefix}_multiqc_report.html .
+        cp ~{sample_prefix}/multiqc_report.html ~{sample_prefix}_multiqc_report.html
 
-        tar cvzf ~{sample_prefix}_multiqc_output.tar.gz qc_output
+        tar cvzf ~{sample_prefix}_multiqc_output.tar.gz ~{sample_prefix}
     >>>
 
   output {
-    Array[File] fastqc_html=glob("*_fastqc.html")
-    Array[File] fastqc_zip=glob("*_fastqc.zip")
     File multiqc_report="~{sample_prefix}_multiqc_report.html"
     File multiqc_tar="~{sample_prefix}_multiqc_output.tar.gz"
   }
