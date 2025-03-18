@@ -33,6 +33,9 @@ RUN groupadd -r $USER &&\
 
 ENV PATH="${PATH}:/FastQC/"
 
+# Copy SHARE-seq specific contaminants TSV file.
+COPY --chown=$USER:$USER common/share_contaminants.tsv .
+
 # Default command
 CMD ["bash"]
 

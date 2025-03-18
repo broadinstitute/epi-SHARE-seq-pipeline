@@ -16,7 +16,7 @@ task run_fastqc{
         do
             name=${fq##*/}
             prefix=${name%%.*}
-            gzip -dc ${fq} | fastqc stdin:$prefix -c contaminants.tsv --noextract --threads ~{num_threads} --outdir '.'
+            gzip -dc ${fq} | fastqc stdin:$prefix -c share_contaminants.tsv -a share_contaminants --noextract --threads ~{num_threads} --outdir '.'
         done
 
         multiqc '.' --force -o ~{sample_prefix}
