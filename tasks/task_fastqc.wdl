@@ -10,20 +10,20 @@ task run_fastqc{
     }
 
     command<<<
-        mkdir output
+        mkdir qc_output
 
         for fq in ~{sep=" " fastq}
         do
             name=${fq##*/}
             prefix=${name%%.*}
-            gzip -dc ${fq} | fastqc stdin:$prefix -c share_contaminants.tsv -a share_contaminants --noextract --threads ~{num_threads} --outdir '.'
+            gzip -dc ${fq} | fastqc stdin:$prefix --contaminants share_contaminants.tsv --adapters share_contaminants.tsv --noextract --threads ~{num_threads} --outdir qc_output
         done
 
-        multiqc '.' --force -o ~{sample_prefix}
+        multiqc qc_output --force -o ~{sample_prefix}
         
-        cp ~{sample_prefix}/~{sample_prefix}_multiqc_report.html .
+        cp qc_output/~{sample_prefix}_multiqc_report.html .
 
-        tar cvzf ~{sample_prefix}_multiqc_output.tar.gz output
+        tar cvzf ~{sample_prefix}_multiqc_output.tar.gz qc_output
     >>>
 
   output {
