@@ -1,6 +1,6 @@
 version 1.0
 
-import "../tasks/fastqc.wdl" as fastqc
+import "../tasks/task_fastqc.wdl" as fastqc
 
 workflow wf_fastqc {
     call fastqc.run_fastqc as qc
