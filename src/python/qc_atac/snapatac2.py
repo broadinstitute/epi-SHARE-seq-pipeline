@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.11.23"
+__generated_with = "0.11.31"
 app = marimo.App(width="medium")
 
 
@@ -32,8 +32,9 @@ def imports():
     import logging
     import rapidgzip
     import dask.dataframe as dd
-    import snapatac2 as snap
+    import numpy as np
     import pandas as pd
+    import pyarrow as pa
 
     # Initialize logger.
     logger = logging.getLogger(__name__)
@@ -59,11 +60,12 @@ def imports():
         json,
         logger,
         logging,
+        np,
         os,
+        pa,
         pbar,
         pd,
         rapidgzip,
-        snap,
     )
 
 
@@ -101,7 +103,7 @@ def fragment_form_input(fragment_file_form, mo):
     mo.vstack([
         mo.md(
             '''
-            🧬**Enter fragment file path:**
+            **::lucide:dna:: Enter fragment file path:**
             '''
         ),
         fragment_file_form
@@ -110,57 +112,70 @@ def fragment_form_input(fragment_file_form, mo):
 
 
 @app.cell
-def dask_ingestion(
-    Path,
-    analysis_parameters,
-    dd,
-    fragment_file_form,
-    get_parquet_file_path,
-    logging,
-    parquet_path,
-):
-    analysis_parameters["fragment_file_path"] = fragment_file_form.value
-
-    fragment_file_path = fragment_file_form.value
-    parquet_file_path = None
-
-    blocksize = 100 * 1024 * 1024 # 100MB blocksize for dask.
-
-    try:
-        parquet_file_path = get_parquet_file_path(fragment_file_path)
-    except Exception as e:
-        logging.error(f"Error creating parquet file path: {e}")
-        pass
-
-
-    try:
-        logging.info(f"Loading fragment file {fragment_file_path} into a dask dataframe.")
-
-        #with rapidgzip.open(fragment_file_path, parallelization=0) as fh:
-        temp_dask_df = dd.read_csv({Path(fragment_file_path)}, sep="\t", names=["chr", "start", "end", "barcode", "supporting_reads"], blocksize=blocksize)
-
-        logging.info(f"Loading fragment file {fragment_file_path} into a dask dataframe.-DONE")
-
-        logging.info(f"Saving the dask dataframe into a the parquet file {parquet_file_path}.")
-
-        # Save as Parquet
-        temp_dask_df.to_parquet(parquet_path, write_index=False)
-        analysis_parameters['parquet_file_path'] = parquet_file_path
-
-        logging.info(f"Saving the dask dataframe into a the parquet file {parquet_file_path}.-DONE")
-    except Exception as e:
-        logging.error(f"Error creating parquet file path: {e}")
-        pass
-    return blocksize, fragment_file_path, parquet_file_path, temp_dask_df
+def _():
+    path = "src\\python\\qc_atac\\data\\IGVFDS4145LQGK.fragments.tsv.bgz"
+    return (path,)
 
 
 @app.cell
-def parquet_ingestion(analysis_parameters, dd, logging, mo):
-    mo.stop(True)
-    # Load the Parquet file into a Dask DataFrame
-    logging.info(f"Reading the parquet file {analysis_parameters['parquet_path']}.")
-    ddf = dd.read_parquet(analysis_parameters["parquet_path"])
-    logging.info(f"Reading the parquet file {analysis_parameters['parquet_path']}.-DONE")
+def _(io, path, rapidgzip):
+    bc_count = set()
+    region_count = set()
+    fragment_count = 0
+    with rapidgzip.open(path, parallelization=8) as fh:
+        with io.TextIOWrapper(fh) as f:
+            for line in f:
+                col = line.strip().split("\t")
+                bc_count.add(col[4])
+                region_count.add(f"{col[0]}_{str(col[1])}_{str(col[2])}")
+                fragment_count += 1
+
+    len(bc_count)
+    len(region_count)
+    fragment_count
+    return bc_count, col, f, fh, fragment_count, line, region_count
+
+
+@app.cell
+def dask_ingestion(dd, np, path):
+    blocksize = 64 * 1024 * 1024  # 64 MB block size
+
+    temp_dask_df = dd.read_csv(path,
+                               sep="\t",
+                               names=["chr", "start", "end", "barcode", "supporting_reads"],
+                               dtype={"chr": "category",
+                                      "start": np.uint32,
+                                      "end": np.uint32,
+                                      "barcode": "string",
+                                      "supporting_reads": np.uint16,
+                                     },
+                               compression="gzip"
+                              )
+    return blocksize, temp_dask_df
+
+
+@app.cell
+def _(temp_dask_df):
+    print(type(temp_dask_df))  # Should print <class 'dask.dataframe.core.DataFrame'>
+         # Should print <class 'dask.dataframe.core.DataFrame'>
+    return
+
+
+@app.cell
+def _(temp_dask_df):
+    import zarr
+    temp_dask_df.to_dask_array(lengths=True).to_zarr("src\\python\\qc_atac\\data\\IGVFDS4145LQGK",
+                        write_empty_chunks=False,
+                            mode="w",
+                           )
+
+    final_path = "src\python\qc_atac\data\IGVFDS4145LQGK"
+    return final_path, zarr
+
+
+@app.cell
+def _(dd, final_path):
+    ddf = dd.read_zarr(final_path)
     return (ddf,)
 
 
@@ -176,17 +191,17 @@ def raw_metrics(ddf, format_number, logging, mo):
     total_molecules = ddf["supporting_reads"].sum().compute()
 
     number_of_regions = mo.stat(
-        value=f"{format_number(total_rows):,}",
+        value=f"{format_number(total_rows)}",
         label="Number of fragments",
     )
 
     number_of_barcodes = mo.stat(
-        value=f"{format_number(unique_barcodes):,}",
+        value=f"{format_number(unique_barcodes)}",
         label="Number of unique barcodes",
     )
 
     percent_duplicates = mo.stat(
-        value=f"{(total_molecules-total_rows)*100/total_molecules:.1%}%", 
+        value=f"{(total_molecules-total_rows)/total_molecules:.1%}", 
         label="Percent duplicates",
     )
     logging.info(f"Computing statistics.-DONE")
@@ -210,6 +225,12 @@ def _(mo):
         This can indicate potential issues with the library preparation, mappability issues, or PCR amplification artifacts.
         """
     )
+    return
+
+
+@app.cell
+def _():
+    #barcode_counts_per_region = ddf.groupby(["chr", "start", "end"])["barcode"].nunique(split_out=12).compute()
     return
 
 
