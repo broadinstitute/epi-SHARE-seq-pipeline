@@ -97,11 +97,11 @@ workflow wf_atac {
         Float? archr_disk_factor
         Float? archr_memory_factor 
         String? archr_docker_image
+
+        File? none
     }
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
-
-    File? none
 
     # Perform barcode error correction on FASTQs.
     if ( chemistry == "shareseq" && correct_barcodes ) {
