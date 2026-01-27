@@ -13,6 +13,7 @@ task share_correct_fastq {
     input {
         File fastq_R1
         File fastq_R2
+        File? fastq_barcode
         File whitelist
         String sample_type
         String? pkr
@@ -54,7 +55,8 @@ task share_correct_fastq {
             ~{whitelist} \
             ~{sample_type} \
             ~{prefix} \
-            ~{pkr}
+            ~{pkr} \
+            ~{if defined(fastq_barcode) then "--barcode_fastq " + fastq_barcode else ""}
 
         pigz -p ~{cpus} *.fastq
     >>>

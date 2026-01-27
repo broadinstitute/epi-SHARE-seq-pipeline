@@ -18,6 +18,7 @@ def parse_arguments():
     parser.add_argument("sample_type", choices=["ATAC", "RNA"], help="Sample modality")
     parser.add_argument("prefix", help="Prefix for naming output QC txt file")
     parser.add_argument("pkr", nargs="?", help="PKR name")
+    parser.add_argument("--barcode_fastq", help="Filename for separate barcode FASTQ file", default=None)
     
     return parser.parse_args()
 
@@ -81,12 +82,13 @@ def check_putative_barcode(barcode_str, barcode_set, quality_str):
 def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                   output_read1_fastq_file, output_read2_fastq_file,
                   r1_barcodes, r2_barcodes, r3_barcodes,
-                  sample_type, pkr, prefix):
+                  sample_type, pkr, prefix, barcode_fastq_file=None):
     """
     Takes in filenames for input and output FASTQ files, as well as
     dictionaries for R1, R2, R3 barcodes. 
     Corrects barcodes and writes corrected R1R2R3 sequence and corresponding quality
     string into output FASTQ files.
+    For SHARE-seq, it expects barcodes in the last 99bp of Read 2, OR in the separate barcode_fastq_file if provided.
     Also produces txt file with barcode QC statistics; reports number of 
     exact barcode matches, non-exact barcode matches, non-matches, homopolymer G barcodes,
     homopolymer Gs in first 10bp of read 2 (UMI sequence for RNA, gDNA sequence for ATAC).
@@ -100,45 +102,86 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
     buffer1 = deque()
     buffer2 = deque()
     buffer_counter = 0
-    
-    # process FASTQs together
-    with xopen.xopen(input_read1_fastq_file, mode= "r", threads= 8) as read1_fh, xopen.xopen(input_read2_fastq_file, mode= "r", threads= 8) as read2_fh:
-        for readline1, readline2 in zip(read1_fh, read2_fh):
-            
+
+    # Determine file openers
+    read1_fh = xopen.xopen(input_read1_fastq_file, mode="r", threads=8)
+    read2_fh = xopen.xopen(input_read2_fastq_file, mode="r", threads=8)
+    barcode_fh = xopen.xopen(barcode_fastq_file, mode="r", threads=8) if barcode_fastq_file else None
+
+    try:
+        if barcode_fh:
+             iterators = zip(read1_fh, read2_fh, barcode_fh)
+        else:
+             iterators = zip(read1_fh, read2_fh)
+
+        for reads in iterators:
+            readline1 = reads[0]
+            readline2 = reads[1]
+            readline_bc = reads[2] if barcode_fh else None
+
             name1 = readline1.strip()
             name2 = readline2.strip()
 
+            # Advance iterators to get sequence
             readline1 = next(read1_fh)
             readline2 = next(read2_fh)
-
+            readline_bc = next(barcode_fh) if barcode_fh else None
 
             sequence1 = readline1.strip()
             sequence2 = readline2.strip()
+            sequence_bc = readline_bc.strip() if barcode_fh else None
 
+            # Advance iterators to get +
             next(read1_fh)
             next(read2_fh)
+            if barcode_fh: next(barcode_fh)
 
+            # Advance iterators to get quality
             readline1 = next(read1_fh)
             readline2 = next(read2_fh)
+            readline_bc = next(barcode_fh) if barcode_fh else None
 
             quality1 = readline1.strip()
             quality2 = readline2.strip()
+            quality_bc = readline_bc.strip() if barcode_fh else None
 
+            if barcode_fh:
+                # Use barcode from separate file
+                # If the separate file is shorter than 99bp, it might fail the slicing below
+                # Assuming separate barcode file follows the same structure (last 99bp relevant or entire read)
+                # But typically separate index reads are just the barcode.
+                # HOWEVER, SHARE-seq structure described is 99bp containing 3 sub-barcodes.
+                # If user provides a separate file, we assume it contains the barcode sequence.
+                # If it's a raw 99bp read, we treat it same as `sequence2[-99:]`
+                read_2_barcode_sequence = sequence_bc
+                read_2_barcode_quality = quality_bc
+                # If the barcode read is longer than 99bp, maybe take last 99?
+                # Safest to assume the barcode READ is the barcode.
+                if len(read_2_barcode_sequence) > 99:
+                     read_2_barcode_sequence = read_2_barcode_sequence[-99:]
+                     read_2_barcode_quality = read_2_barcode_quality[-99:]
+            else:
+                # last 99bp of read 2 contains barcode sequences
+                read_2_barcode_sequence = sequence2[-99:]
+                read_2_barcode_quality = quality2[-99:]
 
-            # last 99bp of read 2 contains barcode sequences
-            read_2_barcode_sequence = sequence2[-99:]
-            read_2_barcode_quality = quality2[-99:]
             # extract 10bp sequence containing R1 barcode, 10bp sequence containing R2 barcode, 
             # 9bp sequence containing R3 barcode, and corresponding quality strings
+            if len(read_2_barcode_sequence) < 99:
+                cellbarcode_mismatch += 1
+                continue
+
             r1_str, r2_str, r3_str = read_2_barcode_sequence[14:24], read_2_barcode_sequence[52:62], read_2_barcode_sequence[90:99]
             q1_str, q2_str, q3_str = read_2_barcode_quality[14:24], read_2_barcode_quality[52:62], read_2_barcode_quality[90:99]
+
             # get corrected barcodes
             r1 = r2 = r3 = None
             r1, q1 = check_putative_barcode(r1_str, r1_barcodes, q1_str)
             r2, q2 = check_putative_barcode(r2_str, r2_barcodes, q2_str)
             r3, q3 = check_putative_barcode(r3_str, r3_barcodes, q3_str)
             
-            # check first ten base pairs of read 2 for homopolymer G
+            # check first ten base pairs of read 2 for homopolymer G (UMI/gDNA)
+            # This logic remains on sequence2 (the genomic read)
             if sequence2[:10] == "G"*10:
                 read2_start_poly_g += 1
                 
@@ -154,6 +197,10 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                     corrected_read1 = f"{corrected_header}\n{sequence1}\n+\n{quality1}\n"
                     buffer1.append(corrected_read1)
                     # add corrected read 2 to buffer; use corrected header, read has format R1R2R3UMI
+                    # If barcode file was provided, sequence2 is purely genomic (or whatever was passed as R2)
+                    # The original logic appended `sequence2[:10]` (UMI).
+                    # If barcode file is separate, we assume R2 is the cDNA read?
+                    # "homopolymer Gs in first 10bp of read 2 (UMI sequence for RNA...)"
                     corrected_sequence2 = r1 + r2 + r3 + sequence2[:10]
                     corrected_quality2 = q1 + q2 + q3 + quality2[:10]
                     corrected_read2 = f"{corrected_header}\n{corrected_sequence2}\n+\n{corrected_quality2}\n"
@@ -166,8 +213,18 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                     # add corrected read 1 to buffer; use corrected header
                     corrected_read1 = f"{corrected_header}\n{sequence1}\n+\n{quality1}\n"
                     buffer1.append(corrected_read1)
-                    # add corrected read 2 to buffer; use corrected header, remove 99bp barcode
-                    corrected_read2 = f"{corrected_header}\n{sequence2[:-99]}\n+\n{quality2[:-99]}\n"
+
+                    # add corrected read 2 to buffer; use corrected header
+                    # Original logic: remove 99bp barcode from R2
+                    if barcode_fh:
+                        # If barcode is separate, R2 is likely the genomic read and shouldn't be trimmed
+                        sequence2_out = sequence2
+                        quality2_out = quality2
+                    else:
+                        sequence2_out = sequence2[:-99]
+                        quality2_out = quality2[:-99]
+
+                    corrected_read2 = f"{corrected_header}\n{sequence2_out}\n+\n{quality2_out}\n"
                     buffer2.append(corrected_read2)
                     buffer_counter += 1
 
@@ -185,6 +242,12 @@ def process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                 
             else:
                 cellbarcode_mismatch += 1
+
+    finally:
+        read1_fh.close()
+        read2_fh.close()
+        if barcode_fh:
+            barcode_fh.close()
 
     if buffer_counter > 0:
         read1_out_writer.write("".join(buffer1))
@@ -210,6 +273,7 @@ def main():
     sample_type = getattr(args, "sample_type")
     prefix = getattr(args, "prefix")
     pkr = getattr(args, "pkr")
+    barcode_fastq_file = getattr(args, "barcode_fastq")
     
     # read whitelist, get lists of barcodes
     (r1_barcodes, r2_barcodes, r3_barcodes) = get_barcodes(whitelist_file)
@@ -218,7 +282,7 @@ def main():
     process_fastqs(input_read1_fastq_file, input_read2_fastq_file,
                    output_read1_fastq_file, output_read2_fastq_file,
                    r1_barcodes, r2_barcodes, r3_barcodes,
-                   sample_type, pkr, prefix)
+                   sample_type, pkr, prefix, barcode_fastq_file)
 
 if __name__ == "__main__":
     main()

@@ -17,5 +17,9 @@
   "share.read2_atac": [
     "/path/to/share-atac.R2.L1.fq.gz",
     "/path/to/share-atac.R2.L2.fq.gz"
+  ],
+  "share.fastq_barcode": [
+    "/path/to/share-atac.Index.L1.fq.gz",
+    "/path/to/share-atac.Index.L2.fq.gz"
   ]
 }

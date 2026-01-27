@@ -47,6 +47,7 @@ workflow wf_atac {
         # Align-specific inputs
         Array[File] read1
         Array[File] read2
+        Array[File] fastq_barcode = []
         Int? align_multimappers
         File genome_index_tar
         # Runtime parameters
@@ -100,13 +101,16 @@ workflow wf_atac {
 
     String barcode_tag_fragments_ = if chemistry=="shareseq" then select_first([barcode_tag_fragments, "XC"]) else select_first([barcode_tag_fragments, barcode_tag])
 
+    File? none
+
     # Perform barcode error correction on FASTQs.
     if ( chemistry == "shareseq" && correct_barcodes ) {
-        scatter (read_pair in zip(read1, read2)) {
+        scatter (idx in range(length(read1))) {
             call share_task_correct_fastq.share_correct_fastq as correct {
                 input:
-                    fastq_R1 = read_pair.left,
-                    fastq_R2 = read_pair.right,
+                    fastq_R1 = read1[idx],
+                    fastq_R2 = read2[idx],
+                    fastq_barcode = if length(fastq_barcode) > 0 then fastq_barcode[idx] else none,
                     whitelist = whitelist,
                     sample_type = "ATAC",
                     pkr = pkr,
